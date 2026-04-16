@@ -1,0 +1,26 @@
+[project]
+name = "skills-mcp-server"
+version = "2.0.0"
+description = "Universal Skills MCP Server — exposes 1300+ skills as MCP tools for Claude, VSCode and Cursor"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.2.0",
+    "rank-bm25>=0.2.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "slow: marks tests as slow (process-level startup tests)",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

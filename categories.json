@@ -1,0 +1,4235 @@
+{
+  "00-andruia-consultant": [
+    "other"
+  ],
+  "007": [
+    "other"
+  ],
+  "10-andruia-skill-smith": [
+    "other"
+  ],
+  "20-andruia-niche-intelligence": [
+    "other"
+  ],
+  "3d-web-experience": [
+    "frontend"
+  ],
+  "ab-test-setup": [
+    "testing"
+  ],
+  "acceptance-orchestrator": [
+    "architecture"
+  ],
+  "accessibility-compliance-accessibility-audit": [
+    "accessibility",
+    "security",
+    "testing"
+  ],
+  "accessibility-rules": [
+    "accessibility"
+  ],
+  "active-directory-attacks": [
+    "security"
+  ],
+  "activecampaign-automation": [
+    "automation"
+  ],
+  "ad-creative": [
+    "content"
+  ],
+  "address-github-comments": [
+    "devops"
+  ],
+  "adhx": [
+    "other"
+  ],
+  "advanced-evaluation": [
+    "testing"
+  ],
+  "advogado-criminal": [
+    "legal"
+  ],
+  "advogado-especialista": [
+    "legal"
+  ],
+  "aegisops-ai": [
+    "ai"
+  ],
+  "agent-evaluation": [
+    "ai",
+    "testing"
+  ],
+  "agent-framework-azure-ai-py": [
+    "ai",
+    "devops"
+  ],
+  "agent-manager-skill": [
+    "ai"
+  ],
+  "agent-memory-mcp": [
+    "ai"
+  ],
+  "agent-memory-systems": [
+    "ai"
+  ],
+  "agent-orchestration-improve-agent": [
+    "ai"
+  ],
+  "agent-orchestration-multi-agent-optimize": [
+    "ai"
+  ],
+  "agent-orchestrator": [
+    "ai"
+  ],
+  "agent-tool-builder": [
+    "ai"
+  ],
+  "agentfolio": [
+    "ai"
+  ],
+  "agentic-actions-auditor": [
+    "ai",
+    "testing"
+  ],
+  "agentmail": [
+    "ai"
+  ],
+  "agents-md": [
+    "ai"
+  ],
+  "agents-v2-py": [
+    "ai"
+  ],
+  "ai-agent-development": [
+    "ai"
+  ],
+  "ai-agents-architect": [
+    "ai",
+    "architecture"
+  ],
+  "ai-analyzer": [
+    "ai"
+  ],
+  "ai-engineer": [
+    "ai"
+  ],
+  "ai-engineering-toolkit": [
+    "ai"
+  ],
+  "ai-md": [
+    "ai"
+  ],
+  "ai-ml": [
+    "ai"
+  ],
+  "ai-native-cli": [
+    "ai"
+  ],
+  "ai-product": [
+    "ai"
+  ],
+  "ai-seo": [
+    "ai",
+    "content"
+  ],
+  "ai-studio-image": [
+    "ai"
+  ],
+  "ai-wrapper-product": [
+    "ai"
+  ],
+  "airflow-dag-patterns": [
+    "data"
+  ],
+  "airtable-automation": [
+    "automation"
+  ],
+  "akf-trust-metadata": [
+    "language"
+  ],
+  "algolia-search": [
+    "backend"
+  ],
+  "algorithmic-art": [
+    "ai"
+  ],
+  "alpha-vantage": [
+    "data"
+  ],
+  "amazon-alexa": [
+    "automation"
+  ],
+  "amplitude-automation": [
+    "automation"
+  ],
+  "analytics-product": [
+    "data"
+  ],
+  "analytics-tracking": [
+    "data"
+  ],
+  "analyze-project": [
+    "architecture"
+  ],
+  "andrej-karpathy": [
+    "ai"
+  ],
+  "android-jetpack-compose-expert": [
+    "mobile"
+  ],
+  "android_ui_verification": [
+    "mobile"
+  ],
+  "angular": [
+    "frontend"
+  ],
+  "angular-best-practices": [
+    "frontend"
+  ],
+  "angular-migration": [
+    "frontend"
+  ],
+  "angular-state-management": [
+    "frontend"
+  ],
+  "angular-ui-patterns": [
+    "frontend"
+  ],
+  "animejs-animation": [
+    "frontend"
+  ],
+  "anti-reversing-techniques": [
+    "security"
+  ],
+  "antigravity-design-expert": [
+    "other"
+  ],
+  "antigravity-skill-orchestrator": [
+    "other"
+  ],
+  "antigravity-workflows": [
+    "automation"
+  ],
+  "api-design-principles": [
+    "backend"
+  ],
+  "api-documentation": [
+    "backend",
+    "content"
+  ],
+  "api-documentation-generator": [
+    "backend",
+    "content"
+  ],
+  "api-documenter": [
+    "backend"
+  ],
+  "api-endpoint-builder": [
+    "backend"
+  ],
+  "api-fuzzing-bug-bounty": [
+    "backend"
+  ],
+  "api-patterns": [
+    "backend"
+  ],
+  "api-security-best-practices": [
+    "backend",
+    "security"
+  ],
+  "api-security-testing": [
+    "backend",
+    "security",
+    "testing"
+  ],
+  "api-testing-observability-api-mock": [
+    "backend",
+    "devops",
+    "testing"
+  ],
+  "apify-actor-development": [
+    "automation"
+  ],
+  "apify-actorization": [
+    "automation"
+  ],
+  "apify-audience-analysis": [
+    "automation"
+  ],
+  "apify-brand-reputation-monitoring": [
+    "automation",
+    "content",
+    "devops"
+  ],
+  "apify-competitor-intelligence": [
+    "automation"
+  ],
+  "apify-content-analytics": [
+    "automation",
+    "content",
+    "data"
+  ],
+  "apify-ecommerce": [
+    "automation"
+  ],
+  "apify-influencer-discovery": [
+    "automation"
+  ],
+  "apify-lead-generation": [
+    "automation"
+  ],
+  "apify-market-research": [
+    "automation"
+  ],
+  "apify-trend-analysis": [
+    "automation"
+  ],
+  "apify-ultimate-scraper": [
+    "automation"
+  ],
+  "app-builder": [
+    "frontend"
+  ],
+  "app-store-changelog": [
+    "content"
+  ],
+  "app-store-optimization": [
+    "content"
+  ],
+  "appdeploy": [
+    "devops"
+  ],
+  "application-performance-performance-optimization": [
+    "devops"
+  ],
+  "architect-review": [
+    "architecture"
+  ],
+  "architecture": [
+    "architecture"
+  ],
+  "architecture-decision-records": [
+    "architecture"
+  ],
+  "architecture-patterns": [
+    "architecture"
+  ],
+  "arm-cortex-expert": [
+    "other"
+  ],
+  "asana-automation": [
+    "automation"
+  ],
+  "ask-questions-if-underspecified": [
+    "other"
+  ],
+  "astro": [
+    "frontend"
+  ],
+  "astropy": [
+    "data",
+    "frontend"
+  ],
+  "async-python-patterns": [
+    "language"
+  ],
+  "attack-tree-construction": [
+    "security"
+  ],
+  "audio-transcriber": [
+    "ai"
+  ],
+  "audit-context-building": [
+    "testing"
+  ],
+  "audit-skills": [
+    "testing"
+  ],
+  "auri-core": [
+    "other"
+  ],
+  "auth-implementation-patterns": [
+    "security"
+  ],
+  "automate-whatsapp": [
+    "automation"
+  ],
+  "autonomous-agent-patterns": [
+    "ai"
+  ],
+  "autonomous-agents": [
+    "ai"
+  ],
+  "avalonia-layout-zafiro": [
+    "frontend"
+  ],
+  "avalonia-viewmodels-zafiro": [
+    "frontend"
+  ],
+  "avalonia-zafiro-development": [
+    "frontend"
+  ],
+  "avoid-ai-writing": [
+    "ai"
+  ],
+  "aws-cost-cleanup": [
+    "devops"
+  ],
+  "aws-cost-optimizer": [
+    "devops"
+  ],
+  "aws-penetration-testing": [
+    "devops",
+    "security",
+    "testing"
+  ],
+  "aws-serverless": [
+    "backend",
+    "devops"
+  ],
+  "aws-skills": [
+    "devops"
+  ],
+  "awt-e2e-testing": [
+    "testing"
+  ],
+  "azd-deployment": [
+    "devops"
+  ],
+  "azure-ai-agents-persistent-dotnet": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-agents-persistent-java": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-anomalydetector-java": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-contentsafety-java": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-contentsafety-py": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-contentsafety-ts": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-contentunderstanding-py": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-document-intelligence-dotnet": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-document-intelligence-ts": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-formrecognizer-java": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-ml-py": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-openai-dotnet": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-projects-dotnet": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-projects-java": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-projects-py": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-projects-ts": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-textanalytics-py": [
+    "ai",
+    "data",
+    "devops"
+  ],
+  "azure-ai-transcription-py": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-translation-document-py": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-translation-text-py": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-translation-ts": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-vision-imageanalysis-java": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-vision-imageanalysis-py": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-voicelive-dotnet": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-voicelive-java": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-voicelive-py": [
+    "ai",
+    "devops"
+  ],
+  "azure-ai-voicelive-ts": [
+    "ai",
+    "devops"
+  ],
+  "azure-appconfiguration-java": [
+    "devops"
+  ],
+  "azure-appconfiguration-py": [
+    "devops"
+  ],
+  "azure-appconfiguration-ts": [
+    "devops"
+  ],
+  "azure-communication-callautomation-java": [
+    "devops"
+  ],
+  "azure-communication-callingserver-java": [
+    "devops"
+  ],
+  "azure-communication-chat-java": [
+    "devops"
+  ],
+  "azure-communication-common-java": [
+    "devops"
+  ],
+  "azure-communication-sms-java": [
+    "devops"
+  ],
+  "azure-compute-batch-java": [
+    "devops"
+  ],
+  "azure-containerregistry-py": [
+    "devops"
+  ],
+  "azure-cosmos-db-py": [
+    "backend",
+    "devops"
+  ],
+  "azure-cosmos-java": [
+    "devops"
+  ],
+  "azure-cosmos-py": [
+    "devops"
+  ],
+  "azure-cosmos-rust": [
+    "devops"
+  ],
+  "azure-cosmos-ts": [
+    "devops"
+  ],
+  "azure-data-tables-java": [
+    "devops"
+  ],
+  "azure-data-tables-py": [
+    "devops"
+  ],
+  "azure-eventgrid-dotnet": [
+    "devops"
+  ],
+  "azure-eventgrid-java": [
+    "devops"
+  ],
+  "azure-eventgrid-py": [
+    "devops"
+  ],
+  "azure-eventhub-dotnet": [
+    "devops"
+  ],
+  "azure-eventhub-java": [
+    "devops"
+  ],
+  "azure-eventhub-py": [
+    "devops"
+  ],
+  "azure-eventhub-rust": [
+    "devops"
+  ],
+  "azure-eventhub-ts": [
+    "devops"
+  ],
+  "azure-functions": [
+    "devops"
+  ],
+  "azure-identity-dotnet": [
+    "devops"
+  ],
+  "azure-identity-java": [
+    "devops"
+  ],
+  "azure-identity-py": [
+    "devops"
+  ],
+  "azure-identity-rust": [
+    "devops"
+  ],
+  "azure-identity-ts": [
+    "devops"
+  ],
+  "azure-keyvault-certificates-rust": [
+    "devops"
+  ],
+  "azure-keyvault-keys-rust": [
+    "devops"
+  ],
+  "azure-keyvault-keys-ts": [
+    "devops"
+  ],
+  "azure-keyvault-py": [
+    "devops"
+  ],
+  "azure-keyvault-secrets-rust": [
+    "devops"
+  ],
+  "azure-keyvault-secrets-ts": [
+    "devops"
+  ],
+  "azure-maps-search-dotnet": [
+    "devops"
+  ],
+  "azure-messaging-webpubsub-java": [
+    "devops"
+  ],
+  "azure-messaging-webpubsubservice-py": [
+    "devops"
+  ],
+  "azure-mgmt-apicenter-dotnet": [
+    "backend",
+    "devops"
+  ],
+  "azure-mgmt-apicenter-py": [
+    "backend",
+    "devops"
+  ],
+  "azure-mgmt-apimanagement-dotnet": [
+    "backend",
+    "devops"
+  ],
+  "azure-mgmt-apimanagement-py": [
+    "backend",
+    "devops"
+  ],
+  "azure-mgmt-applicationinsights-dotnet": [
+    "devops"
+  ],
+  "azure-mgmt-arizeaiobservabilityeval-dotnet": [
+    "devops"
+  ],
+  "azure-mgmt-botservice-dotnet": [
+    "devops"
+  ],
+  "azure-mgmt-botservice-py": [
+    "devops"
+  ],
+  "azure-mgmt-fabric-dotnet": [
+    "devops"
+  ],
+  "azure-mgmt-fabric-py": [
+    "devops"
+  ],
+  "azure-mgmt-mongodbatlas-dotnet": [
+    "backend",
+    "devops"
+  ],
+  "azure-mgmt-weightsandbiases-dotnet": [
+    "devops"
+  ],
+  "azure-microsoft-playwright-testing-ts": [
+    "devops",
+    "testing"
+  ],
+  "azure-monitor-ingestion-java": [
+    "devops"
+  ],
+  "azure-monitor-ingestion-py": [
+    "devops"
+  ],
+  "azure-monitor-opentelemetry-exporter-java": [
+    "devops"
+  ],
+  "azure-monitor-opentelemetry-exporter-py": [
+    "devops"
+  ],
+  "azure-monitor-opentelemetry-py": [
+    "devops"
+  ],
+  "azure-monitor-opentelemetry-ts": [
+    "devops"
+  ],
+  "azure-monitor-query-java": [
+    "devops"
+  ],
+  "azure-monitor-query-py": [
+    "devops"
+  ],
+  "azure-postgres-ts": [
+    "backend",
+    "devops"
+  ],
+  "azure-resource-manager-cosmosdb-dotnet": [
+    "devops"
+  ],
+  "azure-resource-manager-durabletask-dotnet": [
+    "devops"
+  ],
+  "azure-resource-manager-mysql-dotnet": [
+    "backend",
+    "devops"
+  ],
+  "azure-resource-manager-playwright-dotnet": [
+    "devops",
+    "testing"
+  ],
+  "azure-resource-manager-postgresql-dotnet": [
+    "backend",
+    "devops"
+  ],
+  "azure-resource-manager-redis-dotnet": [
+    "backend",
+    "devops"
+  ],
+  "azure-resource-manager-sql-dotnet": [
+    "backend",
+    "devops"
+  ],
+  "azure-search-documents-dotnet": [
+    "devops"
+  ],
+  "azure-search-documents-py": [
+    "devops"
+  ],
+  "azure-search-documents-ts": [
+    "devops"
+  ],
+  "azure-security-keyvault-keys-dotnet": [
+    "devops",
+    "security"
+  ],
+  "azure-security-keyvault-keys-java": [
+    "devops",
+    "security"
+  ],
+  "azure-security-keyvault-secrets-java": [
+    "devops",
+    "security"
+  ],
+  "azure-servicebus-dotnet": [
+    "devops"
+  ],
+  "azure-servicebus-py": [
+    "devops"
+  ],
+  "azure-servicebus-ts": [
+    "devops"
+  ],
+  "azure-speech-to-text-rest-py": [
+    "devops"
+  ],
+  "azure-storage-blob-java": [
+    "devops"
+  ],
+  "azure-storage-blob-py": [
+    "devops"
+  ],
+  "azure-storage-blob-rust": [
+    "devops"
+  ],
+  "azure-storage-blob-ts": [
+    "devops"
+  ],
+  "azure-storage-file-datalake-py": [
+    "devops"
+  ],
+  "azure-storage-file-share-py": [
+    "devops"
+  ],
+  "azure-storage-file-share-ts": [
+    "devops"
+  ],
+  "azure-storage-queue-py": [
+    "devops"
+  ],
+  "azure-storage-queue-ts": [
+    "devops"
+  ],
+  "azure-web-pubsub-ts": [
+    "devops"
+  ],
+  "backend-architect": [
+    "architecture",
+    "backend"
+  ],
+  "backend-dev-guidelines": [
+    "backend"
+  ],
+  "backend-development-feature-development": [
+    "backend"
+  ],
+  "backend-security-coder": [
+    "backend",
+    "security"
+  ],
+  "backtesting-frameworks": [
+    "data"
+  ],
+  "bamboohr-automation": [
+    "automation",
+    "business"
+  ],
+  "basecamp-automation": [
+    "automation"
+  ],
+  "baseline-ui": [
+    "frontend"
+  ],
+  "bash-defensive-patterns": [
+    "language"
+  ],
+  "bash-linux": [
+    "language"
+  ],
+  "bash-pro": [
+    "language"
+  ],
+  "bash-scripting": [
+    "language"
+  ],
+  "bats-testing-patterns": [
+    "testing"
+  ],
+  "bazel-build-optimization": [
+    "devops"
+  ],
+  "bdi-mental-states": [
+    "ai"
+  ],
+  "bdistill-behavioral-xray": [
+    "ai"
+  ],
+  "bdistill-knowledge-extraction": [
+    "ai"
+  ],
+  "beautiful-prose": [
+    "content"
+  ],
+  "behavioral-modes": [
+    "ai"
+  ],
+  "bevy-ecs-expert": [
+    "gamedev"
+  ],
+  "bill-gates": [
+    "ai"
+  ],
+  "billing-automation": [
+    "automation"
+  ],
+  "binary-analysis-patterns": [
+    "security"
+  ],
+  "biopython": [
+    "data"
+  ],
+  "bitbucket-automation": [
+    "automation"
+  ],
+  "blockchain-developer": [
+    "web3"
+  ],
+  "blockrun": [
+    "web3"
+  ],
+  "blog-writing-guide": [
+    "content"
+  ],
+  "blueprint": [
+    "architecture"
+  ],
+  "box-automation": [
+    "automation"
+  ],
+  "brainstorming": [
+    "other"
+  ],
+  "brand-guidelines": [
+    "content"
+  ],
+  "brand-guidelines-anthropic": [
+    "content"
+  ],
+  "brand-guidelines-community": [
+    "content"
+  ],
+  "brevo-automation": [
+    "automation"
+  ],
+  "broken-authentication": [
+    "security"
+  ],
+  "browser-automation": [
+    "automation"
+  ],
+  "browser-extension-builder": [
+    "frontend"
+  ],
+  "bug-hunter": [
+    "testing"
+  ],
+  "build": [
+    "other"
+  ],
+  "building-native-ui": [
+    "frontend"
+  ],
+  "bullmq-specialist": [
+    "backend"
+  ],
+  "bun-development": [
+    "language"
+  ],
+  "burp-suite-testing": [
+    "testing"
+  ],
+  "burpsuite-project-parser": [
+    "security"
+  ],
+  "business-analyst": [
+    "business"
+  ],
+  "busybox-on-windows": [
+    "devops"
+  ],
+  "c-pro": [
+    "language"
+  ],
+  "c4-architecture-c4-architecture": [
+    "architecture"
+  ],
+  "c4-code": [
+    "architecture"
+  ],
+  "c4-component": [
+    "architecture"
+  ],
+  "c4-container": [
+    "architecture",
+    "devops"
+  ],
+  "c4-context": [
+    "architecture"
+  ],
+  "cal-com-automation": [
+    "automation"
+  ],
+  "calendly-automation": [
+    "automation"
+  ],
+  "canva-automation": [
+    "automation"
+  ],
+  "canvas-design": [
+    "frontend"
+  ],
+  "carrier-relationship-management": [
+    "business"
+  ],
+  "cc-skill-backend-patterns": [
+    "backend"
+  ],
+  "cc-skill-clickhouse-io": [
+    "data"
+  ],
+  "cc-skill-coding-standards": [
+    "architecture"
+  ],
+  "cc-skill-continuous-learning": [
+    "other"
+  ],
+  "cc-skill-frontend-patterns": [
+    "frontend"
+  ],
+  "cc-skill-project-guidelines-example": [
+    "other"
+  ],
+  "cc-skill-security-review": [
+    "security"
+  ],
+  "cc-skill-strategic-compact": [
+    "other"
+  ],
+  "cdk-patterns": [
+    "devops"
+  ],
+  "changelog-automation": [
+    "automation"
+  ],
+  "chat-widget": [
+    "frontend"
+  ],
+  "chrome-extension-developer": [
+    "frontend"
+  ],
+  "churn-prevention": [
+    "business"
+  ],
+  "cicd-automation-workflow-automate": [
+    "automation"
+  ],
+  "circleci-automation": [
+    "automation"
+  ],
+  "cirq": [
+    "other"
+  ],
+  "citation-management": [
+    "content"
+  ],
+  "claimable-postgres": [
+    "backend"
+  ],
+  "clarity-gate": [
+    "architecture"
+  ],
+  "clarvia-aeo-check": [
+    "other"
+  ],
+  "claude-ally-health": [
+    "ai",
+    "health"
+  ],
+  "claude-api": [
+    "ai",
+    "backend"
+  ],
+  "claude-code-expert": [
+    "ai"
+  ],
+  "claude-code-guide": [
+    "ai"
+  ],
+  "claude-d3js-skill": [
+    "ai"
+  ],
+  "claude-in-chrome-troubleshooting": [
+    "ai"
+  ],
+  "claude-monitor": [
+    "ai",
+    "devops"
+  ],
+  "claude-scientific-skills": [
+    "ai"
+  ],
+  "claude-settings-audit": [
+    "ai",
+    "testing"
+  ],
+  "claude-speed-reader": [
+    "ai"
+  ],
+  "claude-win11-speckit-update-skill": [
+    "ai"
+  ],
+  "clean-code": [
+    "architecture"
+  ],
+  "clerk-auth": [
+    "security"
+  ],
+  "clickup-automation": [
+    "automation"
+  ],
+  "close-automation": [
+    "automation"
+  ],
+  "closed-loop-delivery": [
+    "architecture"
+  ],
+  "cloud-architect": [
+    "architecture",
+    "devops"
+  ],
+  "cloud-devops": [
+    "devops"
+  ],
+  "cloud-penetration-testing": [
+    "devops",
+    "security",
+    "testing"
+  ],
+  "cloudflare-workers-expert": [
+    "backend"
+  ],
+  "cloudformation-best-practices": [
+    "devops"
+  ],
+  "coda-automation": [
+    "automation"
+  ],
+  "code-documentation-code-explain": [
+    "content"
+  ],
+  "code-documentation-doc-generate": [
+    "content"
+  ],
+  "code-refactoring-context-restore": [
+    "architecture"
+  ],
+  "code-refactoring-refactor-clean": [
+    "architecture"
+  ],
+  "code-refactoring-tech-debt": [
+    "architecture"
+  ],
+  "code-review-ai-ai-review": [
+    "ai",
+    "testing"
+  ],
+  "code-review-checklist": [
+    "testing"
+  ],
+  "code-review-excellence": [
+    "testing"
+  ],
+  "code-reviewer": [
+    "testing"
+  ],
+  "code-simplifier": [
+    "other"
+  ],
+  "codebase-audit-pre-push": [
+    "testing"
+  ],
+  "codebase-cleanup-deps-audit": [
+    "architecture",
+    "testing"
+  ],
+  "codebase-cleanup-refactor-clean": [
+    "architecture"
+  ],
+  "codebase-cleanup-tech-debt": [
+    "architecture"
+  ],
+  "codex-review": [
+    "testing"
+  ],
+  "cognitive-accessibility": [
+    "accessibility"
+  ],
+  "cold-email": [
+    "content"
+  ],
+  "comfyui-gateway": [
+    "ai"
+  ],
+  "commit": [
+    "other"
+  ],
+  "competitive-landscape": [
+    "business"
+  ],
+  "competitor-alternatives": [
+    "business"
+  ],
+  "composition-patterns": [
+    "architecture"
+  ],
+  "comprehensive-review-full-review": [
+    "testing"
+  ],
+  "comprehensive-review-pr-enhance": [
+    "testing"
+  ],
+  "computer-use-agents": [
+    "ai"
+  ],
+  "computer-vision-expert": [
+    "ai"
+  ],
+  "concise-planning": [
+    "architecture"
+  ],
+  "conductor-implement": [
+    "automation"
+  ],
+  "conductor-manage": [
+    "automation"
+  ],
+  "conductor-new-track": [
+    "automation"
+  ],
+  "conductor-revert": [
+    "automation"
+  ],
+  "conductor-setup": [
+    "automation"
+  ],
+  "conductor-status": [
+    "automation"
+  ],
+  "conductor-validator": [
+    "automation"
+  ],
+  "confluence-automation": [
+    "automation"
+  ],
+  "constant-time-analysis": [
+    "other"
+  ],
+  "content-creator": [
+    "content"
+  ],
+  "content-marketer": [
+    "content"
+  ],
+  "content-strategy": [
+    "content"
+  ],
+  "context-agent": [
+    "ai"
+  ],
+  "context-compression": [
+    "ai"
+  ],
+  "context-degradation": [
+    "ai"
+  ],
+  "context-driven-development": [
+    "ai"
+  ],
+  "context-fundamentals": [
+    "ai"
+  ],
+  "context-guardian": [
+    "ai"
+  ],
+  "context-management-context-restore": [
+    "ai"
+  ],
+  "context-management-context-save": [
+    "ai"
+  ],
+  "context-manager": [
+    "ai"
+  ],
+  "context-optimization": [
+    "ai"
+  ],
+  "context-window-management": [
+    "ai"
+  ],
+  "context7-auto-research": [
+    "automation"
+  ],
+  "conversation-memory": [
+    "ai"
+  ],
+  "convertkit-automation": [
+    "automation"
+  ],
+  "convex": [
+    "backend"
+  ],
+  "copilot-sdk": [
+    "ai"
+  ],
+  "copy-editing": [
+    "content"
+  ],
+  "copywriting": [
+    "content"
+  ],
+  "core-components": [
+    "other"
+  ],
+  "cost-optimization": [
+    "business"
+  ],
+  "cpp-pro": [
+    "language"
+  ],
+  "cqrs-implementation": [
+    "architecture"
+  ],
+  "create-branch": [
+    "devops"
+  ],
+  "create-issue-gate": [
+    "other"
+  ],
+  "create-pr": [
+    "devops"
+  ],
+  "cred-omega": [
+    "other"
+  ],
+  "crewai": [
+    "ai"
+  ],
+  "crypto-bd-agent": [
+    "ai",
+    "security",
+    "web3"
+  ],
+  "csharp-pro": [
+    "language"
+  ],
+  "culture-index": [
+    "other"
+  ],
+  "customer-support": [
+    "business"
+  ],
+  "customs-trade-compliance": [
+    "security"
+  ],
+  "daily": [
+    "other"
+  ],
+  "daily-news-report": [
+    "other"
+  ],
+  "data-engineer": [
+    "data"
+  ],
+  "data-engineering-data-driven-feature": [
+    "data"
+  ],
+  "data-engineering-data-pipeline": [
+    "data",
+    "devops"
+  ],
+  "data-quality-frameworks": [
+    "data"
+  ],
+  "data-scientist": [
+    "data"
+  ],
+  "data-storytelling": [
+    "data"
+  ],
+  "data-structure-protocol": [
+    "data"
+  ],
+  "database": [
+    "backend"
+  ],
+  "database-admin": [
+    "backend"
+  ],
+  "database-architect": [
+    "architecture",
+    "backend"
+  ],
+  "database-cloud-optimization-cost-optimize": [
+    "backend",
+    "devops"
+  ],
+  "database-design": [
+    "backend"
+  ],
+  "database-migration": [
+    "backend"
+  ],
+  "database-migrations-migration-observability": [
+    "backend",
+    "devops"
+  ],
+  "database-migrations-sql-migrations": [
+    "backend"
+  ],
+  "database-optimizer": [
+    "backend"
+  ],
+  "datadog-automation": [
+    "automation"
+  ],
+  "dbos-golang": [
+    "language"
+  ],
+  "dbos-python": [
+    "language"
+  ],
+  "dbos-typescript": [
+    "language"
+  ],
+  "dbt-transformation-patterns": [
+    "data"
+  ],
+  "ddd-context-mapping": [
+    "architecture"
+  ],
+  "ddd-strategic-design": [
+    "architecture"
+  ],
+  "ddd-tactical-patterns": [
+    "architecture"
+  ],
+  "debug-buttercup": [
+    "testing"
+  ],
+  "debugger": [
+    "testing"
+  ],
+  "debugging-strategies": [
+    "testing"
+  ],
+  "debugging-toolkit-smart-debug": [
+    "testing"
+  ],
+  "deep-research": [
+    "ai"
+  ],
+  "defi-protocol-templates": [
+    "web3"
+  ],
+  "defuddle": [
+    "other"
+  ],
+  "dependency-management-deps-audit": [
+    "testing"
+  ],
+  "dependency-upgrade": [
+    "devops"
+  ],
+  "deployment-engineer": [
+    "devops"
+  ],
+  "deployment-pipeline-design": [
+    "devops"
+  ],
+  "deployment-procedures": [
+    "devops"
+  ],
+  "deployment-validation-config-validate": [
+    "devops"
+  ],
+  "design-md": [
+    "architecture"
+  ],
+  "design-orchestration": [
+    "architecture"
+  ],
+  "design-spells": [
+    "other"
+  ],
+  "design-system": [
+    "frontend"
+  ],
+  "devcontainer-setup": [
+    "devops"
+  ],
+  "development": [
+    "other"
+  ],
+  "devops-deploy": [
+    "devops"
+  ],
+  "devops-troubleshooter": [
+    "devops"
+  ],
+  "diary": [
+    "other"
+  ],
+  "differential-review": [
+    "testing"
+  ],
+  "discord-automation": [
+    "automation"
+  ],
+  "discord-bot-architect": [
+    "architecture"
+  ],
+  "dispatching-parallel-agents": [
+    "ai"
+  ],
+  "distributed-debugging-debug-trace": [
+    "devops",
+    "testing"
+  ],
+  "distributed-tracing": [
+    "devops"
+  ],
+  "django-access-review": [
+    "backend"
+  ],
+  "django-perf-review": [
+    "backend"
+  ],
+  "django-pro": [
+    "backend"
+  ],
+  "doc-coauthoring": [
+    "security"
+  ],
+  "docker-expert": [
+    "devops"
+  ],
+  "docs-architect": [
+    "architecture"
+  ],
+  "document-scanning": [
+    "security"
+  ],
+  "documentation": [
+    "content"
+  ],
+  "documentation-generation-doc-generate": [
+    "content"
+  ],
+  "documentation-templates": [
+    "content"
+  ],
+  "docusign-automation": [
+    "automation"
+  ],
+  "docx-official": [
+    "content"
+  ],
+  "domain-driven-design": [
+    "architecture"
+  ],
+  "dotnet-architect": [
+    "architecture",
+    "language"
+  ],
+  "dotnet-backend": [
+    "backend",
+    "language"
+  ],
+  "dotnet-backend-patterns": [
+    "backend",
+    "language"
+  ],
+  "drizzle-orm-expert": [
+    "backend"
+  ],
+  "dropbox-automation": [
+    "automation"
+  ],
+  "dwarf-expert": [
+    "other"
+  ],
+  "dx-optimizer": [
+    "architecture"
+  ],
+  "e2e-testing": [
+    "testing"
+  ],
+  "e2e-testing-patterns": [
+    "testing"
+  ],
+  "earllm-build": [
+    "ai"
+  ],
+  "electron-development": [
+    "frontend"
+  ],
+  "elixir-pro": [
+    "language"
+  ],
+  "elon-musk": [
+    "ai"
+  ],
+  "email-sequence": [
+    "content"
+  ],
+  "email-systems": [
+    "content"
+  ],
+  "embedding-strategies": [
+    "ai"
+  ],
+  "emblemai-crypto-wallet": [
+    "ai",
+    "security",
+    "web3"
+  ],
+  "emergency-card": [
+    "other"
+  ],
+  "employment-contract-templates": [
+    "business"
+  ],
+  "energy-procurement": [
+    "business"
+  ],
+  "enhance-prompt": [
+    "ai"
+  ],
+  "environment-setup-guide": [
+    "devops"
+  ],
+  "error-debugging-error-analysis": [
+    "testing"
+  ],
+  "error-debugging-error-trace": [
+    "testing"
+  ],
+  "error-debugging-multi-agent-review": [
+    "ai",
+    "testing"
+  ],
+  "error-detective": [
+    "testing"
+  ],
+  "error-diagnostics-error-analysis": [
+    "testing"
+  ],
+  "error-diagnostics-error-trace": [
+    "testing"
+  ],
+  "error-diagnostics-smart-debug": [
+    "testing"
+  ],
+  "error-handling-patterns": [
+    "architecture"
+  ],
+  "ethical-hacking-methodology": [
+    "security"
+  ],
+  "evaluation": [
+    "testing"
+  ],
+  "event-sourcing-architect": [
+    "architecture"
+  ],
+  "event-store-design": [
+    "architecture"
+  ],
+  "evolution": [
+    "other"
+  ],
+  "exa-search": [
+    "ai"
+  ],
+  "executing-plans": [
+    "architecture"
+  ],
+  "explain-like-socrates": [
+    "other"
+  ],
+  "expo-api-routes": [
+    "backend",
+    "mobile"
+  ],
+  "expo-cicd-workflows": [
+    "automation",
+    "mobile"
+  ],
+  "expo-deployment": [
+    "devops",
+    "mobile"
+  ],
+  "expo-dev-client": [
+    "mobile"
+  ],
+  "expo-tailwind-setup": [
+    "frontend",
+    "mobile"
+  ],
+  "expo-ui-jetpack-compose": [
+    "frontend",
+    "mobile"
+  ],
+  "expo-ui-swift-ui": [
+    "frontend",
+    "language",
+    "mobile"
+  ],
+  "fal-audio": [
+    "ai"
+  ],
+  "fal-generate": [
+    "ai"
+  ],
+  "fal-image-edit": [
+    "ai"
+  ],
+  "fal-platform": [
+    "ai"
+  ],
+  "fal-upscale": [
+    "ai"
+  ],
+  "fal-workflow": [
+    "ai",
+    "automation"
+  ],
+  "family-health-analyzer": [
+    "health"
+  ],
+  "fastapi-pro": [
+    "backend"
+  ],
+  "fastapi-router-py": [
+    "backend"
+  ],
+  "fastapi-templates": [
+    "backend"
+  ],
+  "favicon": [
+    "frontend"
+  ],
+  "fda-food-safety-auditor": [
+    "testing"
+  ],
+  "fda-medtech-compliance-auditor": [
+    "security",
+    "testing"
+  ],
+  "ffuf-claude-skill": [
+    "ai",
+    "security"
+  ],
+  "ffuf-web-fuzzing": [
+    "security"
+  ],
+  "figma-automation": [
+    "automation",
+    "frontend"
+  ],
+  "file-organizer": [
+    "other"
+  ],
+  "file-path-traversal": [
+    "security"
+  ],
+  "file-uploads": [
+    "backend"
+  ],
+  "filesystem-context": [
+    "other"
+  ],
+  "find-bugs": [
+    "testing"
+  ],
+  "finishing-a-development-branch": [
+    "devops"
+  ],
+  "firebase": [
+    "automation"
+  ],
+  "firecrawl-scraper": [
+    "automation"
+  ],
+  "firmware-analyst": [
+    "business"
+  ],
+  "fitness-analyzer": [
+    "health"
+  ],
+  "fix-review": [
+    "testing"
+  ],
+  "fixing-accessibility": [
+    "accessibility"
+  ],
+  "fixing-metadata": [
+    "other"
+  ],
+  "fixing-motion-performance": [
+    "frontend"
+  ],
+  "flutter-expert": [
+    "mobile"
+  ],
+  "food-database-query": [
+    "backend"
+  ],
+  "form-cro": [
+    "content"
+  ],
+  "fp-async": [
+    "language"
+  ],
+  "fp-backend": [
+    "backend",
+    "language"
+  ],
+  "fp-data-transforms": [
+    "data",
+    "language"
+  ],
+  "fp-either-ref": [
+    "language"
+  ],
+  "fp-errors": [
+    "language"
+  ],
+  "fp-option-ref": [
+    "language"
+  ],
+  "fp-pipe-ref": [
+    "language"
+  ],
+  "fp-pragmatic": [
+    "language"
+  ],
+  "fp-react": [
+    "frontend",
+    "language"
+  ],
+  "fp-refactor": [
+    "architecture",
+    "language"
+  ],
+  "fp-taskeither-ref": [
+    "language"
+  ],
+  "fp-ts-errors": [
+    "language"
+  ],
+  "fp-ts-pragmatic": [
+    "language"
+  ],
+  "fp-ts-react": [
+    "frontend",
+    "language"
+  ],
+  "fp-types-ref": [
+    "language"
+  ],
+  "framework-accessibility": [
+    "accessibility"
+  ],
+  "framework-migration-code-migrate": [
+    "architecture"
+  ],
+  "framework-migration-deps-upgrade": [
+    "architecture"
+  ],
+  "framework-migration-legacy-modernize": [
+    "architecture"
+  ],
+  "free-tool-strategy": [
+    "business"
+  ],
+  "freshdesk-automation": [
+    "automation"
+  ],
+  "freshservice-automation": [
+    "automation"
+  ],
+  "frontend-design": [
+    "frontend"
+  ],
+  "frontend-dev-guidelines": [
+    "frontend"
+  ],
+  "frontend-developer": [
+    "frontend"
+  ],
+  "frontend-mobile-development-component-scaffold": [
+    "frontend",
+    "mobile"
+  ],
+  "frontend-mobile-security-xss-scan": [
+    "frontend",
+    "mobile",
+    "security"
+  ],
+  "frontend-security-coder": [
+    "frontend",
+    "security"
+  ],
+  "frontend-slides": [
+    "frontend"
+  ],
+  "frontend-ui-dark-ts": [
+    "frontend"
+  ],
+  "full-stack-orchestration-full-stack-feature": [
+    "architecture"
+  ],
+  "game-development": [
+    "gamedev"
+  ],
+  "gcp-cloud-run": [
+    "devops"
+  ],
+  "gdb-cli": [
+    "testing"
+  ],
+  "gdpr-data-handling": [
+    "data",
+    "security"
+  ],
+  "gemini-api-dev": [
+    "ai",
+    "backend"
+  ],
+  "gemini-api-integration": [
+    "ai",
+    "backend"
+  ],
+  "geo-fundamentals": [
+    "data"
+  ],
+  "geoffrey-hinton": [
+    "ai"
+  ],
+  "gh-review-requests": [
+    "other"
+  ],
+  "gha-security-review": [
+    "security"
+  ],
+  "git-advanced-workflows": [
+    "automation",
+    "devops"
+  ],
+  "git-hooks-automation": [
+    "automation",
+    "devops"
+  ],
+  "git-pr-workflows-git-workflow": [
+    "automation",
+    "devops"
+  ],
+  "git-pr-workflows-onboard": [
+    "automation",
+    "devops"
+  ],
+  "git-pr-workflows-pr-enhance": [
+    "automation",
+    "devops",
+    "testing"
+  ],
+  "git-pushing": [
+    "devops"
+  ],
+  "github": [
+    "devops"
+  ],
+  "github-a11y-scanner": [
+    "accessibility",
+    "devops"
+  ],
+  "github-actions-templates": [
+    "devops"
+  ],
+  "github-analytics-scoring": [
+    "data",
+    "devops"
+  ],
+  "github-automation": [
+    "automation",
+    "devops"
+  ],
+  "github-issue-creator": [
+    "devops"
+  ],
+  "github-scanning": [
+    "devops",
+    "security"
+  ],
+  "github-workflow-automation": [
+    "automation",
+    "devops"
+  ],
+  "github-workflow-standards": [
+    "automation",
+    "devops"
+  ],
+  "gitlab-automation": [
+    "automation"
+  ],
+  "gitlab-ci-patterns": [
+    "devops"
+  ],
+  "gitops-workflow": [
+    "automation",
+    "devops"
+  ],
+  "gmail-automation": [
+    "automation"
+  ],
+  "go-concurrency-patterns": [
+    "language"
+  ],
+  "go-playwright": [
+    "language",
+    "testing"
+  ],
+  "go-rod-master": [
+    "language"
+  ],
+  "goal-analyzer": [
+    "other"
+  ],
+  "godot-4-migration": [
+    "gamedev"
+  ],
+  "godot-gdscript-patterns": [
+    "gamedev"
+  ],
+  "golang-pro": [
+    "language"
+  ],
+  "google-analytics-automation": [
+    "automation",
+    "data"
+  ],
+  "google-calendar-automation": [
+    "automation"
+  ],
+  "google-docs-automation": [
+    "automation"
+  ],
+  "google-drive-automation": [
+    "automation"
+  ],
+  "google-sheets-automation": [
+    "automation"
+  ],
+  "google-slides-automation": [
+    "automation"
+  ],
+  "googlesheets-automation": [
+    "automation"
+  ],
+  "grafana-dashboards": [
+    "devops"
+  ],
+  "graphql": [
+    "backend"
+  ],
+  "graphql-architect": [
+    "architecture",
+    "backend"
+  ],
+  "growth-engine": [
+    "business"
+  ],
+  "grpc-golang": [
+    "backend",
+    "language"
+  ],
+  "haskell-pro": [
+    "language"
+  ],
+  "health-trend-analyzer": [
+    "health"
+  ],
+  "helm-chart-scaffolding": [
+    "devops"
+  ],
+  "help-url-reference": [
+    "other"
+  ],
+  "helpdesk-automation": [
+    "automation"
+  ],
+  "hierarchical-agent-memory": [
+    "ai"
+  ],
+  "hig-components-content": [
+    "content",
+    "frontend"
+  ],
+  "hig-components-controls": [
+    "frontend"
+  ],
+  "hig-components-dialogs": [
+    "frontend"
+  ],
+  "hig-components-layout": [
+    "frontend"
+  ],
+  "hig-components-menus": [
+    "frontend"
+  ],
+  "hig-components-search": [
+    "frontend"
+  ],
+  "hig-components-status": [
+    "frontend"
+  ],
+  "hig-components-system": [
+    "frontend"
+  ],
+  "hig-foundations": [
+    "frontend"
+  ],
+  "hig-inputs": [
+    "frontend"
+  ],
+  "hig-patterns": [
+    "frontend"
+  ],
+  "hig-platforms": [
+    "frontend"
+  ],
+  "hig-project-context": [
+    "frontend"
+  ],
+  "hig-technologies": [
+    "frontend"
+  ],
+  "hono": [
+    "backend"
+  ],
+  "hosted-agents": [
+    "ai"
+  ],
+  "hosted-agents-v2-py": [
+    "ai"
+  ],
+  "hr-pro": [
+    "business"
+  ],
+  "html-injection-testing": [
+    "security",
+    "testing"
+  ],
+  "hubspot-automation": [
+    "automation"
+  ],
+  "hubspot-integration": [
+    "automation"
+  ],
+  "hugging-face-cli": [
+    "ai"
+  ],
+  "hugging-face-dataset-viewer": [
+    "ai"
+  ],
+  "hugging-face-datasets": [
+    "ai"
+  ],
+  "hugging-face-evaluation": [
+    "ai",
+    "testing"
+  ],
+  "hugging-face-jobs": [
+    "ai"
+  ],
+  "hugging-face-model-trainer": [
+    "ai"
+  ],
+  "hugging-face-paper-publisher": [
+    "ai"
+  ],
+  "hugging-face-tool-builder": [
+    "ai"
+  ],
+  "hybrid-cloud-architect": [
+    "architecture",
+    "devops"
+  ],
+  "hybrid-cloud-networking": [
+    "devops"
+  ],
+  "hybrid-search-implementation": [
+    "backend"
+  ],
+  "i18n-localization": [
+    "frontend"
+  ],
+  "iconsax-library": [
+    "other"
+  ],
+  "idor-testing": [
+    "testing"
+  ],
+  "ilya-sutskever": [
+    "ai"
+  ],
+  "image-studio": [
+    "ai"
+  ],
+  "imagen": [
+    "ai"
+  ],
+  "incident-responder": [
+    "devops"
+  ],
+  "incident-response-incident-response": [
+    "devops"
+  ],
+  "incident-response-smart-fix": [
+    "devops"
+  ],
+  "incident-runbook-templates": [
+    "devops"
+  ],
+  "infinite-gratitude": [
+    "other"
+  ],
+  "inngest": [
+    "automation"
+  ],
+  "instagram": [
+    "automation"
+  ],
+  "instagram-automation": [
+    "automation"
+  ],
+  "interactive-portfolio": [
+    "frontend"
+  ],
+  "intercom-automation": [
+    "automation"
+  ],
+  "internal-comms": [
+    "other"
+  ],
+  "internal-comms-anthropic": [
+    "other"
+  ],
+  "internal-comms-community": [
+    "other"
+  ],
+  "interview-coach": [
+    "business"
+  ],
+  "inventory-demand-planning": [
+    "business"
+  ],
+  "ios-debugger-agent": [
+    "ai",
+    "mobile",
+    "testing"
+  ],
+  "ios-developer": [
+    "mobile"
+  ],
+  "issues": [
+    "other"
+  ],
+  "istio-traffic-management": [
+    "devops"
+  ],
+  "iterate-pr": [
+    "devops"
+  ],
+  "java-pro": [
+    "language"
+  ],
+  "javascript-mastery": [
+    "language"
+  ],
+  "javascript-pro": [
+    "language"
+  ],
+  "javascript-testing-patterns": [
+    "language",
+    "testing"
+  ],
+  "javascript-typescript-typescript-scaffold": [
+    "language"
+  ],
+  "jira-automation": [
+    "automation"
+  ],
+  "jobgpt": [
+    "business"
+  ],
+  "json-canvas": [
+    "other"
+  ],
+  "julia-pro": [
+    "language"
+  ],
+  "junta-leiloeiros": [
+    "legal"
+  ],
+  "k6-load-testing": [
+    "testing"
+  ],
+  "k8s-manifest-generator": [
+    "devops"
+  ],
+  "k8s-security-policies": [
+    "devops",
+    "security"
+  ],
+  "kaizen": [
+    "other"
+  ],
+  "keyword-extractor": [
+    "other"
+  ],
+  "klaviyo-automation": [
+    "automation"
+  ],
+  "kotlin-coroutines-expert": [
+    "mobile"
+  ],
+  "kpi-dashboard-design": [
+    "business"
+  ],
+  "kubernetes-architect": [
+    "architecture",
+    "devops"
+  ],
+  "kubernetes-deployment": [
+    "devops"
+  ],
+  "landing-page-generator": [
+    "content"
+  ],
+  "langchain-architecture": [
+    "architecture"
+  ],
+  "langfuse": [
+    "ai"
+  ],
+  "langgraph": [
+    "ai"
+  ],
+  "laravel-expert": [
+    "backend"
+  ],
+  "laravel-security-audit": [
+    "backend",
+    "security",
+    "testing"
+  ],
+  "last30days": [
+    "other"
+  ],
+  "latex-paper-conversion": [
+    "other"
+  ],
+  "launch-strategy": [
+    "business"
+  ],
+  "lead-magnets": [
+    "content"
+  ],
+  "legacy-modernizer": [
+    "architecture"
+  ],
+  "legal-advisor": [
+    "business"
+  ],
+  "leiloeiro-avaliacao": [
+    "legal"
+  ],
+  "leiloeiro-edital": [
+    "legal"
+  ],
+  "leiloeiro-ia": [
+    "legal"
+  ],
+  "leiloeiro-juridico": [
+    "legal"
+  ],
+  "leiloeiro-mercado": [
+    "legal"
+  ],
+  "leiloeiro-risco": [
+    "legal"
+  ],
+  "lex": [
+    "other"
+  ],
+  "lighthouse-scanner": [
+    "testing"
+  ],
+  "lightning-architecture-review": [
+    "architecture"
+  ],
+  "lightning-channel-factories": [
+    "other"
+  ],
+  "lightning-factory-explainer": [
+    "other"
+  ],
+  "linear-automation": [
+    "automation"
+  ],
+  "linear-claude-skill": [
+    "ai"
+  ],
+  "linkedin-automation": [
+    "automation"
+  ],
+  "linkedin-cli": [
+    "automation"
+  ],
+  "linkerd-patterns": [
+    "devops"
+  ],
+  "lint-and-validate": [
+    "testing"
+  ],
+  "linux-privilege-escalation": [
+    "devops",
+    "security"
+  ],
+  "linux-shell-scripting": [
+    "devops"
+  ],
+  "linux-troubleshooting": [
+    "devops"
+  ],
+  "llm-app-patterns": [
+    "ai"
+  ],
+  "llm-application-dev-ai-assistant": [
+    "ai"
+  ],
+  "llm-application-dev-langchain-agent": [
+    "ai"
+  ],
+  "llm-application-dev-prompt-optimize": [
+    "ai"
+  ],
+  "llm-evaluation": [
+    "ai",
+    "testing"
+  ],
+  "llm-ops": [
+    "ai"
+  ],
+  "llm-prompt-optimizer": [
+    "ai"
+  ],
+  "llm-structured-output": [
+    "ai"
+  ],
+  "local-legal-seo-audit": [
+    "business",
+    "content",
+    "testing"
+  ],
+  "local-llm-expert": [
+    "ai"
+  ],
+  "logistics-exception-management": [
+    "business"
+  ],
+  "loki-mode": [
+    "other"
+  ],
+  "m365-agents-dotnet": [
+    "ai",
+    "language"
+  ],
+  "m365-agents-py": [
+    "ai"
+  ],
+  "m365-agents-ts": [
+    "ai"
+  ],
+  "machine-learning-ops-ml-pipeline": [
+    "ai",
+    "devops"
+  ],
+  "macos-menubar-tuist-app": [
+    "mobile"
+  ],
+  "macos-spm-app-packaging": [
+    "mobile"
+  ],
+  "magic-animator": [
+    "frontend"
+  ],
+  "magic-ui-generator": [
+    "frontend"
+  ],
+  "mailchimp-automation": [
+    "automation"
+  ],
+  "make-automation": [
+    "automation"
+  ],
+  "makepad-animation": [
+    "frontend"
+  ],
+  "makepad-basics": [
+    "frontend"
+  ],
+  "makepad-deployment": [
+    "devops",
+    "frontend"
+  ],
+  "makepad-dsl": [
+    "frontend"
+  ],
+  "makepad-event-action": [
+    "frontend"
+  ],
+  "makepad-font": [
+    "frontend"
+  ],
+  "makepad-layout": [
+    "frontend"
+  ],
+  "makepad-platform": [
+    "frontend"
+  ],
+  "makepad-reference": [
+    "frontend"
+  ],
+  "makepad-shaders": [
+    "frontend"
+  ],
+  "makepad-skills": [
+    "frontend"
+  ],
+  "makepad-splash": [
+    "frontend"
+  ],
+  "makepad-widgets": [
+    "frontend"
+  ],
+  "malware-analyst": [
+    "business",
+    "security"
+  ],
+  "manifest": [
+    "other"
+  ],
+  "markdown-accessibility": [
+    "accessibility"
+  ],
+  "market-sizing-analysis": [
+    "business"
+  ],
+  "marketing-ideas": [
+    "content"
+  ],
+  "marketing-psychology": [
+    "content"
+  ],
+  "matematico-tao": [
+    "ai"
+  ],
+  "matplotlib": [
+    "data"
+  ],
+  "maxia": [
+    "other"
+  ],
+  "mcp-builder": [
+    "ai"
+  ],
+  "mcp-builder-ms": [
+    "ai"
+  ],
+  "memory-forensics": [
+    "security"
+  ],
+  "memory-safety-patterns": [
+    "security"
+  ],
+  "memory-systems": [
+    "ai"
+  ],
+  "mental-health-analyzer": [
+    "health"
+  ],
+  "mermaid-expert": [
+    "other"
+  ],
+  "metasploit-framework": [
+    "security"
+  ],
+  "micro-saas-launcher": [
+    "business"
+  ],
+  "microservices-patterns": [
+    "architecture",
+    "backend"
+  ],
+  "microsoft-azure-webjobs-extensions-authentication-events-dotnet": [
+    "devops",
+    "language",
+    "security"
+  ],
+  "microsoft-teams-automation": [
+    "automation"
+  ],
+  "minecraft-bukkit-pro": [
+    "gamedev"
+  ],
+  "miro-automation": [
+    "automation"
+  ],
+  "mixpanel-automation": [
+    "automation"
+  ],
+  "ml-engineer": [
+    "ai"
+  ],
+  "ml-pipeline-workflow": [
+    "ai",
+    "automation",
+    "devops"
+  ],
+  "mlops-engineer": [
+    "ai"
+  ],
+  "mobile-accessibility": [
+    "accessibility",
+    "mobile"
+  ],
+  "mobile-design": [
+    "mobile"
+  ],
+  "mobile-developer": [
+    "mobile"
+  ],
+  "mobile-security-coder": [
+    "mobile",
+    "security"
+  ],
+  "modern-javascript-patterns": [
+    "language"
+  ],
+  "molykit": [
+    "data"
+  ],
+  "monday-automation": [
+    "automation"
+  ],
+  "monetization": [
+    "business"
+  ],
+  "monorepo-architect": [
+    "architecture",
+    "devops"
+  ],
+  "monorepo-management": [
+    "devops"
+  ],
+  "moodle-external-api-development": [
+    "backend"
+  ],
+  "moyu": [
+    "other"
+  ],
+  "mtls-configuration": [
+    "security"
+  ],
+  "multi-advisor": [
+    "other"
+  ],
+  "multi-agent-brainstorming": [
+    "ai"
+  ],
+  "multi-agent-patterns": [
+    "ai"
+  ],
+  "multi-cloud-architecture": [
+    "architecture",
+    "devops"
+  ],
+  "multi-platform-apps-multi-platform": [
+    "frontend"
+  ],
+  "n8n-code-javascript": [
+    "automation",
+    "language"
+  ],
+  "n8n-code-python": [
+    "automation",
+    "language"
+  ],
+  "n8n-expression-syntax": [
+    "automation"
+  ],
+  "n8n-mcp-tools-expert": [
+    "automation"
+  ],
+  "n8n-node-configuration": [
+    "automation"
+  ],
+  "n8n-validation-expert": [
+    "automation"
+  ],
+  "n8n-workflow-patterns": [
+    "automation"
+  ],
+  "nanobanana-ppt-skills": [
+    "content"
+  ],
+  "native-data-fetching": [
+    "data"
+  ],
+  "neon-postgres": [
+    "backend"
+  ],
+  "nerdzao-elite": [
+    "other"
+  ],
+  "nerdzao-elite-gemini-high": [
+    "ai"
+  ],
+  "nestjs-expert": [
+    "backend"
+  ],
+  "network-101": [
+    "devops"
+  ],
+  "network-engineer": [
+    "devops"
+  ],
+  "networkx": [
+    "data"
+  ],
+  "new-rails-project": [
+    "backend"
+  ],
+  "nextjs-app-router-patterns": [
+    "frontend"
+  ],
+  "nextjs-best-practices": [
+    "frontend"
+  ],
+  "nextjs-supabase-auth": [
+    "backend",
+    "frontend",
+    "security"
+  ],
+  "nft-standards": [
+    "web3"
+  ],
+  "nodejs-backend-patterns": [
+    "backend",
+    "language"
+  ],
+  "nodejs-best-practices": [
+    "language"
+  ],
+  "nosql-expert": [
+    "backend"
+  ],
+  "notebooklm": [
+    "ai"
+  ],
+  "notion-automation": [
+    "automation"
+  ],
+  "notion-template-business": [
+    "business"
+  ],
+  "nutrition-analyzer": [
+    "health"
+  ],
+  "nx-workspace-patterns": [
+    "devops"
+  ],
+  "observability-engineer": [
+    "devops"
+  ],
+  "observability-monitoring-monitor-setup": [
+    "devops"
+  ],
+  "observability-monitoring-slo-implement": [
+    "devops"
+  ],
+  "observe-whatsapp": [
+    "automation"
+  ],
+  "obsidian-bases": [
+    "content"
+  ],
+  "obsidian-cli": [
+    "content"
+  ],
+  "obsidian-clipper-template-creator": [
+    "content"
+  ],
+  "obsidian-markdown": [
+    "content"
+  ],
+  "occupational-health-analyzer": [
+    "health"
+  ],
+  "odoo-accounting-setup": [
+    "backend"
+  ],
+  "odoo-automated-tests": [
+    "automation",
+    "backend",
+    "testing"
+  ],
+  "odoo-backup-strategy": [
+    "backend"
+  ],
+  "odoo-docker-deployment": [
+    "backend",
+    "devops"
+  ],
+  "odoo-ecommerce-configurator": [
+    "backend"
+  ],
+  "odoo-edi-connector": [
+    "backend"
+  ],
+  "odoo-hr-payroll-setup": [
+    "backend",
+    "business"
+  ],
+  "odoo-inventory-optimizer": [
+    "backend",
+    "business"
+  ],
+  "odoo-l10n-compliance": [
+    "backend",
+    "security"
+  ],
+  "odoo-manufacturing-advisor": [
+    "backend"
+  ],
+  "odoo-migration-helper": [
+    "backend"
+  ],
+  "odoo-module-developer": [
+    "backend"
+  ],
+  "odoo-orm-expert": [
+    "backend"
+  ],
+  "odoo-performance-tuner": [
+    "backend",
+    "devops"
+  ],
+  "odoo-project-timesheet": [
+    "backend"
+  ],
+  "odoo-purchase-workflow": [
+    "automation",
+    "backend"
+  ],
+  "odoo-qweb-templates": [
+    "backend"
+  ],
+  "odoo-rpc-api": [
+    "backend"
+  ],
+  "odoo-sales-crm-expert": [
+    "backend"
+  ],
+  "odoo-security-rules": [
+    "backend",
+    "security"
+  ],
+  "odoo-shopify-integration": [
+    "automation",
+    "backend"
+  ],
+  "odoo-upgrade-advisor": [
+    "backend"
+  ],
+  "odoo-woocommerce-bridge": [
+    "backend"
+  ],
+  "odoo-xml-views-builder": [
+    "backend"
+  ],
+  "office-productivity": [
+    "other"
+  ],
+  "on-call-handoff-patterns": [
+    "devops"
+  ],
+  "onboarding-cro": [
+    "content"
+  ],
+  "one-drive-automation": [
+    "automation"
+  ],
+  "openapi-spec-generation": [
+    "backend",
+    "testing"
+  ],
+  "openclaw-github-repo-commander": [
+    "devops"
+  ],
+  "oral-health-analyzer": [
+    "health"
+  ],
+  "orchestrate-batch-refactor": [
+    "architecture"
+  ],
+  "os-scripting": [
+    "devops"
+  ],
+  "oss-hunter": [
+    "business"
+  ],
+  "outlook-automation": [
+    "automation"
+  ],
+  "outlook-calendar-automation": [
+    "automation"
+  ],
+  "page-cro": [
+    "content"
+  ],
+  "pagerduty-automation": [
+    "automation"
+  ],
+  "paid-ads": [
+    "content"
+  ],
+  "pakistan-payments-stack": [
+    "backend"
+  ],
+  "parallel-agents": [
+    "ai"
+  ],
+  "payment-integration": [
+    "backend"
+  ],
+  "paypal-integration": [
+    "automation"
+  ],
+  "paywall-upgrade-cro": [
+    "content"
+  ],
+  "pci-compliance": [
+    "security"
+  ],
+  "pdf-official": [
+    "content"
+  ],
+  "pentest-checklist": [
+    "security",
+    "testing"
+  ],
+  "pentest-commands": [
+    "security",
+    "testing"
+  ],
+  "performance-engineer": [
+    "devops"
+  ],
+  "performance-optimizer": [
+    "devops"
+  ],
+  "performance-profiling": [
+    "devops"
+  ],
+  "performance-testing-review-ai-review": [
+    "ai",
+    "devops",
+    "testing"
+  ],
+  "performance-testing-review-multi-agent-review": [
+    "ai",
+    "devops",
+    "testing"
+  ],
+  "personal-tool-builder": [
+    "other"
+  ],
+  "php-pro": [
+    "language"
+  ],
+  "pipecat-friday-agent": [
+    "ai"
+  ],
+  "pipedrive-automation": [
+    "automation"
+  ],
+  "plaid-fintech": [
+    "backend"
+  ],
+  "plan-writing": [
+    "architecture"
+  ],
+  "planning-with-files": [
+    "architecture"
+  ],
+  "playwright-java": [
+    "language",
+    "testing"
+  ],
+  "playwright-skill": [
+    "testing"
+  ],
+  "playwright-testing": [
+    "testing"
+  ],
+  "plotly": [
+    "data"
+  ],
+  "podcast-generation": [
+    "content"
+  ],
+  "polars": [
+    "data"
+  ],
+  "popup-cro": [
+    "content"
+  ],
+  "posix-shell-pro": [
+    "devops"
+  ],
+  "postgres-best-practices": [
+    "backend"
+  ],
+  "postgresql": [
+    "backend"
+  ],
+  "postgresql-optimization": [
+    "backend"
+  ],
+  "posthog-automation": [
+    "automation"
+  ],
+  "postmark-automation": [
+    "automation"
+  ],
+  "postmortem-writing": [
+    "testing"
+  ],
+  "powershell-windows": [
+    "devops"
+  ],
+  "pptx-official": [
+    "content"
+  ],
+  "pr-writer": [
+    "other"
+  ],
+  "pricing-strategy": [
+    "business"
+  ],
+  "prisma-expert": [
+    "backend"
+  ],
+  "privacy-by-design": [
+    "security"
+  ],
+  "privilege-escalation-methods": [
+    "security"
+  ],
+  "product-design": [
+    "architecture"
+  ],
+  "product-inventor": [
+    "business"
+  ],
+  "product-manager": [
+    "business"
+  ],
+  "product-manager-toolkit": [
+    "business"
+  ],
+  "product-marketing-context": [
+    "content"
+  ],
+  "production-code-audit": [
+    "testing"
+  ],
+  "production-scheduling": [
+    "business"
+  ],
+  "professional-proofreader": [
+    "content"
+  ],
+  "programmatic-seo": [
+    "content"
+  ],
+  "progressive-estimation": [
+    "architecture"
+  ],
+  "progressive-web-app": [
+    "frontend"
+  ],
+  "project-development": [
+    "architecture"
+  ],
+  "project-skill-audit": [
+    "testing"
+  ],
+  "projection-patterns": [
+    "architecture"
+  ],
+  "prometheus-configuration": [
+    "devops"
+  ],
+  "prompt-caching": [
+    "ai"
+  ],
+  "prompt-engineer": [
+    "ai"
+  ],
+  "prompt-engineering": [
+    "ai"
+  ],
+  "prompt-engineering-patterns": [
+    "ai"
+  ],
+  "prompt-library": [
+    "ai"
+  ],
+  "protocol-reverse-engineering": [
+    "security"
+  ],
+  "pubmed-database": [
+    "backend"
+  ],
+  "pydantic-ai": [
+    "ai",
+    "backend"
+  ],
+  "pydantic-models-py": [
+    "backend"
+  ],
+  "pypict-skill": [
+    "other"
+  ],
+  "python-development": [
+    "language"
+  ],
+  "python-development-python-scaffold": [
+    "language"
+  ],
+  "python-fastapi-development": [
+    "backend",
+    "language"
+  ],
+  "python-packaging": [
+    "language"
+  ],
+  "python-patterns": [
+    "language"
+  ],
+  "python-performance-optimization": [
+    "devops",
+    "language"
+  ],
+  "python-pro": [
+    "language"
+  ],
+  "python-testing-patterns": [
+    "language",
+    "testing"
+  ],
+  "qiskit": [
+    "ai"
+  ],
+  "quality-nonconformance": [
+    "testing"
+  ],
+  "quant-analyst": [
+    "business",
+    "data"
+  ],
+  "radix-ui-design-system": [
+    "frontend"
+  ],
+  "rag-engineer": [
+    "ai"
+  ],
+  "rag-implementation": [
+    "ai"
+  ],
+  "react-best-practices": [
+    "frontend"
+  ],
+  "react-component-performance": [
+    "frontend"
+  ],
+  "react-flow-architect": [
+    "architecture",
+    "frontend"
+  ],
+  "react-flow-node-ts": [
+    "frontend"
+  ],
+  "react-modernization": [
+    "frontend"
+  ],
+  "react-native-architecture": [
+    "architecture",
+    "frontend",
+    "mobile"
+  ],
+  "react-native-skills": [
+    "frontend",
+    "mobile"
+  ],
+  "react-nextjs-development": [
+    "frontend"
+  ],
+  "react-patterns": [
+    "frontend"
+  ],
+  "react-state-management": [
+    "frontend"
+  ],
+  "react-ui-patterns": [
+    "frontend"
+  ],
+  "readme": [
+    "content"
+  ],
+  "recallmax": [
+    "ai"
+  ],
+  "receiving-code-review": [
+    "testing"
+  ],
+  "red-team-tactics": [
+    "security"
+  ],
+  "red-team-tools": [
+    "security"
+  ],
+  "reddit-automation": [
+    "automation"
+  ],
+  "reference-builder": [
+    "other"
+  ],
+  "referral-program": [
+    "content"
+  ],
+  "rehabilitation-analyzer": [
+    "health"
+  ],
+  "remotion": [
+    "frontend"
+  ],
+  "remotion-best-practices": [
+    "frontend"
+  ],
+  "render-automation": [
+    "automation"
+  ],
+  "report-generation": [
+    "automation"
+  ],
+  "requesting-code-review": [
+    "testing"
+  ],
+  "research-engineer": [
+    "ai"
+  ],
+  "returns-reverse-logistics": [
+    "business"
+  ],
+  "reverse-engineer": [
+    "security"
+  ],
+  "revops": [
+    "business"
+  ],
+  "risk-manager": [
+    "business"
+  ],
+  "risk-metrics-calculation": [
+    "business"
+  ],
+  "robius-app-architecture": [
+    "architecture",
+    "frontend"
+  ],
+  "robius-event-action": [
+    "frontend"
+  ],
+  "robius-matrix-integration": [
+    "frontend"
+  ],
+  "robius-state-management": [
+    "frontend"
+  ],
+  "robius-widget-patterns": [
+    "frontend"
+  ],
+  "ruby-pro": [
+    "language"
+  ],
+  "rust-async-patterns": [
+    "language"
+  ],
+  "rust-pro": [
+    "language"
+  ],
+  "saas-mvp-launcher": [
+    "business"
+  ],
+  "saga-orchestration": [
+    "architecture"
+  ],
+  "sales-automator": [
+    "automation"
+  ],
+  "sales-enablement": [
+    "business"
+  ],
+  "salesforce-automation": [
+    "automation"
+  ],
+  "salesforce-development": [
+    "automation"
+  ],
+  "sam-altman": [
+    "ai"
+  ],
+  "sankhya-dashboard-html-jsp-custom-best-pratices": [
+    "frontend"
+  ],
+  "sast-configuration": [
+    "security"
+  ],
+  "scala-pro": [
+    "language"
+  ],
+  "scanning-tools": [
+    "security"
+  ],
+  "scanpy": [
+    "data"
+  ],
+  "schema-markup": [
+    "backend"
+  ],
+  "scientific-writing": [
+    "content"
+  ],
+  "scikit-learn": [
+    "data"
+  ],
+  "screen-reader-testing": [
+    "testing"
+  ],
+  "screenshots": [
+    "content"
+  ],
+  "scroll-experience": [
+    "frontend"
+  ],
+  "seaborn": [
+    "data"
+  ],
+  "search-specialist": [
+    "other"
+  ],
+  "secrets-management": [
+    "security"
+  ],
+  "security-audit": [
+    "security",
+    "testing"
+  ],
+  "security-auditor": [
+    "security",
+    "testing"
+  ],
+  "security-bluebook-builder": [
+    "security"
+  ],
+  "security-compliance-compliance-check": [
+    "security"
+  ],
+  "security-requirement-extraction": [
+    "security"
+  ],
+  "security-scanning-security-dependencies": [
+    "security"
+  ],
+  "security-scanning-security-hardening": [
+    "security"
+  ],
+  "security-scanning-security-sast": [
+    "security"
+  ],
+  "seek-and-analyze-video": [
+    "ai"
+  ],
+  "segment-automation": [
+    "automation"
+  ],
+  "segment-cdp": [
+    "automation"
+  ],
+  "semgrep-rule-creator": [
+    "security"
+  ],
+  "semgrep-rule-variant-creator": [
+    "security"
+  ],
+  "sendgrid-automation": [
+    "automation"
+  ],
+  "senior-architect": [
+    "architecture"
+  ],
+  "senior-frontend": [
+    "frontend"
+  ],
+  "senior-fullstack": [
+    "architecture"
+  ],
+  "sentry-automation": [
+    "automation"
+  ],
+  "seo": [
+    "content"
+  ],
+  "seo-audit": [
+    "content",
+    "testing"
+  ],
+  "seo-authority-builder": [
+    "content"
+  ],
+  "seo-cannibalization-detector": [
+    "content"
+  ],
+  "seo-competitor-pages": [
+    "content"
+  ],
+  "seo-content": [
+    "content"
+  ],
+  "seo-content-auditor": [
+    "content",
+    "testing"
+  ],
+  "seo-content-planner": [
+    "content"
+  ],
+  "seo-content-refresher": [
+    "content"
+  ],
+  "seo-content-writer": [
+    "content"
+  ],
+  "seo-dataforseo": [
+    "content"
+  ],
+  "seo-forensic-incident-response": [
+    "content",
+    "devops"
+  ],
+  "seo-fundamentals": [
+    "content"
+  ],
+  "seo-geo": [
+    "content"
+  ],
+  "seo-hreflang": [
+    "content"
+  ],
+  "seo-image-gen": [
+    "content"
+  ],
+  "seo-images": [
+    "content"
+  ],
+  "seo-keyword-strategist": [
+    "content"
+  ],
+  "seo-meta-optimizer": [
+    "content"
+  ],
+  "seo-page": [
+    "content"
+  ],
+  "seo-plan": [
+    "content"
+  ],
+  "seo-programmatic": [
+    "content"
+  ],
+  "seo-schema": [
+    "content"
+  ],
+  "seo-sitemap": [
+    "content"
+  ],
+  "seo-snippet-hunter": [
+    "content"
+  ],
+  "seo-structure-architect": [
+    "architecture",
+    "content"
+  ],
+  "seo-technical": [
+    "content"
+  ],
+  "server-management": [
+    "backend"
+  ],
+  "service-mesh-expert": [
+    "devops"
+  ],
+  "service-mesh-observability": [
+    "devops"
+  ],
+  "sexual-health-analyzer": [
+    "health"
+  ],
+  "shadcn": [
+    "frontend"
+  ],
+  "shader-programming-glsl": [
+    "gamedev"
+  ],
+  "sharp-edges": [
+    "other"
+  ],
+  "shellcheck-configuration": [
+    "devops"
+  ],
+  "shodan-reconnaissance": [
+    "security"
+  ],
+  "shopify-apps": [
+    "automation"
+  ],
+  "shopify-automation": [
+    "automation"
+  ],
+  "shopify-development": [
+    "automation"
+  ],
+  "signup-flow-cro": [
+    "content"
+  ],
+  "similarity-search-patterns": [
+    "backend"
+  ],
+  "simplify-code": [
+    "architecture"
+  ],
+  "site-architecture": [
+    "architecture"
+  ],
+  "skill-check": [
+    "other"
+  ],
+  "skill-creator": [
+    "other"
+  ],
+  "skill-creator-ms": [
+    "other"
+  ],
+  "skill-developer": [
+    "other"
+  ],
+  "skill-improver": [
+    "other"
+  ],
+  "skill-installer": [
+    "other"
+  ],
+  "skill-rails-upgrade": [
+    "other"
+  ],
+  "skill-router": [
+    "other"
+  ],
+  "skill-scanner": [
+    "other"
+  ],
+  "skill-seekers": [
+    "other"
+  ],
+  "skill-sentinel": [
+    "other"
+  ],
+  "skill-writer": [
+    "other"
+  ],
+  "skin-health-analyzer": [
+    "health"
+  ],
+  "slack-automation": [
+    "automation"
+  ],
+  "slack-bot-builder": [
+    "automation"
+  ],
+  "slack-gif-creator": [
+    "automation"
+  ],
+  "sleep-analyzer": [
+    "health"
+  ],
+  "slo-implementation": [
+    "devops"
+  ],
+  "smtp-penetration-testing": [
+    "security",
+    "testing"
+  ],
+  "snowflake-development": [
+    "data"
+  ],
+  "social-content": [
+    "content"
+  ],
+  "social-orchestrator": [
+    "other"
+  ],
+  "software-architecture": [
+    "architecture"
+  ],
+  "solidity-security": [
+    "security",
+    "web3"
+  ],
+  "spark-optimization": [
+    "data"
+  ],
+  "spec-to-code-compliance": [
+    "security",
+    "testing"
+  ],
+  "speckit-updater": [
+    "other"
+  ],
+  "speed": [
+    "other"
+  ],
+  "spline-3d-integration": [
+    "frontend"
+  ],
+  "sql-injection-testing": [
+    "backend",
+    "security",
+    "testing"
+  ],
+  "sql-optimization-patterns": [
+    "backend"
+  ],
+  "sql-pro": [
+    "backend"
+  ],
+  "sqlmap-database-pentesting": [
+    "backend",
+    "security",
+    "testing"
+  ],
+  "square-automation": [
+    "automation"
+  ],
+  "sred-project-organizer": [
+    "business"
+  ],
+  "sred-work-summary": [
+    "business"
+  ],
+  "ssh-penetration-testing": [
+    "security",
+    "testing"
+  ],
+  "stability-ai": [
+    "ai"
+  ],
+  "startup-analyst": [
+    "business"
+  ],
+  "startup-business-analyst-business-case": [
+    "business"
+  ],
+  "startup-business-analyst-financial-projections": [
+    "business"
+  ],
+  "startup-business-analyst-market-opportunity": [
+    "business"
+  ],
+  "startup-financial-modeling": [
+    "business"
+  ],
+  "startup-metrics-framework": [
+    "business"
+  ],
+  "statsmodels": [
+    "data"
+  ],
+  "steve-jobs": [
+    "ai"
+  ],
+  "stitch-loop": [
+    "other"
+  ],
+  "stitch-ui-design": [
+    "frontend"
+  ],
+  "stride-analysis-patterns": [
+    "other"
+  ],
+  "stripe-automation": [
+    "automation"
+  ],
+  "stripe-integration": [
+    "automation"
+  ],
+  "subagent-driven-development": [
+    "ai"
+  ],
+  "supabase-automation": [
+    "automation",
+    "backend"
+  ],
+  "supabase-postgres-best-practices": [
+    "backend"
+  ],
+  "superpowers-lab": [
+    "other"
+  ],
+  "supply-chain-risk-auditor": [
+    "testing"
+  ],
+  "sveltekit": [
+    "frontend"
+  ],
+  "swift-concurrency-expert": [
+    "language"
+  ],
+  "swiftui-expert-skill": [
+    "mobile"
+  ],
+  "swiftui-liquid-glass": [
+    "mobile"
+  ],
+  "swiftui-performance-audit": [
+    "devops",
+    "mobile",
+    "testing"
+  ],
+  "swiftui-ui-patterns": [
+    "frontend",
+    "mobile"
+  ],
+  "swiftui-view-refactor": [
+    "architecture",
+    "mobile"
+  ],
+  "sympy": [
+    "data"
+  ],
+  "systematic-debugging": [
+    "testing"
+  ],
+  "systems-programming-rust-project": [
+    "language"
+  ],
+  "tailwind-design-system": [
+    "frontend"
+  ],
+  "tailwind-patterns": [
+    "frontend"
+  ],
+  "tanstack-query-expert": [
+    "frontend"
+  ],
+  "task-intelligence": [
+    "other"
+  ],
+  "tavily-web": [
+    "ai"
+  ],
+  "tcm-constitution-analyzer": [
+    "health"
+  ],
+  "tdd-orchestrator": [
+    "testing"
+  ],
+  "tdd-workflow": [
+    "automation",
+    "testing"
+  ],
+  "tdd-workflows-tdd-cycle": [
+    "automation",
+    "testing"
+  ],
+  "tdd-workflows-tdd-green": [
+    "automation",
+    "testing"
+  ],
+  "tdd-workflows-tdd-red": [
+    "automation",
+    "testing"
+  ],
+  "tdd-workflows-tdd-refactor": [
+    "architecture",
+    "automation",
+    "testing"
+  ],
+  "team-collaboration-issue": [
+    "business"
+  ],
+  "team-collaboration-standup-notes": [
+    "business"
+  ],
+  "team-composition-analysis": [
+    "business"
+  ],
+  "telegram": [
+    "automation"
+  ],
+  "telegram-automation": [
+    "automation"
+  ],
+  "telegram-bot-builder": [
+    "automation"
+  ],
+  "telegram-mini-app": [
+    "automation"
+  ],
+  "temporal-golang-pro": [
+    "language"
+  ],
+  "temporal-python-pro": [
+    "language"
+  ],
+  "temporal-python-testing": [
+    "language",
+    "testing"
+  ],
+  "terraform-aws-modules": [
+    "devops"
+  ],
+  "terraform-infrastructure": [
+    "devops"
+  ],
+  "terraform-module-library": [
+    "devops"
+  ],
+  "terraform-skill": [
+    "devops"
+  ],
+  "terraform-specialist": [
+    "devops"
+  ],
+  "test-automator": [
+    "automation",
+    "testing"
+  ],
+  "test-driven-development": [
+    "testing"
+  ],
+  "test-fixing": [
+    "testing"
+  ],
+  "testing-patterns": [
+    "testing"
+  ],
+  "testing-qa": [
+    "testing"
+  ],
+  "theme-factory": [
+    "frontend"
+  ],
+  "threat-mitigation-mapping": [
+    "security"
+  ],
+  "threat-modeling-expert": [
+    "security"
+  ],
+  "threejs-animation": [
+    "frontend"
+  ],
+  "threejs-fundamentals": [
+    "frontend"
+  ],
+  "threejs-geometry": [
+    "frontend"
+  ],
+  "threejs-interaction": [
+    "frontend"
+  ],
+  "threejs-lighting": [
+    "frontend"
+  ],
+  "threejs-loaders": [
+    "frontend"
+  ],
+  "threejs-materials": [
+    "frontend"
+  ],
+  "threejs-postprocessing": [
+    "frontend"
+  ],
+  "threejs-shaders": [
+    "frontend"
+  ],
+  "threejs-skills": [
+    "frontend"
+  ],
+  "threejs-textures": [
+    "frontend"
+  ],
+  "tiktok-automation": [
+    "automation"
+  ],
+  "todoist-automation": [
+    "automation"
+  ],
+  "tool-design": [
+    "architecture"
+  ],
+  "tool-use-guardian": [
+    "ai"
+  ],
+  "top-web-vulnerabilities": [
+    "security"
+  ],
+  "track-management": [
+    "other"
+  ],
+  "travel-health-analyzer": [
+    "health"
+  ],
+  "trello-automation": [
+    "automation"
+  ],
+  "trigger-dev": [
+    "automation"
+  ],
+  "trpc-fullstack": [
+    "backend"
+  ],
+  "turborepo-caching": [
+    "devops"
+  ],
+  "tutorial-engineer": [
+    "other"
+  ],
+  "twilio-communications": [
+    "automation"
+  ],
+  "twitter-automation": [
+    "automation"
+  ],
+  "typescript-advanced-types": [
+    "language"
+  ],
+  "typescript-expert": [
+    "language"
+  ],
+  "typescript-pro": [
+    "language"
+  ],
+  "ui-skills": [
+    "frontend"
+  ],
+  "ui-ux-designer": [
+    "frontend"
+  ],
+  "ui-ux-pro-max": [
+    "frontend"
+  ],
+  "ui-visual-validator": [
+    "frontend"
+  ],
+  "uncle-bob-craft": [
+    "architecture"
+  ],
+  "uniprot-database": [
+    "backend"
+  ],
+  "unit-testing-test-generate": [
+    "testing"
+  ],
+  "unity-developer": [
+    "gamedev"
+  ],
+  "unity-ecs-patterns": [
+    "gamedev"
+  ],
+  "unreal-engine-cpp-pro": [
+    "language"
+  ],
+  "unsplash-integration": [
+    "automation"
+  ],
+  "upgrading-expo": [
+    "mobile"
+  ],
+  "upstash-qstash": [
+    "automation"
+  ],
+  "using-git-worktrees": [
+    "devops"
+  ],
+  "using-neon": [
+    "backend"
+  ],
+  "using-superpowers": [
+    "other"
+  ],
+  "uv-package-manager": [
+    "devops"
+  ],
+  "variant-analysis": [
+    "other"
+  ],
+  "varlock": [
+    "security"
+  ],
+  "varlock-claude-skill": [
+    "ai",
+    "security"
+  ],
+  "vector-database-engineer": [
+    "backend"
+  ],
+  "vector-index-tuning": [
+    "ai"
+  ],
+  "vercel-ai-sdk-expert": [
+    "ai"
+  ],
+  "vercel-automation": [
+    "automation"
+  ],
+  "vercel-deploy-claimable": [
+    "devops"
+  ],
+  "vercel-deployment": [
+    "devops"
+  ],
+  "verification-before-completion": [
+    "testing"
+  ],
+  "vexor": [
+    "other"
+  ],
+  "vexor-cli": [
+    "other"
+  ],
+  "vibe-code-auditor": [
+    "testing"
+  ],
+  "vibers-code-review": [
+    "testing"
+  ],
+  "videodb": [
+    "ai"
+  ],
+  "videodb-skills": [
+    "ai"
+  ],
+  "viral-generator-builder": [
+    "content"
+  ],
+  "vizcom": [
+    "other"
+  ],
+  "voice-agents": [
+    "ai"
+  ],
+  "voice-ai-development": [
+    "ai"
+  ],
+  "voice-ai-engine-development": [
+    "ai"
+  ],
+  "vulnerability-scanner": [
+    "security"
+  ],
+  "warren-buffett": [
+    "ai"
+  ],
+  "wcag-audit-patterns": [
+    "accessibility",
+    "testing"
+  ],
+  "web-artifacts-builder": [
+    "other"
+  ],
+  "web-design-guidelines": [
+    "frontend"
+  ],
+  "web-performance-optimization": [
+    "devops"
+  ],
+  "web-scanning": [
+    "security"
+  ],
+  "web-scraper": [
+    "automation"
+  ],
+  "web-security-testing": [
+    "security",
+    "testing"
+  ],
+  "web-severity-scoring": [
+    "security"
+  ],
+  "web3-testing": [
+    "testing",
+    "web3"
+  ],
+  "webapp-testing": [
+    "testing"
+  ],
+  "webflow-automation": [
+    "automation"
+  ],
+  "weightloss-analyzer": [
+    "health"
+  ],
+  "wellally-tech": [
+    "health"
+  ],
+  "whatsapp-automation": [
+    "automation"
+  ],
+  "whatsapp-cloud-api": [
+    "backend",
+    "devops"
+  ],
+  "wiki-architect": [
+    "architecture",
+    "content"
+  ],
+  "wiki-changelog": [
+    "content"
+  ],
+  "wiki-onboarding": [
+    "content"
+  ],
+  "wiki-page-writer": [
+    "content"
+  ],
+  "wiki-qa": [
+    "content",
+    "testing"
+  ],
+  "wiki-researcher": [
+    "content"
+  ],
+  "wiki-vitepress": [
+    "content"
+  ],
+  "windows-privilege-escalation": [
+    "security"
+  ],
+  "windows-shell-reliability": [
+    "devops"
+  ],
+  "wireshark-analysis": [
+    "security"
+  ],
+  "wordpress": [
+    "automation"
+  ],
+  "wordpress-penetration-testing": [
+    "automation",
+    "security",
+    "testing"
+  ],
+  "wordpress-plugin-development": [
+    "automation"
+  ],
+  "wordpress-theme-development": [
+    "automation",
+    "frontend"
+  ],
+  "wordpress-woocommerce-development": [
+    "automation"
+  ],
+  "workflow-automation": [
+    "automation"
+  ],
+  "workflow-orchestration-patterns": [
+    "automation"
+  ],
+  "workflow-patterns": [
+    "automation"
+  ],
+  "wrike-automation": [
+    "automation"
+  ],
+  "writing-plans": [
+    "content"
+  ],
+  "writing-skills": [
+    "content"
+  ],
+  "x-article-publisher-skill": [
+    "automation"
+  ],
+  "x-twitter-scraper": [
+    "automation"
+  ],
+  "xlsx-official": [
+    "content"
+  ],
+  "xss-html-injection": [
+    "security"
+  ],
+  "xvary-stock-research": [
+    "data"
+  ],
+  "yann-lecun": [
+    "ai"
+  ],
+  "yann-lecun-debate": [
+    "ai"
+  ],
+  "yann-lecun-filosofia": [
+    "ai"
+  ],
+  "yann-lecun-tecnico": [
+    "ai"
+  ],
+  "yes-md": [
+    "health"
+  ],
+  "youtube-automation": [
+    "automation",
+    "content"
+  ],
+  "youtube-summarizer": [
+    "content"
+  ],
+  "zapier-make-patterns": [
+    "automation"
+  ],
+  "zendesk-automation": [
+    "automation"
+  ],
+  "zeroize-audit": [
+    "testing"
+  ],
+  "zod-validation-expert": [
+    "backend"
+  ],
+  "zoho-crm-automation": [
+    "automation"
+  ],
+  "zoom-automation": [
+    "automation"
+  ]
+}

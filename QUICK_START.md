@@ -91,6 +91,18 @@ Mesma coisa - aparecem em "Available Tools" no chat.
 }
 ```
 
+### 🧠 Cliente sem sampling? Configure um modelo de apoio
+
+`find_skills`, `classify_skills` e `a11y_find` pedem ao modelo do cliente (sampling). Se o cliente não suporta,
+o servidor usa um modelo configurado no ambiente (na entrada do servidor no JSON, em `"env"`):
+
+```json
+"env": { "ANTHROPIC_API_KEY": "sk-ant-..." }
+```
+
+ou, para Ollama: `"env": { "SKILLS_MCP_BACKEND": "ollama", "SKILLS_MCP_MODEL": "llama3" }`.
+Detalhes e demais variáveis no `README.md`.
+
 ### 🆘 Se não funcionar
 
 ```bash

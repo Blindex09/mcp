@@ -1,5 +1,10 @@
 # NVDA Screen Reader Testing Guide (2026)
 
+> **Before opening NVDA:** `a11y_aria_snapshot` shows the accessibility tree a screen reader is given and `a11y_tab_order`
+> shows the keyboard order, both via the Skills MCP server. Use them to find missing/duplicated names and focus problems
+> first; they do not replace listening to the real screen reader.
+
+
 > Compiled from NV Access 2026.1 / 2026.1.1 release notes, the official User Guide & Key Commands, the TetraLogical NVDA HTML Support matrix (Feb 2026), and 2026 developer testing guides. NVDA is free and open-source (GPL) — download from nvaccess.org.
 
 ## Current state (2026)

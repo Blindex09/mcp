@@ -13,6 +13,26 @@ Use WCAG 2.2 AA as the web conformance baseline. Treat WCAG 3.0 (Working Draft, 
 - **Tier 2 — starting pointers:** Vue/Nuxt, Svelte, C#/.NET, Flutter/Dart, Rust, Python UI frameworks, PHP/Laravel, and Ruby/Rails in [references/multilanguage-multiplatform-a11y.md](references/multilanguage-multiplatform-a11y.md). Research current official platform guidance before shipping; a pointer is not implementation certification.
 - Known gaps: Elixir/Phoenix LiveView and Go+htmx do not yet have dedicated coverage.
 
+## 0.1 Using this skill through the MCP server
+
+This skill ships inside the Skills MCP server (`a11y/`). Every `references/x.md` link below is the guide named `x`
+for `a11y_get_reference`, and every `examples/y.ext` is the example named `y` for `a11y_get_example`.
+
+| Need | Tool |
+|---|---|
+| See what exists (summary + sections of every guide/example) | `a11y_list_content` |
+| Let the model pick the right guides/examples for a task described in plain language | `a11y_find(task)` |
+| Read a guide (or one section of it) / get component source | `a11y_get_reference(name, section)` / `a11y_get_example(name)` |
+| WCAG contrast ratio between two colors | `a11y_contrast` |
+| Automated axe-core audit of a URL (http/https) or HTML string | `a11y_audit` |
+| Accessibility tree, i.e. what a screen reader receives | `a11y_aria_snapshot` |
+| Keyboard focus order, names, focus indicators | `a11y_tab_order` |
+
+Selection of what to read is done by a model, never by keyword. The measurement tools (`a11y_contrast`, `a11y_audit`,
+`a11y_aria_snapshot`, `a11y_tab_order`) report facts; interpreting them and deciding the fix stays with you.
+They cover only part of WCAG: keyboard, screen-reader and touch checks remain manual (section 5).
+Browser-based tools need `python -m playwright install chromium` once.
+
 ## 1. References by domain
 
 Read only what the task needs.
@@ -86,7 +106,7 @@ Do not infer that every visually separated block needs a region or heading. Land
 
 1. Inventory target platforms, browsers, AT, input methods, and conformance level.
 2. Inspect DOM/native semantics and the computed accessibility tree for duplicate, missing, overridden, or hidden information.
-3. Run automated validation, axe/Lighthouse/platform checks, syntax/build checks, and framework linters.
+3. Run automated validation, axe/Lighthouse/platform checks, syntax/build checks, and framework linters (via the MCP: `a11y_audit`, `a11y_aria_snapshot`, `a11y_tab_order`, `a11y_contrast`).
 4. Complete keyboard, touch, zoom/reflow, screen-reader, focus, error, and dynamic-content flows manually.
 5. Correct native structure first; then add only necessary ARIA/platform semantics.
 6. Retest accessible names, roles, states, focus, announcements, reading order, and singular/plural localized text.

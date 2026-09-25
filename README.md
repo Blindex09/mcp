@@ -22,12 +22,13 @@ c:\skills\                    ← 1300+ skills (cada uma com SKILL.md)
 
 c:\mcp\                       ← MCP Server
      ├── mcp_server.py          ← Servidor principal (32 tools, FastMCP)
-     ├── sampling.py            ← Ponte para o modelo do cliente (MCP sampling)
+     ├── sampling.py            ← Quem faz o julgamento: modelo do cliente (sampling) ou modelo de apoio (env)
      ├── a11y/                  ← Acessibilidade embutida (guias, exemplos, auditoria axe)
      ├── sync_cursor_rules.py   ← Sincroniza CLAUDE.md → Cursor User Rules
      ├── setup.py               ← Configura clientes automaticamente
      ├── pyproject.toml         ← Dependências (uv)
      ├── requirements.txt       ← Dependências (pip)
+     ├── tests/                 ← 92 testes (inclui navegador real para a auditoria)
      └── README.md
 ```
 
@@ -47,6 +48,8 @@ componentes, template React de IA acessivel) e adiciona 8 ferramentas + recursos
 | `a11y_tab_order` | Ordem de foco por Tab, nome acessivel e indicador de foco |
 
 Recursos: `a11y://reference/{name}` e `a11y://example/{name}`.
+Os guias e exemplos vivem em `a11y/content/` (origem: repo `web-accessibility`); o `SKILL.md` de lá explica como usar cada ferramenta.
+Escolher o que ler é feito por modelo (`a11y_find`); as ferramentas de medição só reportam fatos.
 Auditoria exige `pip install playwright` + `python -m playwright install chromium`.
 So navega em http/https, com timeout de 90 s. axe-core 4.12.1 (MPL-2.0) vendorizado em `a11y/vendor/`.
 

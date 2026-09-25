@@ -99,16 +99,19 @@ async def test_unexpected_error_becomes_state_not_crash(prov, monkeypatch):
 
 
 async def test_state_is_checking_while_only_verifying_and_installing_only_when_downloading(prov, monkeypatch):
-    seen: list[str] = []
-    fake_env(monkeypatch, importable=[True], chromium=[True])
-    orig = pv.Provisioner._provision
+    seen: list[tuple[str, str]] = []
+    fake_env(monkeypatch, importable=[True], chromium=[False, True])
 
-    async def spy(self):
-        task = asyncio.create_task(orig(self))
-        await asyncio.sleep(0)
-        seen.append(self.state)  # logo no inicio: so verificando
-        await task
+    async def present():
+        seen.append(("verificando", prov.state))
+        return len(seen) > 1  # a 1a checagem diz que falta; a 2a (depois de instalar) diz que ha
 
-    monkeypatch.setattr(pv.Provisioner, "_provision", spy)
+    async def run(*cmd, timeout):
+        seen.append(("baixando", prov.state))
+        return 0, "ok"
+
+    monkeypatch.setattr(pv, "chromium_present", present)
+    monkeypatch.setattr(pv, "_run", run)
     await prov.ensure()
-    assert seen == ["checking"] and prov.state == "ready"
+    assert seen[0] == ("verificando", "checking")  # so olhando: nao diz que esta instalando
+    assert ("baixando", "installing") in seen and prov.state == "ready"

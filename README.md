@@ -1,244 +1,97 @@
-# 🎯 Skills MCP Server - Global Command Integration
+# ♿ Accessibility MCP Server
 
-> Expõe 1334 skills como ferramentas MCP globais em Claude Desktop, VSCode, Cursor e qualquer cliente compatível
+Servidor MCP **somente de acessibilidade** (web, mobile e interfaces de IA/agentes) para Claude Desktop, VS Code, Cursor e qualquer cliente MCP.
+
+Ele dá à IA três coisas: **conhecimento** (guias e exemplos de acessibilidade), **escolha inteligente** do que ler para cada tarefa e **ferramentas de medição** que auditam uma página de verdade.
 
 ## O que faz
 
-- 📚 Descobre automaticamente todas as skills em `c:\skills` (ao vivo, sem rebuild)
-- 🗂️ Categoriza 1334 skills em 18 categorias com comandos dedicados por categoria
-- 🔧 Expõe 24 ferramentas MCP: 18 de categoria + 6 gerais (incluindo busca semântica BM25)
-- 🌐 Funciona em Claude Desktop, VSCode Copilot, Cursor, GitHub Copilot
+- 📚 **Base de conhecimento embutida** (`a11y/content/`): 24 guias (WCAG 2.2, ARIA, NVDA/VoiceOver/TalkBack, checklist de auditoria, IA conversacional acessível, mobile, frameworks, XR…), 42 exemplos de componentes acessíveis (modal, abas, combobox, treegrid, chat de IA…) e o template React (10 arquivos) de chat/agente acessível.
+- 🧠 **Escolha pelo modelo**: `a11y_find` recebe a tarefa em linguagem natural, em qualquer idioma, e o modelo escolhe os guias e exemplos certos pelo sentido. Nada de palavra-chave, regex ou ranking lexical.
+- 🔬 **Medição de fatos**: contraste WCAG, auditoria axe-core num navegador real, árvore de acessibilidade e ordem de foco por teclado.
 
-## Arquitetura
+## Ferramentas (9)
 
-```
-c:\skills\                    ← 1300+ skills (cada uma com SKILL.md)
-         ├── agent-customization/
-         │   └── SKILL.md
-         ├── react-best-practices/
-         │   └── SKILL.md
-         └── ...
+| Ferramenta | O que faz |
+|---|---|
+| `a11y_list_content` | Catálogo (resumo + seções) de todos os guias e exemplos |
+| `a11y_find(task)` | O modelo escolhe guias/exemplos para a tarefa |
+| `a11y_get_reference(name, section)` | Lê um guia inteiro ou só uma seção |
+| `a11y_get_example(name)` | Devolve o código de um exemplo de componente |
+| `a11y_get_template(name)` | Arquivo do template React de chat/agente acessível (`assets/…`) ou dos scripts de auditoria (`scripts/…`) |
+| `a11y_contrast(foreground, background, size_px, bold)` | Razão de contraste WCAG e aprovação AA/AAA |
+| `a11y_audit(url \| html, level)` | Auditoria axe-core (A/AA/AAA) em Chromium headless; violações por impacto |
+| `a11y_aria_snapshot(url \| html)` | Árvore de acessibilidade: o que o leitor de tela recebe |
+| `a11y_tab_order(url \| html, max_steps)` | Ordem de foco com Tab, nome acessível e indicador de foco |
 
-c:\mcp\                       ← MCP Server
-     ├── mcp_server.py          ← Servidor principal (24 tools, FastMCP)
-     ├── categorize_skills.py   ← Utilitário de auditoria de categorias
-     ├── categories.json        ← Snapshot de categorias para auditoria
-     ├── sync_cursor_rules.py   ← Sincroniza CLAUDE.md → Cursor User Rules
-     ├── setup.py               ← Configura clientes automaticamente
-     ├── pyproject.toml         ← Dependências (uv)
-     ├── requirements.txt       ← Dependências (pip)
-     └── README.md
-```
+Recursos MCP: `a11y://reference/{name}` e `a11y://example/{name}`.
 
-## Setup - 3 passos rápidos
+Fluxo típico: `a11y_find("modal acessível")` → `a11y_get_reference` / `a11y_get_example` → implementar → `a11y_audit` + `a11y_tab_order` + `a11y_aria_snapshot` → testar à mão com teclado e leitor de tela (o automático cobre só parte do WCAG).
 
-### 1️⃣ Instalar dependências
+## Como o julgamento funciona
+
+Toda decisão de "isso serve para aquilo" é de um modelo; o servidor só valida fatos objetivos (o nome devolvido existe no catálogo?). Quem responde:
+
+1. **O modelo do próprio cliente**, via MCP sampling.
+2. Senão, um **modelo de apoio** configurado por ambiente:
+
+| Variável | Uso |
+|---|---|
+| `ANTHROPIC_API_KEY` | ativa o backend Anthropic (lida só do ambiente, nunca logada) |
+| `SKILLS_MCP_BACKEND` | `anthropic` ou `ollama` (opcional; senão detecta pelo que estiver configurado) |
+| `SKILLS_MCP_MODEL` | id do modelo (Anthropic: padrão `claude-haiku-4-5-20251001`; Ollama: obrigatório) |
+| `OLLAMA_HOST` | endereço do Ollama (padrão `http://localhost:11434`) |
+
+Exemplo no JSON do cliente: `"env": {"ANTHROPIC_API_KEY": "..."}` na entrada do servidor.
+
+3. Sem nenhum dos dois, `a11y_find` avisa como configurar e devolve o catálogo para o modelo que chamou escolher. Não há plano B por palavra-chave.
+
+As ferramentas de medição (`a11y_contrast`, `a11y_audit`, `a11y_aria_snapshot`, `a11y_tab_order`) não usam modelo: reportam fatos, e interpretar e corrigir fica com quem chamou.
+
+## Instalação
 
 ```bash
-# Recomendado (uv)
 cd c:\mcp
-uv sync
-
-# Alternativa (pip)
-pip install -r requirements.txt
+pip install -r requirements.txt            # ou: uv sync
+python -m playwright install chromium      # uma vez; só para auditoria/árvore/foco no navegador
+python setup.py                            # registra no Claude Desktop e Cursor (entrada "accessibility")
 ```
 
-### 2️⃣ Executar setup
+Reinicie o Claude Desktop / Cursor. Para VS Code, o `setup.py` imprime o trecho para o `settings.json`. O `setup.ps1` faz tudo isso no Windows.
+
+Dependências: `mcp>=1.2,<2` (o mcp 2.x renomeou o `FastMCP`), `playwright`. O `httpx` já vem com o `mcp`.
+
+## Segurança
+
+- Navegação só em `http://` e `https://` (nunca `file:`, `javascript:`, `chrome:`), navegador descartável por chamada e timeout de 90 s.
+- Leitura de guias/exemplos só por nome do catálogo — texto do cliente nunca vira caminho de arquivo.
+- Chave de API só do ambiente, fora de logs.
+
+## Estrutura
+
+```
+c:\mcp\
+├── mcp_server.py        ← servidor FastMCP (entrada)
+├── sampling.py          ← quem faz o julgamento: modelo do cliente ou modelo de apoio
+├── a11y/
+│   ├── tools.py         ← as 8 ferramentas e os recursos MCP
+│   ├── audit.py         ← contraste, axe-core, árvore de acessibilidade, ordem de foco
+│   ├── content_index.py ← catálogo dos guias/exemplos (leitura só por nome)
+│   ├── content/         ← guias, exemplos, template React (origem: repo web-accessibility)
+│   └── vendor/          ← axe-core 4.12.1 (MPL-2.0)
+├── tests/               ← 44 testes (inclui navegador real)
+├── setup.py / setup.ps1 / mcp.json / test.py
+└── requirements.txt / pyproject.toml
+```
+
+Os guias e exemplos são editáveis em `a11y/content/`; o `SKILL.md` de lá explica como usar cada ferramenta.
+
+## Desenvolvimento
 
 ```bash
-cd c:\mcp
-python setup.py
+python -m pytest -q          # 44 testes
+ruff check a11y sampling.py mcp_server.py tests
+mypy a11y sampling.py mcp_server.py --ignore-missing-imports
 ```
 
-Ou usando o script PowerShell (recomendado para Windows):
-
-```powershell
-.\setup.ps1
-```
-
-Isso configura automaticamente:
-- ✅ Claude Desktop (`%APPDATA%\Claude\claude_desktop_config.json`)
-- ✅ Cursor (`~\.cursor\mcp.json`)
-- 📝 Exibe instruções para VSCode
-
-### 3️⃣ Reiniciar as aplicações
-
-Reinicie Claude Desktop, Cursor e/ou VSCode para carregar o servidor.
-
----
-
-## Ferramentas disponíveis (24 total)
-
-### Por categoria (18 tools)
-
-Cada tool lista **somente** as skills da categoria, com ícone e contagem.
-
-| Tool | Categoria | Skills |
-|------|-----------|--------|
-| `list_accessibility_skills` | ♿ Acessibilidade | 9 |
-| `list_ai_skills` | 🤖 AI & Agentes | 191 |
-| `list_backend_skills` | ⚙️ Backend | 123 |
-| `list_frontend_skills` | 🎨 Frontend | 122 |
-| `list_devops_skills` | 🚀 DevOps & Cloud | 238 |
-| `list_security_skills` | 🔒 Segurança | 89 |
-| `list_testing_skills` | ✅ Testing & QA | 114 |
-| `list_mobile_skills` | 📱 Mobile | 29 |
-| `list_data_skills` | 📊 Data Engineering | 38 |
-| `list_automation_skills` | 🔄 Automação | 171 |
-| `list_architecture_skills` | 🏗️ Arquitetura | 79 |
-| `list_language_skills` | 💻 Linguagens | 75 |
-| `list_content_skills` | 📝 Conteúdo & Marketing | 97 |
-| `list_gamedev_skills` | 🎮 GameDev | 8 |
-| `list_business_skills` | 💼 Negócios & Startups | 53 |
-| `list_web3_skills` | 🔗 Web3 & Blockchain | 8 |
-| `list_health_skills` | 🏥 Saúde & Bem-estar | 17 |
-| `list_legal_skills` | ⚖️ Jurídico & Legal | 9 |
-
-> Todas aceitam parâmetro `limit: int = 0` (0 = retorna todas da categoria)
-
-### Gerais (6 tools)
-
-| Tool | O que faz |
-|------|-----------|
-| `invoke_skill(skill_name, params)` | Lê e retorna o SKILL.md completo de uma skill |
-| `search_skills(query)` | Busca por substring no nome/categoria |
-| `semantic_search_skills(query, top_k)` | **Busca semântica BM25** — entende contexto, multi-token, sinônimos parciais |
-| `list_categories()` | Lista todas as categorias disponíveis com contagens |
-| `list_all_skills(page, per_page)` | Lista todas as 1334 skills com paginação |
-| `refresh_skills()` | Força reload imediato do cache (sem restart) |
-
----
-
-## Exemplos de uso
-
-```
-# Listar skills de AI
-list_ai_skills()
-→ 🤖 AI & Agentes — 129 skills: agent-evaluation, agent-memory-mcp, ...
-
-# Invocar uma skill específica
-invoke_skill("react-best-practices", "como usar hooks corretamente?")
-→ [retorna conteúdo completo do SKILL.md]
-
-# Buscar por palavra
-search_skills("docker")
-→ [lista todas as skills com "docker" no nome]
-
-# Ver todas as categorias
-list_categories()
-→ ♿ accessibility (8) | 🤖 ai (129) | ⚙️ backend (80) | ...
-```
-
----
-
-## Categorização de skills
-
-As skills são categorizadas automaticamente pelo nome da pasta usando regras de tokens, prefixos e substrings definidas em `mcp_server.py` (dict `CATEGORY_RULES`).
-
-Para verificar categorias após adicionar novas skills:
-
-```bash
-python categorize_skills.py
-```
-
-> A categorização em runtime é feita pelo servidor diretamente — o `categories.json` é apenas um snapshot para auditoria.
-
-**Distribuição atual (março 2026):**
-- 🚀 devops: 233 | 🤖 ai: 168 | 🔄 automation: 153 | ✅ testing: 109
-- ⚙️ backend: 94 | 🎨 frontend: 91 | 📝 content: 88 | 🔒 security: 81
-- 💻 language: 63 | 🏗️ architecture: 60 | 💼 business: 33 | 📱 mobile: 27
-- 📊 data: 22 | ♿ accessibility: 9 | 🔗 web3: 8 | 🎮 gamedev: 7
-- 📦 other: 298 (skills meta/pessoais sem categoria técnica)
-- **77.7% das skills categorizadas em categorias específicas**
-
----
-
-## Estrutura de uma SKILL.md
-
-```markdown
-# Nome da Skill
-
-Descrição brevíssima do que a skill faz.
-
-## Uso
-
-Como usar, exemplos, contexto...
-```
-
-O servidor lê o título (H1), extrai metadados e usa o conteúdo completo como contexto.
-
----
-
-## Adicionar uma nova skill
-
-1. Crie a pasta: `c:\skills\{nome-da-skill}\`
-2. Crie o arquivo: `c:\skills\{nome-da-skill}\SKILL.md`
-3. Rode `python categorize_skills.py` para atualizar o cache de categorias
-4. O servidor já descobre a skill na próxima chamada (sem restart)
-
----
-
-## Troubleshooting
-
-### Skills não aparecem
-```bash
-python -c "from mcp_server import get_skills; print(len(get_skills()))"
-```
-
-### Claude Desktop / Cursor não conecta
-1. Verifique `uv` no PATH: `uv --version`
-2. Verifique o config: `%APPDATA%\Claude\claude_desktop_config.json`
-3. Reinicie completamente o cliente
-
-### VSCode não reconhece as tools
-- Verifique `settings.json` (ver output do `python setup.py`)
-- Reinicie o VSCode
-
----
-
-## Slash Commands por Cliente
-
-| Cliente | Sintaxe | Status |
-|---------|---------|--------|
-| Claude Desktop | `/ai`, `/backend`, `/oliverplan` | ✅ nativo |
-| Claude Code | `/ai`, `/backend`, `/oliverplan` | ✅ nativo |
-| VS Code Copilot | `/skills.ai`, `/skills.backend`, `/skills.oliverplan` | ✅ funciona |
-| Cursor | não suporta MCP Prompts | ❌ use linguagem natural |
-
-## Memória Global Dinâmica
-
-| Cliente | Mecanismo | Como atualizar |
-|---------|-----------|----------------|
-| Claude Desktop / Code | `~/.claude/CLAUDE.md` | edite e salve |
-| VS Code Copilot | `~/.claude/CLAUDE.md` (auto-detectado) | edite e salve |
-| Cursor | `Cursor Settings → Rules` (SQLite) | `python c:/mcp/sync_cursor_rules.py` |
-
-### Sincronizar regras com o Cursor
-
-```bash
-# Ver o que será gravado (dry-run)
-python c:/mcp/sync_cursor_rules.py --show
-
-# Sincronizar (feche o Cursor antes)
-python c:/mcp/sync_cursor_rules.py
-
-# Limpar
-python c:/mcp/sync_cursor_rules.py --clear
-```
-
----
-
-## Links
-
-- 📖 [MCP Spec 2025-11-25](https://modelcontextprotocol.io/specification/2025-11-25)
-- 🚀 [FastMCP Docs](https://gofastmcp.com)
-- 🧩 [VSCode MCP Guide](https://code.visualstudio.com/docs/copilot/chat/mcp-servers)
-- 🖱️ [Cursor MCP Guide](https://cursor.com/docs/context/mcp)
-
----
-
-**Criado:** 26 de março de 2026  
-**Atualizado:** 29 de março de 2026  
-**Versão:** 2.2  
-**Skills:** 1334 | **Categorias:** 18 | **Tools MCP:** 24  
-**Status:** ✅ Pronto para produção
+Os testes nunca chamam modelo real: interceptam o HTTP e usam um cliente simulado.

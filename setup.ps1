@@ -1,7 +1,7 @@
-# MCP Skills Server - Windows Setup Script
+# Accessibility MCP Server - Windows Setup Script
 # Execução: .\setup.ps1
 
-Write-Host "🚀 MCP Skills Server - Setup para Windows`n" -ForegroundColor Cyan
+Write-Host "🚀 Accessibility MCP Server - Setup para Windows`n" -ForegroundColor Cyan
 
 # Verifica Python
 Write-Host "📋 Verificando Python..." -ForegroundColor Yellow
@@ -33,6 +33,6 @@ python "$PSScriptRoot\setup.py" | ForEach-Object { Write-Host $_ }
 Write-Host "`n📝 Próximos passos:" -ForegroundColor Cyan
 Write-Host "  1. Feche Claude Desktop completamente" -ForegroundColor White
 Write-Host "  2. Abra novamente Claude Desktop" -ForegroundColor White
-Write-Host "  3. As skills estarão disponíveis!" -ForegroundColor White
+Write-Host "  3. As ferramentas de acessibilidade estarão disponíveis!" -ForegroundColor White
 
 Write-Host "`n✨ Setup concluído!" -ForegroundColor Green

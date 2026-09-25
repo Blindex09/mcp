@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Native Dialog Modal — recommended for new projects (2026)</title>
+  <style>
+    dialog { border-radius: 8px; border: 1px solid #ccc; padding: 1.5rem; max-width: 90vw; }
+    dialog::backdrop { background: rgba(0,0,0,0.5); }
+    .dialog-actions { display: flex; gap: 0.5rem; justify-content: flex-end; padding: 0; margin: 1rem 0 0; }
+  </style>
+</head>
+<body>
+
+  <button type="button" id="opener">Delete project</button>
+
+  <!-- <dialog> opened with .showModal() gives you, for free:
+       - top-layer rendering (above every z-index and overflow:hidden ancestor)
+       - automatic focus trap (Tab/Shift+Tab cycle inside)
+       - Escape closes and dispatches a 'close' event
+       - inert background (clicks and tab focus can't escape)
+       - ::backdrop pseudo-element for dimming
+       - correct role="dialog" semantics -->
+  <dialog id="confirm-delete" aria-labelledby="confirm-delete-title" aria-describedby="confirm-delete-desc">
+    <form method="dialog">
+      <h2 id="confirm-delete-title">Delete this project?</h2>
+      <p id="confirm-delete-desc">This removes all environments and cannot be undone.</p>
+      <div class="dialog-actions">
+        <button type="submit" value="cancel">Cancel</button>
+        <button type="submit" value="confirm" autofocus>Delete</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    const opener = document.getElementById('opener');
+    const dlg = document.getElementById('confirm-delete');
+
+    opener.addEventListener('click', () => dlg.showModal());
+
+    // 'close' event fires on Escape and on form method="dialog" submit.
+    dlg.addEventListener('close', () => {
+      const result = dlg.returnValue; // "cancel" or "confirm"
+      if (result === 'confirm') {
+        // run the delete; focus is automatically returned to the opener
+        console.log('Confirmed deletion');
+      }
+      // No manual focus restoration needed — the browser does it.
+    });
+  </script>
+
+</body>
+</html>

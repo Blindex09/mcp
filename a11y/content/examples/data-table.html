@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accessible Data Table (2026)</title>
+  <style>
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+    th[scope="col"] { background: #f5f5f5; }
+    caption { caption-side: top; font-weight: 600; padding: 0.5rem; text-align: left; }
+    th button { all: unset; cursor: pointer; display: flex; gap: 0.25rem; width: 100%; }
+    th button:focus-visible { outline: 3px solid #1a73e8; outline-offset: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- =========================================================== -->
+<!-- Simple accessible table: <caption>, <th scope>, <thead>      -->
+<!-- Screen readers announce "Q1, North, 45,000 dollars" instead  -->
+<!-- of a flat stream of numbers. WCAG: 1.3.1.                     -->
+<!-- =========================================================== -->
+<table>
+  <caption>Subscription plans — features by tier</caption>
+  <thead>
+    <tr>
+      <th scope="col">Feature</th>
+      <th scope="col">Basic ($9/mo)</th>
+      <th scope="col">Pro ($29/mo)</th>
+      <th scope="col">Enterprise (custom)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- scope="row" lets screen readers announce the row header with each cell -->
+    <tr>
+      <th scope="row">Users</th>
+      <td>1</td>
+      <td>5</td>
+      <td>Unlimited</td>
+    </tr>
+    <tr>
+      <th scope="row">Storage</th>
+      <td>10 GB</td>
+      <td>100 GB</td>
+      <td>Unlimited</td>
+    </tr>
+    <tr>
+      <th scope="row">Support</th>
+      <td>Email</td>
+      <td>Priority email</td>
+      <td>24/7 phone</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- =========================================================== -->
+<!-- Sortable table: aria-sort on the column header + a live      -->
+<!-- region announces the change. Sort controls are real <button>. -->
+<!-- WCAG: 1.3.1, 2.1.1, 4.1.2.                                   -->
+<!-- =========================================================== -->
+<table>
+  <caption id="sort-caption">
+    Employee directory
+    <span class="sr-only">Column headers are buttons; activate to sort.</span>
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col" aria-sort="ascending">
+        <button type="button" aria-describedby="sort-caption">
+          Name <span aria-hidden="true">▲</span>
+        </button>
+      </th>
+      <th scope="col" aria-sort="none">
+        <button type="button" aria-describedby="sort-caption">
+          Salary <span aria-hidden="true">↕</span>
+        </button>
+      </th>
+    </tr>
+  </thead>
+  <tbody id="sort-body">
+    <tr><th scope="row">Ada</th><td>90,000</td></tr>
+    <tr><th scope="row">Lin</th><td>110,000</td></tr>
+    <tr><th scope="row">Grace</th><td>85,000</td></tr>
+  </tbody>
+</table>
+
+<!-- Live region announces sort changes. Exists in DOM before changes. -->
+<div id="sort-announcer" aria-live="polite" class="sr-only"></div>
+
+<script>
+  function sortTable(colIndex, direction, headers) {
+    const tbody = document.getElementById('sort-body');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort((a, b) => {
+      const av = a.children[colIndex].textContent;
+      const bv = b.children[colIndex].textContent;
+      return direction === 'ascending' ? av.localeCompare(bv, undefined, { numeric: true }) : bv.localeCompare(av, undefined, { numeric: true });
+    });
+    rows.forEach((r) => tbody.appendChild(r));
+
+    // Reset all headers; set the active one.
+    headers.forEach((h) => h.setAttribute('aria-sort', 'none'));
+    headers[colIndex].setAttribute('aria-sort', direction);
+
+    // Announce.
+    document.getElementById('sort-announcer').textContent =
+      `Table sorted by ${headers[colIndex].textContent.trim()}, ${direction}`;
+  }
+</script>
+
+<!-- =========================================================== -->
+<!-- Complex tables (multi-level headers): use id + headers        -->
+<!-- attributes instead of scope when headers span columns/rows.   -->
+<!-- =========================================================== -->
+<!--
+<table>
+  <caption>Quarterly revenue by region</caption>
+  <thead>
+    <tr>
+      <th rowspan="2" id="region" scope="col">Region</th>
+      <th colspan="2" id="h1" scope="colgroup">H1 2026</th>
+      <th colspan="2" id="h2" scope="colgroup">H2 2026</th>
+    </tr>
+    <tr>
+      <th id="q1" headers="h1" scope="col">Q1</th>
+      <th id="q2" headers="h1" scope="col">Q2</th>
+      <th id="q3" headers="h2" scope="col">Q3</th>
+      <th id="q4" headers="h2" scope="col">Q4</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">North</th>
+      <td headers="region q1">45,000</td>
+      <td headers="region q2">52,000</td>
+      <td headers="region q3">48,000</td>
+      <td headers="region q4">60,000</td>
+    </tr>
+  </tbody>
+</table>
+-->
+
+<!-- =========================================================== -->
+<!-- Layout tables: add role="presentation" so screen readers     -->
+<!-- ignore table structure. (Prefer CSS Grid/Flexbox instead.)   -->
+<!-- =========================================================== -->
+<!-- <table role="presentation"> ... </table> -->
+
+</body>
+</html>

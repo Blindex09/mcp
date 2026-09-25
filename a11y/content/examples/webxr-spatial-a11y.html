@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible 3D Canvas &amp; WebXR Sonification Example</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; background: #f8f9fa; }
+    .canvas-container { position: relative; width: 100%; max-width: 600px; height: 350px; border: 1px solid #ccc; background: #111; }
+    canvas { width: 100%; height: 100%; display: block; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+  </style>
+</head>
+<body>
+
+  <h1>Accessible 3D WebXR &amp; Data Sonification</h1>
+
+  <div class="canvas-container" role="region" aria-label="Interactive 3D Data Visualization">
+    <!-- Visual 3D Canvas -->
+    <canvas id="scene-3d-canvas" aria-hidden="true"></canvas>
+
+    <!-- Keyboard Navigation Roving Tabindex Overlay for Screen Readers -->
+    <div id="spatial-nodes" role="group" aria-label="3D Data Nodes">
+      <button type="button" tabindex="0" data-value="20" aria-label="Node A: Value 20">Node A (20)</button>
+      <button type="button" tabindex="-1" data-value="50" aria-label="Node B: Value 50">Node B (50)</button>
+      <button type="button" tabindex="-1" data-value="85" aria-label="Node C: Value 85">Node C (85)</button>
+    </div>
+  </div>
+
+  <!-- Fallback Semantic HTML Table -->
+  <section aria-labelledby="table-fallback-heading">
+    <h2 id="table-fallback-heading">Data Table Fallback</h2>
+    <table class="data-table">
+      <caption>3D Data Node Values</caption>
+      <thead>
+        <tr><th scope="col">Node Name</th><th scope="col">Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Node A</th><td>20</td></tr>
+        <tr><th scope="row">Node B</th><td>50</td></tr>
+        <tr><th scope="row">Node C</th><td>85</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script>
+    // Web Audio API Audio Sonification for pitch feedback
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playFrequency(value) {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      // Map value (0 - 100) to pitch frequency (220Hz - 880Hz)
+      const freq = 220 + (value * 6.6);
+      osc.frequency.value = freq;
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    // Attach focus listeners for sonification
+    document.querySelectorAll('#spatial-nodes button').forEach(btn => {
+      btn.addEventListener('focus', () => {
+        const val = parseFloat(btn.getAttribute('data-value'));
+        playFrequency(val);
+      });
+    });
+  </script>
+
+</body>
+</html>

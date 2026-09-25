@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script para validar o Skills MCP Server antes de usar globalmente
+Test script para validar o Accessibility MCP Server antes de usar globalmente
 """
 
 import sys
@@ -20,7 +20,7 @@ def test_python_version():
 
 def test_dependencies():
     """Verifica se as dependências estão instaladas"""
-    required = ['mcp', 'rank_bm25']
+    required = ['mcp']
     missing = []
     
     for pkg in required:
@@ -37,27 +37,27 @@ def test_dependencies():
     return True
 
 
-def test_skills_discovery():
-    """Testa se as skills podem ser descobertas"""
-    skills_path = Path("c:/skills")
-    
-    if not skills_path.exists():
-        print(f"❌ Pasta de skills não existe: {skills_path}")
-        return False
-    
-    skill_dirs = [d for d in skills_path.iterdir() if d.is_dir() and not d.name.startswith('.')]
-    skill_count = len(skill_dirs)
-    
-    skills_with_md = sum(1 for d in skill_dirs if (d / 'SKILL.md').exists())
-    
-    print(f"✅ Encontradas {skill_count} pastas de skills")
-    print(f"✅ {skills_with_md} delas têm SKILL.md")
-    
-    if skills_with_md == 0:
-        print("⚠️  Nenhuma skill com SKILL.md encontrada!")
-        return False
-    
-    return True
+def test_a11y_content():
+    """Verifica se os guias e exemplos de acessibilidade embutidos estao presentes"""
+    content = Path(__file__).parent / "a11y" / "content"
+    refs = list((content / "references").glob("*.md"))
+    examples = [p for p in (content / "examples").glob("*") if p.is_file()]
+    axe = Path(__file__).parent / "a11y" / "vendor" / "axe.min.js"
+
+    print(f"✅ {len(refs)} guias de referencia" if refs else "❌ Nenhum guia em a11y/content/references")
+    print(f"✅ {len(examples)} exemplos de componentes" if examples else "❌ Nenhum exemplo em a11y/content/examples")
+    print("✅ axe-core vendorizado" if axe.exists() else "❌ a11y/vendor/axe.min.js ausente")
+    return bool(refs) and bool(examples) and axe.exists()
+
+
+def test_browser_optional():
+    """Playwright/Chromium so sao necessarios para a11y_audit, a11y_aria_snapshot e a11y_tab_order"""
+    try:
+        import playwright  # noqa: F401
+        print("✅ playwright instalado (rode 'python -m playwright install chromium' uma vez)")
+    except ImportError:
+        print("⚠️  playwright ausente: as ferramentas de auditoria no navegador nao funcionarao (pip install playwright)")
+    return True  # opcional: nao reprova o setup
 
 
 def test_server_startup():
@@ -82,12 +82,13 @@ def test_server_startup():
 
 
 def main():
-    print("🧪 MCP Skills Server - Test Suite\n")
+    print("🧪 Accessibility MCP Server - Test Suite\n")
     
     tests = [
         ("Python Version", test_python_version),
         ("Dependencies", test_dependencies),
-        ("Skills Discovery", test_skills_discovery),
+        ("Conteudo de acessibilidade", test_a11y_content),
+        ("Navegador (opcional)", test_browser_optional),
         ("Server Startup", test_server_startup),
     ]
     

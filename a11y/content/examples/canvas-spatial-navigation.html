@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canvas Spatial Navigation &amp; PAT Example</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; background: #fafafa; }
+    .canvas-container { position: relative; width: 600px; height: 400px; border: 2px solid #333; background: #0f172a; }
+    canvas { width: 100%; height: 100%; display: block; }
+    /* Parallel Accessible DOM Tree (PAT) overlay buttons */
+    .pat-node {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid #38bdf8;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pat-node:focus-visible {
+      outline: 4px solid #f59e0b;
+      outline-offset: 2px;
+      background: #0284c7;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Canvas Editor with Parallel Accessible DOM Tree (PAT)</h1>
+
+  <p>Use <strong>Arrow keys</strong> for spatial 2D navigation between interactive canvas elements.</p>
+
+  <div class="canvas-container" role="region" aria-label="Interactive Node Graph Editor">
+    <!-- Visual Canvas -->
+    <canvas id="graph-canvas" aria-hidden="true"></canvas>
+
+    <!-- Parallel Accessible DOM Tree (PAT) Overlay -->
+    <div id="pat-tree" role="group" aria-label="Graph Nodes">
+      <button 
+        type="button" 
+        class="pat-node" 
+        style="top: 50px; left: 100px;" 
+        data-x="100" data-y="50"
+        aria-label="Start Node: Input Data"
+        aria-controls="node-2"
+        tabindex="0"
+      >
+        A
+      </button>
+
+      <button 
+        type="button" 
+        class="pat-node" 
+        style="top: 200px; left: 300px;" 
+        data-x="300" data-y="200"
+        aria-label="Process Node: Data Transformer"
+        id="node-2"
+        aria-controls="node-3"
+        tabindex="-1"
+      >
+        B
+      </button>
+
+      <button 
+        type="button" 
+        class="pat-node" 
+        style="top: 320px; left: 500px;" 
+        data-x="500" data-y="320"
+        aria-label="Output Node: Final Result"
+        id="node-3"
+        tabindex="-1"
+      >
+        C
+      </button>
+    </div>
+  </div>
+
+  <!-- WCAG 2.5.7 Dragging Alternative Actions -->
+  <section aria-labelledby="actions-title">
+    <h2 id="actions-title">Node Position Controls (Single-Pointer Alternative)</h2>
+    <button type="button" onclick="moveActiveNode('up')">Move Node Up</button>
+    <button type="button" onclick="moveActiveNode('down')">Move Node Down</button>
+  </section>
+
+  <script>
+    const nodes = Array.from(document.querySelectorAll('.pat-node'));
+
+    // Spatial 2D Navigation (calculates nearest physical coordinate distance)
+    document.getElementById('pat-tree').addEventListener('keydown', (e) => {
+      const active = document.activeElement;
+      if (!active || !active.matches('.pat-node')) return;
+
+      const currentX = parseFloat(active.getAttribute('data-x'));
+      const currentY = parseFloat(active.getAttribute('data-y'));
+
+      let bestCandidate = null;
+      let minDistance = Infinity;
+
+      nodes.forEach(candidate => {
+        if (candidate === active) return;
+        const cx = parseFloat(candidate.getAttribute('data-x'));
+        const cy = parseFloat(candidate.getAttribute('data-y'));
+
+        let isValidDirection = false;
+        if (e.key === 'ArrowRight' && cx > currentX) isValidDirection = true;
+        if (e.key === 'ArrowLeft' && cx < currentX) isValidDirection = true;
+        if (e.key === 'ArrowDown' && cy > currentY) isValidDirection = true;
+        if (e.key === 'ArrowUp' && cy < currentY) isValidDirection = true;
+
+        if (isValidDirection) {
+          const dist = Math.hypot(cx - currentX, cy - currentY);
+          if (dist < minDistance) {
+            minDistance = dist;
+            bestCandidate = candidate;
+          }
+        }
+      });
+
+      if (bestCandidate) {
+        e.preventDefault();
+        active.setAttribute('tabindex', '-1');
+        bestCandidate.setAttribute('tabindex', '0');
+        bestCandidate.focus();
+      }
+    });
+
+    function moveActiveNode(direction) {
+      const active = document.activeElement;
+      if (!active || !active.matches('.pat-node')) return;
+      let y = parseFloat(active.getAttribute('data-y'));
+      y = direction === 'up' ? y - 20 : y + 20;
+      active.setAttribute('data-y', y);
+      active.style.top = `${y}px`;
+    }
+  </script>
+
+</body>
+</html>

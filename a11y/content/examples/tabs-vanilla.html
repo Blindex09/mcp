@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accessible Tabs — roving tabindex (vanilla JS)</title>
+  <style>
+    [role="tablist"] { display: flex; gap: 0.25rem; border-bottom: 1px solid #ccc; }
+    [role="tab"] {
+      padding: 0.5rem 1rem; border: 1px solid #ccc; border-bottom: none;
+      background: #f5f5f5; cursor: pointer; border-radius: 4px 4px 0 0;
+    }
+    [role="tab"][aria-selected="true"] { background: #fff; font-weight: 600; }
+    /* Only the active tab is in the tab order; others use tabindex="-1" (roving tabindex) */
+    [role="tab"]:focus-visible { outline: 3px solid #1a73e8; outline-offset: 2px; }
+    [role="tabpanel"] { padding: 1rem; border: 1px solid #ccc; border-top: none; }
+    [role="tabpanel"][hidden] { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Tabs: role="tablist" contains role="tab" elements.
+       Each tab controls a role="tabpanel" via aria-controls (id match).
+       aria-labelledby on the panel points back to the tab for an accessible name. -->
+  <div role="tablist" aria-label="Account sections">
+    <button type="button" role="tab" id="tab-profile" aria-controls="panel-profile" aria-selected="true" tabindex="0">
+      Profile
+    </button>
+    <button type="button" role="tab" id="tab-security" aria-controls="panel-security" aria-selected="false" tabindex="-1">
+      Security
+    </button>
+    <button type="button" role="tab" id="tab-billing" aria-controls="panel-billing" aria-selected="false" tabindex="-1">
+      Billing
+    </button>
+  </div>
+
+  <div role="tabpanel" id="panel-profile" aria-labelledby="tab-profile">
+    <p>Profile settings go here.</p>
+  </div>
+  <div role="tabpanel" id="panel-security" aria-labelledby="tab-security" hidden>
+    <p>Security settings go here.</p>
+  </div>
+  <div role="tabpanel" id="panel-billing" aria-labelledby="tab-billing" hidden>
+    <p>Billing settings go here.</p>
+  </div>
+
+  <script>
+    const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+    const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+
+    function activateTab(tab) {
+      // Deselect all tabs; hide all panels
+      tabs.forEach(t => {
+        t.setAttribute('aria-selected', 'false');
+        t.setAttribute('tabindex', '-1');
+      });
+      panels.forEach(p => p.setAttribute('hidden', ''));
+
+      // Select this tab; show its panel; move focus (roving tabindex)
+      tab.setAttribute('aria-selected', 'true');
+      tab.setAttribute('tabindex', '0');
+      document.getElementById(tab.getAttribute('aria-controls')).removeAttribute('hidden');
+      tab.focus();
+    }
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => activateTab(tab));
+      tab.addEventListener('keydown', (e) => {
+        let newIndex = null;
+        // Arrow keys move between tabs and WRAP (per WAI-ARIA APG tabs pattern)
+        if (e.key === 'ArrowRight') newIndex = (i + 1) % tabs.length;
+        else if (e.key === 'ArrowLeft') newIndex = (i - 1 + tabs.length) % tabs.length;
+        else if (e.key === 'Home') newIndex = 0;
+        else if (e.key === 'End') newIndex = tabs.length - 1;
+        if (newIndex !== null) {
+          e.preventDefault();
+          activateTab(tabs[newIndex]);
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

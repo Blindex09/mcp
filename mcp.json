@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "skills": {
+    "accessibility": {
       "command": "uv",
       "args": ["--directory", "c:\\mcp", "run", "mcp_server.py"]
     }

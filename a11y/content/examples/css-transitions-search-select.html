@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 Emerging Web Features Accessibility Examples</title>
+  <style>
+    /* Baseline accessible styles */
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+      margin: 2rem;
+      color: #1a1a1a;
+      background: #fafafa;
+    }
+
+    :focus-visible {
+      outline: 3px solid #005fcc;
+      outline-offset: 2px;
+    }
+
+    /* 1. CSS @starting-style & transition-behavior: allow-discrete for <dialog> */
+    dialog {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 500px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      
+      /* Animation properties */
+      opacity: 0;
+      transform: translateY(-20px);
+      display: none;
+      transition: 
+        opacity 0.3s ease, 
+        transform 0.3s ease, 
+        display 0.3s allow-discrete, 
+        overlay 0.3s allow-discrete;
+    }
+
+    dialog[open] {
+      opacity: 1;
+      transform: translateY(0);
+      display: block;
+    }
+
+    @starting-style {
+      dialog[open] {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+    }
+
+    /* Backdrop animation */
+    dialog::backdrop {
+      background-color: rgba(0, 0, 0, 0);
+      transition: background-color 0.3s allow-discrete, display 0.3s allow-discrete;
+    }
+
+    dialog[open]::backdrop {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    @starting-style {
+      dialog[open]::backdrop {
+        background-color: rgba(0, 0, 0, 0);
+      }
+    }
+
+    /* 2. Search container styles */
+    search {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+    }
+
+    /* 3. Action toolbar (role="toolbar") for contextual quick-actions */
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 1rem;
+      background: white;
+      margin-bottom: 1rem;
+    }
+
+    .action-toolbar {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>2026 Modern Web Accessibility Examples</h1>
+
+  <!-- 1. HTML5 Native <search> Element -->
+  <section aria-labelledby="search-heading">
+    <h2 id="search-heading">1. Native Search Landmark (&lt;search&gt;)</h2>
+    <search>
+      <label for="site-search" class="sr-only">Search documentation</label>
+      <input type="search" id="site-search" name="q" placeholder="Search 2026 standards...">
+      <button type="submit">Search</button>
+    </search>
+  </section>
+
+  <!-- 2. Accessible Native Dialog with CSS Entry/Exit Animations -->
+  <section aria-labelledby="dialog-heading">
+    <h2 id="dialog-heading">2. Top-Layer &lt;dialog&gt; with @starting-style</h2>
+    <button type="button" commandfor="modal-demo" command="show-modal">Open Accessible Dialog</button>
+
+    <dialog id="modal-demo" aria-labelledby="modal-title" aria-describedby="modal-desc">
+      <h3 id="modal-title">Top-Layer Animated Modal</h3>
+      <p id="modal-desc">
+        This modal uses native <code>&lt;dialog&gt;</code> top-layer rendering combined with 
+        <code>@starting-style</code> and <code>transition-behavior: allow-discrete</code>. 
+        It animates entry and exit smoothly without breaking screen reader focus contracts or abrupt DOM removal.
+      </p>
+      <button type="button" commandfor="modal-demo" command="close">Close Modal</button>
+    </dialog>
+  </section>
+
+  <!-- 3. Contextual Quick-Actions Toolbar (role="toolbar") -->
+  <section aria-labelledby="actions-heading">
+    <h2 id="actions-heading">3. Contextual Quick Actions (role="toolbar")</h2>
+
+    <!-- No "aria-actions" attribute exists in any ARIA spec — a real role="toolbar"
+         placed inside the item is all that's needed to associate quick actions with it. -->
+    <div class="card" id="document-item-1">
+      <h3>Annual Performance Report 2026.pdf</h3>
+      <p>Uploaded on July 30, 2026. Status: Verified WCAG 2.2 AA.</p>
+
+      <!-- Associated quick actions toolbar -->
+      <div id="doc-actions-1" class="action-toolbar" role="toolbar" aria-label="Actions for Annual Compliance Report">
+        <button type="button" aria-label="Download Annual Compliance Report">Download</button>
+        <button type="button" aria-label="Share Annual Compliance Report">Share</button>
+        <button type="button" aria-label="Delete Annual Compliance Report">Delete</button>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

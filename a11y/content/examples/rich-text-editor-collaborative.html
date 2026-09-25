@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collaborative Editor — Experimental WAI-ARIA 1.3 Example</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; background: #fdfdfd; }
+    .editor-wrapper { max-width: 800px; border: 1px solid #ccc; border-radius: 6px; background: white; }
+    [role="toolbar"] { display: flex; gap: 0.5rem; padding: 0.5rem; background: #f0f0f0; border-bottom: 1px solid #ccc; }
+    [role="toolbar"] button { padding: 0.4rem 0.8rem; font-weight: bold; background: white; border: 1px solid #aaa; cursor: pointer; }
+    [role="toolbar"] button:focus-visible { outline: 3px solid #005fcc; }
+    .editor-surface { min-height: 200px; padding: 1rem; outline: none; }
+    .editor-surface:focus-visible { outline: 2px solid #005fcc; }
+    [role="suggestion"] { background: #e6f4ea; text-decoration: underline green; }
+    [role="comment"] { background: #fff8c5; border-bottom: 2px solid #e3b341; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <h1>Collaborative Editor — Experimental ARIA 1.3 Pattern</h1>
+
+  <p><strong>Compatibility warning:</strong> ARIA 1.3 is a Working Draft. Prefer native <code>ins</code>, <code>del</code>, and <code>mark</code> markup in production and test draft roles with the target browser and assistive technology.</p>
+
+  <p>Press <strong>Alt+F10</strong> to toggle focus between the formatting toolbar and the text surface.</p>
+
+  <div class="editor-wrapper">
+    <!-- Roving Tabindex Formatting Toolbar -->
+    <div role="toolbar" aria-label="Text Formatting Controls" tabindex="0" id="editor-toolbar">
+      <button type="button" tabindex="0" aria-label="Bold (Ctrl+B)">B</button>
+      <button type="button" tabindex="-1" aria-label="Italic (Ctrl+I)">I</button>
+      <button type="button" tabindex="-1" aria-label="Insert Comment">Comment</button>
+    </div>
+
+    <!-- Contenteditable Surface -->
+    <div 
+      contenteditable="true" 
+      role="textbox" 
+      aria-multiline="true" 
+      aria-label="Document Content"
+      class="editor-surface"
+      id="editor-surface"
+    >
+      <p>
+        This document demonstrates collaborative editing features. 
+        Here is a <span role="suggestion">proposed addition</span> to the text.
+      </p>
+      <p>
+        Here is an annotated section with a <span role="comment" aria-details="comment-1" tabindex="0">linked comment</span>.
+      </p>
+    </div>
+  </div>
+
+  <!-- External Comment Card linked via aria-details -->
+  <aside id="comment-1" role="region" aria-label="Comment by Alice" style="margin-top: 1rem; padding: 1rem; background: #fff8c5; border-left: 4px solid #e3b341;">
+    <strong>Alice:</strong> "Please review this phrasing for clarity."
+  </aside>
+
+  <script>
+    const toolbar = document.getElementById('editor-toolbar');
+    const surface = document.getElementById('editor-surface');
+    const buttons = Array.from(toolbar.querySelectorAll('button'));
+
+    // Alt+F10 Focus Toggle
+    document.addEventListener('keydown', (e) => {
+      if (e.altKey && e.key === 'F10') {
+        e.preventDefault();
+        if (document.activeElement === surface) {
+          buttons[0].focus();
+        } else {
+          surface.focus();
+        }
+      }
+    });
+
+    // Toolbar Roving Tabindex
+    toolbar.addEventListener('keydown', (e) => {
+      const activeBtn = document.activeElement;
+      const index = buttons.indexOf(activeBtn);
+      if (index === -1) return;
+
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        const next = buttons[(index + 1) % buttons.length];
+        activeBtn.setAttribute('tabindex', '-1');
+        next.setAttribute('tabindex', '0');
+        next.focus();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const prev = buttons[(index - 1 + buttons.length) % buttons.length];
+        activeBtn.setAttribute('tabindex', '-1');
+        prev.setAttribute('tabindex', '0');
+        prev.focus();
+      }
+    });
+  </script>
+
+</body>
+</html>

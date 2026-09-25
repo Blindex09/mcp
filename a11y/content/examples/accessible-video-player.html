@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible HTML5 Video Player with WebVTT</title>
+  <style>
+    .player-container { max-width: 640px; margin: 2rem auto; font-family: system-ui, sans-serif; }
+    video { width: 100%; display: block; background: #000; }
+    .controls-toolbar { display: flex; gap: 0.5rem; padding: 0.5rem; background: #222; color: #fff; align-items: center; }
+    .controls-toolbar button { background: #444; color: #fff; border: 1px solid #666; padding: 0.4rem 0.8rem; cursor: pointer; }
+    .controls-toolbar button:focus-visible { outline: 3px solid #ffcc00; }
+  </style>
+</head>
+<body>
+
+  <main class="player-container">
+    <h1>Accessible Custom Video Player</h1>
+
+    <div role="region" aria-label="Video Player Interface">
+      <!-- HTML5 Video Element with native WebVTT track -->
+      <video id="video-element" preload="metadata">
+        <source src="video-sample.mp4" type="video/mp4">
+        <!-- Closed Captions Track -->
+        <track kind="captions" src="subtitles-en.vtt" srclang="en" label="English Captions" default>
+        <!-- Audio Description Track -->
+        <track kind="descriptions" src="audio-descriptions-en.vtt" srclang="en" label="English Audio Description">
+        Your browser does not support HTML5 video.
+      </video>
+
+      <!-- Custom Keyboard Accessible Controls -->
+      <div class="controls-toolbar" role="toolbar" aria-label="Video Controls">
+        <button type="button" id="play-btn" aria-label="Play video">Play</button>
+        <button type="button" id="captions-btn" aria-label="Toggle closed captions" aria-pressed="true">CC</button>
+        <button type="button" id="mute-btn" aria-label="Mute audio" aria-pressed="false">Mute</button>
+        <span id="time-display" aria-live="off">00:00 / 00:00</span>
+      </div>
+    </div>
+
+    <!-- Transcript section -->
+    <section aria-labelledby="transcript-heading">
+      <h2 id="transcript-heading">Interactive Video Transcript</h2>
+      <p>
+        <strong>[00:01] Speaker:</strong> Welcome to the 2026 Web Accessibility tutorial...
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const video = document.getElementById('video-element');
+    const playBtn = document.getElementById('play-btn');
+    const captionsBtn = document.getElementById('captions-btn');
+
+    playBtn.addEventListener('click', () => {
+      if (video.paused) {
+        video.play();
+        playBtn.textContent = 'Pause';
+        playBtn.setAttribute('aria-label', 'Pause video');
+      } else {
+        video.pause();
+        playBtn.textContent = 'Play';
+        playBtn.setAttribute('aria-label', 'Play video');
+      }
+    });
+
+    captionsBtn.addEventListener('click', () => {
+      const track = video.textTracks[0];
+      if (track.mode === 'showing') {
+        track.mode = 'disabled';
+        captionsBtn.setAttribute('aria-pressed', 'false');
+      } else {
+        track.mode = 'showing';
+        captionsBtn.setAttribute('aria-pressed', 'true');
+      }
+    });
+  </script>
+
+</body>
+</html>

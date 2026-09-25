@@ -1,0 +1,122 @@
+<!-- HTML Semantic Foundation — the bedrock of accessibility (2026)
+     WCAG: 1.1.1, 1.3.1, 2.4.1, 2.4.6, 4.1.2
+     Rule: native HTML first; ARIA only to fill gaps. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accessible Page Structure</title>
+</head>
+<body>
+
+  <!-- Skip link: first focusable element, lets keyboard/AT users bypass repetitive nav. WCAG 2.4.1 -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header>
+    <!-- Landmark <nav> with an accessible name when there are multiple navs -->
+    <nav aria-label="Main navigation">
+      <ul>
+        <li><a href="/home" aria-current="page">Home</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- <main> is the single top-level primary landmark. tabindex="-1" makes it a skip-link target. -->
+  <main id="main-content" tabindex="-1">
+    <!-- One <h1> per page representing the page topic. No skipped levels. -->
+    <h1>Account Settings</h1>
+
+    <section aria-labelledby="profile-heading">
+      <h2 id="profile-heading">Profile</h2>
+      <p>Update your personal information below.</p>
+
+      <!-- Accessible form: every input has a <label for> association. Placeholder is NOT a label. -->
+      <form>
+        <p>
+          <label for="full-name">Full name <span aria-hidden="true">*</span></label>
+          <input id="full-name" name="full-name" type="text" autocomplete="name" required aria-required="true" />
+        </p>
+
+        <!-- Group related fields with <fieldset> + <legend> -->
+        <fieldset>
+          <legend>Address</legend>
+          <p>
+            <label for="street">Street address</label>
+            <input id="street" name="street" type="text" autocomplete="address-line1" />
+          </p>
+          <p>
+            <label for="city">City</label>
+            <input id="city" name="city" type="text" autocomplete="address-level2" />
+          </p>
+        </fieldset>
+
+        <!-- Error association: aria-invalid + aria-describedby pointing to the error id.
+             aria-invalid is set to "true" (and the error span shown) by JS only AFTER a
+             failed validation attempt — never pre-set before the user has interacted. -->
+        <p>
+          <label for="email">Email <span aria-hidden="true">*</span></label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            required
+            aria-required="true"
+            aria-invalid="false"
+            aria-describedby="email-error email-hint"
+          />
+          <span id="email-hint" class="form-hint">We'll never share your email.</span>
+          <span id="email-error" class="form-error" role="alert" hidden>Please enter a valid email address.</span>
+        </p>
+
+        <!-- Required fieldset for a single choice: radio group -->
+        <fieldset>
+          <legend>Notification preference</legend>
+          <p>
+            <input id="notif-email" name="notif" type="radio" value="email" checked />
+            <label for="notif-email">Email</label>
+          </p>
+          <p>
+            <input id="notif-sms" name="notif" type="radio" value="sms" />
+            <label for="notif-sms">SMS</label>
+          </p>
+        </fieldset>
+
+        <!-- Do something → <button>. type="button" prevents accidental form submit. -->
+        <button type="submit">Save changes</button>
+        <button type="button">Cancel</button>
+      </form>
+    </section>
+
+    <aside aria-labelledby="related-heading">
+      <h2 id="related-heading">Related</h2>
+      <ul>
+        <li><a href="/privacy">Privacy policy</a></li>
+      </ul>
+    </aside>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Example Co. <a href="/accessibility">Accessibility statement</a></p>
+  </footer>
+
+  <!-- THE ANTIPATTERN TO AVOID (shown for contrast — do not ship this) -->
+  <!--
+    <div class="btn" onclick="save()">Save</div>          ← not keyboard reachable, not announced as button, no focus ring
+    <span class="link" onclick="go('/home')">Home</span>  ← breaks open-in-new-tab, copy-link, history, link rotor
+    <div class="h1-style">Title</div>                     ← not a real heading, breaks screen reader outline
+    <input placeholder="Email" />                         ← placeholder disappears on focus, fails 1.3.1 + 3.3.2
+  -->
+
+  <!-- The same elements done right -->
+  <!--
+    <button type="button" onclick="save()">Save</button>
+    <a href="/home">Home</a>
+    <h1>Title</h1>
+    <label for="email">Email</label><input id="email" type="email" />
+  -->
+
+</body>
+</html>

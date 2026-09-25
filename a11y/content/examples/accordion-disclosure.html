@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accessible Accordion / Disclosure (2026) — 3 approaches</title>
+  <style>
+    details { border: 1px solid #ccc; border-radius: 6px; margin-bottom: 4px; }
+    summary { cursor: pointer; padding: 0.75rem 1rem; font-weight: 600; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary:focus-visible { outline: 3px solid #1a73e8; outline-offset: 2px; }
+    details[open] summary { border-bottom: 1px solid #ccc; }
+    .panel { padding: 1rem; }
+  </style>
+</head>
+<body>
+
+<!-- =========================================================== -->
+<!-- APPROACH 1 (RECOMMENDED): native <details>/<summary>         -->
+<!-- Zero JavaScript, zero ARIA. Browser handles focus, Enter/    -->
+<!-- Space toggle, screen reader announcement ("summary,         -->
+<!-- collapsed/expanded"), and the accessibility tree.            -->
+<!-- WCAG: 1.3.1, 4.1.2 (all free).                               -->
+<!-- =========================================================== -->
+<details>
+  <summary>Shipping &amp; returns</summary>
+  <div class="panel">
+    <p>Orders ship within two business days. Returns are free within 30 days.</p>
+  </div>
+</details>
+
+<!-- Exclusive accordion (only one open at a time) — same name attribute, no JS. -->
+<details name="faq">
+  <summary>What sizes are available?</summary>
+  <div class="panel"><p>XS through 3XL.</p></div>
+</details>
+<details name="faq">
+  <summary>Do you ship internationally?</summary>
+  <div class="panel"><p>Yes, to 40+ countries.</p></div>
+</details>
+
+<!-- =========================================================== -->
+<!-- APPROACH 2: custom accordion with ARIA (when you need        -->
+<!-- animation, non-child panels, or custom styling that <details> -->
+<!-- cannot support). Button-in-heading + aria-expanded +         -->
+<!-- aria-controls + role="region" + hidden.                      -->
+<!-- WCAG: 1.3.1, 2.1.1, 2.4.6, 4.1.2.                            -->
+<!-- =========================================================== -->
+<div class="accordion">
+  <h3>
+    <button type="button" aria-expanded="false" aria-controls="panel-billing" id="btn-billing">
+      Billing details
+      <span aria-hidden="true">▸</span>
+    </button>
+  </h3>
+  <div id="panel-billing" role="region" aria-labelledby="btn-billing" hidden>
+    <div class="panel"><p>Your billing information goes here.</p></div>
+  </div>
+</div>
+
+<script>
+  // Toggle a single custom accordion panel. Keep aria-expanded and `hidden` in sync.
+  document.querySelectorAll('.accordion button[aria-expanded]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      const panel = document.getElementById(btn.getAttribute('aria-controls'));
+      if (panel) panel.hidden = expanded;
+      // Optional single-open behavior: close siblings.
+      btn.closest('.accordion')?.querySelectorAll('button[aria-expanded="true"]').forEach((other) => {
+        if (other !== btn) {
+          other.setAttribute('aria-expanded', 'false');
+          document.getElementById(other.getAttribute('aria-controls')).hidden = true;
+        }
+      });
+    });
+  });
+</script>
+
+<!-- For framework components, use the library's documented
+     Accordion primitives and test the complete keyboard contract. -->
+
+</body>
+</html>

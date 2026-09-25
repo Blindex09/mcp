@@ -5,10 +5,8 @@ import sys
 import time
 from pathlib import Path
 from types import ModuleType
-from typing import Any
 
 import pytest
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -38,64 +36,21 @@ def test_module_imports_cleanly() -> None:
     assert mod is not None
 
 
-def test_required_callables_exist() -> None:
-    """Core public functions must be present after import."""
+def test_server_identity_and_instructions() -> None:
     mod = _load_module()
-    expected = [
-        "categorize_skill_name",
-        "get_skills",
-        "discover_skills",
-        "build_category_response",
-        "main",
-    ]
-    for name in expected:
-        assert hasattr(mod, name), f"Missing callable: {name}"
-        assert callable(getattr(mod, name)), f"Not callable: {name}"
+    assert mod.mcp.name == "accessibility"
+    assert callable(mod.main)
+    assert "a11y_find" in mod.mcp.instructions
 
 
-def test_required_constants_exist() -> None:
-    """Infrastructure constants must be defined."""
+async def test_server_exposes_only_accessibility_tools() -> None:
     mod = _load_module()
-    assert hasattr(mod, "SKILLS_PATH"), "Missing SKILLS_PATH"
-    assert hasattr(mod, "_CACHE_TTL_SECONDS"), "Missing _CACHE_TTL_SECONDS"
-    assert hasattr(mod, "_BM25_TTL"), "Missing _BM25_TTL"
-
-
-def test_mcp_instance_exists() -> None:
-    """FastMCP instance must be exposed as `mcp`."""
-    mod = _load_module()
-    assert hasattr(mod, "mcp"), "Missing FastMCP instance `mcp`"
-
-
-def test_mcp_instance_has_instructions() -> None:
-    """FastMCP instance must be configured with instructions."""
-    mod = _load_module()
-    mcp_instance: Any = mod.mcp  # type: ignore[attr-defined]
-    # FastMCP exposes _instructions or stores it on the underlying server
-    # Check any attribute that confirms instructions were passed
-    attrs = dir(mcp_instance)
-    has_instructions = (
-        "instructions" in attrs
-        or "_instructions" in attrs
-        or hasattr(getattr(mcp_instance, "_settings", None), "instructions")
-        or hasattr(getattr(mcp_instance, "settings", None), "instructions")
-    )
-    assert has_instructions, "FastMCP instance is missing `instructions` configuration"
-
-
-def test_category_rules_and_icons_aligned() -> None:
-    """Every CATEGORY_RULES key must have a corresponding CATEGORY_ICONS entry."""
-    mod = _load_module()
-    rules: dict[str, Any] = mod.CATEGORY_RULES  # type: ignore[attr-defined]
-    icons: dict[str, str] = mod.CATEGORY_ICONS  # type: ignore[attr-defined]
-    missing = set(rules.keys()) - set(icons.keys())
-    assert not missing, f"CATEGORY_RULES keys missing from CATEGORY_ICONS: {missing}"
-
-
-def test_skills_path_is_path_object() -> None:
-    """SKILLS_PATH must be a pathlib.Path instance."""
-    mod = _load_module()
-    assert isinstance(mod.SKILLS_PATH, Path)
+    names = {t.name for t in await mod.mcp.list_tools()}
+    assert names == {
+        "a11y_list_content", "a11y_find", "a11y_get_reference", "a11y_get_example", "a11y_get_template",
+        "a11y_contrast", "a11y_audit", "a11y_aria_snapshot", "a11y_tab_order",
+    }
+    assert not any("skill" in n for n in names)
 
 
 # ---------------------------------------------------------------------------

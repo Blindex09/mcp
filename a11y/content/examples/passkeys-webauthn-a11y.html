@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Passkeys / WebAuthn Authentication</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; background: #fafafa; }
+    .login-card { max-width: 400px; margin: 0 auto; padding: 1.5rem; border: 1px solid #ccc; background: white; border-radius: 8px; }
+    label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+    input[type="text"] { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid #777; border-radius: 4px; box-sizing: border-box; }
+    input[type="text"]:focus-visible { outline: 3px solid #005fcc; }
+    button { width: 100%; padding: 0.75rem; background: #005fcc; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; }
+    button:focus-visible { outline: 3px solid #ffcc00; outline-offset: 2px; }
+  </style>
+</head>
+<body>
+
+  <main class="login-card" aria-labelledby="login-title">
+    <h1 id="login-title">Accessible Login</h1>
+
+    <p id="auth-help">
+      Log in effortlessly using your Passkey (fingerprint, face unlock, or security key) 
+      without solving cognitive puzzles or transcribing codes (WCAG 2.2 SC 3.3.8).
+    </p>
+
+    <form id="login-form">
+      <div>
+        <label for="username">Username or Email</label>
+        <!-- autocomplete="username webauthn" enables WebAuthn Conditional Mediation autofill -->
+        <input 
+          type="text" 
+          id="username" 
+          name="username" 
+          autocomplete="username webauthn" 
+          aria-describedby="auth-help"
+          required
+        >
+      </div>
+
+      <button type="submit" id="passkey-btn">Sign in with Passkey</button>
+    </form>
+  </main>
+
+  <script>
+    const passkeyBtn = document.getElementById('passkey-btn');
+
+    // Check WebAuthn Conditional UI availability
+    if (window.PublicKeyCredential && PublicKeyCredential.isConditionalMediationAvailable) {
+      PublicKeyCredential.isConditionalMediationAvailable().then(available => {
+        if (available) {
+          console.log('WebAuthn Conditional Mediation available for autofill');
+        }
+      });
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      try {
+        const challenge = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
+        const publicKeyCredentialRequestOptions = {
+          challenge: challenge,
+          timeout: 60000,
+          userVerification: "preferred"
+        };
+        const credential = await navigator.credentials.get({
+          publicKey: publicKeyCredentialRequestOptions
+        });
+        console.log('Passkey authentication successful:', credential);
+      } catch (err) {
+        console.error('Passkey authentication cancelled or failed:', err);
+      }
+    });
+  </script>
+
+</body>
+</html>

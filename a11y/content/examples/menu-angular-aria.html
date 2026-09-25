@@ -1,0 +1,95 @@
+<!--
+  Angular Aria menu + menubar + submenu (Angular 21, 2026)
+  @angular/aria/menu, @angular/aria/menubar
+
+  The directives wire role="menu"/"menubar"/"menuitem", aria-haspopup,
+  aria-expanded, aria-controls, keyboard nav (arrows, Home/End, Enter/Escape),
+  RTL, and focus management. You provide HTML + CSS + business logic.
+-->
+
+<!-- ============ MENU (dropdown) with submenu ============ -->
+<!-- ngMenuTrigger on a <button> wires aria-haspopup, aria-expanded, aria-controls. -->
+<button type="button" ngMenuTriggerFor="fileMenu" aria-label="File menu">File ▾</button>
+
+<!-- ngMenu = role="menu". ngMenuItem = role="menuitem". -->
+<ng-template #fileMenu ngMenu>
+  <button type="button" ngMenuItem (click)="newFile()">New</button>
+  <button type="button" ngMenuItem (click)="openFile()">Open…</button>
+
+  <!-- Submenu: ngMenuTriggerFor on a ngMenuItem opens a nested menu.
+       ArrowRight opens, ArrowLeft closes, aria-haspopup + aria-expanded auto-applied. -->
+  <button type="button" ngMenuItem ngMenuTriggerFor="shareMenu">Share ▸</button>
+
+  <div role="separator" aria-hidden="true" style="height:1px;background:#eee;margin:4px 0"></div>
+
+  <button type="button" ngMenuItem disabled>Print…</button>
+</ng-template>
+
+<ng-template #shareMenu ngMenu>
+  <button type="button" ngMenuItem (click)="shareEmail()">Email</button>
+  <button type="button" ngMenuItem (click)="shareLink()">Copy link</button>
+</ng-template>
+
+<!-- ============ MENUBAR (horizontal, persistent) ============ -->
+<!-- ngMenuBar = role="menubar". Items use roving tabindex (only one in Tab order).
+     Arrow keys move between top-level items; Enter/Space/ArrowDown opens submenus. -->
+<nav ngMenuBar aria-label="Application menu">
+  <button type="button" ngMenuItem ngMenuTriggerFor="editMenu">Edit</button>
+  <button type="button" ngMenuItem ngMenuTriggerFor="viewMenu">View</button>
+  <button type="button" ngMenuItem ngMenuTriggerFor="helpMenu">Help</button>
+</nav>
+
+<ng-template #editMenu ngMenu>
+  <button type="button" ngMenuItem (click)="undo()">Undo</button>
+  <button type="button" ngMenuItem (click)="redo()">Redo</button>
+</ng-template>
+
+<!-- ============ Component (TypeScript) ============ -->
+<!--
+import { Component } from '@angular/core';
+import { Menu, MenuItem, MenuTrigger } from '@angular/aria/menu';
+import { Menubar } from '@angular/aria/menubar';
+
+@Component({
+  selector: 'app-menu-demo',
+  standalone: true,
+  imports: [Menu, MenuItem, MenuTrigger, Menubar],
+  templateUrl: './menu-demo.html',
+})
+export class MenuDemo {
+  newFile(): void {
+    console.log('New file action triggered');
+  }
+
+  openFile(): void {
+    console.log('Open file action triggered');
+  }
+
+  undo(): void {
+    console.log('Undo action triggered');
+  }
+}
+-->
+
+<!--
+  Angular Material alternative (mat-menu):
+    <button type="button" mat-icon-button [matMenuTriggerFor]="menu" aria-label="Open actions">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button type="button" mat-menu-item>Edit</button>
+      <button type="button" mat-menu-item [matMenuTriggerFor]="share">Share</button>
+      <button type="button" mat-menu-item disabled>Print</button>
+    </mat-menu>
+    <mat-menu #share="matMenu">
+      <button type="button" mat-menu-item>Email</button>
+      <button type="button" mat-menu-item>Copy link</button>
+    </mat-menu>
+
+  mat-menu keyboard: ↓/↑ next/prev, ← close submenu, → open submenu,
+    Enter activate, Escape close all. Focus returns to trigger on close.
+
+  Gotcha (2026): Angular Material does NOT support menuitemcheckbox /
+  menuitemradio roles natively. Use [attr.aria-checked] manually or use
+  Angular Aria instead.
+-->

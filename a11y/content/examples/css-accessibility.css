@@ -1,0 +1,134 @@
+/* CSS Accessibility Essentials (2026)
+   WCAG: 1.4.3 (contrast), 1.4.11 (non-text contrast), 2.4.7 (focus visible),
+          2.4.13 (focus appearance), 2.3.3 (animation from interactions),
+          1.4.10 (reflow), 1.4.12 (text spacing). */
+
+/* ------------------------------------------------------------------ */
+/* 1. Focus — never remove :focus without a replacement.              */
+/*    Use :focus-visible so the ring shows for keyboard, not mouse.   */
+/*    WCAG 2.4.7 (AA) and 2.4.13 Focus Appearance (AAA in 2.2).         */
+/* ------------------------------------------------------------------ */
+:focus-visible {
+  outline: 3px solid #1a73e8;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* If you must restyle focus, give a visible indicator on ALL focus too */
+:focus { outline: 2px solid #1a73e8; outline-offset: 2px; }
+
+/* ------------------------------------------------------------------ */
+/* 2. Reduced motion — respect the OS setting. 44% of sites use this   */
+/*    in 2026 (Project Wallace). Replace motion with opacity fades /  */
+/*    short durations rather than stripping animation entirely.        */
+/*    WCAG 2.3.3 Animation from Interactions.                          */
+/* ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Color scheme — opt into native light/dark theming.              */
+/*    paired with light-dark() (Baseline 2026).                        */
+/* ------------------------------------------------------------------ */
+:root {
+  color-scheme: light dark;
+  --text: light-dark(#1a1a1a, #f5f5f5);
+  --bg: light-dark(#ffffff, #121212);
+  --link: light-dark(#1a73e8, #8ab4f8);
+}
+body { color: var(--text); background: var(--bg); }
+a { color: var(--link); }
+
+/* ------------------------------------------------------------------ */
+/* 4. prefers-contrast — users who need higher contrast.             */
+/*    WCAG 1.4.6 (Contrast Enhanced, AAA).                             */
+/* ------------------------------------------------------------------ */
+@media (prefers-contrast: more) {
+  :root { --text: #000; --bg: #fff; }
+  body { font-weight: 600; }
+  button, a { border-width: 2px; }
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. forced-colors — Windows High Contrast Mode.                     */
+/*    Use system color keywords (CanvasText, ButtonFace, etc.).        */
+/* ------------------------------------------------------------------ */
+@media (forced-colors: active) {
+  button, a, input { border: 1px solid CanvasText; }
+  .icon { forced-color-adjust: auto; }
+}
+
+/* ------------------------------------------------------------------ */
+/* 6. Automated contrast selection — pick black or white text         */
+/*    based on the background. Use as a safety net, not a replacement */
+/*    for hand-tuned palettes.                                         */
+/* ------------------------------------------------------------------ */
+.auto-contrast-button {
+  background: var(--bg-color);
+  color: color-contrast(var(--bg-color) vs black, white);
+}
+
+/* ------------------------------------------------------------------ */
+/* 7. Target size — WCAG 2.5.8 (AA in 2.2) requires >= 24x24 CSS px.  */
+/*    2.5.5 (AAA) wants 44x44. Don't rely on tiny tap targets.         */
+/* ------------------------------------------------------------------ */
+button, .tap-target {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* ------------------------------------------------------------------ */
+/* 8. sr-only — visually hidden but available to screen readers.      */
+/*    For: skip links (until focused), live announcers, extra context. */
+/* ------------------------------------------------------------------ */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 1px 1px) !important;
+  clip-path: inset(50%) !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+/* Skip link: visible on focus only */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 1rem;
+  z-index: 1000;
+  padding: 0.75rem 1rem;
+  background: #1a73e8;
+  color: #fff;
+  border-radius: 4px;
+}
+.skip-link:focus {
+  left: 1rem;
+  outline: 3px solid #fff;
+}
+
+/* ------------------------------------------------------------------ */
+/* 9. Reflow — content must work at 320 CSS px width and 400% zoom.   */
+/*    Avoid fixed pixel widths on containers; prefer min/max.         */
+/*    WCAG 1.4.10.                                                     */
+/* ------------------------------------------------------------------ */
+.container {
+  max-width: 100%;
+  padding-inline: 1rem;
+}
+img, video, svg { max-width: 100%; height: auto; }
+
+/* ------------------------------------------------------------------ */
+/* 10. Text spacing — users can override; don't break layout.          */
+/*     WCAG 1.4.12. Test with the text-spacing bookmarklet.           */
+/* ------------------------------------------------------------------ */
+p, li { line-height: 1.5; }

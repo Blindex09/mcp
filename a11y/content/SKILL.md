@@ -15,7 +15,7 @@ Use WCAG 2.2 AA as the web conformance baseline. Treat WCAG 3.0 (Working Draft, 
 
 ## 0.1 Using this skill through the MCP server
 
-This skill ships inside the Skills MCP server (`a11y/`). Every `references/x.md` link below is the guide named `x`
+This skill ships inside the Accessibility MCP server (`a11y/`). Every `references/x.md` link below is the guide named `x`
 for `a11y_get_reference`, and every `examples/y.ext` is the example named `y` for `a11y_get_example`.
 
 | Need | Tool |

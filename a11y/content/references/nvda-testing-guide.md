@@ -1,7 +1,7 @@
 # NVDA Screen Reader Testing Guide (2026)
 
 > **Before opening NVDA:** `a11y_aria_snapshot` shows the accessibility tree a screen reader is given and `a11y_tab_order`
-> shows the keyboard order, both via the Skills MCP server. Use them to find missing/duplicated names and focus problems
+> shows the keyboard order, both via the Accessibility MCP server. Use them to find missing/duplicated names and focus problems
 > first; they do not replace listening to the real screen reader.
 
 

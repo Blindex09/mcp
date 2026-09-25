@@ -1,13 +1,11 @@
 """Modelo de apoio (clientes sem sampling): configuracao por ambiente, ordem e falhas."""
+import json
+
 import httpx
 import pytest
 
 import mcp_server
 import sampling
-from tests.test_model_driven import (  # noqa: F401 - fixture reutilizada
-    fake_ctx,
-    skills_dir,
-)
 
 
 @pytest.fixture()
@@ -39,7 +37,7 @@ def test_backend_detection(monkeypatch):
     assert sampling.configured_backend() is None
 
 
-async def test_client_sampling_has_priority_over_backend(monkeypatch, calls):
+async def test_client_sampling_has_priority_over_backend(monkeypatch, calls, fake_ctx):
     log, _ = calls
     monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
     ctx, _prompts = fake_ctx("resposta do cliente")
@@ -47,7 +45,7 @@ async def test_client_sampling_has_priority_over_backend(monkeypatch, calls):
     assert log == []  # nao gastou o backend
 
 
-async def test_falls_back_to_anthropic_when_client_has_no_sampling(monkeypatch, calls):
+async def test_falls_back_to_anthropic_when_client_has_no_sampling(monkeypatch, calls, fake_ctx):
     log, reply = calls
     monkeypatch.setenv("ANTHROPIC_API_KEY", "segredo")
     monkeypatch.setenv("SKILLS_MCP_MODEL", "claude-x")
@@ -97,16 +95,21 @@ async def test_backend_failure_returns_none_and_never_leaks_key(monkeypatch, cal
     assert "SEGREDO-123" not in caplog.text
 
 
-async def test_find_skills_works_via_backend_without_client_sampling(monkeypatch, calls, skills_dir):  # noqa: F811
+async def test_a11y_find_works_via_backend_without_client_sampling(monkeypatch, calls, fake_ctx):
     _, reply = calls
     monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
-    reply["data"] = {"content": [{"type": "text", "text": '["azure-deploy-agent", "inventado"]'}]}
+    reply["data"] = {"content": [{"type": "text", "text": '["modal-native-dialog", "inventado"]'}]}
     ctx, _ = fake_ctx(None)
-    out = await mcp_server.find_skills("subir agente na nuvem", ctx)
-    assert "azure-deploy-agent" in out and "inventado" not in out
+    tool = mcp_server.mcp._tool_manager.get_tool("a11y_find")
+    data = json.loads(await tool.fn(task="dialogo modal", ctx=ctx))
+    assert data["selection"] == "model"
+    assert [i["name"] for i in data["items"]] == ["modal-native-dialog"]
 
 
-async def test_no_model_anywhere_explains_how_to_configure(skills_dir):  # noqa: F811
+async def test_no_model_anywhere_explains_how_to_configure(fake_ctx):
     ctx, _ = fake_ctx(None)
-    out = await mcp_server.find_skills("x", ctx)
-    assert "ANTHROPIC_API_KEY" in out and "sampling" in out and "azure-deploy-agent" not in out
+    tool = mcp_server.mcp._tool_manager.get_tool("a11y_find")
+    data = json.loads(await tool.fn(task="x", ctx=ctx))
+    assert data["selection"] == "unavailable"
+    assert "ANTHROPIC_API_KEY" in data["note"] and "sampling" in data["note"]
+    assert data["catalog"]  # o modelo chamador escolhe pelo catalogo

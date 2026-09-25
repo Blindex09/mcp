@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Setup script para registrar o Skills MCP Server em Claude Desktop, VSCode e Cursor
+Setup script para registrar o Accessibility MCP Server em Claude Desktop, VSCode e Cursor
 """
 
 import json
@@ -33,8 +33,13 @@ def setup_claude_desktop():
     if 'mcpServers' not in config:
         config['mcpServers'] = {}
     
-    # Adiciona/atualiza skills server
-    config['mcpServers']['skills'] = {
+    # Adiciona/atualiza o servidor de acessibilidade
+    # Remove a entrada do servidor antigo de skills (mesmo diretorio), agora substituido por este
+    legacy = config['mcpServers'].get('skills')
+    if legacy and 'mcp' in json.dumps(legacy).lower():
+        del config['mcpServers']['skills']
+
+    config['mcpServers']['accessibility'] = {
         "command": "uv",
         "args": ["--directory", "c:/mcp", "run", "mcp_server.py"]
     }
@@ -67,8 +72,13 @@ def setup_cursor():
     if 'mcpServers' not in config:
         config['mcpServers'] = {}
     
-    # Adiciona/atualiza skills server
-    config['mcpServers']['skills'] = {
+    # Adiciona/atualiza o servidor de acessibilidade
+    # Remove a entrada do servidor antigo de skills (mesmo diretorio), agora substituido por este
+    legacy = config['mcpServers'].get('skills')
+    if legacy and 'mcp' in json.dumps(legacy).lower():
+        del config['mcpServers']['skills']
+
+    config['mcpServers']['accessibility'] = {
         "command": "uv",
         "args": ["--directory", "c:\\mcp", "run", "mcp_server.py"]
     }
@@ -87,7 +97,7 @@ def setup_vscode():
     print("""
 {
   "mcp.servers": {
-    "skills": {
+    "accessibility": {
       "command": "uv",
       "args": ["--directory", "c:\\\\mcp", "run", "mcp_server.py"]
     }
@@ -97,7 +107,7 @@ def setup_vscode():
 
 
 def main():
-    print("🔧 MCP Skills Server - Setup Script\n")
+    print("🔧 Accessibility MCP Server - Setup Script\n")
     print("Registrando servidor MCP em todas as plataformas...\n")
     
     try:
@@ -110,7 +120,7 @@ def main():
         print("1. Reinicie Claude Desktop")
         print("2. Reinicie Cursor")
         print("3. Reinicie VSCode")
-        print("4. As skills estarão disponíveis como ferramentas MCP")
+        print("4. As ferramentas a11y_* estarão disponíveis")
         
     except Exception as e:
         print(f"❌ Erro: {e}")

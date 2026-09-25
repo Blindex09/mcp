@@ -4,7 +4,7 @@ Copy-paste checklists for audits, PRs, and sprint planning. Field-proven in 2026
 
 ---
 
-> **MCP tools for this checklist** (Skills MCP server): `a11y_audit` (axe-core on a URL or HTML),
+> **MCP tools for this checklist** (Accessibility MCP server): `a11y_audit` (axe-core on a URL or HTML),
 > `a11y_aria_snapshot` (accessibility tree), `a11y_tab_order` (focus order/indicator) and `a11y_contrast` (ratio for a pair).
 > They replace the `npx`/`node scripts/...` commands below when working through the MCP and cover only the automated part;
 > the manual items stay manual.

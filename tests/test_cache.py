@@ -61,31 +61,6 @@ def test_cache_ttl_constant_is_positive() -> None:
     assert mcp_server._CACHE_TTL_SECONDS > 0
 
 
-def test_bm25_ttl_constant_is_positive() -> None:
-    assert mcp_server._BM25_TTL > 0
-
-
-def test_get_bm25_rebuilds_when_skill_count_changes(sample_skills: list[dict]) -> None:
-    """BM25 index must rebuild when the number of skills changes."""
-    # Patch BM25Okapi to avoid installing rank_bm25 just for this test
-    try:
-        from rank_bm25 import BM25Okapi  # noqa: F401
-    except ImportError:
-        import pytest
-        pytest.skip("rank_bm25 not installed")
-
-    # Build index with full dataset
-    idx1 = mcp_server._get_bm25(sample_skills)
-
-    # Now pass a smaller dataset — should rebuild
-    smaller = sample_skills[:2]
-    # Force rebuild by resetting the built_at timestamp
-    mcp_server._bm25_built_at = 0.0
-    idx2 = mcp_server._get_bm25(smaller)
-
-    assert idx1 is not idx2
-
-
 def test_discover_skills_returns_sorted(tmp_path) -> None:  # type: ignore[no-untyped-def]
     """discover_skills() must return skills sorted by name."""
     # Create fake skill directories out of alphabetical order
@@ -176,12 +151,12 @@ def test_discover_skills_categorized_layout_uses_folder_category(tmp_path) -> No
     assert skills[0]["categories"][0] == "ai", "Primary category must be the folder name"
 
 
-def test_discover_skills_categorized_layout_unknown_folder_ignored(tmp_path) -> None:  # type: ignore[no-untyped-def]
-    """A folder that is not a known category and has no SKILL.md must be ignored."""
-    unknown_dir = tmp_path / "not-a-category"
-    unknown_dir.mkdir()
-    (unknown_dir / "some-skill").mkdir()
-    (unknown_dir / "some-skill" / "SKILL.md").write_text("# Some Skill\n\nDesc.", encoding="utf-8")
+def test_discover_skills_any_folder_without_skill_md_is_a_category(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    """Pasta sem SKILL.md e' categoria (fato estrutural), qualquer que seja o nome."""
+    folder = tmp_path / "my-own-bucket"
+    folder.mkdir()
+    (folder / "some-skill").mkdir()
+    (folder / "some-skill" / "SKILL.md").write_text("# Some Skill\n\nDesc.", encoding="utf-8")
 
     original_path = mcp_server.SKILLS_PATH
     mcp_server.SKILLS_PATH = tmp_path
@@ -190,4 +165,5 @@ def test_discover_skills_categorized_layout_unknown_folder_ignored(tmp_path) -> 
     finally:
         mcp_server.SKILLS_PATH = original_path
 
-    assert skills == [], "Skills inside unknown category dirs must not be discovered"
+    assert [s["name"] for s in skills] == ["some-skill"]
+    assert skills[0]["categories"] == ["my-own-bucket"]

@@ -5,7 +5,6 @@ description = "Universal Skills MCP Server — exposes 1300+ skills as MCP tools
 requires-python = ">=3.10"
 dependencies = [
     "mcp>=1.2.0,<2",
-    "rank-bm25>=0.2.2",
     "playwright>=1.40",
 ]
 

@@ -94,12 +94,6 @@ def reset_skill_cache():
 
     mcp_server._skills = []
     mcp_server._skills_loaded_at = 0.0
-    mcp_server._bm25_index = None
-    mcp_server._bm25_skills = []
-    mcp_server._bm25_built_at = 0.0
     yield
     mcp_server._skills = []
     mcp_server._skills_loaded_at = 0.0
-    mcp_server._bm25_index = None
-    mcp_server._bm25_skills = []
-    mcp_server._bm25_built_at = 0.0

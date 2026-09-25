@@ -7,6 +7,8 @@ from typing import Any
 
 from mcp.server.fastmcp import Context
 
+from sampling import ask_model, extract_json
+
 from . import audit
 from .content_index import ContentIndex
 
@@ -62,17 +64,9 @@ def register(mcp: Any) -> None:
             "intent, not by shared words. Answer ONLY with a JSON array of catalog names.\n\n"
             f"TASK:\n{task}\n\nCATALOG:\n{_json(catalog)}"
         )
-        try:
-            from mcp.types import SamplingMessage, TextContent
-
-            result = await ctx.session.create_message(
-                messages=[SamplingMessage(role="user", content=TextContent(type="text", text=prompt))],
-                max_tokens=400,
-            )
-            content = result.content
-            raw = content.text if isinstance(content, TextContent) else ""
-            names = json.loads(raw[raw.index("[") : raw.rindex("]") + 1])
-        except Exception:  # noqa: BLE001 - sem sampling ou resposta invalida: o modelo chamador escolhe
+        raw = await ask_model(ctx, prompt, max_tokens=400)
+        names = extract_json(raw, "array")
+        if not isinstance(names, list):  # sem sampling ou resposta ilegivel: o modelo chamador escolhe
             return _json(
                 {"selection": "unavailable", "note": "Escolha pelo catalogo abaixo.", "catalog": catalog}
             )

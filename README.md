@@ -5,8 +5,9 @@
 ## O que faz
 
 - 📚 Descobre automaticamente todas as skills em `c:\skills` (ao vivo, sem rebuild)
-- 🗂️ Categoriza 1334 skills em 18 categorias com comandos dedicados por categoria
-- 🔧 Expõe 24 ferramentas MCP: 18 de categoria + 6 gerais (incluindo busca semântica BM25)
+- 🧠 **Todo julgamento é do modelo**: achar a skill certa e classificar em categorias é feito pelo modelo do cliente (MCP sampling) — sem palavra-chave, regex nem ranking lexical
+- 🗂️ Categorias = pasta pai (fato estrutural) + classificação do modelo, com cache
+- 🔧 Ferramentas MCP: `find_skills`, `classify_skills`, listagens por categoria, `invoke_skill` e as de acessibilidade (`a11y_*`)
 - 🌐 Funciona em Claude Desktop, VSCode Copilot, Cursor, GitHub Copilot
 
 ## Arquitetura
@@ -21,8 +22,8 @@ c:\skills\                    ← 1300+ skills (cada uma com SKILL.md)
 
 c:\mcp\                       ← MCP Server
      ├── mcp_server.py          ← Servidor principal (24 tools, FastMCP)
-     ├── categorize_skills.py   ← Utilitário de auditoria de categorias
-     ├── categories.json        ← Snapshot de categorias para auditoria
+     ├── sampling.py            ← Ponte para o modelo do cliente (MCP sampling)
+     ├── a11y/                  ← Acessibilidade embutida (guias, exemplos, auditoria axe)
      ├── sync_cursor_rules.py   ← Sincroniza CLAUDE.md → Cursor User Rules
      ├── setup.py               ← Configura clientes automaticamente
      ├── pyproject.toml         ← Dependências (uv)
@@ -37,8 +38,8 @@ componentes, template React de IA acessivel) e adiciona 8 ferramentas + recursos
 
 | Ferramenta | O que faz |
 |---|---|
-| `a11y_list_content` | Lista guias e exemplos embutidos |
-| `a11y_search` | Busca BM25 em guias/exemplos ("modal focus trap") |
+| `a11y_list_content` | Catálogo (resumo + seções) dos guias e exemplos embutidos |
+| `a11y_find` | O modelo escolhe guias/exemplos pela tarefa (sampling; sem sampling devolve o catálogo) |
 | `a11y_get_reference` / `a11y_get_example` | Le um guia (opcional: so uma secao) ou um exemplo |
 | `a11y_contrast` | Contraste WCAG entre duas cores |
 | `a11y_audit` | Auditoria axe-core em URL http(s) ou HTML (Chromium headless) |
@@ -120,8 +121,8 @@ Cada tool lista **somente** as skills da categoria, com ícone e contagem.
 | Tool | O que faz |
 |------|-----------|
 | `invoke_skill(skill_name, params)` | Lê e retorna o SKILL.md completo de uma skill |
-| `search_skills(query)` | Busca por substring no nome/categoria |
-| `semantic_search_skills(query, top_k)` | **Busca semântica BM25** — entende contexto, multi-token, sinônimos parciais |
+| `find_skills(task)` | **O modelo escolhe** as skills pela tarefa (sampling, em lotes; sem palavra-chave) |
+| `classify_skills()` | O modelo classifica skills sem categoria; resultado em cache |
 | `list_categories()` | Lista todas as categorias disponíveis com contagens |
 | `list_all_skills(page, per_page)` | Lista todas as 1334 skills com paginação |
 | `refresh_skills()` | Força reload imediato do cache (sem restart) |
@@ -140,7 +141,7 @@ invoke_skill("react-best-practices", "como usar hooks corretamente?")
 → [retorna conteúdo completo do SKILL.md]
 
 # Buscar por palavra
-search_skills("docker")
+find_skills("subir containers com docker em produção")
 → [lista todas as skills com "docker" no nome]
 
 # Ver todas as categorias
@@ -150,25 +151,17 @@ list_categories()
 
 ---
 
-## Categorização de skills
+## Categorização e busca (por modelo)
 
-As skills são categorizadas automaticamente pelo nome da pasta usando regras de tokens, prefixos e substrings definidas em `mcp_server.py` (dict `CATEGORY_RULES`).
+Nada aqui usa regras de nome, palavra-chave, regex ou BM25:
 
-Para verificar categorias após adicionar novas skills:
-
-```bash
-python categorize_skills.py
-```
-
-> A categorização em runtime é feita pelo servidor diretamente — o `categories.json` é apenas um snapshot para auditoria.
-
-**Distribuição atual (março 2026):**
-- 🚀 devops: 233 | 🤖 ai: 168 | 🔄 automation: 153 | ✅ testing: 109
-- ⚙️ backend: 94 | 🎨 frontend: 91 | 📝 content: 88 | 🔒 security: 81
-- 💻 language: 63 | 🏗️ architecture: 60 | 💼 business: 33 | 📱 mobile: 27
-- 📊 data: 22 | ♿ accessibility: 9 | 🔗 web3: 8 | 🎮 gamedev: 7
-- 📦 other: 298 (skills meta/pessoais sem categoria técnica)
-- **77.7% das skills categorizadas em categorias específicas**
+- **Categoria** = pasta pai da skill (fato estrutural) + o que o modelo decidir em `classify_skills()`
+  (resultado em `skills_classification.json`, só reclassifica o que mudou). O que o modelo não souber
+  classificar fica `unclassified` — nada é chutado por nome.
+- **Busca** = `find_skills(task)`: o modelo do cliente lê o catálogo (nome + descrição, em lotes) e escolhe
+  pelo sentido; nomes inventados são descartados (única checagem fixa: o nome existe?).
+- **Cliente sem sampling**: as ferramentas dizem isso e o modelo que chamou lê o catálogo
+  (`list_all_skills`, `list_categories`) e decide; não existe plano B por palavra-chave.
 
 ---
 
@@ -192,7 +185,7 @@ O servidor lê o título (H1), extrai metadados e usa o conteúdo completo como 
 
 1. Crie a pasta: `c:\skills\{nome-da-skill}\`
 2. Crie o arquivo: `c:\skills\{nome-da-skill}\SKILL.md`
-3. Rode `python categorize_skills.py` para atualizar o cache de categorias
+3. (Opcional) chame `classify_skills()` para o modelo categorizar a nova skill
 4. O servidor já descobre a skill na próxima chamada (sem restart)
 
 ---

@@ -35,3 +35,5 @@ env/
 
 .cursor/
 .claude/
+
+skills_classification.json

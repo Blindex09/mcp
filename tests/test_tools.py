@@ -169,40 +169,6 @@ async def test_list_all_skills_empty() -> None:
     assert "Nenhuma" in result
 
 
-# ── search_skills ──────────────────────────────────────────────────────────
-
-async def test_search_by_name(sample_skills: list[dict]) -> None:
-    with patch("mcp_server.get_skills", return_value=sample_skills):
-        result = await mcp_server.search_skills("react")
-    assert "react-best-practices" in result
-
-
-async def test_search_by_description(sample_skills: list[dict]) -> None:
-    with patch("mcp_server.get_skills", return_value=sample_skills):
-        result = await mcp_server.search_skills("orchestration")
-    assert "docker-compose" in result
-
-
-async def test_search_by_category(sample_skills: list[dict]) -> None:
-    with patch("mcp_server.get_skills", return_value=sample_skills):
-        result = await mcp_server.search_skills("devops")
-    assert "docker-compose" in result
-
-
-async def test_search_no_results(sample_skills: list[dict]) -> None:
-    with patch("mcp_server.get_skills", return_value=sample_skills):
-        result = await mcp_server.search_skills("xyznonexistent99999")
-    assert "Nenhuma skill" in result
-
-
-async def test_search_is_case_insensitive(sample_skills: list[dict]) -> None:
-    with patch("mcp_server.get_skills", return_value=sample_skills):
-        result_lower = await mcp_server.search_skills("react")
-        result_upper = await mcp_server.search_skills("REACT")
-    assert "react-best-practices" in result_lower
-    assert "react-best-practices" in result_upper
-
-
 # ── invoke_skill ───────────────────────────────────────────────────────────
 
 async def test_invoke_skill_found(sample_skills: list[dict], tmp_path: Path) -> None:
@@ -240,12 +206,11 @@ async def test_invoke_skill_not_found(sample_skills: list[dict]) -> None:
     assert "nao encontrada" in result.lower() or "não encontrada" in result.lower()
 
 
-async def test_invoke_skill_partial_match_suggests(sample_skills: list[dict]) -> None:
-    """Partial match should suggest similar skill names."""
+async def test_invoke_skill_miss_points_to_model_search_not_substring(sample_skills: list[dict]) -> None:
+    """Nome inexato nao vira 'voce quis dizer' por substring: aponta para find_skills."""
     with patch("mcp_server.get_skills", return_value=sample_skills):
         result = await mcp_server.invoke_skill("react")
-    # Should suggest react-best-practices and react-native-expo
-    assert "react-best-practices" in result or "react-native-expo" in result
+    assert "find_skills" in result and "react-best-practices" not in result
 
 
 async def test_invoke_skill_with_params(sample_skills: list[dict], tmp_path: Path) -> None:

@@ -13,6 +13,7 @@ Best practices MCP 2026:
 - Retornar SKILL.md completo no invoke
 """
 
+import hashlib
 import re
 import sys
 import json
@@ -24,6 +25,7 @@ from typing import Any
 from mcp.server.fastmcp import Context, FastMCP
 
 from a11y.tools import register as register_a11y
+from sampling import ask_model, extract_json
 
 # Setup logging (stderr so, nunca stdout em MCP!)
 logging.basicConfig(
@@ -41,9 +43,9 @@ MCP_PATH = Path(__file__).parent
 mcp = FastMCP(
     "skills",
     instructions=(
-        "Skills server with 1300+ skills in 18 categories. "
+        "Skills server with 1300+ skills. Categories come from the folder layout and model classification (classify_skills). "
         "Workflow: 1) list_<category>_skills() to browse by category, "
-        "2) semantic_search_skills(query) for cross-category semantic search, "
+        "2) find_skills(task) - the model picks skills by meaning, no keywords, "
         "3) invoke_skill(name) to read full SKILL.md content. "
         "Use list_categories() to see all available categories with skill counts."
     ),
@@ -51,395 +53,14 @@ mcp = FastMCP(
 
 
 # ---------------------------------------------------------------------------
-# REGRAS DE CATEGORIZACAO (inline, sem depender de arquivo externo)
+# TAXONOMIA (opcoes oferecidas ao modelo classificador - NAO sao regras de match)
 # ---------------------------------------------------------------------------
 
-CATEGORY_RULES: dict[str, dict] = {
-    "accessibility": {
-        "tokens": ["accessibility", "a11y", "wcag", "aria", "accessible"],
-        "substrings": ["accessibility", "a11y", "wcag"],
-        "prefixes": [],
-        "excludes": [],
-    },
-    "ai": {
-        "tokens": [
-            "ai", "agent", "agents", "llm", "ml", "gpt", "rag",
-            "prompt", "embedding", "chatbot", "nlp", "copilot",
-            "crewai", "langfuse", "langgraph", "mlops", "imagen",
-        ],
-        "substrings": [
-            "agent", "llm", "ai-", "-ai-", "-ai",
-            "machine-learning", "multi-agent", "autonomous-agent",
-            "subagent", "voice-ai", "computer-use", "agentfolio",
-            "prompt-", "-prompt", "rag-", "-rag",
-            "embedding", "vector-index", "fine-tun",
-            "claude-", "anthropic", "openai-", "gemini-",
-            "copilot-", "chatbot", "nlp-", "neural",
-            "context-compress", "context-window", "context-manager",
-            "context-driven", "context-fundamental", "context-optimiz",
-            "conversation-memory", "computer-vision", "bdi-mental",
-            "exa-search", "deep-research", "tavily", "notebooklm",
-            "langfuse", "crewai", "langgraph", "mlops-",
-            "transcrib", "behavioral-mode", "hugging-face",
-            "fal-generate", "fal-image", "fal-audio", "fal-upscale",
-            "fal-workflow", "fal-platform",
-            "mcp-builder", "mcp-builder-ms", "memory-systems",
-            "research-engineer",
-            # personas & AI researchers
-            "yann-lecun", "andrej-karpathy", "ilya-sutskever",
-            "geoffrey-hinton", "sam-altman", "bill-gates",
-            "elon-musk", "steve-jobs", "warren-buffett",
-            "matematico-tao", "lex-fridman",
-            # AI tools & frameworks
-            "comfyui", "bdistill-", "videodb",
-            "image-studio", "seek-and-analyze-video",
-            "tool-use-guardian", "algorithmic-art",
-            # quantum computing
-            "qiskit", "cirq-",
-        ],
-        "prefixes": ["ai-", "azure-ai-", "m365-agents", "llm-", "context-", "fal-", "hugging-face-"],
-        "excludes": [
-            "bullmq-specialist",
-            "fp-ts-pragmatic",
-            "brand-guidelines-anthropic",
-            "internal-comms-anthropic",
-        ],
-    },
-    "backend": {
-        "tokens": [
-            "api", "server", "backend", "database", "db", "sql",
-            "graphql", "grpc", "webhook", "middleware", "nosql",
-        ],
-        "substrings": [
-            "api-", "-api", "backend", "database", "serverless",
-            "microservice", "fastapi", "express-", "django", "flask",
-            "nestjs", "graphql", "rest-api", "grpc", "prisma",
-            "postgres", "mysql", "mongodb", "redis-",
-            "kafka-", "rabbitmq", "bullmq", "supabase",
-            "webhook", "cron-", "scheduler",
-            "algolia", "convex", "using-neon", "neon-",
-            "cloudflare-workers", "plaid-",
-            "laravel", "pydantic", "hybrid-search",
-            "similarity-search", "file-upload", "schema-markup",
-            "payment-integration",
-            "odoo-", "hono", "drizzle-orm", "trpc-",
-            "new-rails-project", "zod-validation", "pakistan-payments",
-        ],
-        "prefixes": ["api-", "database-", "sql-"],
-        "excludes": [],
-    },
-    "frontend": {
-        "tokens": [
-            "react", "vue", "angular", "css", "html", "ui", "ux",
-            "svelte", "tailwind", "theme", "storybook", "frontend",
-            "remotion", "threejs",
-        ],
-        "substrings": [
-            "react-", "-react", "angular", "vue-", "-vue",
-            "svelte", "nextjs", "nuxt", "tailwind", "css-", "-css",
-            "html-", "design-system", "storybook", "figma",
-            "avalonia", "3d-web", "radix-ui", "ui-ux",
-            "ui-visual", "ui-skills", "theme-",
-            "app-builder", "web-design", "canvas-design",
-            "remotion", "interactive-portfolio", "frontend-design",
-            "chrome-extension", "browser-extension", "i18n-",
-            "multi-platform-", "zustand",
-            "astro", "shadcn", "scroll-experience", "spline-3d",
-            "progressive-web-app", "chat-widget", "favicon",
-            "magic-animator", "fixing-motion-", "animejs",
-            "tanstack-query", "electron-develop",
-        ],
-        "prefixes": ["react-", "angular-", "vue-", "ui-", "hig-", "makepad-", "robius-"],
-        "excludes": [
-            "linux-privilege-escalation",
-            "linux-shell-scripting",
-            "linux-troubleshooting",
-            "c4-component",
-            "html-injection-testing",
-            "xss-html-injection",
-        ],
-    },
-    "devops": {
-        "tokens": [
-            "devops", "docker", "k8s", "terraform", "aws", "azure",
-            "gcp", "ci", "cd", "helm", "ansible", "github",
-        ],
-        "substrings": [
-            "devops", "docker", "kubernetes", "terraform", "aws-",
-            "github-actions", "ci-cd", "deploy", "infra",
-            "cloud-", "helm", "ansible", "azd-",
-            "pipeline-", "-pipeline", "observability",
-            "monitoring-", "-monitor", "container",
-            "registry", "gitlab-ci",
-            "git-", "gitops", "linux-", "posix-",
-            "powershell", "incident-", "performance-",
-            "slo-", "grafana-", "prometheus-",
-            "service-mesh", "istio-", "linkerd-",
-            "distributed-", "on-call", "bazel-", "busybox",
-            "github-issue", "create-pr", "git-push", "iterate-pr",
-            "using-git", "github-", "os-script",
-            "cloudformation", "cdk-", "monorepo-", "turborepo",
-            "nx-workspace", "shellcheck", "dependency-upgrade",
-            "environment-setup", "network-",
-            "finishing-a-development-branch", "create-branch",
-            "windows-shell", "uv-package-manager",
-        ],
-        "prefixes": [
-            "aws-", "azure-", "gcp-", "k8s-", "docker-",
-            "terraform-", "deployment-",
-        ],
-        "excludes": [],
-    },
-    "security": {
-        "tokens": [
-            "security", "pentest", "auth", "encryption", "vulnerability",
-            "vulnerabilities", "hacking", "malware", "forensic", "threat", "owasp",
-        ],
-        "substrings": [
-            "security", "pentest", "penetration", "vulnerability", "vulnerabilities",
-            "attack", "auth-", "oauth", "jwt", "gdpr", "compliance",
-            "crypto-", "anti-reversing", "api-security",
-            "active-directory", "authentication", "hacking",
-            "malware", "forensic", "threat", "privilege-escalation",
-            "privilege-esc", "exploit", "xss", "csrf", "injection",
-            "phish", "sanitiz", "firewall",
-            "red-team", "metasploit", "shodan", "binary-analysis",
-            "protocol-reverse", "scanning", "sast-",
-            "web-severity", "memory-safety", "wireshark",
-            "secrets-manag", "web-scanning",
-            "traversal", "mtls", "reverse-engineer",
-            "burpsuite", "ffuf-", "semgrep-",
-            "privacy-by-design", "varlock",
-        ],
-        "prefixes": ["security-"],
-        "excludes": [
-            "seo-forensic-incident-response",
-        ],
-    },
-    "testing": {
-        "tokens": [
-            "test", "tests", "testing", "e2e", "qa", "spec",
-            "playwright", "pytest", "jest", "vitest",
-            "tdd", "debug", "debugger",
-        ],
-        "substrings": [
-            "test-", "-test", "testing", "playwright", "pytest",
-            "jest-", "vitest", "cucumber", "e2e-", "-e2e",
-            "qa-", "-qa", "evaluation", "audit",
-            "lint-", "coverage", "static-analysis",
-            "tdd-", "debug-", "debugg", "find-bugs",
-            "error-detective", "error-debug", "error-diagnostic",
-            "fix-review", "code-review", "systematic-debug",
-            "comprehensive-review", "postmortem", "quality-nonconform",
-            "verification-before", "pr-enhance",
-            "bug-hunter", "differential-review",
-            "lighthouse-scanner", "gdb-cli", "codex-review",
-        ],
-        "prefixes": ["test-"],
-        "excludes": [
-            "backtesting-frameworks",
-        ],
-    },
-    "mobile": {
-        "tokens": [
-            "mobile", "ios", "android", "flutter",
-            "swiftui", "kotlin", "expo",
-        ],
-        "substrings": [
-            "mobile", "react-native", "flutter", "ios-", "-ios",
-            "android", "jetpack", "swiftui", "kotlin-",
-            "macos-spm", "macos-menubar", "tuist-",
-        ],
-        "prefixes": ["expo-", "mobile-"],
-        "excludes": [
-            "azure-monitor-opentelemetry-exporter-java",
-            "azure-monitor-opentelemetry-exporter-py",
-        ],
-    },
-    "data": {
-        "tokens": [
-            "data", "etl", "analytics", "warehouse", "lakehouse",
-            "dbt", "spark", "airflow",
-        ],
-        "substrings": [
-            "data-engineering", "data-pipeline", "data-lake",
-            "data-warehouse", "dbt-", "etl-", "spark-",
-            "airflow-", "analytics-", "bigquery", "snowflake",
-            "databricks", "redshift", "quant-", "backtesting",
-            "matplotlib", "networkx", "plotly", "polars",
-            "seaborn", "statsmodels", "sympy", "scikit-learn",
-            "scanpy", "alpha-vantage", "xvary-stock",
-            "astropy", "biopython", "molykit",
-            "geo-fundamental", "clickhouse",
-        ],
-        "prefixes": ["data-"],
-        "excludes": [
-            "azure-data-tables-java",
-            "azure-data-tables-py",
-        ],
-    },
-    "automation": {
-        "tokens": ["automation", "telegram"],
-        "substrings": [
-            "automation", "automate-", "auto-",
-            "workflow", "zapier", "n8n",
-            "firebase", "hubspot", "stripe-",
-            "paypal", "salesforce", "shopify",
-            "slack-", "telegram-", "twilio",
-            "wordpress", "inngest", "segment-",
-            "trigger-dev", "upstash", "conductor-",
-            "firecrawl", "scraper", "report-gen",
-            "automat",
-            "apify-", "linkedin-cli", "observe-whatsapp",
-            "amazon-alexa", "x-article-publisher", "instagram",
-            "unsplash-integration",
-        ],
-        "prefixes": [],
-        "excludes": [
-            "azure-communication-callautomation-java",
-        ],
-    },
-    "architecture": {
-        "tokens": ["architecture", "architect"],
-        "substrings": [
-            "architecture", "architect", "design-pattern",
-            "system-design", "c4-", "microservice",
-            "event-driven", "domain-driven", "ddd-",
-            "clean-architecture", "hexagonal",
-            "cqrs-", "event-store", "saga-", "projection-",
-            "refactor", "tech-debt", "clean-code",
-            "codebase-cleanup", "legacy-", "code-refact",
-            "framework-migration", "error-handling",
-            "design-orchestrat", "coding-standard", "design-md",
-            "concise-planning", "executing-plans", "full-stack-orchestration",
-            "senior-fullstack", "uncle-bob", "composition-pattern",
-            "progressive-estimation", "analyze-project", "blueprint",
-            "closed-loop-delivery", "tool-design", "plan-writing",
-            "planning-with-files", "clarity-gate", "dx-optimizer",
-            "simplify-code", "product-design", "project-development",
-            "acceptance-orchestrator",
-        ],
-        "prefixes": ["c4-"],
-        "excludes": [],
-    },
-    "language": {
-        "tokens": [
-            "python", "golang", "go", "rust", "java", "typescript",
-            "csharp", "ruby", "elixir", "swift", "php", "lua",
-            "cpp", "dotnet", "bash",
-            "javascript", "haskell", "scala", "julia", "c", "bun",
-        ],
-        "substrings": [
-            "python-", "golang-", "rust-", "typescript-",
-            "ruby-", "elixir-", "php-", "lua-",
-            "dotnet-", "csharp-", "bash-",
-            "javascript-", "haskell-", "scala-", "julia-",
-            "bun-", "nodejs-", "modern-javascript",
-        ],
-        "prefixes": [
-            "python-", "go-", "rust-", "typescript-",
-            "java-", "dotnet-", "ruby-", "bash-",
-            "fp-ts-", "fp-",
-        ],
-        "excludes": [],
-        "skip_prefix": ["azure-"],
-    },
-    "content": {
-        "tokens": [
-            "seo", "copywriting", "branding", "marketing",
-            "blog", "newsletter", "content", "prose",
-        ],
-        "substrings": [
-            "seo-", "copywriting", "brand-", "marketing",
-            "blog-", "newsletter", "content-", "editorial",
-            "social-media", "landing-page",
-            "wiki-", "obsidian-", "readme", "documentation",
-            "writing-", "copy-editing", "podcast",
-            "youtube-", "screenshot", "email-sequence", "email-system",
-            "docx-", "pptx-", "xlsx-", "pdf-official",
-            "app-store-optim", "beautiful-prose",
-            "-cro", "paid-ads", "referral-",
-            "professional-proofreader", "scientific-writing",
-            "lead-magnets", "app-store-changelog",
-            "ad-creative", "viral-generator", "cold-email",
-            "nanobanana-ppt", "citation-management",
-        ],
-        "prefixes": ["seo-", "brand-", "wiki-"],
-        "excludes": [],
-    },
-
-    # ─── GAMEDEV (2026) ──────────────────────────────────────────────
-    "gamedev": {
-        "tokens": ["game", "unity", "godot", "bevy", "shader", "minecraft"],
-        "substrings": [
-            "game-", "unity-", "godot-", "bevy-", "shader-",
-            "game-development", "bukkit-",
-        ],
-        "prefixes": [],
-        "excludes": [],
-    },
-
-    # ─── BUSINESS & STARTUPS (2026) ───────────────────────────────────
-    "business": {
-        "tokens": ["startup", "business", "analyst"],
-        "substrings": [
-            "startup-", "business-analyst", "competitive-landscape",
-            "market-sizing", "cost-optimization", "pricing-strategy",
-            "financial-modeling", "financial-projection", "kpi-",
-            "product-manager", "risk-manager", "risk-metrics",
-            "customer-support", "launch-strategy",
-            "hr-", "legal-", "logistics-", "employment-",
-            "inventory-", "returns-", "carrier-",
-            "churn-prevention", "competitor-alternative",
-            "growth-engine", "jobgpt", "monetization", "revops",
-            "sales-enablement", "production-scheduling",
-            "saas-mvp-launcher", "micro-saas-", "interview-coach",
-            "energy-procurement", "free-tool-strategy",
-            "team-collaboration", "team-composition",
-            "product-inventor", "sred-", "oss-hunter",
-        ],
-        "prefixes": ["startup-", "revops-"],
-        "excludes": [],
-    },
-
-    # ─── WEB3 & BLOCKCHAIN (2026) ─────────────────────────────────────
-    "web3": {
-        "tokens": ["blockchain", "solidity", "defi", "nft", "web3", "crypto"],
-        "substrings": [
-            "blockchain", "solidity", "defi-", "nft-",
-            "web3", "ethereum", "bitcoin", "blockrun",
-            "smart-contract",
-        ],
-        "prefixes": [],
-        "excludes": [],
-    },
-
-    # ─── HEALTH & WELLNESS (2026) ─────────────────────────────────────
-    "health": {
-        "tokens": ["health", "nutrition", "fitness", "wellness", "medical", "clinical"],
-        "substrings": [
-            "health-analyzer", "health-trend", "nutrition-", "fitness-analyzer",
-            "sleep-analyzer", "weightloss-", "rehabilitation-",
-            "tcm-constitution", "yes-md", "wellally",
-            "mental-health", "skin-health", "oral-health",
-            "sexual-health", "travel-health", "occupational-health",
-            "family-health",
-        ],
-        "prefixes": [],
-        "excludes": [],
-    },
-
-    # ─── LEGAL & JURÍDICO (2026) ──────────────────────────────────────
-    "legal": {
-        "tokens": ["advogado", "juridico"],
-        "substrings": [
-            "leiloeiro", "advogado-", "juridico",
-            "junta-leiloeiro",
-        ],
-        "prefixes": ["advogado-", "leiloeiro-"],
-        "excludes": [],
-    },
-}
+CATEGORIES: tuple[str, ...] = (
+    "accessibility", "ai", "backend", "frontend", "devops", "security", "testing",
+    "mobile", "data", "automation", "architecture", "language", "content",
+    "gamedev", "business", "web3", "health", "legal",
+)
 
 CATEGORY_ICONS = {
     "accessibility": "♿",
@@ -460,59 +81,41 @@ CATEGORY_ICONS = {
     "web3": "🔗",
     "health": "🏥",
     "legal": "⚖️",
-    "other": "📦",
+    "unclassified": "📦",
 }
-
-
-def categorize_skill_name(skill_name: str) -> list[str]:
-    """Categoriza uma skill pelo nome da pasta — roda em tempo real, sem arquivo externo."""
-    name_lower = skill_name.lower()
-    tokens = set(name_lower.split("-"))
-    categories: list[str] = []
-
-    for category, rules in CATEGORY_RULES.items():
-        if skill_name in rules.get("excludes", []):
-            continue
-
-        skip = False
-        for sp in rules.get("skip_prefix", []):
-            if name_lower.startswith(sp):
-                skip = True
-                break
-        if skip:
-            continue
-
-        matched = False
-
-        for token in rules.get("tokens", []):
-            if token in tokens:
-                matched = True
-                break
-
-        if not matched:
-            for prefix in rules.get("prefixes", []):
-                if name_lower.startswith(prefix):
-                    matched = True
-                    break
-
-        if not matched:
-            for sub in rules.get("substrings", []):
-                if sub in name_lower:
-                    matched = True
-                    break
-
-        if matched:
-            categories.append(category)
-
-    return sorted(categories) if categories else ["other"]
 
 
 # ---------------------------------------------------------------------------
 # SKILL DISCOVERY & METADATA
 # ---------------------------------------------------------------------------
 
-# Conjunto de categorias reconhecidas como pastas de categoria no SKILLS_PATH
-_KNOWN_CATEGORIES: frozenset[str] = frozenset(CATEGORY_RULES.keys()) | {"other"}
+# Classificacao feita pelo modelo (classify_skills), persistida para nao repetir custo.
+CLASSIFICATION_CACHE = MCP_PATH / "skills_classification.json"
+
+
+def _description_hash(description: str) -> str:
+    return hashlib.sha1(description.encode("utf-8")).hexdigest()[:12]
+
+
+def load_classification() -> dict[str, dict[str, Any]]:
+    try:
+        data = json.loads(CLASSIFICATION_CACHE.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def save_classification(data: dict[str, dict[str, Any]]) -> None:
+    CLASSIFICATION_CACHE.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def skill_categories(name: str, description: str, folder_category: str | None) -> list[str]:
+    """Pasta pai (fato estrutural) + categorias decididas pelo modelo. Nada por nome/palavra."""
+    cats: list[str] = [folder_category] if folder_category else []
+    entry = load_classification().get(name)
+    if entry and entry.get("h") == _description_hash(description):
+        cats += [c for c in entry.get("cats", []) if c not in cats]
+    return cats or ["unclassified"]
 
 
 def get_skill_info(
@@ -548,17 +151,12 @@ def get_skill_info(
 
         description = " ".join(description_lines)[:200]
 
-        if folder_category:
-            # Pasta como fonte de verdade: categoria primaria = pasta pai.
-            # Categorias secundarias vem da analise do nome (sem duplicar a primaria).
-            secondary = [c for c in categorize_skill_name(skill_name) if c != folder_category]
-            categories = [folder_category] + secondary
-        else:
-            categories = categorize_skill_name(skill_name)
+        description = description or "Advanced skill"
+        categories = skill_categories(skill_name, description, folder_category)
 
         return {
             "name": skill_name,
-            "description": description or "Advanced skill",
+            "description": description,
             "path": str(skill_dir),
             "skill_md_preview": content[:1000],
             "full_content_path": str(skill_md),
@@ -570,7 +168,7 @@ def get_skill_info(
 
 
 def discover_skills() -> list[dict[str, Any]]:
-    """Descobre e categoriza TODAS as skills em c:\\skills em tempo real.
+    """Descobre TODAS as skills em c:\\skills em tempo real.
 
     Suporta dois layouts:
     - Flat:        c:\\skills\\<skill-name>\\SKILL.md  (legado)
@@ -589,22 +187,19 @@ def discover_skills() -> list[dict[str, Any]]:
         if not item.is_dir() or item.name.startswith("."):
             continue
         if (item / "SKILL.md").exists():
-            # Layout flat — skill direto na raiz, usa analise de nome
+            # Layout flat — skill direto na raiz
             skill_info = get_skill_info(item)
             if skill_info:
                 skills.append(skill_info)
-        elif item.name in _KNOWN_CATEGORIES:
-            # Layout categorizado — pasta pai e' a categoria primaria
+        else:
+            # Layout categorizado — pasta pai e' a categoria (fato estrutural)
             for subitem in item.iterdir():
                 if subitem.is_dir() and not subitem.name.startswith("."):
                     skill_info = get_skill_info(subitem, folder_category=item.name)
                     if skill_info:
                         skills.append(skill_info)
-        else:
-            # Pasta desconhecida sem SKILL.md — ignora
-            logger.debug(f"Pasta ignorada (nao e categoria conhecida): {item.name}")
 
-    logger.debug(f"Descobertas {len(skills)} skills com categorizacao automatica")
+    logger.debug(f"Descobertas {len(skills)} skills ")
     return sorted(skills, key=lambda s: s["name"])
 
 
@@ -1000,9 +595,9 @@ def legal() -> list[dict]:
 
 @mcp.prompt()
 def skills(query: str = "") -> list[dict]:
-    """Busca e lista skills por palavra-chave, ou lista todas as categorias disponíveis"""
+    """Acha skills para uma tarefa (o modelo escolhe pelo sentido), ou lista as categorias"""
     if query:
-        return [{"role": "user", "content": f"Use search_skills('{query}') e me mostre as skills encontradas."}]
+        return [{"role": "user", "content": f"Use find_skills('{query}') e me mostre as skills encontradas."}]
     return [{"role": "user", "content": "Use list_categories() e me mostre todas as categorias de skills disponíveis com suas contagens."}]
 
 
@@ -1024,11 +619,7 @@ async def invoke_skill(skill_name: str, params: str = "") -> str:
     matching = [s for s in skills if s["name"].lower() == skill_name.lower()]
 
     if not matching:
-        partial = [s for s in skills if skill_name.lower() in s["name"].lower()]
-        if partial:
-            names = "\n".join(f"  - {s['name']} [{', '.join(s.get('categories',[]))}]" for s in partial[:10])
-            return f"Skill '{skill_name}' nao encontrada.\n\nVoce quis dizer:\n{names}"
-        return f"Skill '{skill_name}' nao encontrada. Use list_categories() ou search_skills() para encontrar."
+        return f"Skill '{skill_name}' nao encontrada. Use find_skills(task) para o modelo achar a skill certa."
 
     skill = matching[0]
 
@@ -1054,159 +645,130 @@ async def invoke_skill(skill_name: str, params: str = "") -> str:
     return response
 
 
-@mcp.tool()
-async def search_skills(query: str) -> str:
-    """
-    Busca skills por nome, descricao ou categoria. Busca textual em todo o catalogo.
-
-    Args:
-        query: Termo de busca (ex: 'typescript', 'performance', 'database', 'react', 'prompt', 'security')
-    """
-    skills = get_skills()
-    q = query.lower()
-
-    matching = [
-        s for s in skills
-        if q in s["name"].lower()
-        or q in s["description"].lower()
-        or q in " ".join(s.get("categories", []))
-    ]
-
-    if not matching:
-        return f"Nenhuma skill encontrada para '{query}'. Tente termos mais genericos."
-
-    response = f"Busca: '{query}' - {len(matching)} resultado(s)\n\n"
-
-    for idx, skill in enumerate(matching[:30], 1):
-        cats = ", ".join(skill.get("categories", ["other"]))
-        response += f"{idx}. **{skill['name']}** [{cats}]\n"
-        response += f"   {skill['description']}\n\n"
-
-    if len(matching) > 30:
-        response += f"_...e mais {len(matching) - 30} resultados_"
-
-    return response
+_FIND_BATCH = 250   # skills por chamada ao modelo (limite de contexto, nao de relevancia)
+_FIND_MAX_RESULTS = 10
+_CLASSIFY_BATCH = 60
 
 
-# ---------------------------------------------------------------------------
-# BM25 index cache
-# ---------------------------------------------------------------------------
-_bm25_index: Any = None
-_bm25_skills: list[dict] = []
-_bm25_built_at: float = 0.0
-_BM25_TTL = 300  # segundos
-
-
-def _build_bm25_index(skills: list[dict]) -> Any:
-    """Constrói índice BM25 sobre nomes + primeiras linhas dos SKILL.md."""
-    try:
-        from rank_bm25 import BM25Okapi
-    except ImportError:
-        return None
-
-    corpus: list[list[str]] = []
-    for skill in skills:
-        # Tokenizar nome (substitui hífens por espaços, split)
-        name_tokens = skill["name"].replace("-", " ").replace("_", " ").split()
-        # Adicionar categoria como tokens extras
-        cat_tokens: list[str] = []
-        for cat in skill.get("categories", []):
-            cat_tokens.extend(cat.split("-"))
-        # Ler primeiras linhas do SKILL.md para mais contexto
-        skill_dir = SKILLS_PATH / skill["name"]
-        skill_md = skill_dir / "SKILL.md"
-        content_tokens: list[str] = []
-        if skill_md.exists():
-            try:
-                first_lines = skill_md.read_text(encoding="utf-8", errors="ignore")[:400]
-                # Tokenizar: só palavras alfanuméricas
-                import re
-                content_tokens = re.findall(r"[a-zA-Z0-9]+", first_lines.lower())
-            except Exception:
-                pass
-
-        all_tokens = name_tokens + cat_tokens + content_tokens
-        corpus.append([t.lower() for t in all_tokens if len(t) > 1])
-
-    return BM25Okapi(corpus)
-
-
-def _get_bm25(skills: list[dict]) -> Any:
-    """Retorna índice BM25 construído (com cache TTL)."""
-    global _bm25_index, _bm25_skills, _bm25_built_at
-    now = time.time()
-    if _bm25_index is None or (now - _bm25_built_at) > _BM25_TTL or len(skills) != len(_bm25_skills):
-        logger.info("Construindo índice BM25 para %d skills...", len(skills))
-        _bm25_index = _build_bm25_index(skills)
-        _bm25_skills = skills
-        _bm25_built_at = now
-    return _bm25_index
+def _catalog_line(skill: dict[str, Any]) -> str:
+    return f"{skill['name']} :: {skill['description'][:100]}"
 
 
 @mcp.tool()
-async def semantic_search_skills(query: str, top_k: int = 15) -> str:
+async def find_skills(task: str, ctx: Context) -> str:  # type: ignore[type-arg]
     """
-    Busca semântica por relevância usando BM25. Vai MUITO além do substring match —
-    entende contexto, sinônimos parciais e relevância multi-token.
-
-    Use isso quando search_skills não encontrar o que você quer.
-    Exemplos: 'deploy container cloud', 'autenticação jwt api', 'machine learning pipeline',
-              'scraping web automation', 'pagamentos stripe checkout'.
+    Acha as skills certas para uma tarefa descrita em linguagem natural (qualquer idioma).
+    Quem escolhe e o MODELO do cliente (MCP sampling) lendo o catalogo - sem palavra-chave,
+    regex nem ranking lexical. Entende intencao, sinonimos e contexto.
 
     Args:
-        query: Consulta em linguagem natural (ex: 'deploy agent on Azure', 'react state management')
-        top_k: Número de resultados (padrão: 15, máximo: 30)
+        task: O que voce precisa fazer (ex: 'subir um agente no Azure com CI', 'tela de chat acessivel')
     """
     skills = get_skills()
     if not skills:
-        return "Nenhuma skill disponível."
+        return "Nenhuma skill disponivel."
+    known = {s["name"]: s for s in skills}
 
-    top_k = min(max(top_k, 1), 30)
-
-    bm25 = _get_bm25(skills)
-    if bm25 is None:
-        return (
-            "❌ rank_bm25 não instalado. Execute: pip install rank-bm25\n"
-            "   Por enquanto, use search_skills() para busca por substring."
+    picked: list[str] = []
+    for i in range(0, len(skills), _FIND_BATCH):
+        batch = skills[i : i + _FIND_BATCH]
+        lines = "\n".join(_catalog_line(s) for s in batch)
+        raw = await ask_model(
+            ctx,
+            "Voce escolhe skills para uma tarefa. Julgue pelo SENTIDO e pela intencao, nao por "
+            f"palavras em comum. Escolha ate {_FIND_MAX_RESULTS} nomes deste catalogo que realmente "
+            "ajudam (lista vazia se nenhum serve). Responda SOMENTE com um array JSON de nomes."
+            f"\n\nTAREFA:\n{task}\n\nCATALOGO:\n{lines}",
+            max_tokens=400,
         )
+        if raw is None:
+            return (
+                "O cliente nao oferece sampling, entao a escolha por modelo nao esta disponivel aqui. "
+                "Leia o catalogo com list_all_skills(page=N) ou list_categories() e escolha voce mesmo, "
+                "depois use invoke_skill(nome)."
+            )
+        names = extract_json(raw, "array") or []
+        picked += [n for n in names if isinstance(n, str) and n in known and n not in picked]
 
-    # Tokenizar a query
-    query_tokens = [t.lower() for t in re.findall(r"[a-zA-Z0-9]+", query) if len(t) > 1]
-    if not query_tokens:
-        return "Query inválida. Use palavras como: 'deploy azure', 'react hooks', 'ml pipeline'."
-
-    scores = bm25.get_scores(query_tokens)
-
-    # Combinar score com índice e ordenar
-    ranked = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)
-    top_results = [(skills[i], score) for i, score in ranked[:top_k] if score > 0]
-
-    if not top_results:
-        return (
-            f"Nenhum resultado relevante para '{query}'.\n"
-            f"Tente search_skills('{query}') para busca por substring,\n"
-            f"ou list_categories() para ver todas as categorias."
+    if len(picked) > _FIND_MAX_RESULTS:  # varios lotes: o modelo desempata entre os finalistas
+        lines = "\n".join(_catalog_line(known[n]) for n in picked)
+        raw = await ask_model(
+            ctx,
+            f"Dos candidatos abaixo, escolha os {_FIND_MAX_RESULTS} mais uteis para a tarefa, "
+            "do mais util ao menos. Responda SOMENTE com um array JSON de nomes."
+            f"\n\nTAREFA:\n{task}\n\n{lines}",
+            max_tokens=400,
         )
+        final = [n for n in (extract_json(raw, "array") or []) if isinstance(n, str) and n in picked]
+        picked = final or picked[:_FIND_MAX_RESULTS]
 
-    response = f"🔍 Busca semântica (BM25): **'{query}'** → {len(top_results)} resultado(s)\n\n"
-    for idx, (skill, score) in enumerate(top_results, 1):
-        cats = ", ".join(skill.get("categories", ["other"]))
-        response += f"{idx}. **{skill['name']}** [{cats}] _(score: {score:.2f})_\n"
-        if skill.get("description"):
-            response += f"   {skill['description']}\n"
-        response += "\n"
+    if not picked:
+        return f"O modelo nao achou skill adequada para: {task}"
+    out = f"Skills para '{task}' ({len(picked)}):\n\n"
+    for idx, n in enumerate(picked, 1):
+        sk = known[n]
+        out += f"{idx}. **{n}** [{', '.join(sk.get('categories', []))}]\n   {sk['description']}\n\n"
+    return out + "_Use invoke_skill('nome') para ler a skill._"
 
-    response += "---\n"
-    response += f"_Para invocar uma skill: `invoke_skill('nome-da-skill')`_"
-    return response
+
+@mcp.tool()
+async def classify_skills(ctx: Context, max_batches: int = 10, force: bool = False) -> str:  # type: ignore[type-arg]
+    """
+    Pede ao modelo do cliente (MCP sampling) para classificar as skills sem categoria nas
+    categorias de list_categories(). O resultado fica em cache (skills_classification.json)
+    e so se reclassifica o que mudou. Skills que o modelo nao souber classificar ficam
+    'unclassified' - nada e chutado por nome.
+
+    Args:
+        max_batches: Teto de chamadas ao modelo por execucao (retome chamando de novo)
+        force: Reclassifica tudo, ignorando o cache
+    """
+    skills = get_skills(force_reload=True)
+    cache = load_classification()
+    todo = [
+        s for s in skills
+        if force or cache.get(s["name"], {}).get("h") != _description_hash(s["description"])
+    ]
+    if not todo:
+        return "Todas as skills ja estao classificadas."
+
+    done = 0
+    for n_batch, i in enumerate(range(0, len(todo), _CLASSIFY_BATCH)):
+        if n_batch >= max(1, max_batches):
+            break
+        batch = todo[i : i + _CLASSIFY_BATCH]
+        raw = await ask_model(
+            ctx,
+            "Classifique cada skill em UMA ou MAIS destas categorias, pelo sentido do que ela faz: "
+            f"{', '.join(CATEGORIES)}. Se nenhuma servir, use lista vazia. Responda SOMENTE com um "
+            'objeto JSON {"nome-da-skill": ["categoria", ...]}.\n\n'
+            + "\n".join(_catalog_line(s) for s in batch),
+            max_tokens=2000,
+        )
+        if raw is None:
+            if done == 0:
+                return "O cliente nao oferece sampling: nao da para classificar por modelo aqui."
+            break
+        result = extract_json(raw, "object") or {}
+        for s in batch:
+            cats = result.get(s["name"])
+            if isinstance(cats, list):
+                cache[s["name"]] = {
+                    "h": _description_hash(s["description"]),
+                    "cats": [c for c in cats if c in CATEGORIES],
+                }
+                done += 1
+    save_classification(cache)
+    get_skills(force_reload=True)
+    return f"Classificadas {done} skills; faltam {len(todo) - done}. Cache: {CLASSIFICATION_CACHE.name}"
 
 
 @mcp.tool()
 async def list_categories() -> str:
     """
-    Lista todas as 18 categorias disponiveis com contagem de skills.
+    Lista as categorias em uso com contagem de skills (pasta pai + classificacao feita pelo modelo).
     Categorias: accessibility, ai, backend, frontend, devops, security, testing, mobile, data, automation, architecture, language, content, gamedev, business, web3, health, legal.
-    Para busca avancada use semantic_search_skills(query).
+    Para achar skills por tarefa use find_skills(task). Para classificar skills sem categoria use classify_skills().
     """
     skills = get_skills()
 
@@ -1225,7 +787,7 @@ async def list_categories() -> str:
 
     response += "\n---\n"
     response += "Comandos disponiveis:\n"
-    for cat in sorted(CATEGORY_RULES.keys()):
+    for cat in sorted(CATEGORIES):
         icon = CATEGORY_ICONS.get(cat, "📦")
         response += f"  {icon} list_{cat}_skills()\n"
 

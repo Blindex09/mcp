@@ -20,7 +20,7 @@ def test_python_version():
 
 def test_dependencies():
     """Verifica se as dependências estão instaladas"""
-    required = ['mcp', 'rank_bm25']
+    required = ['mcp']
     missing = []
     
     for pkg in required:

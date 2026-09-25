@@ -42,7 +42,8 @@ def test_required_callables_exist() -> None:
     """Core public functions must be present after import."""
     mod = _load_module()
     expected = [
-        "categorize_skill_name",
+        "find_skills",
+        "classify_skills",
         "get_skills",
         "discover_skills",
         "build_category_response",
@@ -58,7 +59,6 @@ def test_required_constants_exist() -> None:
     mod = _load_module()
     assert hasattr(mod, "SKILLS_PATH"), "Missing SKILLS_PATH"
     assert hasattr(mod, "_CACHE_TTL_SECONDS"), "Missing _CACHE_TTL_SECONDS"
-    assert hasattr(mod, "_BM25_TTL"), "Missing _BM25_TTL"
 
 
 def test_mcp_instance_exists() -> None:
@@ -84,12 +84,12 @@ def test_mcp_instance_has_instructions() -> None:
 
 
 def test_category_rules_and_icons_aligned() -> None:
-    """Every CATEGORY_RULES key must have a corresponding CATEGORY_ICONS entry."""
+    """Every taxonomy category offered to the classifier must have an icon."""
     mod = _load_module()
-    rules: dict[str, Any] = mod.CATEGORY_RULES  # type: ignore[attr-defined]
+    rules: dict[str, Any] = dict.fromkeys(mod.CATEGORIES)  # type: ignore[attr-defined]
     icons: dict[str, str] = mod.CATEGORY_ICONS  # type: ignore[attr-defined]
     missing = set(rules.keys()) - set(icons.keys())
-    assert not missing, f"CATEGORY_RULES keys missing from CATEGORY_ICONS: {missing}"
+    assert not missing, f"CATEGORIES missing from CATEGORY_ICONS: {missing}"
 
 
 def test_skills_path_is_path_object() -> None:

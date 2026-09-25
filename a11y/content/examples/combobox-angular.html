@@ -1,0 +1,95 @@
+<!--
+  Angular Aria combobox — Angular 21+ (2026)
+  @angular/aria/combobox + @angular/cdk/overlay
+  Directives: ngCombobox, ngComboboxInput, ngComboboxPopupContainer,
+              ngListbox, ngOption
+
+  The library wires role="combobox", aria-haspopup, aria-expanded,
+  aria-controls, aria-activedescendant, keyboard nav, and focus.
+  You provide the HTML structure and CSS.
+-->
+<div class="day-selection">
+  <h2 id="week-label" class="day-selection__title">This Week</h2>
+
+  <!-- Combobox container: coordinates input + popup, manages open/close,
+       keyboard, and ARIA roles. readonly prevents free text entry. -->
+  <div ngCombobox readonly>
+    <!-- Combobox input: the trigger. aria-labelledby associates the input
+         with both the heading and the selected value span for an accessible name. -->
+    <div #trigger class="day-selection__select-trigger">
+      <span id="day-value" class="day-selection__select-value">
+        {{ day() }}
+      </span>
+      <input type="text"
+        ngComboboxInput
+        aria-labelledby="week-label day-value"
+        class="day-selection__select-input" />
+      <!-- The arrow is purely visual; state is conveyed by aria-expanded.
+           Hide it from assistive tech with aria-hidden. -->
+      <span class="day-selection__select-arrow" aria-hidden="true">▼</span>
+    </div>
+
+    <!-- Popup container: marks where the popup content lives and keeps
+         correct ARIA relationships between trigger and popup. -->
+    <ng-template ngComboboxPopupContainer>
+      <ng-template
+        [cdkConnectedOverlay]="{ origin: trigger, usePopover: 'inline', matchWidth: true }"
+        [cdkConnectedOverlayOpen]="true">
+        <!-- Listbox: an ordered list because day order matters.
+             aria-label gives the listbox an accessible name. -->
+        <ol
+          ngListbox
+          [(values)]="selectedDay"
+          aria-label="Available days"
+          class="day-selection__select-popup">
+          @for (day of days(); track day.value) {
+            <li
+              ngOption
+              [value]="day.value"
+              [label]="day.label"
+              class="day-selection__select-option">
+              <span class="day-selection__select-option-check" aria-hidden="true">✓</span>
+              <span class="day-selection__select-option-day">{{ day.dayName }}</span>
+              <span class="day-selection__select-option-date">{{ day.label }}</span>
+            </li>
+          }
+        </ol>
+      </ng-template>
+    </ng-template>
+  </div>
+</div>
+
+<!--
+  TypeScript component (simplified):
+
+  import { Component, signal } from '@angular/core';
+  import { Combobox, ComboboxInput, ComboboxPopupContainer } from '@angular/aria/combobox';
+  import { Listbox, Option } from '@angular/aria/listbox';
+  import { CdkConnectedOverlay } from '@angular/cdk/overlay';
+
+  @Component({
+    selector: 'app-day-selection',
+    standalone: true,
+    imports: [Combobox, ComboboxInput, ComboboxPopupContainer, Listbox, Option, CdkConnectedOverlay],
+    templateUrl: './day-selection.html',
+  })
+  export class DaySelectionComponent {
+    selectedDay: string | null = null;
+    day = signal('Select a day');
+    days = signal([
+      { value: 'mon', label: '12 Jan', dayName: 'Monday' },
+      { value: 'tue', label: '13 Jan', dayName: 'Tuesday' },
+      { value: 'wed', label: '14 Jan', dayName: 'Wednesday' },
+      { value: 'thu', label: '15 Jan', dayName: 'Thursday' },
+      { value: 'fri', label: '16 Jan', dayName: 'Friday' }
+    ]);
+  }
+-->
+
+<!--
+  VoiceOver walkthrough (from the 2026 push-based.io guide):
+  - TAB → "Current Week Select a day, clickable list box popup collapsed combobox"
+  - Enter → "Expanded, list box 7 items"
+  - ArrowDown → "Monday January 12 not selected, menu item, (1 of 7)"
+  - Enter → "collapsed, 13 January" (listbox closed, value selected)
+-->

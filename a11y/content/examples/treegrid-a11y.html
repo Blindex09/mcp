@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible TreeGrid Example (W3C APG)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; background: #fafafa; }
+    .treegrid { display: table; width: 100%; max-width: 700px; border-collapse: collapse; background: white; border: 1px solid #ccc; }
+    [role="row"] { display: table-row; }
+    [role="row"]:focus { outline: 3px solid #005fcc; outline-offset: -3px; background: #eef6ff; }
+    [role="columnheader"], [role="gridcell"] { display: table-cell; padding: 0.6rem; border: 1px solid #ddd; }
+    [role="columnheader"] { background: #f0f0f0; font-weight: bold; }
+    .expander { cursor: pointer; font-weight: bold; margin-right: 0.5rem; }
+    .level-2 { padding-left: 2rem; }
+  </style>
+</head>
+<body>
+
+  <h1>Accessible TreeGrid (Hierarchical Data Table)</h1>
+
+  <div 
+    class="treegrid" 
+    role="treegrid" 
+    aria-label="Project Directory TreeGrid"
+  >
+    <!-- Header -->
+    <div role="row" aria-rowindex="1">
+      <div role="columnheader">Name</div>
+      <div role="columnheader">Type</div>
+      <div role="columnheader">Size</div>
+    </div>
+
+    <!-- Parent Row 1 -->
+    <div
+      role="row"
+      tabindex="0"
+      aria-expanded="true"
+      aria-level="1"
+      aria-posinset="1"
+      aria-setsize="2"
+      id="row-src"
+      data-owns="row-app row-index"
+    >
+      <div role="gridcell"><span class="expander">▼</span>src/</div>
+      <div role="gridcell">Folder</div>
+      <div role="gridcell">--</div>
+    </div>
+
+    <!-- Child Row 1.1 (data-parent links it back to its owning row for hide/show) -->
+    <div
+      role="row"
+      tabindex="-1"
+      aria-level="2"
+      aria-posinset="1"
+      aria-setsize="2"
+      id="row-app"
+      data-parent="row-src"
+    >
+      <div role="gridcell" class="level-2">App.tsx</div>
+      <div role="gridcell">TypeScript File</div>
+      <div role="gridcell">4.2 KB</div>
+    </div>
+
+    <!-- Child Row 1.2 -->
+    <div
+      role="row"
+      tabindex="-1"
+      aria-level="2"
+      aria-posinset="2"
+      aria-setsize="2"
+      id="row-index"
+      data-parent="row-src"
+    >
+      <div role="gridcell" class="level-2">index.css</div>
+      <div role="gridcell">CSS Stylesheet</div>
+      <div role="gridcell">1.8 KB</div>
+    </div>
+  </div>
+
+  <script>
+    const treegrid = document.querySelector('[role="treegrid"]');
+
+    // Rows that are visible: the header, any top-level row, and child rows
+    // whose owning parent is currently expanded.
+    function visibleRows() {
+      return Array.from(treegrid.querySelectorAll('[role="row"]:not([aria-rowindex="1"])'))
+        .filter((row) => row.style.display !== 'none');
+    }
+
+    function setChildrenVisible(parentRow, visible) {
+      const owns = (parentRow.getAttribute('data-owns') || '').split(' ').filter(Boolean);
+      owns.forEach((id) => {
+        const child = document.getElementById(id);
+        if (!child) return;
+        child.style.display = visible ? '' : 'none';
+        // Collapsing a parent must also collapse (and hide) any expanded descendants.
+        if (!visible && child.hasAttribute('aria-expanded')) {
+          child.setAttribute('aria-expanded', 'false');
+          setChildrenVisible(child, false);
+        }
+      });
+    }
+
+    treegrid.addEventListener('keydown', (e) => {
+      const activeRow = document.activeElement;
+      if (!activeRow || !activeRow.matches('[role="row"]')) return;
+
+      const rows = visibleRows();
+      const index = rows.indexOf(activeRow);
+
+      if (e.key === 'ArrowDown' && index < rows.length - 1) {
+        e.preventDefault();
+        activeRow.setAttribute('tabindex', '-1');
+        rows[index + 1].setAttribute('tabindex', '0');
+        rows[index + 1].focus();
+      } else if (e.key === 'ArrowUp' && index > 0) {
+        e.preventDefault();
+        activeRow.setAttribute('tabindex', '-1');
+        rows[index - 1].setAttribute('tabindex', '0');
+        rows[index - 1].focus();
+      } else if (e.key === 'ArrowRight' && activeRow.getAttribute('aria-expanded') === 'false') {
+        e.preventDefault();
+        activeRow.setAttribute('aria-expanded', 'true');
+        setChildrenVisible(activeRow, true);
+        const expander = activeRow.querySelector('.expander');
+        if (expander) expander.textContent = '▼';
+      } else if (e.key === 'ArrowLeft' && activeRow.getAttribute('aria-expanded') === 'true') {
+        e.preventDefault();
+        activeRow.setAttribute('aria-expanded', 'false');
+        setChildrenVisible(activeRow, false);
+        const expander = activeRow.querySelector('.expander');
+        if (expander) expander.textContent = '▶';
+      }
+    });
+  </script>
+
+</body>
+</html>

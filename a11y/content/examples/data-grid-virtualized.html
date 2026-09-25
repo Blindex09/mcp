@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible 2D Virtualized Data Grid Example</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; background: #fafafa; }
+    .grid-container { max-width: 700px; border: 2px solid #333; background: white; }
+    [role="grid"] { display: table; width: 100%; border-collapse: collapse; }
+    [role="row"] { display: table-row; }
+    [role="columnheader"], [role="gridcell"] {
+      display: table-cell;
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    [role="columnheader"] { background: #eee; font-weight: bold; }
+    [role="gridcell"]:focus {
+      outline: 3px solid #005fcc;
+      outline-offset: -3px;
+      background: #eef6ff;
+    }
+    .editing input { width: 100%; padding: 0.25rem; font: inherit; }
+  </style>
+</head>
+<body>
+
+  <h1>Accessible 2D Interactive Data Grid</h1>
+
+  <p id="grid-instructions">
+    Use <strong>Arrow keys</strong> to navigate cells. Press <strong>Enter</strong> or <strong>F2</strong> to edit a cell. 
+    Press <strong>Escape</strong> to exit cell editing mode.
+  </p>
+
+  <div class="grid-container">
+    <div 
+      role="grid" 
+      aria-label="User Management Data Grid" 
+      aria-rowcount="100" 
+      aria-colcount="3"
+      aria-describedby="grid-instructions"
+    >
+      <!-- Header Row -->
+      <div role="row" aria-rowindex="1">
+        <div role="columnheader" aria-colindex="1">ID</div>
+        <div role="columnheader" aria-colindex="2">Name</div>
+        <div role="columnheader" aria-colindex="3">Role</div>
+      </div>
+
+      <!-- Row 1 -->
+      <div role="row" aria-rowindex="2">
+        <div role="gridcell" tabindex="0" aria-colindex="1" data-row="2" data-col="1">101</div>
+        <div role="gridcell" tabindex="-1" aria-colindex="2" data-row="2" data-col="2">Alice Smith</div>
+        <div role="gridcell" tabindex="-1" aria-colindex="3" data-row="2" data-col="3">Administrator</div>
+      </div>
+
+      <!-- Row 2 -->
+      <div role="row" aria-rowindex="3">
+        <div role="gridcell" tabindex="-1" aria-colindex="1" data-row="3" data-col="1">102</div>
+        <div role="gridcell" tabindex="-1" aria-colindex="2" data-row="3" data-col="2">Bob Jones</div>
+        <div role="gridcell" tabindex="-1" aria-colindex="3" data-row="3" data-col="3">Developer</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const grid = document.querySelector('[role="grid"]');
+    let cells = Array.from(grid.querySelectorAll('[role="gridcell"]'));
+    let isEditing = false;
+
+    grid.addEventListener('keydown', (e) => {
+      const activeCell = document.activeElement;
+      if (!activeCell || !activeCell.matches('[role="gridcell"]')) return;
+
+      const currentRow = parseInt(activeCell.getAttribute('data-row'));
+      const currentCol = parseInt(activeCell.getAttribute('data-col'));
+
+      if (isEditing) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          // Cancel edit: discard the input value, restore the original cell content.
+          isEditing = false;
+          activeCell.classList.remove('editing');
+          activeCell.textContent = activeCell.dataset.originalValue ?? '';
+          activeCell.focus();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          // Commit edit: apply the input value to the cell.
+          isEditing = false;
+          activeCell.classList.remove('editing');
+          const input = activeCell.querySelector('input');
+          if (input) activeCell.textContent = input.value;
+          delete activeCell.dataset.originalValue;
+          activeCell.focus();
+        }
+        return;
+      }
+
+      let targetCell = null;
+
+      if (e.key === 'ArrowRight') {
+        targetCell = grid.querySelector(`[data-row="${currentRow}"][data-col="${currentCol + 1}"]`);
+      } else if (e.key === 'ArrowLeft') {
+        targetCell = grid.querySelector(`[data-row="${currentRow}"][data-col="${currentCol - 1}"]`);
+      } else if (e.key === 'ArrowDown') {
+        targetCell = grid.querySelector(`[data-row="${currentRow + 1}"][data-col="${currentCol}"]`);
+      } else if (e.key === 'ArrowUp') {
+        targetCell = grid.querySelector(`[data-row="${currentRow - 1}"][data-col="${currentCol}"]`);
+      } else if (e.key === 'Enter' || e.key === 'F2') {
+        e.preventDefault();
+        // Enter Cell Edit Mode
+        isEditing = true;
+        activeCell.classList.add('editing');
+        const currentValue = activeCell.textContent.trim();
+        activeCell.dataset.originalValue = currentValue;
+        activeCell.innerHTML = `<input type="text" value="${currentValue}" aria-label="Edit cell content">`;
+        const input = activeCell.querySelector('input');
+        input.focus();
+        input.select();
+        return;
+      }
+
+      if (targetCell) {
+        e.preventDefault();
+        activeCell.setAttribute('tabindex', '-1');
+        targetCell.setAttribute('tabindex', '0');
+        targetCell.focus();
+      }
+    });
+  </script>
+
+</body>
+</html>

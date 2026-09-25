@@ -23,6 +23,8 @@ from typing import Any
 
 from mcp.server.fastmcp import Context, FastMCP
 
+from a11y.tools import register as register_a11y
+
 # Setup logging (stderr so, nunca stdout em MCP!)
 logging.basicConfig(
     level=logging.DEBUG,
@@ -1299,6 +1301,9 @@ async def refresh_skills() -> str:
 # ---------------------------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------------------------
+
+register_a11y(mcp)  # ferramentas de acessibilidade embutidas (a11y/)
+
 
 def main() -> None:
     """Inicia o servidor MCP."""

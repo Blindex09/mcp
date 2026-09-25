@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accessible Treeview (2026)</title>
+  <style>
+    [role="tree"] { list-style: none; padding-left: 1rem; }
+    [role="treeitem"] { cursor: pointer; padding: 2px 0; }
+    [role="treeitem"]:focus-visible { outline: 3px solid #1a73e8; outline-offset: 2px; }
+    [role="group"] { list-style: none; padding-left: 1rem; }
+    [aria-expanded="false"] > [role="group"] { display: none; }
+  </style>
+</head>
+<body>
+
+<!-- Treeview: role="tree" container with aria-label.
+     treeitem: role="treeitem", aria-level (depth), aria-expanded (parents),
+     aria-selected (if selectable), tabindex roving (one item has 0, rest -1).
+     group: role="group" wraps children of a parent treeitem.
+
+     Keyboard (WAI-ARIA APG Treeview Pattern):
+       ↑/↓      move between visible nodes
+       →        expand collapsed node OR move to first child if expanded
+       ←        collapse expanded node OR move to parent if collapsed
+       Home/End first/last visible node
+       Enter     activate/toggle the node
+       * (star)  expand all siblings at the current level (optional)
+       Tab       enter/exit the tree (only one tab stop) -->
+<ul role="tree" aria-label="File system">
+  <li role="treeitem" aria-level="1" aria-expanded="true" tabindex="0" id="node-src">
+    <span>src</span>
+    <ul role="group">
+      <li role="treeitem" aria-level="2" aria-expanded="false" tabindex="-1">
+        <span>components</span>
+        <ul role="group" hidden>
+          <li role="treeitem" aria-level="3" tabindex="-1"><span>Button.tsx</span></li>
+          <li role="treeitem" aria-level="3" tabindex="-1"><span>Modal.tsx</span></li>
+        </ul>
+      </li>
+      <li role="treeitem" aria-level="2" tabindex="-1"><span>index.ts</span></li>
+    </ul>
+  </li>
+  <li role="treeitem" aria-level="1" tabindex="-1"><span>package.json</span></li>
+</ul>
+
+<script>
+  const tree = document.querySelector('[role="tree"]');
+  const items = Array.from(tree.querySelectorAll('[role="treeitem"]'));
+
+  function setRovingFocus(active) {
+    items.forEach((it) => (it.tabIndex = -1));
+    active.tabIndex = 0;
+    active.focus();
+  }
+
+  // Flatten visible items for ↑/↓ navigation.
+  function visibleItems() {
+    return items.filter((it) => it.offsetParent !== null);
+  }
+
+  tree.addEventListener('keydown', (e) => {
+    const current = document.activeElement;
+    if (!current || !current.matches('[role="treeitem"]')) return;
+    const visible = visibleItems();
+    const i = visible.indexOf(current);
+    const isParent = current.hasAttribute('aria-expanded');
+
+    switch (e.key) {
+      case 'ArrowDown': {
+        e.preventDefault();
+        if (i < visible.length - 1) setRovingFocus(visible[i + 1]);
+        break;
+      }
+      case 'ArrowUp': {
+        e.preventDefault();
+        if (i > 0) setRovingFocus(visible[i - 1]);
+        break;
+      }
+      case 'ArrowRight': {
+        e.preventDefault();
+        if (isParent && current.getAttribute('aria-expanded') === 'false') {
+          current.setAttribute('aria-expanded', 'true');
+          current.querySelector('[role="group"]').hidden = false;
+          // move to first child
+          const firstChild = current.querySelector('[role="group"] [role="treeitem"]');
+          if (firstChild) setRovingFocus(firstChild);
+        } else if (isParent) {
+          const firstChild = current.querySelector('[role="group"] [role="treeitem"]');
+          if (firstChild) setRovingFocus(firstChild);
+        }
+        break;
+      }
+      case 'ArrowLeft': {
+        e.preventDefault();
+        if (isParent && current.getAttribute('aria-expanded') === 'true') {
+          current.setAttribute('aria-expanded', 'false');
+          current.querySelector('[role="group"]').hidden = true;
+        } else {
+          // move to parent group's treeitem
+          const parentGroup = current.closest('[role="group"]');
+          const parentItem = parentGroup?.parentElement;
+          if (parentItem?.matches?.('[role="treeitem"]')) setRovingFocus(parentItem);
+        }
+        break;
+      }
+      case 'Home': e.preventDefault(); if (visible.length) setRovingFocus(visible[0]); break;
+      case 'End':  e.preventDefault(); if (visible.length) setRovingFocus(visible[visible.length - 1]); break;
+      case 'Enter': {
+        // Activate/toggle the node (APG: Enter performs the node's default action).
+        e.preventDefault();
+        if (isParent) {
+          const expanded = current.getAttribute('aria-expanded') === 'true';
+          current.setAttribute('aria-expanded', String(!expanded));
+          const group = current.querySelector('[role="group"]');
+          if (group) group.hidden = expanded;
+        }
+        break;
+      }
+    }
+  });
+
+  // Click toggles expand/collapse on parents.
+  tree.addEventListener('click', (e) => {
+    const item = e.target.closest('[role="treeitem"]');
+    if (!item || !item.hasAttribute('aria-expanded')) return;
+    const expanded = item.getAttribute('aria-expanded') === 'true';
+    item.setAttribute('aria-expanded', String(!expanded));
+    const group = item.querySelector('[role="group"]');
+    if (group) group.hidden = expanded;
+    setRovingFocus(item);
+  });
+</script>
+
+</body>
+</html>

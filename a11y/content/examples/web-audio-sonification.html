@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Web Audio API Sonification Chart</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; background: #fafafa; }
+    .chart-container { max-width: 600px; padding: 1rem; border: 1px solid #ccc; background: white; }
+    .data-points { display: flex; gap: 1rem; justify-content: space-between; margin-top: 1rem; }
+    .point {
+      width: 60px; height: 60px; border-radius: 50%; background: #0284c7; color: white;
+      display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer;
+    }
+    .point:focus-visible { outline: 4px solid #f59e0b; outline-offset: 2px; }
+  </style>
+</head>
+<body>
+
+  <h1>Accessible Data Chart with Web Audio Sonification</h1>
+
+  <div class="chart-container" role="region" aria-label="Interactive Stock Trend Chart">
+    <p>Use <strong>Arrow keys</strong> to navigate data points and hear pitch sonification (frequency &amp; stereo pan).</p>
+
+    <div class="data-points" role="group" aria-label="Monthly sales points">
+      <button type="button" class="point" tabindex="0" data-val="20" data-pan="-0.8" aria-label="January: $20k" id="pt-1">Jan</button>
+      <button type="button" class="point" tabindex="-1" data-val="50" data-pan="-0.4" aria-label="February: $50k" id="pt-2">Feb</button>
+      <button type="button" class="point" tabindex="-1" data-val="35" data-pan="0.0" aria-label="March: $35k" id="pt-3">Mar</button>
+      <button type="button" class="point" tabindex="-1" data-val="90" data-pan="0.4" aria-label="April: $90k" id="pt-4">Apr</button>
+      <button type="button" class="point" tabindex="-1" data-val="70" data-pan="0.8" aria-label="May: $70k" id="pt-5">May</button>
+    </div>
+  </div>
+
+  <script>
+    const points = Array.from(document.querySelectorAll('.point'));
+    let audioCtx = null;
+
+    function playSonification(val, panVal) {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const panner = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : null;
+
+      // Pitch Mapping: Map 0-100 value to 220Hz - 880Hz
+      const freq = 220 + (val * 6.6);
+      osc.frequency.value = freq;
+
+      if (panner) {
+        panner.pan.value = panVal;
+        osc.connect(panner);
+        panner.connect(gain);
+      } else {
+        osc.connect(gain);
+      }
+
+      gain.connect(audioCtx.destination);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.25);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.25);
+    }
+
+    points.forEach((pt, index) => {
+      pt.addEventListener('focus', () => {
+        const val = parseFloat(pt.getAttribute('data-val'));
+        const panVal = parseFloat(pt.getAttribute('data-pan'));
+        playSonification(val, panVal);
+      });
+
+      pt.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' && index < points.length - 1) {
+          e.preventDefault();
+          pt.setAttribute('tabindex', '-1');
+          points[index + 1].setAttribute('tabindex', '0');
+          points[index + 1].focus();
+        } else if (e.key === 'ArrowLeft' && index > 0) {
+          e.preventDefault();
+          pt.setAttribute('tabindex', '-1');
+          points[index - 1].setAttribute('tabindex', '0');
+          points[index - 1].focus();
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

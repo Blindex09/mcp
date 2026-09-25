@@ -30,6 +30,25 @@ c:\mcp\                       ← MCP Server
      └── README.md
 ```
 
+## Acessibilidade turbinada (`a11y/`)
+
+Incorpora a skill `web-accessibility` (referencias WCAG 2.2/ARIA/NVDA, ~50 exemplos de
+componentes, template React de IA acessivel) e adiciona 8 ferramentas + recursos MCP:
+
+| Ferramenta | O que faz |
+|---|---|
+| `a11y_list_content` | Lista guias e exemplos embutidos |
+| `a11y_search` | Busca BM25 em guias/exemplos ("modal focus trap") |
+| `a11y_get_reference` / `a11y_get_example` | Le um guia (opcional: so uma secao) ou um exemplo |
+| `a11y_contrast` | Contraste WCAG entre duas cores |
+| `a11y_audit` | Auditoria axe-core em URL http(s) ou HTML (Chromium headless) |
+| `a11y_aria_snapshot` | Arvore de acessibilidade (o que o leitor de tela recebe) |
+| `a11y_tab_order` | Ordem de foco por Tab, nome acessivel e indicador de foco |
+
+Recursos: `a11y://reference/{name}` e `a11y://example/{name}`.
+Auditoria exige `pip install playwright` + `python -m playwright install chromium`.
+So navega em http/https, com timeout de 90 s. axe-core 4.12.1 (MPL-2.0) vendorizado em `a11y/vendor/`.
+
 ## Setup - 3 passos rápidos
 
 ### 1️⃣ Instalar dependências

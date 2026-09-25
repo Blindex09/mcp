@@ -1,0 +1,93 @@
+<!-- Accessible Listbox (2026) — single & multi-select
+     Two focus strategies: roving tabindex OR aria-activedescendant. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accessible Listbox</title>
+  <style>
+    [role="listbox"] { border: 1px solid #ccc; min-height: 8rem; width: 12rem; padding: 0.25rem; }
+    [role="option"] { padding: 0.25rem 0.5rem; cursor: pointer; border-radius: 4px; }
+    [role="option"]:focus-visible, [role="option"][aria-selected="true"] { outline: 2px solid #1a73e8; outline-offset: 1px; background: rgba(59,130,246,.1); }
+  </style>
+</head>
+<body>
+
+<label id="fruit-label">Choose a fruit</label>
+<!-- Listbox is a SINGLE tab stop. Use roving tabindex: active option has 0, rest -1.
+     aria-labelledby names the listbox. aria-activedescendant is the alternative (see below). -->
+<ul role="listbox" aria-labelledby="fruit-label" tabindex="0" id="fruits">
+  <li role="option" id="opt-apple" tabindex="-1" aria-selected="true">Apple</li>
+  <li role="option" id="opt-banana" tabindex="-1">Banana</li>
+  <li role="option" id="opt-cherry" tabindex="-1">Cherry</li>
+  <li role="option" id="opt-durian" tabindex="-1" aria-disabled="true">Durian (out of stock)</li>
+</ul>
+
+<script>
+  // Roving tabindex listbox (WAI-ARIA APG Listbox Pattern, single-select).
+  const listbox = document.getElementById('fruits');
+  const options = Array.from(listbox.querySelectorAll('[role="option"]')).filter(o => !o.hasAttribute('aria-disabled'));
+  let active = 0; // index into `options`
+
+  function setActive(i) {
+    active = (i + options.length) % options.length;
+    options.forEach((o, idx) => {
+      o.tabIndex = idx === active ? 0 : -1;
+      o.setAttribute('aria-selected', String(idx === active));
+    });
+    options[active].focus();
+  }
+
+  listbox.addEventListener('keydown', (e) => {
+    switch (e.key) {
+      case 'ArrowDown': e.preventDefault(); setActive(active + 1); break;
+      case 'ArrowUp':   e.preventDefault(); setActive(active - 1); break;
+      case 'Home':      e.preventDefault(); setActive(0); break;
+      case 'End':       e.preventDefault(); setActive(options.length - 1); break;
+      case 'Enter':
+      case ' ': { e.preventDefault(); /* selection already follows focus for single-select */ break; }
+    }
+  });
+
+  listbox.addEventListener('click', (e) => {
+    const opt = e.target.closest('[role="option"]');
+    if (opt && options.includes(opt)) setActive(options.indexOf(opt));
+  });
+
+  // When the listbox itself gets tab focus, move into the active option.
+  listbox.addEventListener('focus', () => options[active].focus());
+</script>
+
+<!-- =================================================================== -->
+<!-- MULTI-SELECT listbox (aria-multiselectable, Ctrl/Shift modifiers).  -->
+<!-- Focus and selection are SEPARATE: arrow keys move focus, Ctrl+Space  -->
+<!-- toggles selection of the focused item, Shift+arrows extend a range.   -->
+<!--                                                                     -->
+<!-- <ul role="listbox" aria-multiselectable="true" aria-labelledby="x">   -->
+<!--   <li role="option" aria-selected="true">…</li>                       -->
+<!-- </ul>                                                               -->
+<!--                                                                     -->
+<!-- Angular Aria alternative: ngListbox [multi]="true" selectionMode=   -->
+<!-- "explicit" focusMode="roving" (or "activedescendant"). See            -->
+<!-- https://angular.dev/guide/aria/multiselect                          -->
+<!-- =================================================================== -->
+
+<!-- =================================================================== -->
+<!-- aria-activedescendant variant (combobox/grid use this):              -->
+<!-- DOM focus stays on the container; the id of the highlighted option   -->
+<!-- is set on the container's aria-activedescendant. The caret stays     -->
+<!-- in the input.                                                        -->
+<!--                                                                     -->
+<!-- <input role="combobox" aria-activedescendant="opt-2"                 -->
+<!--        aria-controls="popup" aria-expanded="true">                   -->
+<!-- <ul role="listbox" id="popup">                                       -->
+<!--   <li role="option" id="opt-1">…</li>                                 -->
+<!--   <li role="option" id="opt-2" aria-selected="true">…</li>           -->
+<!-- </ul>                                                               -->
+<!-- Pitfall: aria-activedescendant MUST resolve to an element that       -->
+<!-- currently exists in the DOM (virtualized lists must render the       -->
+<!-- active option). axe-core checks this.                               -->
+<!-- =================================================================== -->
+
+</body>
+</html>

@@ -4,8 +4,9 @@ version = "2.0.0"
 description = "Universal Skills MCP Server — exposes 1300+ skills as MCP tools for Claude, VSCode and Cursor"
 requires-python = ">=3.10"
 dependencies = [
-    "mcp>=1.2.0",
+    "mcp>=1.2.0,<2",
     "rank-bm25>=0.2.2",
+    "playwright>=1.40",
 ]
 
 [project.optional-dependencies]

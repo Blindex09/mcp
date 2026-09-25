@@ -11,6 +11,7 @@ from sampling import NO_MODEL_HELP, ask_model, extract_json
 
 from . import audit
 from .content_index import ContentIndex
+from .tools_ux import register_ux
 
 _MAX_CHARS = 40_000
 _index: ContentIndex | None = None
@@ -39,6 +40,7 @@ def _error(e: Exception) -> str:
 
 def register(mcp: Any) -> None:
     """Registra as ferramentas e recursos de acessibilidade no servidor FastMCP."""
+    register_ux(mcp)
 
     @mcp.tool()
     async def a11y_list_content() -> str:

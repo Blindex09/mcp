@@ -30,12 +30,19 @@ mcp = FastMCP(
     "accessibility",
     instructions=(
         "Accessibility server (WCAG 2.2, ARIA, screen readers, mobile, accessible AI/agent UIs). "
-        "Workflow: 1) a11y_find(task) lets the model pick the right guides/examples for a task, "
-        "or a11y_list_content() shows the whole catalog; "
-        "2) a11y_get_reference(name) / a11y_get_example(name) to read them; "
-        "3) measure with a11y_audit (axe-core), a11y_aria_snapshot (accessibility tree), "
-        "a11y_tab_order (keyboard focus) and a11y_contrast. "
-        "Automated checks cover only part of WCAG: keyboard, screen-reader and touch testing stay manual."
+        "A green automated audit does NOT mean accessible: test like a user. "
+        "1) KNOWLEDGE: a11y_find(task) picks guides/examples by meaning; a11y_get_reference / a11y_get_example / "
+        "a11y_get_template read them. Start with the guides component-identity-guide, ux-persona-testing and "
+        "design-language-review. "
+        "2) TEST LIKE A USER: a11y_open(url|html, persona) starts a persistent session (personas are enforced: "
+        "keyboard and screen_reader have no mouse); a11y_dossier gives FACTS about every interactive element so YOU "
+        "decide what each really is in that site's context; a11y_act / a11y_reach / a11y_announce probe behavior and "
+        "report the effect; a11y_stress checks reflow and text spacing; a11y_close ends it. "
+        "3) DESIGN: a11y_design_tokens measures the site's own design language; a11y_screenshot and a11y_preview_css "
+        "let you try a change temporarily before recommending it, inside the site's scale. "
+        "4) QUICK CHECKS without a session: a11y_audit (axe-core), a11y_aria_snapshot, a11y_tab_order, a11y_contrast. "
+        "The tools report facts and never classify; judging and reporting is yours. Always state what was NOT verified "
+        "(real screen readers, real devices, untested flows)."
     ),
 )
 

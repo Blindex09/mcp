@@ -34,12 +34,30 @@ Selection of what to read is done by a model, never by keyword. The measurement 
 They cover only part of WCAG: keyboard, screen-reader and touch checks remain manual (section 5).
 Browser-based tools need `python -m playwright install chromium` once.
 
+### Testing like a user (session tools)
+
+A green audit is not accessibility. To find what really happens, open a persistent session and act as the user:
+
+| Need | Tool |
+|---|---|
+| Start/stop a session with an enforced persona (`keyboard`, `screen_reader`, `low_vision`, `mobile_touch`, `reduced_motion`, `forced_colors`) | `a11y_open` / `a11y_close` |
+| Facts about every interactive element, to decide what each one really is in this site | `a11y_dossier` |
+| Do what a user does and get the effect (focus, tree changes, announcements) | `a11y_act` |
+| Tab presses needed to reach an element; what a screen reader gets for it | `a11y_reach` / `a11y_announce` |
+| Reflow at 320 px, text-spacing clipping | `a11y_stress` |
+| The site's real design language; try a change temporarily; look at it | `a11y_design_tokens` / `a11y_preview_css` / `a11y_screenshot` |
+
+How to judge: [references/component-identity-guide.md](references/component-identity-guide.md) (what is this element, in this site),
+[references/ux-persona-testing.md](references/ux-persona-testing.md) (task-based walkthroughs and the report, including what was NOT verified),
+[references/design-language-review.md](references/design-language-review.md) (typography/spacing suggestions inside the site's own scale).
+
 ## 1. References by domain
 
 Read only what the task needs.
 
 ### A. Foundations, ARIA, audit, and testing
 
+- [references/component-identity-guide.md](references/component-identity-guide.md), [references/ux-persona-testing.md](references/ux-persona-testing.md), [references/design-language-review.md](references/design-language-review.md): judging what components are, testing like a user, and design review.
 - [references/aria-rules-dos-and-donts.md](references/aria-rules-dos-and-donts.md): native semantics, careful ARIA, accessible-name duplication, roles/states, and focus.
 - [references/audit-checklist.md](references/audit-checklist.md): automated and manual audit workflow.
 - [references/nvda-testing-guide.md](references/nvda-testing-guide.md): NVDA/browser testing.

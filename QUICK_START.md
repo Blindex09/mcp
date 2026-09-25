@@ -25,6 +25,18 @@ Claude: [a11y_audit → violações por impacto, com o trecho de HTML e a corre�
 Você:   o foco do teclado nessa página está certo?
 Claude: [a11y_tab_order → ordem, nomes e indicador de foco de cada parada]
 
+Você:   testa o cadastro como um usuário só de teclado
+Claude: [a11y_open persona=keyboard → a11y_dossier → a11y_reach/a11y_act press Tab/Enter…
+         relata onde travou, quantos Tab foram, o que foi anunciado — e o que NÃO conseguiu verificar]
+
+Você:   esse campo com várias opções é o quê? e esse "dropdown" do menu?
+Claude: [a11y_dossier + a11y_act: decide pelo comportamento e pelo contexto do site
+         (combobox? lista de seleção? menu de navegação?) e propõe a correção sem mudar o visual]
+
+Você:   essa fonte e esse espaçamento estão bons?
+Claude: [a11y_design_tokens mede a escala do site → propõe dentro dela → a11y_preview_css + a11y_screenshot
+         para mostrar antes/depois, sem tocar no site]
+
 Você:   #767676 sobre #ffffff passa no AA?
 Claude: [a11y_contrast → razão e aprovação para texto normal/grande e componentes]
 ```

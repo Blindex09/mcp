@@ -69,36 +69,47 @@ class ContentIndex:
         return path.read_text(encoding="utf-8", errors="replace") if path else None
 
     def catalog(self) -> list[dict[str, str]]:
-        """Catalogo para o MODELO escolher: nome, tipo, resumo e secoes de cada item.
+        """Catalogo COMPACTO para o MODELO escolher: tipo, nome, resumo curto e secoes principais.
 
-        Aqui so se extrai o que o arquivo ja diz (titulo, primeiro paragrafo, cabecalhos);
-        quem decide o que serve a uma tarefa e a IA, nunca uma regra de palavras-chave.
+        Aqui so se extrai o que o arquivo ja diz (titulo, primeiro paragrafo, cabecalhos,
+        comentario de abertura); quem decide o que serve a uma tarefa e a IA, nunca uma regra
+        de palavras-chave. Detalhes ficam para a_get_reference/example/template.
         """
         items: list[dict[str, str]] = []
         for name, path in self.references.items():
             text = path.read_text(encoding="utf-8", errors="replace")
-            heads = [h for h, _ in _split_markdown(text)][:12]
+            heads = [_clip_heading(h) for h, _ in _split_markdown(text)][1:7]  # o 1o e' o titulo do guia
             items.append({"kind": "reference", "name": name, "summary": _first_paragraph(text), "sections": "; ".join(heads)})
         for name, path in self.examples.items():
             text = path.read_text(encoding="utf-8", errors="replace")
-            items.append({"kind": "example", "name": name, "summary": f"{path.suffix} - " + _leading_comment(text), "sections": ""})
+            summary = _leading_comment(text) or f"exemplo {path.suffix}"
+            items.append({"kind": "example", "name": name, "summary": f"{path.suffix} - {summary}"})
         for name, path in self.templates.items():
             text = path.read_text(encoding="utf-8", errors="replace")
             kind = "script" if name.startswith("scripts/") else "template"
-            items.append({"kind": kind, "name": name, "summary": _leading_comment(text), "sections": ""})
+            where = path.parent.relative_to(self.root).as_posix()
+            items.append({"kind": kind, "name": name, "summary": _leading_comment(text) or f"{path.suffix} em {where}"})
         return items
 
 
-def _first_paragraph(text: str, limit: int = 220) -> str:
-    for block in re.split(r"\n\s*\n", text):
+def _clip_heading(h: str, limit: int = 60) -> str:
+    return h if len(h) <= limit else h[: limit - 3].rstrip() + "..."
+
+
+def _first_paragraph(text: str, limit: int = 110) -> str:
+    """Introducao do guia (antes da 1a secao ##); sem introducao, o proprio titulo."""
+    intro, _, _ = text.partition("\n## ")
+    for block in re.split(r"\n\s*\n", intro):
         b = block.strip()
-        if b and not b.startswith("#"):
+        if b and not b.startswith(("#", ">")):  # titulo ou aviso (blockquote), nao descricao
             return " ".join(b.split())[:limit]
-    return ""
+    title = re.match(r"#\s+(.+)", text)
+    return title.group(1).strip()[:limit] if title else ""
 
 
-def _leading_comment(text: str, limit: int = 160) -> str:
+def _leading_comment(text: str, limit: int = 110) -> str:
     m = re.search(r"<!--(.*?)-->|/\*(.*?)\*/|^//(.*)$|<title>(.*?)</title>", text, re.DOTALL | re.MULTILINE)
     if not m:
         return ""
-    return " ".join(next(g for g in m.groups() if g is not None).split())[:limit]
+    raw = next(g for g in m.groups() if g is not None)
+    return " ".join(re.sub(r"(^|\s)\*+(?=\s|$)", " ", raw).split())[:limit]

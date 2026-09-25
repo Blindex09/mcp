@@ -172,3 +172,19 @@ def test_template_read_is_exact_key_only(index):
     assert index.read("template", "assets/../../mcp_server.py") is None
     assert index.read("template", "../pyproject.toml") is None
     assert index.read("template", "assets\\accessible-ai-react\\package.json")
+
+
+def test_catalog_is_compact_and_every_item_has_a_summary(index):
+    import json as _json
+
+    cat = index.catalog()
+    assert len(_json.dumps(cat, ensure_ascii=False)) < 22_000  # era ~30k
+    assert all(c["summary"] for c in cat)
+
+
+def test_summary_never_comes_from_a_banner_or_a_section_body(index):
+    by_name = {c["name"]: c for c in index.catalog()}
+    assert not any(c["summary"].startswith(">") for c in by_name.values())
+    nvda = by_name["nvda-testing-guide"]["summary"]
+    assert "Before opening NVDA" not in nvda and "Auto-switching" not in nvda
+    assert "NVDA" in nvda  # cai para o titulo do guia

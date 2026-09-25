@@ -21,7 +21,7 @@ c:\skills\                    ← 1300+ skills (cada uma com SKILL.md)
          └── ...
 
 c:\mcp\                       ← MCP Server
-     ├── mcp_server.py          ← Servidor principal (24 tools, FastMCP)
+     ├── mcp_server.py          ← Servidor principal (32 tools, FastMCP)
      ├── sampling.py            ← Ponte para o modelo do cliente (MCP sampling)
      ├── a11y/                  ← Acessibilidade embutida (guias, exemplos, auditoria axe)
      ├── sync_cursor_rules.py   ← Sincroniza CLAUDE.md → Cursor User Rules
@@ -87,7 +87,7 @@ Reinicie Claude Desktop, Cursor e/ou VSCode para carregar o servidor.
 
 ---
 
-## Ferramentas disponíveis (24 total)
+## Ferramentas disponíveis (32 total)
 
 ### Por categoria (18 tools)
 
@@ -116,14 +116,14 @@ Cada tool lista **somente** as skills da categoria, com ícone e contagem.
 
 > Todas aceitam parâmetro `limit: int = 0` (0 = retorna todas da categoria)
 
-### Gerais (6 tools)
+### Gerais (6 tools) — busca e classificação são feitas pelo modelo
 
 | Tool | O que faz |
 |------|-----------|
 | `invoke_skill(skill_name, params)` | Lê e retorna o SKILL.md completo de uma skill |
 | `find_skills(task)` | **O modelo escolhe** as skills pela tarefa (sampling, em lotes; sem palavra-chave) |
 | `classify_skills()` | O modelo classifica skills sem categoria; resultado em cache |
-| `list_categories()` | Lista todas as categorias disponíveis com contagens |
+| `list_categories()` | Lista as categorias em uso (pasta pai + classificação do modelo) com contagens |
 | `list_all_skills(page, per_page)` | Lista todas as 1334 skills com paginação |
 | `refresh_skills()` | Força reload imediato do cache (sem restart) |
 
@@ -140,13 +140,20 @@ list_ai_skills()
 invoke_skill("react-best-practices", "como usar hooks corretamente?")
 → [retorna conteúdo completo do SKILL.md]
 
-# Buscar por palavra
+# Achar por tarefa (o modelo escolhe)
 find_skills("subir containers com docker em produção")
-→ [lista todas as skills com "docker" no nome]
+→ [o modelo lê o catálogo e devolve as skills que servem, pelo sentido — não por palavra]
 
 # Ver todas as categorias
 list_categories()
-→ ♿ accessibility (8) | 🤖 ai (129) | ⚙️ backend (80) | ...
+→ ♿ accessibility (n) | 🤖 ai (n) | ... | 📦 unclassified (n)
+
+# Deixar o modelo classificar o que ainda não tem categoria
+classify_skills()
+
+# Acessibilidade embutida
+a11y_find("tela de chat que leitor de tela consiga usar")
+a11y_audit(url="https://exemplo.com")
 ```
 
 ---
@@ -250,7 +257,7 @@ python c:/mcp/sync_cursor_rules.py --clear
 ---
 
 **Criado:** 26 de março de 2026  
-**Atualizado:** 29 de março de 2026  
-**Versão:** 2.2  
-**Skills:** 1334 | **Categorias:** 18 | **Tools MCP:** 24  
+**Atualizado:** 25 de setembro de 2026  
+**Versão:** 2.3  
+**Skills:** 1334 | **Categorias:** 18 | **Tools MCP:** 32 (18 por categoria + 6 gerais + 8 `a11y_*`)  
 **Status:** ✅ Pronto para produção

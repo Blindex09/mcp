@@ -1,3 +1,5 @@
+> **Atualização 25/09/2026:** este arquivo descreve a primeira versão. O estado atual: 32 ferramentas, busca e classificação **pelo modelo** (`find_skills`, `classify_skills` via MCP sampling; sem regras por nome, BM25 ou substring) e acessibilidade embutida em `a11y/` (guias, exemplos, auditoria axe-core). Ver `README.md`.
+
 ## 📊 O que foi criado
 
 ### ✅ Sistema de Comandos Globais via MCP
@@ -34,8 +36,9 @@ c:\mcp\
 2. **Lê** cada `SKILL.md` e extrai metadados
 3. **Expõe** como ferramentas MCP:
    - `invoke_skill(name, params)` - qualquer skill
-   - `list_skills()` - lista todas
-   - `skill_{nome}(context)` - direto para top 10
+   - `list_all_skills()` / `list_categories()` - catálogo paginado
+   - `find_skills(task)` - o modelo escolhe pelo sentido
+   - `a11y_*` - acessibilidade (guias, exemplos, auditoria)
 
 4. **Registra** automaticamente em:
    - ✅ Claude Desktop

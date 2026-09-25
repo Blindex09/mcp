@@ -24,14 +24,31 @@ python setup.py
 
 ```
 Usuário: quais skills estão disponíveis?
-Claude: [invoca list_skills - mostra 969 skills!]
+Claude: [invoca list_categories / find_skills - o modelo acha pelo sentido]
 
 Usuário: /invoke_skill agent-customization "quero configurar uma skill de MCP"
 Claude: [retorna SKILL.md + contexto]
 
 Usuário: me ajuda com refatoração de código
-Claude: [invoca automaticamente skill_code_simplifier]
+Claude: [invoca find_skills("refatoração de código") e depois invoke_skill]
 ```
+
+#### Acessibilidade (a11y_*)
+
+```
+Usuário: audita https://meusite.com em WCAG AA
+Claude: [invoca a11y_audit -> axe-core em Chromium headless]
+
+Usuário: como faço um modal acessível?
+Claude: [a11y_find escolhe os guias/exemplos; a11y_get_example traz o código]
+```
+
+Para a auditoria: `python -m playwright install chromium` (uma vez).
+
+#### Primeira vez: classificar as skills
+
+`classify_skills()` pede ao modelo (MCP sampling) que categorize as skills sem pasta de categoria.
+Resultado em cache (`skills_classification.json`); só reclassifica o que mudou.
 
 #### No VSCode/Cursor:
 
@@ -87,4 +104,5 @@ uv --directory c:\mcp run mcp_server.py
 ---
 
 **Criado:** 26 de março de 2026  
+**Atualizado:** 25 de setembro de 2026  
 **Status:** ✅ Pronto

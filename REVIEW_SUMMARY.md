@@ -1,3 +1,5 @@
+> **Histórico (março/2026).** Descreve o sistema antigo de categorização por regras de nome (`CATEGORY_RULES`, `categorize_skills.py`, `categories.json`), **removido em 25/09/2026**. Hoje a categoria vem da pasta pai + classificação do modelo (`classify_skills`). Ver `README.md`.
+
 # 📋 RESUMO EXECUTIVO - MCP Skills Server Review
 
 **Data:** 27 de março de 2026  

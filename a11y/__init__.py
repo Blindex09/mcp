@@ -1,1 +1,1 @@
-"""Conteudo e ferramentas de acessibilidade embutidos no Skills MCP Server."""
+"""Conteudo e ferramentas de acessibilidade embutidos no Accessibility MCP Server."""

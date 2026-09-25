@@ -8,8 +8,12 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from mcp.server.fastmcp import Image
+from mcp.server.fastmcp import Context, Image
 
+from llm import NO_MODEL_HELP, ask_model, backend_status
+
+from .agent import run_agent
+from .provisioning import PROVISIONER
 from .session import PERSONAS, SESSION, SessionError
 
 
@@ -134,3 +138,62 @@ def register_ux(mcp: Any) -> None:
         """Stress the page and report facts. kind: reflow_320 (WCAG 1.4.10: horizontal scroll and overflowing
         elements at 320 px width) | text_spacing (WCAG 1.4.12: text clipped after applying user text-spacing)."""
         return await _run(SESSION.stress(kind))
+
+
+    async def _autonomous(ctx: Context, mode: str, goal: str, url: str, html: str, persona: str, max_steps: int, vision: bool) -> str:  # type: ignore[type-arg]
+        async def ask(prompt: str, images: list[bytes] | None, max_tokens: int) -> str | None:
+            return await ask_model(ctx, prompt, max_tokens, images)
+
+        async def progress(step: int, total: int, message: str) -> None:
+            try:
+                await ctx.report_progress(step, total, message)
+            except Exception:  # noqa: BLE001, S110 - cliente sem progresso: segue
+                pass
+
+        try:
+            async with SESSION.lock:
+                result = await run_agent(
+                    session=SESSION, ask=ask, mode=mode, goal=goal, url=url or None, html=html or None,
+                    persona=persona, max_steps=max_steps, vision=vision, progress=progress,
+                )
+        except SessionError as e:
+            return _json({"error": str(e), "personas": {k: v["about"] for k, v in PERSONAS.items()}})
+        except Exception as e:  # noqa: BLE001
+            return _error(e)
+        if result["stopped_by"] == "model_unavailable" and result["facts"]["steps_used"] == 0:
+            return _json({"error": NO_MODEL_HELP, "how_to_do_it_manually": "use a11y_open + a11y_dossier + a11y_act com o seu proprio modelo"})
+        return _json(result)
+
+    @mcp.tool()
+    async def a11y_walkthrough(
+        ctx: Context, task: str, url: str = "", html: str = "", persona: str = "default", max_steps: int = 25, vision: bool = True,  # type: ignore[type-arg]
+    ) -> str:
+        """AUTONOMOUS user test: a model plays a real person with the given persona trying to accomplish a task on the
+        page (url http/https or html), step by step, seeing the screen (screenshot) and the accessibility tree, and
+        writes a plain-language report of what happened, where the person struggled, and what to fix (keeping the
+        design), including what could NOT be verified. Needs the server's own model (A11Y_MCP_MODEL + provider key,
+        see a11y_status) or a client that offers sampling. The harness enforces the persona (keyboard/screen_reader
+        have no mouse), a step cap (max 60), a time budget and stops repeated identical actions.
+        task: the person's goal in plain words, e.g. "sign up for the newsletter" or "find the return policy"."""
+        return await _autonomous(ctx, "task", task, url, html, persona, max_steps, vision)
+
+    @mcp.tool()
+    async def a11y_review(
+        ctx: Context, focus: str = "componentes e design", url: str = "", html: str = "", persona: str = "default", max_steps: int = 30, vision: bool = True,  # type: ignore[type-arg]
+    ) -> str:
+        """AUTONOMOUS UX review: a model explores the page, PROBES each important interactive component to learn what it
+        really is for people in this site's context (text field vs combobox vs list vs menu vs navigation vs accordion...),
+        compares with what it exposes today, and reviews typography/spacing against the site's own design language.
+        Returns a plain-language report with evidence, fixes that keep the design, and what could not be verified.
+        Same requirements and enforced limits as a11y_walkthrough. focus: what to review, in your own words."""
+        return await _autonomous(ctx, "review", focus, url, html, persona, max_steps, vision)
+
+    @mcp.tool()
+    async def a11y_status() -> str:
+        """Readiness check: is the browser (Playwright/Chromium) installed or being installed automatically, and is a
+        model configured for the autonomous tools (a11y_find, a11y_walkthrough, a11y_review)? Never shows secrets."""
+        return _json({
+            "browser": {"state": PROVISIONER.state, "detail": PROVISIONER.detail or None},
+            "model": backend_status(),
+            "note": "Sem modelo configurado, as ferramentas autonomas ficam indisponiveis; as demais (dossie, acoes, medicao) funcionam.",
+        })

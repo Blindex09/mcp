@@ -28,7 +28,7 @@ def test_catalog_describes_every_item_for_the_model(index):
     cat = index.catalog()
     assert len(cat) == len(index.references) + len(index.examples) + len(index.templates)
     ref = next(c for c in cat if c["name"] == "audit-checklist")
-    assert ref["kind"] == "reference" and ref["summary"] and ref["sections"]
+    assert ref["kind"] == "reference" and ref["quando_usar"] and ref["secoes"]
 
 
 def test_no_keyword_ranking_left():
@@ -158,7 +158,7 @@ async def test_find_uses_model_choice_and_drops_invented_names(monkeypatch):
 def test_every_original_file_is_served(index):
     """Nada do web-accessibility fica inalcancavel: guias, exemplos, template React e scripts."""
     root = index.root
-    on_disk = {p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file() and p.name != ".gitignore"}
+    on_disk = {p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file() and p.name not in (".gitignore", "catalog.json")}
     served = {f"references/{n}.md" for n in index.references} | set(index.templates)
     served |= {p.relative_to(root).as_posix() for p in index.examples.values()}
     served |= {"SKILL.md"}  # o SKILL.md e' entregue pelo README/instrucoes e pelos guias
@@ -174,17 +174,26 @@ def test_template_read_is_exact_key_only(index):
     assert index.read("template", "assets\\accessible-ai-react\\package.json")
 
 
-def test_catalog_is_compact_and_every_item_has_a_summary(index):
-    import json as _json
-
+def test_catalog_is_authored_by_ai_not_extracted_by_regex(index):
+    """Toda descricao vem de catalog.json (texto escrito por IA); nada e resumido por regra."""
+    assert index.catalog_problems() == {"sem_descricao": [], "descricao_orfa": []}
     cat = index.catalog()
-    assert len(_json.dumps(cat, ensure_ascii=False)) < 22_000  # era ~30k
-    assert all(c["summary"] for c in cat)
+    assert all(c["quando_usar"] and c["quando_usar"] != "(sem descricao no catalogo)" for c in cat)
+    assert all(len(c["quando_usar"]) > 30 for c in cat if c["kind"] in ("reference", "example"))
+    nvda = next(c for c in cat if c["name"] == "nvda-testing-guide")
+    assert "NVDA" in nvda["quando_usar"] and "Before opening NVDA" not in nvda["quando_usar"]
+    import a11y.content_index as ci
+
+    for gone in ("_first_paragraph", "_leading_comment", "_clip_heading"):
+        assert not hasattr(ci, gone)  # sem extracao heuristica de resumo
 
 
-def test_summary_never_comes_from_a_banner_or_a_section_body(index):
-    by_name = {c["name"]: c for c in index.catalog()}
-    assert not any(c["summary"].startswith(">") for c in by_name.values())
-    nvda = by_name["nvda-testing-guide"]["summary"]
-    assert "Before opening NVDA" not in nvda and "Auto-switching" not in nvda
-    assert "NVDA" in nvda  # cai para o titulo do guia
+def test_missing_or_orphan_description_is_detected(tmp_path):
+    (tmp_path / "references").mkdir()
+    (tmp_path / "references" / "novo.md").write_text("# Novo\n\n## A\ntexto", encoding="utf-8")
+    (tmp_path / "catalog.json").write_text('{"reference": {"velho": "x"}}', encoding="utf-8")
+    from a11y.content_index import ContentIndex
+
+    idx = ContentIndex(tmp_path)
+    assert idx.catalog_problems() == {"sem_descricao": ["reference:novo"], "descricao_orfa": ["reference:velho"]}
+    assert idx.catalog()[0]["quando_usar"] == "(sem descricao no catalogo)"

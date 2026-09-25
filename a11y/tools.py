@@ -45,7 +45,7 @@ def register(mcp: Any) -> None:
     @mcp.tool()
     async def a11y_list_content() -> str:
         """Catalog of the built-in accessibility knowledge base. Each item has a name, kind
-        (reference guide, component example, template file or script), a summary and its section headings.
+        (reference guide, component example, template file or script), a plain-language "quando_usar" description and, for guides, its section headings.
         Read the catalog and CHOOSE what fits the task, then open it with a11y_get_reference
         a11y_get_example or a11y_get_template. Covers ARIA, WCAG audit checklists, NVDA/VoiceOver testing,
         AI-chat/agent UI accessibility, mobile, frameworks, and ready-made accessible

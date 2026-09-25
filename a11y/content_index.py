@@ -6,8 +6,12 @@ caminho de arquivo, entao nao ha como sair da pasta de conteudo.
 
 from __future__ import annotations
 
+import json
+import logging
 import re
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 CONTENT_DIR = Path(__file__).parent / "content"
 _EXAMPLE_EXTS = {".html", ".js", ".ts", ".tsx", ".jsx", ".css", ".kt", ".swift", ".vue", ".svelte"}
@@ -68,48 +72,45 @@ class ContentIndex:
         path = table.get(key)
         return path.read_text(encoding="utf-8", errors="replace") if path else None
 
-    def catalog(self) -> list[dict[str, str]]:
-        """Catalogo COMPACTO para o MODELO escolher: tipo, nome, resumo curto e secoes principais.
+    def _manifest(self) -> dict[str, dict[str, str]]:
+        """Descricoes escritas por IA (catalog.json), nao extraidas por regex."""
+        try:
+            data = json.loads((self.root / "catalog.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            logger.warning("catalog.json ausente ou invalido em %s", self.root)
+            return {}
+        return {k: v for k, v in data.items() if isinstance(v, dict)}
 
-        Aqui so se extrai o que o arquivo ja diz (titulo, primeiro paragrafo, cabecalhos,
-        comentario de abertura); quem decide o que serve a uma tarefa e a IA, nunca uma regra
-        de palavras-chave. Detalhes ficam para a_get_reference/example/template.
-        """
-        items: list[dict[str, str]] = []
-        for name, path in self.references.items():
-            text = path.read_text(encoding="utf-8", errors="replace")
-            heads = [_clip_heading(h) for h, _ in _split_markdown(text)][1:7]  # o 1o e' o titulo do guia
-            items.append({"kind": "reference", "name": name, "summary": _first_paragraph(text), "sections": "; ".join(heads)})
-        for name, path in self.examples.items():
-            text = path.read_text(encoding="utf-8", errors="replace")
-            summary = _leading_comment(text) or f"exemplo {path.suffix}"
-            items.append({"kind": "example", "name": name, "summary": f"{path.suffix} - {summary}"})
+    def _items(self) -> list[tuple[str, str, Path]]:
+        out: list[tuple[str, str, Path]] = []
+        out += [("reference", n, p) for n, p in self.references.items()]
+        out += [("example", n, p) for n, p in self.examples.items()]
         for name, path in self.templates.items():
-            text = path.read_text(encoding="utf-8", errors="replace")
-            kind = "script" if name.startswith("scripts/") else "template"
-            where = path.parent.relative_to(self.root).as_posix()
-            items.append({"kind": kind, "name": name, "summary": _leading_comment(text) or f"{path.suffix} em {where}"})
+            out.append(("script" if name.startswith("scripts/") else "template", name, path))
+        return out
+
+    def catalog_problems(self) -> dict[str, list[str]]:
+        """Itens do disco sem descricao e descricoes de itens que nao existem mais (para o teste de consistencia)."""
+        manifest = self._manifest()
+        on_disk = {(k, n) for k, n, _ in self._items()}
+        described = {(k, n) for k, group in manifest.items() for n in group}
+        return {
+            "sem_descricao": sorted(f"{k}:{n}" for k, n in on_disk - described),
+            "descricao_orfa": sorted(f"{k}:{n}" for k, n in described - on_disk),
+        }
+
+    def catalog(self) -> list[dict[str, str]]:
+        """Catalogo para o MODELO escolher: tipo, nome, quando usar (texto escrito por IA) e secoes reais do guia.
+
+        Nada e resumido por regra: a descricao vem de catalog.json e as secoes sao os cabecalhos do proprio guia.
+        Quem decide o que serve a uma tarefa e a IA, nunca uma regra de palavras-chave.
+        """
+        manifest = self._manifest()
+        items: list[dict[str, str]] = []
+        for kind, name, path in self._items():
+            item = {"kind": kind, "name": name, "quando_usar": manifest.get(kind, {}).get(name, "(sem descricao no catalogo)")}
+            if kind == "reference":
+                heads = [h for h, _ in _split_markdown(path.read_text(encoding="utf-8", errors="replace"))][1:9]
+                item["secoes"] = "; ".join(heads)
+            items.append(item)
         return items
-
-
-def _clip_heading(h: str, limit: int = 60) -> str:
-    return h if len(h) <= limit else h[: limit - 3].rstrip() + "..."
-
-
-def _first_paragraph(text: str, limit: int = 110) -> str:
-    """Introducao do guia (antes da 1a secao ##); sem introducao, o proprio titulo."""
-    intro, _, _ = text.partition("\n## ")
-    for block in re.split(r"\n\s*\n", intro):
-        b = block.strip()
-        if b and not b.startswith(("#", ">")):  # titulo ou aviso (blockquote), nao descricao
-            return " ".join(b.split())[:limit]
-    title = re.match(r"#\s+(.+)", text)
-    return title.group(1).strip()[:limit] if title else ""
-
-
-def _leading_comment(text: str, limit: int = 110) -> str:
-    m = re.search(r"<!--(.*?)-->|/\*(.*?)\*/|^//(.*)$|<title>(.*?)</title>", text, re.DOTALL | re.MULTILINE)
-    if not m:
-        return ""
-    raw = next(g for g in m.groups() if g is not None)
-    return " ".join(re.sub(r"(^|\s)\*+(?=\s|$)", " ", raw).split())[:limit]

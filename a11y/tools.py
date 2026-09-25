@@ -7,7 +7,7 @@ from typing import Any
 
 from mcp.server.fastmcp import Context
 
-from sampling import NO_MODEL_HELP, ask_model, extract_json
+from llm import NO_MODEL_HELP, ask_model, extract_json
 
 from . import audit
 from .content_index import ContentIndex

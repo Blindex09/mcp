@@ -6,14 +6,14 @@ from types import SimpleNamespace
 import pytest
 from mcp.types import TextContent
 
-# Permite importar mcp_server, sampling e a11y a partir de tests/
+# Permite importar mcp_server, llm e a11y a partir de tests/
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 @pytest.fixture(autouse=True)
 def no_real_model_backend(monkeypatch):
     """Nenhum teste pode chamar modelo de verdade por causa de variaveis do ambiente do dev."""
-    for var in ("ANTHROPIC_API_KEY", "SKILLS_MCP_BACKEND", "SKILLS_MCP_MODEL", "OLLAMA_HOST"):
+    for var in ("ANTHROPIC_API_KEY", "A11Y_MCP_BACKEND", "A11Y_MCP_MODEL", "A11Y_MCP_BASE_URL", "A11Y_MCP_API_KEY", "OPENAI_API_KEY", "OLLAMA_HOST"):
         monkeypatch.delenv(var, raising=False)
 
 

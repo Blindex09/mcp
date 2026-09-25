@@ -7,15 +7,20 @@ conversacional acessivel, mobile, frameworks), exemplos de componentes acessivei
 ferramentas de medicao (contraste, axe-core, arvore de acessibilidade, ordem de foco).
 
 Todo julgamento (qual guia serve a uma tarefa) e feito por modelo - o do cliente via MCP
-sampling ou um modelo de apoio configurado por ambiente (ver sampling.py) - nunca por
+sampling ou um modelo de apoio configurado por ambiente (ver llm.py) - nunca por
 palavra-chave, regex ou ranking lexical. As ferramentas de medicao so reportam fatos.
 """
 
 import logging
 import sys
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
+from a11y.provisioning import PROVISIONER
+from a11y.session import SESSION
 from a11y.tools import register as register_a11y
 
 # Logging so em stderr (stdout e' o canal do protocolo MCP)
@@ -26,8 +31,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@asynccontextmanager
+async def lifespan(_server: Any) -> AsyncIterator[dict[str, Any]]:
+    """Ao iniciar, deixa o navegador pronto em segundo plano; ao encerrar, fecha a sessao aberta."""
+    PROVISIONER.start_background()
+    try:
+        yield {}
+    finally:
+        await SESSION.close()
+
+
 mcp = FastMCP(
     "accessibility",
+    lifespan=lifespan,
     instructions=(
         "Accessibility server (WCAG 2.2, ARIA, screen readers, mobile, accessible AI/agent UIs). "
         "A green automated audit does NOT mean accessible: test like a user. "

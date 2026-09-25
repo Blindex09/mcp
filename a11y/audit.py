@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from .provisioning import PROVISIONER
+
 AXE_PATH = Path(__file__).parent / "vendor" / "axe.min.js"
 NAV_TIMEOUT_MS = 30_000
 TOTAL_TIMEOUT_S = 90
@@ -90,10 +92,8 @@ async def _with_page(
         raise ValueError("informe exatamente um entre url e html")
     if url:
         validate_url(url)  # antes de subir o navegador
-    try:
-        from playwright.async_api import async_playwright
-    except ImportError as e:
-        raise RuntimeError("Playwright nao instalado. Rode: pip install playwright") from e
+    await PROVISIONER.ensure()  # instala Playwright/Chromium sozinho se faltar
+    from playwright.async_api import async_playwright
 
     async def run() -> Any:
         async with async_playwright() as pw:

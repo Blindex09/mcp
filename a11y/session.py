@@ -20,6 +20,7 @@ from typing import Any
 
 from . import page_scripts as js
 from .audit import _launch, validate_url
+from .provisioning import PROVISIONER
 
 IDLE_TIMEOUT_S = 600
 ACTION_TIMEOUT_MS = 10_000
@@ -101,6 +102,7 @@ class Session:
             raise SessionError("color_scheme deve ser light ou dark")
         if url:
             validate_url(url)
+        await PROVISIONER.ensure()  # instala Playwright/Chromium sozinho se faltar
         await self.close()
         from playwright.async_api import async_playwright
 

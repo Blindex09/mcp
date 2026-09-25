@@ -194,7 +194,7 @@ async def test_tools_fail_clearly_without_any_model_and_work_with_a_provider(mon
     assert "A11Y_MCP_MODEL" in out["error"]
     status = json.loads(await tools.get_tool("a11y_status").fn())
     assert status["model"]["ready"] is False
-    assert status["browser"]["state"] in {"unknown", "ready", "installing", "failed"}
+    assert status["browser"]["state"] in {"unknown", "checking", "ready", "installing", "failed"}
 
     monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
     monkeypatch.setenv("A11Y_MCP_MODEL", "m")

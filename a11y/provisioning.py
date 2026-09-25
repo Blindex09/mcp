@@ -68,15 +68,16 @@ async def chromium_present() -> bool:
 class Provisioner:
     def __init__(self) -> None:
         self._task: asyncio.Task[None] | None = None
-        self.state = "unknown"  # unknown | ready | installing | failed
+        self.state = "unknown"  # unknown | checking | installing | ready | failed
         self.detail = ""
 
     async def _provision(self) -> None:
-        self.state = "installing"
+        self.state = "checking"
         try:
             if not playwright_importable():
                 if not auto_install_enabled():
                     raise ProvisioningError("Playwright ausente e A11Y_MCP_AUTO_INSTALL=0. Rode: pip install playwright")
+                self.state = "installing"
                 logger.info("Instalando o pacote playwright (pip)...")
                 code, out = await _run(sys.executable, "-m", "pip", "install", "--disable-pip-version-check", "playwright", timeout=PIP_TIMEOUT_S)
                 importlib.invalidate_caches()
@@ -85,6 +86,7 @@ class Provisioner:
             if not await chromium_present():
                 if not auto_install_enabled():
                     raise ProvisioningError("Chromium ausente e A11Y_MCP_AUTO_INSTALL=0. Rode: python -m playwright install chromium")
+                self.state = "installing"
                 logger.info("Baixando o Chromium do Playwright...")
                 code, out = await _run(sys.executable, "-m", "playwright", "install", "chromium", timeout=BROWSER_TIMEOUT_S)
                 if code != 0 or not await chromium_present():

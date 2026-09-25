@@ -96,3 +96,19 @@ async def test_unexpected_error_becomes_state_not_crash(prov, monkeypatch):
     monkeypatch.setattr(pv, "playwright_importable", lambda: (_ for _ in ()).throw(OSError("disco cheio")))
     with pytest.raises(pv.ProvisioningError, match="OSError"):
         await prov.ensure()
+
+
+async def test_state_is_checking_while_only_verifying_and_installing_only_when_downloading(prov, monkeypatch):
+    seen: list[str] = []
+    fake_env(monkeypatch, importable=[True], chromium=[True])
+    orig = pv.Provisioner._provision
+
+    async def spy(self):
+        task = asyncio.create_task(orig(self))
+        await asyncio.sleep(0)
+        seen.append(self.state)  # logo no inicio: so verificando
+        await task
+
+    monkeypatch.setattr(pv.Provisioner, "_provision", spy)
+    await prov.ensure()
+    assert seen == ["checking"] and prov.state == "ready"

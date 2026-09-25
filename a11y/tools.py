@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from mcp.server.fastmcp import Context
+
 from . import audit
 from .content_index import ContentIndex
 
@@ -38,34 +40,45 @@ def register(mcp: Any) -> None:
 
     @mcp.tool()
     async def a11y_list_content() -> str:
-        """List the built-in accessibility knowledge base: reference guides (ARIA, WCAG
-        audit checklist, NVDA testing, AI-chat a11y, mobile, frameworks) and ready-made
-        accessible component examples (modal, tabs, combobox, treegrid, ...).
-        Start here, then use a11y_search or a11y_get_reference / a11y_get_example."""
-        idx = get_index()
-        return _json({"references": sorted(idx.references), "examples": sorted(idx.examples)})
+        """Catalog of the built-in accessibility knowledge base. Each item has a name, kind
+        (reference guide or component example), a summary and its section headings.
+        Read the catalog and CHOOSE what fits the task, then open it with a11y_get_reference
+        or a11y_get_example. Covers ARIA, WCAG audit checklists, NVDA/VoiceOver testing,
+        AI-chat/agent UI accessibility, mobile, frameworks, and ready-made accessible
+        components (modal, tabs, combobox, treegrid, ...)."""
+        return _json(get_index().catalog())
 
     @mcp.tool()
-    async def a11y_search(query: str, kind: str = "all", top_k: int = 8) -> str:
-        """Semantic (BM25) search over the accessibility references and examples.
-        query: what you need, e.g. "modal focus trap", "live region announcements", "NVDA table".
-        kind: "all" | "reference" | "example" | "skill". Returns ranked snippets with the
-        file name to open via a11y_get_reference / a11y_get_example."""
-        if kind not in ("all", "reference", "example", "skill"):
-            return _json({"error": "kind deve ser all, reference, example ou skill"})
-        hits = get_index().search(query, kind=kind, top_k=top_k)
-        return _json(
-            [
-                {
-                    "score": round(s, 2),
-                    "kind": c.kind,
-                    "name": c.name,
-                    "section": c.heading,
-                    "snippet": c.text.strip()[:300],
-                }
-                for s, c in hits
-            ]
+    async def a11y_find(task: str, ctx: Context) -> str:  # type: ignore[type-arg]
+        """Ask the model to pick which accessibility references/examples fit a task, described
+        in plain language (any language, no keywords needed). Selection is done by the
+        client's model via MCP sampling over the full catalog - not by keyword matching.
+        If the client does not support sampling, the catalog is returned so the calling
+        model can choose itself."""
+        catalog = get_index().catalog()
+        prompt = (
+            "You route accessibility work. Given the task and the catalog, pick the items "
+            "(at most 6, most useful first) a developer should read. Judge by meaning and "
+            "intent, not by shared words. Answer ONLY with a JSON array of catalog names.\n\n"
+            f"TASK:\n{task}\n\nCATALOG:\n{_json(catalog)}"
         )
+        try:
+            from mcp.types import SamplingMessage, TextContent
+
+            result = await ctx.session.create_message(
+                messages=[SamplingMessage(role="user", content=TextContent(type="text", text=prompt))],
+                max_tokens=400,
+            )
+            content = result.content
+            raw = content.text if isinstance(content, TextContent) else ""
+            names = json.loads(raw[raw.index("[") : raw.rindex("]") + 1])
+        except Exception:  # noqa: BLE001 - sem sampling ou resposta invalida: o modelo chamador escolhe
+            return _json(
+                {"selection": "unavailable", "note": "Escolha pelo catalogo abaixo.", "catalog": catalog}
+            )
+        valid = {(c["kind"], c["name"]) for c in catalog}
+        picked = [c for c in catalog if c["name"] in names and (c["kind"], c["name"]) in valid]
+        return _json({"selection": "model", "items": picked})
 
     @mcp.tool()
     async def a11y_get_reference(name: str, section: str = "") -> str:

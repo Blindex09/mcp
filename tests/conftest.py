@@ -97,3 +97,10 @@ def reset_skill_cache():
     yield
     mcp_server._skills = []
     mcp_server._skills_loaded_at = 0.0
+
+
+@pytest.fixture(autouse=True)
+def no_real_model_backend(monkeypatch):
+    """Nenhum teste pode chamar modelo de verdade por causa de variaveis do ambiente do dev."""
+    for var in ("ANTHROPIC_API_KEY", "SKILLS_MCP_BACKEND", "SKILLS_MCP_MODEL", "OLLAMA_HOST"):
+        monkeypatch.delenv(var, raising=False)

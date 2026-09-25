@@ -25,7 +25,7 @@ from typing import Any
 from mcp.server.fastmcp import Context, FastMCP
 
 from a11y.tools import register as register_a11y
-from sampling import ask_model, extract_json
+from sampling import NO_MODEL_HELP, ask_model, extract_json
 
 # Setup logging (stderr so, nunca stdout em MCP!)
 logging.basicConfig(
@@ -683,9 +683,8 @@ async def find_skills(task: str, ctx: Context) -> str:  # type: ignore[type-arg]
         )
         if raw is None:
             return (
-                "O cliente nao oferece sampling, entao a escolha por modelo nao esta disponivel aqui. "
-                "Leia o catalogo com list_all_skills(page=N) ou list_categories() e escolha voce mesmo, "
-                "depois use invoke_skill(nome)."
+                f"{NO_MODEL_HELP} Ou leia o catalogo com list_all_skills(page=N) / list_categories() "
+                "e escolha voce mesmo, depois use invoke_skill(nome)."
             )
         names = extract_json(raw, "array") or []
         picked += [n for n in names if isinstance(n, str) and n in known and n not in picked]
@@ -747,7 +746,7 @@ async def classify_skills(ctx: Context, max_batches: int = 10, force: bool = Fal
         )
         if raw is None:
             if done == 0:
-                return "O cliente nao oferece sampling: nao da para classificar por modelo aqui."
+                return f"{NO_MODEL_HELP} Nao da para classificar por modelo aqui."
             break
         result = extract_json(raw, "object") or {}
         for s in batch:

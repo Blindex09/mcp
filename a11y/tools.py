@@ -7,7 +7,7 @@ from typing import Any
 
 from mcp.server.fastmcp import Context
 
-from sampling import ask_model, extract_json
+from sampling import NO_MODEL_HELP, ask_model, extract_json
 
 from . import audit
 from .content_index import ContentIndex
@@ -54,9 +54,9 @@ def register(mcp: Any) -> None:
     async def a11y_find(task: str, ctx: Context) -> str:  # type: ignore[type-arg]
         """Ask the model to pick which accessibility references/examples fit a task, described
         in plain language (any language, no keywords needed). Selection is done by the
-        client's model via MCP sampling over the full catalog - not by keyword matching.
-        If the client does not support sampling, the catalog is returned so the calling
-        model can choose itself."""
+        client's model via MCP sampling (or a configured fallback model) over the full
+        catalog - not by keyword matching. If neither exists, the catalog is returned so
+        the calling model can choose itself."""
         catalog = get_index().catalog()
         prompt = (
             "You route accessibility work. Given the task and the catalog, pick the items "
@@ -68,7 +68,7 @@ def register(mcp: Any) -> None:
         names = extract_json(raw, "array")
         if not isinstance(names, list):  # sem sampling ou resposta ilegivel: o modelo chamador escolhe
             return _json(
-                {"selection": "unavailable", "note": "Escolha pelo catalogo abaixo.", "catalog": catalog}
+                {"selection": "unavailable", "note": f"{NO_MODEL_HELP} Escolha pelo catalogo abaixo.", "catalog": catalog}
             )
         valid = {(c["kind"], c["name"]) for c in catalog}
         picked = [c for c in catalog if c["name"] in names and (c["kind"], c["name"]) in valid]

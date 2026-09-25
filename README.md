@@ -167,7 +167,19 @@ Nada aqui usa regras de nome, palavra-chave, regex ou BM25:
   classificar fica `unclassified` — nada é chutado por nome.
 - **Busca** = `find_skills(task)`: o modelo do cliente lê o catálogo (nome + descrição, em lotes) e escolhe
   pelo sentido; nomes inventados são descartados (única checagem fixa: o nome existe?).
-- **Cliente sem sampling**: as ferramentas dizem isso e o modelo que chamou lê o catálogo
+- **Quem responde** (o servidor é um MCP standalone, não depende de outro projeto):
+  1. o modelo do próprio cliente, via MCP sampling;
+  2. senão, um **modelo de apoio** configurado por variável de ambiente:
+
+  | Variável | Uso |
+  |---|---|
+  | `ANTHROPIC_API_KEY` | ativa o backend Anthropic (chave só lida do ambiente, nunca logada) |
+  | `SKILLS_MCP_BACKEND` | `anthropic` ou `ollama` (opcional; senão detecta pelo que estiver configurado) |
+  | `SKILLS_MCP_MODEL` | id do modelo (Anthropic: padrão `claude-haiku-4-5-20251001`; Ollama: obrigatório) |
+  | `OLLAMA_HOST` | endereço do Ollama (padrão `http://localhost:11434`) |
+
+  Exemplo no `claude_desktop_config.json`: `"env": {"ANTHROPIC_API_KEY": "..."}` na entrada do servidor.
+- **Sem nenhum dos dois**: as ferramentas avisam como configurar e o modelo que chamou lê o catálogo
   (`list_all_skills`, `list_categories`) e decide; não existe plano B por palavra-chave.
 
 ---

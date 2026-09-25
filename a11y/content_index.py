@@ -35,6 +35,7 @@ class ContentIndex:
         self.root = root
         self.references: dict[str, Path] = {}
         self.examples: dict[str, Path] = {}
+        self.templates: dict[str, Path] = {}  # assets/ e scripts/, chave = caminho relativo
         self._load()
 
     def _load(self) -> None:
@@ -47,10 +48,19 @@ class ContentIndex:
             for p in sorted(ex_dir.iterdir()):
                 if p.is_file() and p.suffix in _EXAMPLE_EXTS:
                     self.examples[p.stem] = p
+        for sub in ("assets", "scripts"):
+            base = self.root / sub
+            if base.is_dir():
+                for p in sorted(base.rglob("*")):
+                    if p.is_file() and p.name != ".gitignore":
+                        self.templates[p.relative_to(self.root).as_posix()] = p
 
     def read(self, kind: str, name: str) -> str | None:
-        table = self.references if kind == "reference" else self.examples
         key = name.strip()
+        if kind == "template":  # chave exata do indice (ex.: assets/accessible-ai-react/src/ai/turnReducer.js)
+            path = self.templates.get(key.replace("\\", "/"))
+            return path.read_text(encoding="utf-8", errors="replace") if path else None
+        table = self.references if kind == "reference" else self.examples
         for ext in (".md", *_EXAMPLE_EXTS):
             if key.endswith(ext):
                 key = key[: -len(ext)]
@@ -72,6 +82,10 @@ class ContentIndex:
         for name, path in self.examples.items():
             text = path.read_text(encoding="utf-8", errors="replace")
             items.append({"kind": "example", "name": name, "summary": f"{path.suffix} - " + _leading_comment(text), "sections": ""})
+        for name, path in self.templates.items():
+            text = path.read_text(encoding="utf-8", errors="replace")
+            kind = "script" if name.startswith("scripts/") else "template"
+            items.append({"kind": kind, "name": name, "summary": _leading_comment(text), "sections": ""})
         return items
 
 

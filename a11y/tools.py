@@ -43,9 +43,9 @@ def register(mcp: Any) -> None:
     @mcp.tool()
     async def a11y_list_content() -> str:
         """Catalog of the built-in accessibility knowledge base. Each item has a name, kind
-        (reference guide or component example), a summary and its section headings.
+        (reference guide, component example, template file or script), a summary and its section headings.
         Read the catalog and CHOOSE what fits the task, then open it with a11y_get_reference
-        or a11y_get_example. Covers ARIA, WCAG audit checklists, NVDA/VoiceOver testing,
+        a11y_get_example or a11y_get_template. Covers ARIA, WCAG audit checklists, NVDA/VoiceOver testing,
         AI-chat/agent UI accessibility, mobile, frameworks, and ready-made accessible
         components (modal, tabs, combobox, treegrid, ...)."""
         return _json(get_index().catalog())
@@ -98,6 +98,16 @@ def register(mcp: Any) -> None:
         text = get_index().read("example", name)
         if text is None:
             return _json({"error": f"exemplo nao encontrado: {name}", "available": sorted(get_index().examples)})
+        return _clip(text)
+
+    @mcp.tool()
+    async def a11y_get_template(name: str) -> str:
+        """Get a file of the accessible AI/agent React template (assets/accessible-ai-react/...) or
+        an audit script (scripts/audit-axe.js, scripts/audit-contrast.js), by the exact path shown
+        in a11y_list_content, e.g. "assets/accessible-ai-react/src/ai/turnReducer.js"."""
+        text = get_index().read("template", name)
+        if text is None:
+            return _json({"error": f"arquivo nao encontrado: {name}", "available": sorted(get_index().templates)})
         return _clip(text)
 
     @mcp.tool()

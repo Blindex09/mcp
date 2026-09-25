@@ -26,7 +26,7 @@ def test_index_loads_content(index):
 
 def test_catalog_describes_every_item_for_the_model(index):
     cat = index.catalog()
-    assert len(cat) == len(index.references) + len(index.examples)
+    assert len(cat) == len(index.references) + len(index.examples) + len(index.templates)
     ref = next(c for c in cat if c["name"] == "audit-checklist")
     assert ref["kind"] == "reference" and ref["summary"] and ref["sections"]
 
@@ -95,7 +95,7 @@ def test_summarize_axe_orders_by_impact():
 async def test_tools_registered_on_server():
     names = {t.name for t in await mcp_server.mcp.list_tools()}
     assert {
-        "a11y_list_content", "a11y_find", "a11y_get_reference", "a11y_get_example",
+        "a11y_list_content", "a11y_find", "a11y_get_reference", "a11y_get_example", "a11y_get_template",
         "a11y_contrast", "a11y_audit", "a11y_aria_snapshot", "a11y_tab_order",
     } <= names
 
@@ -153,3 +153,22 @@ async def test_find_uses_model_choice_and_drops_invented_names(monkeypatch):
     assert data["selection"] == "model"
     assert [i["name"] for i in data["items"]] == ["modal-native-dialog"]
     assert tools.get_index().read("example", "modal-native-dialog")
+
+
+def test_every_original_file_is_served(index):
+    """Nada do web-accessibility fica inalcancavel: guias, exemplos, template React e scripts."""
+    root = index.root
+    on_disk = {p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file() and p.name != ".gitignore"}
+    served = {f"references/{n}.md" for n in index.references} | set(index.templates)
+    served |= {p.relative_to(root).as_posix() for p in index.examples.values()}
+    served |= {"SKILL.md"}  # o SKILL.md e' entregue pelo README/instrucoes e pelos guias
+    assert on_disk - served == set()
+    assert "assets/accessible-ai-react/src/ai/turnReducer.js" in index.templates
+    assert "scripts/audit-axe.js" in index.templates
+
+
+def test_template_read_is_exact_key_only(index):
+    assert index.read("template", "assets/accessible-ai-react/src/ai/turnReducer.js")
+    assert index.read("template", "assets/../../mcp_server.py") is None
+    assert index.read("template", "../pyproject.toml") is None
+    assert index.read("template", "assets\\accessible-ai-react\\package.json")

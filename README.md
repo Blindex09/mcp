@@ -6,11 +6,11 @@ Ele dá à IA três coisas: **conhecimento** (guias e exemplos de acessibilidade
 
 ## O que faz
 
-- 📚 **Base de conhecimento embutida** (`a11y/content/`): 24 guias (WCAG 2.2, ARIA, NVDA/VoiceOver/TalkBack, checklist de auditoria, IA conversacional acessível, mobile, frameworks, XR…), ~50 exemplos de componentes acessíveis (modal, abas, combobox, treegrid, chat de IA…) e um template React de chat/agente acessível.
+- 📚 **Base de conhecimento embutida** (`a11y/content/`): 24 guias (WCAG 2.2, ARIA, NVDA/VoiceOver/TalkBack, checklist de auditoria, IA conversacional acessível, mobile, frameworks, XR…), 42 exemplos de componentes acessíveis (modal, abas, combobox, treegrid, chat de IA…) e o template React (10 arquivos) de chat/agente acessível.
 - 🧠 **Escolha pelo modelo**: `a11y_find` recebe a tarefa em linguagem natural, em qualquer idioma, e o modelo escolhe os guias e exemplos certos pelo sentido. Nada de palavra-chave, regex ou ranking lexical.
 - 🔬 **Medição de fatos**: contraste WCAG, auditoria axe-core num navegador real, árvore de acessibilidade e ordem de foco por teclado.
 
-## Ferramentas (8)
+## Ferramentas (9)
 
 | Ferramenta | O que faz |
 |---|---|
@@ -18,6 +18,7 @@ Ele dá à IA três coisas: **conhecimento** (guias e exemplos de acessibilidade
 | `a11y_find(task)` | O modelo escolhe guias/exemplos para a tarefa |
 | `a11y_get_reference(name, section)` | Lê um guia inteiro ou só uma seção |
 | `a11y_get_example(name)` | Devolve o código de um exemplo de componente |
+| `a11y_get_template(name)` | Arquivo do template React de chat/agente acessível (`assets/…`) ou dos scripts de auditoria (`scripts/…`) |
 | `a11y_contrast(foreground, background, size_px, bold)` | Razão de contraste WCAG e aprovação AA/AAA |
 | `a11y_audit(url \| html, level)` | Auditoria axe-core (A/AA/AAA) em Chromium headless; violações por impacto |
 | `a11y_aria_snapshot(url \| html)` | Árvore de acessibilidade: o que o leitor de tela recebe |
@@ -78,7 +79,7 @@ c:\mcp\
 │   ├── content_index.py ← catálogo dos guias/exemplos (leitura só por nome)
 │   ├── content/         ← guias, exemplos, template React (origem: repo web-accessibility)
 │   └── vendor/          ← axe-core 4.12.1 (MPL-2.0)
-├── tests/               ← 42 testes (inclui navegador real)
+├── tests/               ← 44 testes (inclui navegador real)
 ├── setup.py / setup.ps1 / mcp.json / test.py
 └── requirements.txt / pyproject.toml
 ```
@@ -88,7 +89,7 @@ Os guias e exemplos são editáveis em `a11y/content/`; o `SKILL.md` de lá expl
 ## Desenvolvimento
 
 ```bash
-python -m pytest -q          # 42 testes
+python -m pytest -q          # 44 testes
 ruff check a11y sampling.py mcp_server.py tests
 mypy a11y sampling.py mcp_server.py --ignore-missing-imports
 ```

@@ -23,6 +23,7 @@ for `a11y_get_reference`, and every `examples/y.ext` is the example named `y` fo
 | See what exists (summary + sections of every guide/example) | `a11y_list_content` |
 | Let the model pick the right guides/examples for a task described in plain language | `a11y_find(task)` |
 | Read a guide (or one section of it) / get component source | `a11y_get_reference(name, section)` / `a11y_get_example(name)` |
+| Get a file of the accessible AI React template or an audit script (`assets/...`, `scripts/...`) | `a11y_get_template(path)` |
 | WCAG contrast ratio between two colors | `a11y_contrast` |
 | Automated axe-core audit of a URL (http/https) or HTML string | `a11y_audit` |
 | Accessibility tree, i.e. what a screen reader receives | `a11y_aria_snapshot` |

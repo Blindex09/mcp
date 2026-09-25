@@ -47,7 +47,7 @@ async def test_server_exposes_only_accessibility_tools() -> None:
     mod = _load_module()
     names = {t.name for t in await mod.mcp.list_tools()}
     assert names == {
-        "a11y_list_content", "a11y_find", "a11y_get_reference", "a11y_get_example",
+        "a11y_list_content", "a11y_find", "a11y_get_reference", "a11y_get_example", "a11y_get_template",
         "a11y_contrast", "a11y_audit", "a11y_aria_snapshot", "a11y_tab_order",
     }
     assert not any("skill" in n for n in names)

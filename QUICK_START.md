@@ -2,10 +2,11 @@
 
 ### 1️⃣ Instalar
 
+O Playwright e o Chromium são instalados sozinhos na primeira vez (alguns minutos; `a11y_status` mostra o andamento).
+
 ```powershell
 cd c:\mcp
 python -m pip install -r requirements.txt      # ou: uv sync
-python -m playwright install chromium          # uma vez (auditoria no navegador)
 python setup.py                                # registra no Claude Desktop e Cursor
 ```
 
@@ -43,16 +44,29 @@ Claude: [a11y_contrast → razão e aprovação para texto normal/grande e compo
 
 O que o automático não cobre (teclado de ponta a ponta, leitor de tela, toque) o Claude lembra de testar à mão, seguindo o guia `nvda-testing-guide`.
 
-### 🧠 Cliente sem sampling? Configure um modelo de apoio
+### 🧠 Dê um modelo ao servidor (para o usuário autônomo e o `a11y_find`)
 
-`a11y_find` pede ao modelo do cliente (MCP sampling) que escolha os guias. Se o cliente não suporta, o servidor usa um modelo do ambiente (em `"env"` na entrada do servidor no JSON):
+A especificação MCP de 2026 descontinuou o sampling, então o servidor chama o provedor direto. Na entrada do servidor no JSON, em `"env"`:
 
 ```json
-"env": { "ANTHROPIC_API_KEY": "sk-ant-..." }
+"env": { "ANTHROPIC_API_KEY": "sk-ant-...", "A11Y_MCP_MODEL": "<o modelo que você escolher>" }
 ```
 
-ou, para Ollama: `"env": { "SKILLS_MCP_BACKEND": "ollama", "SKILLS_MCP_MODEL": "llama3" }`.
-Sem nenhum modelo, `a11y_find` devolve o catálogo e o próprio Claude escolhe. As demais variáveis estão no `README.md`.
+Não há modelo padrão: `A11Y_MCP_MODEL` é sua escolha. Outros provedores (OpenAI, xAI/OpenRouter/LM Studio via `A11Y_MCP_BASE_URL`, Ollama)
+estão no `README.md`. Confira com `a11y_status`. Sem modelo, as ferramentas de sessão (`a11y_open`, `a11y_dossier`, `a11y_act`…) continuam
+funcionando com o modelo do próprio cliente; só `a11y_walkthrough`/`a11y_review` e a escolha automática do `a11y_find` precisam dele.
+
+### 🤖 Deixe o servidor testar sozinho
+
+```
+Você:   simula uma pessoa só de teclado tentando se cadastrar em https://meusite.com
+Claude: [a11y_walkthrough persona=keyboard → relatório com atritos, gravidade, correções e o que NÃO foi verificado]
+
+Você:   revisa os componentes e o design dessa página
+Claude: [a11y_review → prova o comportamento de cada componente e propõe dentro do design do site]
+```
+
+`a11y_close` interrompe um teste em andamento e devolve o relatório parcial.
 
 ### ⚙️ Configuração manual
 
@@ -75,4 +89,4 @@ python c:\mcp\test.py          # confere dependências, conteúdo embutido e ini
 python c:\mcp\mcp_server.py    # roda o servidor e mostra o log no stderr
 ```
 
-Auditoria falhando com "Chromium indisponível": `python -m playwright install chromium`.
+Navegador não sobe: veja `a11y_status`. Se a instalação automática estiver desligada (`A11Y_MCP_AUTO_INSTALL=0`), rode `python -m playwright install chromium`.

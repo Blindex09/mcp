@@ -47,6 +47,11 @@ A green audit is not accessibility. To find what really happens, open a persiste
 | Reflow at 320 px, text-spacing clipping | `a11y_stress` |
 | The site's real design language; try a change temporarily; look at it | `a11y_design_tokens` / `a11y_preview_css` / `a11y_screenshot` |
 
+Autonomous user: `a11y_walkthrough(task, persona)` and `a11y_review(focus)` run a model as the person (with screenshots and the accessibility
+tree) and return a plain-language report; `a11y_close` interrupts them; `a11y_status` shows readiness. `a11y_focus_style` gives the facts of what :focus changes.
+`a11y_dossier` reports role/name **as computed by the browser** and whether each element is focusable/clickable (an element that is clickable but not
+focusable, with no role, is a mouse-only control).
+
 How to judge: [references/component-identity-guide.md](references/component-identity-guide.md) (what is this element, in this site),
 [references/ux-persona-testing.md](references/ux-persona-testing.md) (task-based walkthroughs and the report, including what was NOT verified),
 [references/design-language-review.md](references/design-language-review.md) (typography/spacing suggestions inside the site's own scale).

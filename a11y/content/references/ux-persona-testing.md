@@ -4,6 +4,10 @@ Automated audits go green while real people fail. This guide is for running a **
 persistent browser session (`a11y_open` → probes → `a11y_close`), observing what a person would actually experience, and
 reporting where they get stuck. The judgment (was it understandable? was it a struggle?) is yours; the tools give facts.
 
+> Prefer letting the server run the walkthrough for you: `a11y_walkthrough(task, persona)` (a model plays the person and writes the report) or
+> `a11y_review(focus)`. The rest of this guide is the method it follows, and what you check when doing it by hand with the session tools.
+> `a11y_focus_style(target)` gives the measured facts of what :focus changes.
+
 ## 1. Personas (enforced by the tools)
 
 | Persona | What the harness enforces | What you look for |

@@ -5,6 +5,9 @@ semantics and behavior match — without changing how the site looks. The decisi
 (`a11y_dossier`), probe the behavior (`a11y_act`, `a11y_reach`, `a11y_announce`), compare with the site's own
 conventions, and justify. Do not classify by tag name, class name, or a keyword in the label.
 
+> `a11y_dossier` reports each element's role and name **as computed by the browser** (`computed`), whether it is `focusable` and `clickable`,
+> and the raw attributes next to them. A `clickable` element that is not `focusable`, with role `generic` and no name, is a control only a mouse user can operate.
+
 ## 0. Principles
 
 1. **Meaning over appearance.** A control is what it *does for the user*, not what it looks like. A box that looks

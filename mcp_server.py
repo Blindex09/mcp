@@ -56,6 +56,7 @@ mcp = FastMCP(
         "report the effect; a11y_stress checks reflow and text spacing; a11y_close ends it. "
         "3) DESIGN: a11y_design_tokens measures the site's own design language; a11y_screenshot and a11y_preview_css "
         "let you try a change temporarily before recommending it, inside the site's scale. "
+        "AUTONOMOUS: a11y_walkthrough(task, persona) and a11y_review(focus) run a model as the user (with screenshots) and return a report; a11y_close interrupts; a11y_status shows browser/model readiness. "
         "4) QUICK CHECKS without a session: a11y_audit (axe-core), a11y_aria_snapshot, a11y_tab_order, a11y_contrast. "
         "The tools report facts and never classify; judging and reporting is yours. Always state what was NOT verified "
         "(real screen readers, real devices, untested flows)."

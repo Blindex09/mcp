@@ -51,18 +51,20 @@ async def site():
 async def _by(session, **match):
     d = await session.dossier()
     for e in d["elements"]:
-        if all(str(e.get(k) or e["name_sources"].get(k) or e["text"]) == v or e.get(k) == v for k, v in match.items()):
+        name = (e.get("computed") or {}).get("name") or e.get("text")
+        if all((name if k == "text" else e.get(k)) == v for k, v in match.items()):
             return e
     raise AssertionError(f"elemento nao achado: {match}")
 
 
 async def test_dossier_gives_facts_not_classification(site):
     d = await site.dossier()
-    assert d["title"] == "Loja" and d["count"] >= 8
+    assert d["title"] == "Loja" and len(d["elements"]) >= 8
     kinds = {e["id"]: e for e in d["elements"]}
     field = next(e for e in kinds.values() if e["tag"] == "input")
-    assert field["editable"] and field["relations"]["datalist_options"] == 3
-    assert field["name_sources"]["label"] == "Buscar"
+    assert field["computed"]["properties"]["editable"] and field["relations"]["datalist_options"] == 3
+    assert field["computed"]["role"] == "combobox" and field["computed"]["name"] == "Buscar"  # calculado pelo navegador
+    assert field["attrs"]["label"] == "Buscar" and field["clickable"] is not None
     trigger = next(e for e in kinds.values() if e["role_attr"] == "button" and e["text"] == "Categorias")
     assert trigger["states"]["haspopup"] == "true" and trigger["relations"]["controls"] == "m"
     assert trigger["relations"]["popup_links"] == 2 and trigger["focusable"]
@@ -242,3 +244,145 @@ async def test_mcp_tools_registered_and_return_json():
         assert "nao tem mouse" in refused["error"]
     finally:
         await tool("a11y_close").fn()
+
+
+MIXED = """<!doctype html><html lang="pt"><head><title>m</title></head><body><main>
+<button id="ok">Salvar</button>
+<div id="fake">Comprar agora</div>
+<x-chip tabindex="0" role="button" aria-label="Filtro">f</x-chip>
+<span id="hid" aria-hidden="true">nada</span>
+<script>document.getElementById('fake').addEventListener('click', () => {});</script></main></body></html>"""
+
+
+async def test_discovery_comes_from_the_browser_not_from_a_tag_list():
+    await SESSION.open(None, MIXED)
+    try:
+        d = await SESSION.dossier()
+        by_tag = {e["tag"]: e for e in d["elements"]}
+        # elemento que so tem addEventListener: o navegador diz que e clicavel, mas nao focavel nem tem papel
+        fake = by_tag["div"]
+        assert fake["clickable"] is True and fake["focusable"] is False
+        assert fake["computed"]["role"] == "generic" and fake["computed"]["name"] == ""
+        # elemento customizado que uma lista de tags nunca conheceria: entra porque o navegador o acha focavel
+        chip = by_tag["x-chip"]
+        assert chip["focusable"] is True and chip["computed"]["role"] == "button" and chip["computed"]["name"] == "Filtro"
+        assert by_tag["button"]["computed"]["name"] == "Salvar"
+        assert "span" not in by_tag  # aria-hidden e sem interacao: fora
+        assert d["discovered_total"] == 3 and d["discovery_truncated"] is False
+    finally:
+        await SESSION.close()
+
+
+async def test_ids_are_stable_between_dossier_calls_and_usable_as_targets():
+    await SESSION.open(None, MIXED)
+    try:
+        first = {e["tag"]: e["id"] for e in (await SESSION.dossier())["elements"]}
+        second = {e["tag"]: e["id"] for e in (await SESSION.dossier())["elements"]}
+        assert first == second
+        out = await SESSION.act("focus", first["x-chip"])
+        assert out["focus_after"]["tag"] == "x-chip"
+    finally:
+        await SESSION.close()
+
+
+async def test_discovery_limit_is_reported_not_hidden():
+    await SESSION.open(None, MIXED)
+    try:
+        found, total = await SESSION._discover(limit=2)
+        assert len(found) == 2 and total == 3
+    finally:
+        await SESSION.close()
+
+
+async def test_settle_is_adaptive_it_waits_for_the_network_and_returns_fast_when_nothing_happens():
+    import asyncio
+    import time
+
+    page_html = """<!doctype html><html lang="pt"><title>s</title><body><button id="go">Ir</button><div id="out"></div>
+    <script>document.getElementById('go').addEventListener('click', async () => {
+      const r = await fetch('http://slow.test/dado'); document.getElementById('out').textContent = await r.text(); });</script></body></html>"""
+    await SESSION.open(None, page_html)
+    try:
+        async def slow(route):
+            await asyncio.sleep(0.8)  # servidor lento: nenhum sleep fixo do harness cobriria isso por acaso
+            await route.fulfill(body="chegou", headers={"access-control-allow-origin": "*", "content-type": "text/plain"})
+
+        await SESSION.context.route("http://slow.test/**", slow)
+        go = (await SESSION.dossier())["elements"][0]["id"]
+        r = await SESSION.act("click", go)
+        assert any("chegou" in x for x in r["tree_added"]), r["tree_added"]
+        t = time.monotonic()
+        quiet = await SESSION.act("hover", go)  # nada muda: volta logo, sem esperar o teto
+        assert quiet["tree_added"] == [] and time.monotonic() - t < 1.5
+    finally:
+        await SESSION.close()
+
+
+FOCUS_PAGE = """<!doctype html><html lang="pt"><title>f</title><style>
+ #styled:focus { outline: 3px solid rgb(255, 0, 0); outline-offset: 2px; }
+ #plain { outline: none; }
+</style><body><button id="styled">Com estilo</button><button id="plain">Sem estilo</button>
+<script>window.n = 0; for (const b of document.querySelectorAll('button')) { b.addEventListener('focus', () => window.n++); b.addEventListener('blur', () => window.n++); }</script>
+</body></html>"""
+
+
+async def test_focus_style_reports_measured_facts_without_firing_focus_events():
+    await SESSION.open(None, FOCUS_PAGE)
+    try:
+        els = {e["text"]: e["id"] for e in (await SESSION.dossier())["elements"]}
+        styled = await SESSION.focus_style(els["Com estilo"])
+        assert styled["changed_on_focus"]["outline-color"][1] == "rgb(255, 0, 0)"
+        assert "3px" in styled["outline_when_focused"] and styled["properties_changed"] >= 3
+        plain = await SESSION.focus_style(els["Sem estilo"])
+        assert "outline-width" not in plain["changed_on_focus"] or plain["changed_on_focus"]["outline-width"][1] == "0px"
+        assert await SESSION.page.evaluate("() => window.n") == 0  # nenhum evento de foco/blur foi disparado
+        assert "focus_indicator" not in json.dumps(styled)  # nada de veredito booleano
+    finally:
+        await SESSION.close()
+    await SESSION.open(None, FOCUS_PAGE, persona="screen_reader")
+    try:
+        with pytest.raises(SessionError, match="nao ve a tela"):
+            await SESSION.focus_style("e1")
+    finally:
+        await SESSION.close()
+
+
+async def test_tab_order_and_reach_report_raw_focus_style_not_a_verdict():
+    order = await audit.tab_order(html=FOCUS_PAGE)
+    assert all("focus_style" in s["element"] and "focus_indicator" not in s["element"] for s in order)
+    assert "3px" in order[0]["element"]["focus_style"]["outline"]
+
+
+async def test_close_interrupts_a_running_autonomous_test_and_keeps_the_partial_report():
+    import mcp_server
+    from a11y import agent
+
+    fin = json.dumps({"thought": "x", "friction": None, "action": {"type": "press", "value": "Tab"}})
+    calls = {"n": 0}
+
+    async def ask(prompt, images, max_tokens):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return fin
+        return "RELATORIO PARCIAL"
+
+    async def stop_after_first_step(*a, **k):
+        SESSION.stop_requested = True  # o que a11y_close faz quando ha um teste em andamento
+
+    r = await agent.run_agent(session=SESSION, ask=ask, mode="task", goal="g", url=None, html=SITE,
+                              persona="keyboard", progress=stop_after_first_step)
+    assert r["stopped_by"] == "cancelled" and r["report"] == "RELATORIO PARCIAL" and len(r["steps"]) == 1
+
+    close = mcp_server.mcp._tool_manager.get_tool("a11y_close")
+    async with SESSION.lock:  # simula um teste autonomo segurando a sessao
+        out = json.loads(await close.fn())
+    assert out["cancel_requested"] is True and SESSION.stop_requested is True
+    SESSION.stop_requested = False
+
+
+async def test_agent_can_inspect_focus_style_but_a_screen_reader_cannot():
+    from a11y import agent
+
+    assert "focus_style" in agent._allowed_actions("default")
+    assert "focus_style" in agent._allowed_actions("keyboard")
+    assert "focus_style" not in agent._allowed_actions("screen_reader")

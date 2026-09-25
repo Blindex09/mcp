@@ -175,7 +175,8 @@ async def test_compact_element_and_effect_summary_are_facts_only():
         d = await SESSION.dossier()
         lines = [agent.compact_element(e) for e in d["elements"]]
         assert any("editavel" in ln and "datalist_options=3" in ln for ln in lines)
-        assert any("role=button" in ln and "haspopup=true" in ln and "popup_links=2" in ln for ln in lines)
+        assert any("role-attr=button" in ln and "papel-calculado=button" in ln and "haspopup=true" in ln and "popup_links=2" in ln for ln in lines)
+        assert all("focavel=" in ln and "clicavel=" in ln for ln in lines)  # fatos crus, sem veredito
         assert any("em=nav" in ln for ln in lines)
     finally:
         await SESSION.close()

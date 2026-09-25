@@ -53,7 +53,7 @@ async def test_server_exposes_only_accessibility_tools() -> None:
         "a11y_contrast", "a11y_audit", "a11y_aria_snapshot", "a11y_tab_order",
         # teste como usuario (sessao persistente)
         "a11y_open", "a11y_close", "a11y_dossier", "a11y_observe", "a11y_act", "a11y_reach",
-        "a11y_announce", "a11y_screenshot", "a11y_design_tokens", "a11y_preview_css", "a11y_stress",
+        "a11y_announce", "a11y_screenshot", "a11y_design_tokens", "a11y_preview_css", "a11y_stress", "a11y_focus_style",
         # autonomia (o modelo opera como usuario) e diagnostico
         "a11y_walkthrough", "a11y_review", "a11y_status",
     }

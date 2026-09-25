@@ -40,7 +40,8 @@ async def test_missing_package_and_browser_are_installed_in_order(prov, monkeypa
     calls = fake_env(monkeypatch, importable=[False, True], chromium=[False, True])
     await prov.ensure()
     assert prov.state == "ready"
-    assert [c[2:5] for c in calls] == [("pip", "install", "playwright"), ("playwright", "install", "chromium")]
+    assert calls[0][2:4] == ("pip", "install") and calls[0][-1] == "playwright"
+    assert calls[1][2:5] == ("playwright", "install", "chromium")
 
 
 async def test_only_browser_missing(prov, monkeypatch):

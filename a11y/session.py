@@ -24,6 +24,8 @@ from .provisioning import PROVISIONER
 
 IDLE_TIMEOUT_S = 600
 ACTION_TIMEOUT_MS = 10_000
+SETTLE_QUIET_MS = 200  # silencio do DOM que caracteriza "assentou"
+SETTLE_CAP_MS = 3_000  # teto de seguranca da espera adaptativa
 _ID_RE = re.compile(r"e\d+")
 _SAFE_CSS_PROP = re.compile(r"^[a-z-]+$")
 _ALLOWED_SCHEMES = ("http:", "https:", "data:", "blob:", "about:")
@@ -81,6 +83,10 @@ class Session:
         self.context: Any = None
         self.page: Any = None
         self.persona = "default"
+        self.cdp: Any = None
+        self.stop_requested = False  # pedido de cancelamento de um teste autonomo em andamento
+        self._inflight: set[Any] = set()  # requisicoes em andamento (sinal de que a pagina ainda esta reagindo)
+        self._ids: dict[int, str] = {}  # backendNodeId -> id estavel (eN) entre chamadas do dossie
         self.last_used = time.monotonic()
         self.lock = asyncio.Lock()
         self.dialogs: list[str] = []
@@ -104,6 +110,7 @@ class Session:
             validate_url(url)
         await PROVISIONER.ensure()  # instala Playwright/Chromium sozinho se faltar
         await self.close()
+        self.stop_requested = False
         from playwright.async_api import async_playwright
 
         cfg = PERSONAS[persona]
@@ -120,7 +127,13 @@ class Session:
             await self.context.route("**/*", self._route)
             await self.context.add_init_script(js.LIVE_OBSERVER_JS)
             self.context.on("page", self._on_popup)
+            self.context.on("request", self._request_started)
+            self.context.on("requestfinished", self._request_done)
+            self.context.on("requestfailed", self._request_done)
             self.page = await self.context.new_page()
+            self.cdp = await self.context.new_cdp_session(self.page)
+            await self.cdp.send("DOM.enable")
+            await self.cdp.send("Accessibility.enable")
             self.page.set_default_timeout(ACTION_TIMEOUT_MS)
             self.page.on("dialog", self._on_dialog)
             self.page.on("console", self._on_console)
@@ -149,7 +162,9 @@ class Session:
                     await getattr(obj, method)()
                 except Exception:  # noqa: BLE001, S110 - fechando: ja pode ter caido
                     pass
-        self.pw = self.browser = self.context = self.page = None
+        self.pw = self.browser = self.context = self.page = self.cdp = None
+        self._ids = {}
+        self._inflight = set()
         return was_open
 
     async def _idle_watchdog(self) -> None:
@@ -175,6 +190,12 @@ class Session:
         if self.page is not None and page is not self.page:
             self.popups.append(page.url or "(sem url)")
             asyncio.ensure_future(page.close())
+
+    def _request_started(self, request: Any) -> None:
+        self._inflight.add(request)
+
+    def _request_done(self, request: Any) -> None:
+        self._inflight.discard(request)
 
     def _on_console(self, msg: Any) -> None:
         if msg.type == "error":
@@ -239,9 +260,70 @@ class Session:
             "console_errors": self.console_errors[-5:],
         }
 
+    async def _discover(self, limit: int = 600) -> tuple[list[dict[str, Any]], int]:
+        """O NAVEGADOR aponta o que e focavel (arvore de acessibilidade) ou clicavel (DOMSnapshot.isClickable,
+        que inclui quem so tem addEventListener). Nenhuma lista de tags nem heuristica de cursor."""
+        cdp = self.cdp
+        await cdp.send("DOM.getDocument", {"depth": 0})
+        snap = await cdp.send("DOMSnapshot.captureSnapshot", {"computedStyles": [], "includeDOMRects": True})
+        doc, strings = snap["documents"][0], snap["strings"]
+        nodes = doc["nodes"]
+        clickable = set(nodes.get("isClickable", {}).get("index", []))
+        layout = doc["layout"]
+        rendered = {i for i, b in zip(layout["nodeIndex"], layout["bounds"], strict=False) if b[2] > 0 and b[3] > 0}
+        ax_by: dict[int, dict[str, Any]] = {}
+        for n in (await cdp.send("Accessibility.getFullAXTree"))["nodes"]:
+            bid = n.get("backendDOMNodeId")
+            if bid is None:
+                continue
+            props = {p["name"]: p["value"].get("value") for p in n.get("properties", [])}
+            ax_by[bid] = {
+                "role": (n.get("role") or {}).get("value"), "name": (n.get("name") or {}).get("value") or "",
+                "description": (n.get("description") or {}).get("value") or None,
+                "ignored": bool(n.get("ignored")), "properties": props,
+            }
+        found: list[dict[str, Any]] = []
+        for idx, bid in enumerate(nodes["backendNodeId"]):
+            if nodes["nodeType"][idx] != 1 or idx not in rendered or strings[nodes["nodeName"][idx]] in ("HTML", "BODY"):
+                continue
+            ax = ax_by.get(bid)
+            focusable = bool(ax and not ax["ignored"] and ax["properties"].get("focusable"))
+            is_clickable = idx in clickable
+            if focusable or is_clickable:
+                found.append({"backend": bid, "focusable": focusable, "clickable": is_clickable, "ax": ax})
+        total = len(found)
+        found = found[:limit]
+        pushed = await cdp.send("DOM.pushNodesByBackendIdsToFrontend", {"backendNodeIds": [f["backend"] for f in found]})
+
+        async def tag(item: dict[str, Any], node_id: int) -> None:
+            eid = self._ids.setdefault(item["backend"], f"e{len(self._ids) + 1}")
+            item["id"] = eid
+            if node_id:
+                await cdp.send("DOM.setAttributeValue", {"nodeId": node_id, "name": "data-a11y-id", "value": eid})
+
+        for item, node_id in zip(found, pushed["nodeIds"], strict=False):
+            await tag(item, node_id)
+        return found, total
+
     async def dossier(self, scope: str = "", max_elements: int = 60) -> dict[str, Any]:
+        """FATOS dos elementos que o navegador aponta como focaveis/clicaveis, com papel e nome COMPUTADOS por ele."""
         page = self._need()
-        return dict(await page.evaluate(js.DOSSIER_JS, {"scope": scope or None, "max": max(1, min(max_elements, 200))}))
+        found, total = await self._discover()
+        found = [f for f in found if "id" in f]
+        result = dict(await page.evaluate(
+            js.DOSSIER_JS, {"ids": [f["id"] for f in found], "scope": scope or None, "max": max(1, min(max_elements, 200))}
+        ))
+        if "error" in result:
+            return result
+        by_id = {f["id"]: f for f in found}
+        for e in result["elements"]:
+            f = by_id[e["id"]]
+            e["focusable"], e["clickable"] = f["focusable"], f["clickable"]
+            e["computed"] = f["ax"]  # papel, nome, descricao e propriedades como o navegador os expoe (None = fora da arvore)
+        result["discovered_total"] = total
+        result["discovery_truncated"] = total > len(found)
+        result["note"] = "iframes nao sao percorridos; ids sao atributos data-a11y-id colocados na pagina"
+        return result
 
     async def design_tokens(self) -> dict[str, Any]:
         return dict(await self._need().evaluate(js.DESIGN_JS))
@@ -274,10 +356,7 @@ class Session:
             await page.keyboard.type(value, delay=20)
         elif action == "wait":
             await page.wait_for_timeout(max(0, min(int(value or 500), 3000)))
-        try:
-            await page.wait_for_load_state("load", timeout=3000)
-        except Exception:  # noqa: BLE001 - sem navegacao: nada a esperar
-            await asyncio.sleep(0.15)
+        await self._settle()
         after = await self._state()
         diff = tree_diff(before["tree"], after["tree"])
         return {
@@ -290,6 +369,23 @@ class Session:
             "js_dialogs": self.dialogs[d0:], "popups_blocked": self.popups[p0:],
             "console_errors": self.console_errors[c0:],
         }
+
+    async def _settle(self) -> None:
+        """Espera adaptativa: navegacao terminou, nao ha requisicoes em voo e o DOM ficou quieto.
+        Nao ha sleep fixo; SETTLE_CAP_MS e' so o teto de seguranca para a acao inteira."""
+        page = self._need()
+        deadline = time.monotonic() + SETTLE_CAP_MS / 1000
+        try:
+            await page.wait_for_load_state("load", timeout=SETTLE_CAP_MS)
+            while True:
+                left = max(0.0, deadline - time.monotonic())
+                await page.evaluate(js.SETTLE_JS, {"quiet": SETTLE_QUIET_MS, "cap": int(left * 1000) + 1})
+                if not self._inflight or time.monotonic() >= deadline:
+                    return
+                while self._inflight and time.monotonic() < deadline:  # rede ainda ocupada: espera esvaziar
+                    await asyncio.sleep(0.05)
+        except Exception:  # noqa: BLE001 - pagina navegando/fechando: o estado seguinte mostra o que houver
+            return
 
     async def reach(self, target: str, max_tabs: int = 100) -> dict[str, Any]:
         """Quantas vezes o usuario de teclado aperta Tab, do inicio da pagina, para chegar ao alvo."""
@@ -313,10 +409,42 @@ class Session:
                 first = sig
             elif sig == first:
                 return {"reached": False, "tab_presses": i, "reason": "o foco deu a volta sem passar pelo alvo", "path": path[-15:]}
-            path.append({"stop": i, "tag": f["tag"], "role": f["role"], "name": f["name"], "focus_indicator": f["focus_indicator"]})
+            path.append({"stop": i, "tag": f["tag"], "role": f["role"], "name": f["name"], "focus_style": f["focus_style"]})
             if want and f["id"] == want:
                 return {"reached": True, "tab_presses": i, "path": path[-15:]}
         return {"reached": False, "tab_presses": max_tabs, "reason": "limite de Tab atingido", "path": path[-15:]}
+
+    async def focus_style(self, target: str) -> dict[str, Any]:
+        """Mudanca de estilo que o :focus provoca no elemento, medida pelo Chromium (pseudo-estado forcado, sem
+        disparar eventos de foco/blur). Sao FATOS: se aquilo e um indicador de foco visivel e suficiente e do modelo."""
+        if PERSONAS[self.persona].get("no_visual"):
+            raise SessionError("persona 'screen_reader' nao ve a tela: estilo de foco indisponivel.")
+        loc = self._locator(target)
+        if await loc.count() == 0:
+            raise SessionError("elemento nao encontrado (rode a11y_dossier de novo depois de navegar)")
+        eid = await loc.get_attribute("data-a11y-id")
+        cdp = self.cdp
+        root = (await cdp.send("DOM.getDocument", {"depth": 0}))["root"]["nodeId"]
+        node = (await cdp.send("DOM.querySelector", {"nodeId": root, "selector": f'[data-a11y-id="{eid}"]'}))["nodeId"]
+        await cdp.send("CSS.enable")
+
+        async def computed() -> dict[str, str]:
+            got = await cdp.send("CSS.getComputedStyleForNode", {"nodeId": node})
+            return {p["name"]: p["value"] for p in got["computedStyle"]}
+
+        before = await computed()
+        try:
+            await cdp.send("CSS.forcePseudoState", {"nodeId": node, "forcedPseudoClasses": ["focus", "focus-visible"]})
+            after = await computed()
+        finally:
+            await cdp.send("CSS.forcePseudoState", {"nodeId": node, "forcedPseudoClasses": []})
+        changed = {k: [before.get(k), v] for k, v in after.items() if before.get(k) != v}
+        return {
+            "target": target, "changed_on_focus": dict(list(changed.items())[:25]), "properties_changed": len(changed),
+            "outline_when_focused": " ".join(after.get(k, "") for k in ("outline-style", "outline-width", "outline-color", "outline-offset")),
+            "box_shadow_when_focused": after.get("box-shadow"),
+            "note": "fatos do :focus; se e visivel e com contraste suficiente para a pessoa e julgamento (veja screenshot)",
+        }
 
     async def announce(self, target: str) -> dict[str, Any]:
         """O que um leitor de tela receberia para o elemento (arvore de acessibilidade dele)."""

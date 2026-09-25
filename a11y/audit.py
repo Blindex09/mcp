@@ -187,8 +187,7 @@ _TAB_PROBE = """() => {
            || e.getAttribute('alt') || '').trim().slice(0, 80),
     id: e.id || null,
     visible: r.width > 0 && r.height > 0,
-    focus_indicator: (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0)
-                     || cs.boxShadow !== 'none'
+    focus_style: {outline: cs.outlineStyle + ' ' + cs.outlineWidth + ' ' + cs.outlineColor + ' offset ' + cs.outlineOffset, box_shadow: cs.boxShadow}
   };
 }"""
 

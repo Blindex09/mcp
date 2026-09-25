@@ -35,8 +35,8 @@ AskFn = Callable[[str, list[bytes] | None, int], Awaitable[str | None]]
 ProgressFn = Callable[[int, int, str], Awaitable[None]]
 
 _POINTER_ACTIONS = {"click", "hover", "focus", "select"}
-_TARGET_ACTIONS = _POINTER_ACTIONS | {"reach", "announce"}
-_ALL_ACTIONS = _POINTER_ACTIONS | {"press", "type", "wait", "reach", "announce"}
+_TARGET_ACTIONS = _POINTER_ACTIONS | {"reach", "announce", "focus_style"}
+_ALL_ACTIONS = _POINTER_ACTIONS | {"press", "type", "wait", "reach", "announce", "focus_style"}
 
 # Fatos sobre o que este harness NAO consegue verificar (nao e julgamento: e o alcance das ferramentas).
 NOT_VERIFIED = [
@@ -56,25 +56,26 @@ def _guide(name: str) -> str:
 
 
 def compact_element(e: dict[str, Any]) -> str:
-    """Uma linha por elemento do dossie, so com fatos (para caber no prompt)."""
+    """Uma linha por elemento do dossie, so com fatos (papel/nome como o NAVEGADOR os calcula)."""
     st = e["states"]
+    comp = e.get("computed") or {}
     bits = [f"{e['id']} <{e['tag']}{'[' + e['type'] + ']' if e.get('type') else ''}>"]
     if e.get("role_attr"):
-        bits.append(f"role={e['role_attr']}")
-    ns = e["name_sources"]
-    name = ns.get("aria_label") or ns.get("labelledby") or ns.get("label") or e.get("text") or ns.get("placeholder") or ns.get("title")
-    bits.append(f"nome={str(name)[:50]!r}" if name else "SEM NOME")
+        bits.append(f"role-attr={e['role_attr']}")
+    bits.append(f"papel-calculado={comp['role']}" if comp.get("role") else "fora-da-arvore-de-acessibilidade")
+    name = comp.get("name") or e.get("text")
+    bits.append(f"nome={str(name)[:50]!r}" if name else "nome=(vazio)")
+    bits.append(f"focavel={'sim' if e.get('focusable') else 'nao'}")
+    bits.append(f"clicavel={'sim' if e.get('clickable') else 'nao'}")
     for key in ("expanded", "haspopup", "checked", "selected", "pressed", "invalid"):
         if st.get(key) not in (None, False, "false"):
             bits.append(f"{key}={st[key]}")
-    if e.get("editable"):
+    if (comp.get("properties") or {}).get("editable"):
         bits.append("editavel")
     rel = e["relations"]
     for key in ("datalist_options", "native_options", "popup_items", "popup_links"):
         if rel.get(key):
             bits.append(f"{key}={rel[key]}")
-    if not e.get("focusable"):
-        bits.append("nao-focavel")
     if e.get("context", {}).get("landmark"):
         bits.append(f"em={e['context']['landmark']}")
     return " ".join(bits)
@@ -102,8 +103,11 @@ def effect_summary(r: dict[str, Any]) -> str:
 
 
 def _allowed_actions(persona: str) -> list[str]:
-    no_pointer = PERSONAS[persona].get("no_pointer")
-    return sorted(a for a in _ALL_ACTIONS if not (no_pointer and a in _POINTER_ACTIONS))
+    cfg = PERSONAS[persona]
+    return sorted(
+        a for a in _ALL_ACTIONS
+        if not (cfg.get("no_pointer") and a in _POINTER_ACTIONS) and not (cfg.get("no_visual") and a == "focus_style")
+    )
 
 
 def _system_prompt(mode: str, persona: str, goal: str, allowed: list[str], vision: bool) -> str:
@@ -192,6 +196,9 @@ async def run_agent(
     repeats: dict[str, int] = {}
     try:
         for step in range(1, max_steps + 1):
+            if session.stop_requested:
+                stopped_by = "cancelled"
+                break
             if time.monotonic() - started > TIME_BUDGET_S:
                 stopped_by = "time_budget"
                 break
@@ -249,6 +256,9 @@ async def run_agent(
                     if kind == "reach":
                         result = await session.reach(str(action["target"]))
                         eff = f"Tab ate o alvo: alcancado={result['reached']} apos {result['tab_presses']} Tab" + (f" ({result.get('reason')})" if result.get("reason") else "")
+                    elif kind == "focus_style":
+                        result = await session.focus_style(str(action["target"]))
+                        eff = f"ao focar muda {result['properties_changed']} propriedades; outline={result['outline_when_focused'].strip()!r}; box-shadow={result['box_shadow_when_focused']!r}"
                     elif kind == "announce":
                         result = await session.announce(str(action["target"]))
                         eff = "leitor de tela recebe: " + " ".join(result["accessibility_tree"].split())[:160]
@@ -288,6 +298,7 @@ async def _write_report(
         "step_limit": "a execucao atingiu o limite de passos antes de terminar",
         "time_budget": "a execucao atingiu o limite de tempo",
         "repeated_action": "a execucao parou por repetir a mesma acao no mesmo estado (possivel laco)",
+        "cancelled": "voce interrompeu a execucao (a11y_close)",
         "model_unavailable": "o modelo deixou de responder",
         "model_invalid_output": "o modelo nao devolveu um formato valido",
         "finished": "o proprio usuario simulado encerrou",

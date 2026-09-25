@@ -58,8 +58,12 @@ def register_ux(mcp: Any) -> None:
 
     @mcp.tool()
     async def a11y_close() -> str:
-        """Close the browser session opened by a11y_open."""
+        """Close the browser session. If an autonomous test (a11y_walkthrough / a11y_review) is running, this
+        interrupts it: the run stops at the next step and still returns the report of what it did so far."""
         try:
+            if SESSION.lock.locked():
+                SESSION.stop_requested = True
+                return _json({"closed": False, "cancel_requested": True, "note": "o teste autonomo termina no proximo passo e devolve o relatorio parcial"})
             async with SESSION.lock:
                 return _json({"closed": await SESSION.close()})
         except Exception as e:  # noqa: BLE001
@@ -99,6 +103,14 @@ def register_ux(mcp: Any) -> None:
         """How many Tab presses a keyboard user needs, from the top of the page, to reach the target
         (id from a11y_dossier), with the focus path. Reports if the target is unreachable or the focus loops."""
         return await _run(SESSION.reach(target, max_tabs))
+
+    @mcp.tool()
+    async def a11y_focus_style(target: str) -> str:
+        """FACTS about what :focus changes on an element (measured by Chromium by forcing the focus state, no
+        events fired): every computed property that differs (outline, box-shadow, border, background, color...).
+        Whether that is a visible, sufficient focus indicator is your judgment (compare with a11y_screenshot).
+        Refused for the screen_reader persona."""
+        return await _run(SESSION.focus_style(target))
 
     @mcp.tool()
     async def a11y_announce(target: str) -> str:

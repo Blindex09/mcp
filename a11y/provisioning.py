@@ -78,7 +78,7 @@ class Provisioner:
                 if not auto_install_enabled():
                     raise ProvisioningError("Playwright ausente e A11Y_MCP_AUTO_INSTALL=0. Rode: pip install playwright")
                 logger.info("Instalando o pacote playwright (pip)...")
-                code, out = await _run(sys.executable, "-m", "pip", "install", "playwright", timeout=PIP_TIMEOUT_S)
+                code, out = await _run(sys.executable, "-m", "pip", "install", "--disable-pip-version-check", "playwright", timeout=PIP_TIMEOUT_S)
                 importlib.invalidate_caches()
                 if code != 0 or not playwright_importable():
                     raise ProvisioningError(f"falha ao instalar o pacote playwright: {out.strip()[-200:]}")

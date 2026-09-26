@@ -10,7 +10,9 @@ from typing import Any
 
 from mcp.server.fastmcp import Context, Image
 
-from llm import NO_MODEL_HELP, ask_model, backend_status
+from llm import NO_MODEL_HELP, Hint, backend_status
+from router import ask_routed
+from router import stats as routing_stats
 
 from . import learn
 from .agent import run_agent
@@ -200,8 +202,8 @@ def register_ux(mcp: Any) -> None:
         ctx: Context, mode: str, goal: str, url: str, html: str, persona: str, max_steps: int, vision: bool, browser: str,
         allow_mutations: str = "auto",
     ) -> str:  # type: ignore[type-arg]
-        async def ask(prompt: str, images: list[bytes] | None, max_tokens: int, tier: str = "main") -> str | None:
-            return await ask_model(ctx, prompt, max_tokens, images, tier)
+        async def ask(prompt: str, images: list[bytes] | None, max_tokens: int, hint: Hint | None = None) -> str | None:
+            return await ask_routed(ctx, prompt, images=images, max_tokens=max_tokens, hint=hint)
 
         async def progress(step: int, total: int, message: str) -> None:
             try:
@@ -256,6 +258,7 @@ def register_ux(mcp: Any) -> None:
         return _json({
             "browsers": status_of_all(),
             "model": backend_status(),
+            "routing": routing_stats(),
             "note": "Sem modelo configurado, as ferramentas autonomas ficam indisponiveis; as demais (dossie, acoes, medicao) funcionam.",
         })
 

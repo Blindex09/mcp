@@ -18,7 +18,8 @@ import time
 from collections.abc import Awaitable, Callable
 from typing import Any
 
-from llm import extract_json
+from llm import Hint, extract_json
+from router import drain_outcomes
 
 from . import learn
 from .content_index import CONTENT_DIR
@@ -32,6 +33,14 @@ DOSSIER_LINES_IN_PROMPT = 40
 GUIDE_CHARS = 5000
 
 AskFn = Callable[..., Awaitable[str | None]]
+
+
+def _decision_of(raw: str | None) -> dict[str, Any] | None:
+    """A decisao do passo, se a resposta for de fato uma (fato objetivo: JSON com uma acao que tem tipo)."""
+    parsed = extract_json(raw, "object")
+    if isinstance(parsed, dict) and isinstance(parsed.get("action"), dict) and parsed["action"].get("type"):
+        return parsed
+    return None
 ProgressFn = Callable[[int, int, str], Awaitable[None]]
 
 _POINTER_ACTIONS = {"click", "hover", "focus", "select"}
@@ -286,15 +295,21 @@ async def run_agent(
             look_next = False
             prompt = f"{system}\n\n{_observation_text(obs, elements, history, step, max_steps, map_text, coverage_line(session.coverage_report()))}"
             decision: dict[str, Any] | None = None
+            step_hint = Hint(
+                purpose=f"decidir o proximo passo de um usuario simulado (persona {persona}) numa pagina, lendo a arvore de acessibilidade "
+                        "e, quando ha, uma captura de tela; a resposta e um JSON com a acao a executar",
+                brief=f"objetivo: {goal[:200]}; passo {step} de {max_steps}; pagina {obs['url']}; {len(elements)} elementos no dossie; "
+                      f"captura de tela anexa: {'sim' if shot else 'nao'}",
+                validate=lambda r: _decision_of(r) is not None,
+            )
             for attempt in (1, 2):
                 model_calls += 1
-                raw = await ask(prompt if attempt == 1 else prompt + "\n\nSua resposta anterior nao era um JSON valido. Responda SOMENTE com o JSON pedido.", shot, 900)
+                raw = await ask(prompt if attempt == 1 else prompt + "\n\nSua resposta anterior nao era um JSON valido. Responda SOMENTE com o JSON pedido.", shot, 900, hint=step_hint)
                 if raw is None:
                     stopped_by = "model_unavailable"
                     break
-                parsed = extract_json(raw, "object")
-                if isinstance(parsed, dict) and isinstance(parsed.get("action"), dict) and parsed["action"].get("type"):
-                    decision = parsed
+                decision = _decision_of(raw)
+                if decision is not None:
                     break
             if decision is None:
                 stopped_by = stopped_by if stopped_by == "model_unavailable" else "model_invalid_output"
@@ -363,7 +378,7 @@ async def run_agent(
             f"acoes recusadas/erros: {[(x['action'], x.get('refused') or x.get('error')) for x in steps if x.get('refused') or x.get('error')][:8]}\n"
             f"lacunas de cobertura: {coverage['gaps'][:6]}\nrelatorio: {report[:1500]}"
         )
-        learned_topics = await learn.learn_from_run(ask, host, digest)
+        learned_topics = await learn.learn_from_run(ask, host, digest, routing=drain_outcomes())
         model_calls += 1 if learned_topics else 0
     finally:
         await session.close()
@@ -407,7 +422,12 @@ async def _write_report(
         "correcao que mantem o design do site; 3) o que voce NAO conseguiu verificar. Nao chame de acessivel algo so "
         "porque nada falhou; diga o que foi de fato provado."
     )
-    raw = await ask(prompt, None, 1800)
+    report_hint = Hint(
+        purpose="escrever o relatorio final de uma sessao de teste de acessibilidade, em texto corrido, com achados por gravidade, "
+                "evidencia, correcao e o que nao foi verificado",
+        brief=f"modo {mode}; persona {persona}; {len(narration)} passos narrados; {len(frictions)} atritos registrados; desfecho: {outcome}",
+    )
+    raw = await ask(prompt, None, 1800, hint=report_hint)
     return raw or "(o modelo nao respondeu ao pedido de relatorio; use a narracao e os atritos abaixo)"
 
 

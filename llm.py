@@ -26,6 +26,8 @@ import base64
 import json
 import logging
 import os
+from collections.abc import Callable
+from dataclasses import dataclass
 from typing import Any
 
 import httpx
@@ -46,6 +48,18 @@ NO_MODEL_HELP = (
     "A11Y_MCP_BASE_URL+A11Y_MCP_API_KEY para compativeis com OpenAI, OLLAMA_API_KEY para o Ollama Cloud, ou A11Y_MCP_BACKEND=ollama). "
     "O cliente tambem nao oferece sampling."
 )
+
+
+@dataclass(frozen=True)
+class Hint:
+    """O que quem chama diz ao roteador (router.py) sobre o pedido: texto livre que um modelo le, nunca um codigo de categoria.
+
+    purpose: a finalidade da chamada, em linguagem natural. brief: contexto curto e concreto. validate: checagem de FATO
+    objetivo sobre a resposta (JSON legivel, nome existente no catalogo...); se falhar, a resposta barata sobe de camada."""
+
+    purpose: str
+    brief: str = ""
+    validate: Callable[[str | None], bool] | None = None
 
 
 async def _http_post(url: str, headers: dict[str, str], payload: dict[str, Any]) -> dict[str, Any]:

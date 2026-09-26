@@ -159,7 +159,7 @@ Regra 7, aprovação ligada ou desligada, nunca bloqueio. Estava violada com um 
 
 Regra 8, tempo adaptativo. Estava violada: havia relógios fixos de 420 s, 240 s, 90 s, 120 s e 3 s. Corrigido em duas rodadas. Primeiro, o que demora é tentado de novo com mais tempo, sem repetir ações com efeito (o clique roda uma vez). Depois, a pedido do dono, os últimos números fixos viraram tempos que se adaptam: a espera por elemento segue enquanto a página progride (rede ou DOM mudando) e desiste só quando ela para; a espera por página assentar aguarda toda requisição realmente em andamento, ignora as que nunca terminam (event stream, long-poll) com um limite que acompanha a lentidão já vista no site, e esse ritmo é reiniciado a cada sessão; a sessão parada só fecha depois de dez vezes o maior intervalo da conversa; as tentativas de modelo escalam sem teto prático. O teste autônomo para por falta de progresso, cancelamento ou pelo orçamento de passos da pessoa.
 
-Regra 9, economia, qualidade e roteamento. Cumpre em parte. Não há modelo padrão embutido. A11Y_MCP_MODEL_FAST atende às chamadas leves, e a captura de tela só vai no primeiro passo, ao mudar de página ou quando o modelo pede. Limite: a escolha entre modelo leve e pesado é por propósito da chamada, definida no código, e não por um classificador semântico entre vários modelos.
+Regra 9, economia, qualidade e roteamento. Cumpre. Não há modelo padrão embutido. A escolha entre modelo leve e pesado deixou de ser definida no código: é um classificador semântico (router.py), isto é, um modelo barato que lê a finalidade de cada chamada, o contexto e fatos objetivos e decide a camada, com lições de roteamento no prompt (aprendizado em contexto). A cascata sobe de camada por fato objetivo ou por um verificador independente, nunca pela confiança autodeclarada. A captura de tela só vai no primeiro passo, ao mudar de página ou quando o modelo pede. Limites: só há duas camadas (A11Y_MCP_MODEL_FAST e A11Y_MCP_MODEL); o verificador lê só texto, sem imagens; e a qualidade da decisão depende do modelo barato escolhido, ainda não medida com um modelo real.
 
 Regra 10, aprendizado sempre. Estava ausente; implementado (a11y/learn.py). Limite: o conhecimento que muda no mundo, como o WCAG, não se atualiza sozinho a partir de fontes confiáveis; os guias são atualizados por revisão.
 
@@ -190,3 +190,15 @@ Ações delegadas. Depois de qualquer ação, o Playwright registra listeners em
 Ollama Cloud. OLLAMA_API_KEY envia Authorization Bearer e, sem OLLAMA_HOST, usa https://ollama.com. No acesso direto o modelo é o nome da lista de tags, sem o sufixo -cloud. A chave nunca vai para log e o conftest a remove do ambiente dos testes.
 
 Limite que permanece: em Chromium com HTML passado direto não há endereço de script, então a proveniência dos listeners é desconhecida nesse modo.
+
+## 11. Roteador semântico de modelos (setembro de 2026)
+
+Pesquisa. Roteamento aprende uma política a partir de preferências (RouteLLM), cascata consulta modelos em sequência e para quando a resposta basta (FrugalGPT), e a verificação da própria resposta decide a escalada (AutoMix). Trabalhos recentes mostram que a confiança verbalizada pelo modelo é quase independente da resposta, o que a torna um gatilho frágil, e que os sinais mais fortes (margem de token calibrada, sondas de estado oculto, aprendizado por reforço) exigem rótulos ou acesso interno que a API não oferece. Roteadores que recebem políticas em linguagem natural e as aplicam em contexto (Arch-Router) dispensam retreino. O survey de 2026 recomenda combinar pré-roteamento, verificação e escalada, com feedback online.
+
+Decisão. Pré-roteador semântico com política em contexto, cascata por fatos com verificador independente, e aprendizado guardado na memória que já existia. Nada de palavra-chave, regex, tabela de dificuldade ou limiar; um teste guarda o código-fonte contra isso.
+
+O que é fato e não julgamento: o resultado do roteador ter uma camada que existe; a resposta ter vindo; a validação objetiva de quem chamou (JSON legível, nome existente no catálogo); a configuração (qual modelo é cada camada). Tudo o mais é do modelo.
+
+Falha segura. Roteador ilegível, ausente ou com erro de rede: camada forte. Verificador ilegível: aceita a resposta barata, que já foi paga. Camada forte sem resposta depois de uma subida: devolve a resposta barata, que vale mais que nenhuma.
+
+Fontes. Survey de roteamento e cascata dinâmicos: https://arxiv.org/html/2603.04445v2. UCCI, incerteza calibrada em cascata, que exige rótulos: https://arxiv.org/html/2605.18796. RLCascadeRouter, cascata sem estimador de qualidade, que exige recompensas: https://arxiv.org/pdf/2608.15817. Arch-Router, políticas em linguagem natural aplicadas em contexto: https://arxiv.org/abs/2506.16655. Confiança verbalizada quase independente da resposta em modelos de visão: https://arxiv.org/html/2609.18453.

@@ -86,16 +86,15 @@ async def test_agent_learns_after_a_run_and_the_next_run_starts_knowing_it():
     assert len(learn.load_all()) == 1  # o segundo aprendizado atualizou o mesmo assunto
 
 
-async def test_learn_call_uses_the_light_tier(monkeypatch):
-    tiers = []
-
-    class Spy(Script):
-        async def __call__(self, prompt, images, max_tokens, tier="main"):
-            tiers.append(tier)
-            return await super().__call__(prompt, images, max_tokens, tier)
-
-    await run(Spy(FINISH, "R", entries_json(("t", "l", learn.GENERAL))))
-    assert tiers[-1] == "fast" and set(tiers[:-1]) == {"main"}  # decidir/relatar = pesado; lembrar = leve
+async def test_every_call_tells_the_router_what_it_is_for_and_none_names_a_tier():
+    """A camada nao e mais fixada no codigo: cada chamada descreve a finalidade em texto livre e o roteador decide."""
+    script = Script(FINISH, "R", entries_json(("t", "l", learn.GENERAL)))
+    await run(script)
+    assert all(h is not None and h.purpose for h in script.hints)
+    purposes = [h.purpose for h in script.hints]
+    assert "decidir o proximo passo" in purposes[0] and "relatorio" in purposes[-2] and "memoria" in purposes[-1]
+    assert not any(hasattr(h, "tier") for h in script.hints)
+    assert script.hints[0].validate is not None and script.hints[-1].validate is not None  # fatos objetivos para a cascata
 
 
 async def test_tools_list_and_forget():

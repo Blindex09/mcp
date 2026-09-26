@@ -19,10 +19,12 @@ class Script:
         self.replies = list(replies)
         self.prompts: list[str] = []
         self.images: list[list[bytes] | None] = []
+        self.hints: list = []  # a dica de roteamento que cada chamada mandou (finalidade em texto livre)
 
-    async def __call__(self, prompt, images, max_tokens, tier="main"):
+    async def __call__(self, prompt, images, max_tokens, hint=None):
         self.prompts.append(prompt)
         self.images.append(images)
+        self.hints.append(hint)
         if not self.replies:
             return "RELATORIO FINAL"
         r = self.replies.pop(0)
@@ -165,7 +167,7 @@ async def test_validation_and_cleanup():
     with pytest.raises(SessionError):
         await run(Script(), goal="  ")
 
-    async def boom(prompt, images, max_tokens):
+    async def boom(prompt, images, max_tokens, hint=None):
         raise RuntimeError("falha do modelo")
 
     with pytest.raises(RuntimeError):

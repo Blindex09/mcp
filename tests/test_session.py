@@ -362,7 +362,7 @@ async def test_close_interrupts_a_running_autonomous_test_and_keeps_the_partial_
     fin = json.dumps({"thought": "x", "friction": None, "action": {"type": "press", "value": "Tab"}})
     calls = {"n": 0}
 
-    async def ask(prompt, images, max_tokens):
+    async def ask(prompt, images, max_tokens, hint=None):
         calls["n"] += 1
         if calls["n"] == 1:
             return fin

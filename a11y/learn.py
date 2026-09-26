@@ -16,9 +16,10 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from llm import extract_json
+from llm import Hint, extract_json
 
 GENERAL = "geral"
+ROUTING = "roteamento"  # licoes do roteador de modelos (router.py); nao entram no prompt do agente
 MAX_PER_SCOPE = 30
 MAX_LEARNING_CHARS = 400
 PROMPT_CHARS = 2500
@@ -102,13 +103,13 @@ def merge_changes(existing: list[dict[str, Any]], changes: list[Any], scopes: se
     return out
 
 
-async def learn_from_run(ask: AskFn, host: str, run_digest: str) -> list[str]:
+async def learn_from_run(ask: AskFn, host: str, run_digest: str, routing: str = "") -> list[str]:
     """Pede ao modelo (nivel leve) as MUDANCAS nos aprendizados; aplica e grava na hora. Nunca derruba a execucao."""
     if not enabled():
         return []
     try:
         existing = load_all()
-        current = [e for e in existing if e.get("scope") in (GENERAL, host)]
+        current = [e for e in existing if e.get("scope") in (GENERAL, host, ROUTING)]
         prompt = (
             "Voce mantem a memoria de um testador de acessibilidade. Abaixo estao os aprendizados ATUAIS (gerais e deste site) e o resumo "
             "de uma execucao que acabou de terminar. Devolva SOMENTE AS MUDANCAS: itens novos ou atualizados. Se algo novo trata do "
@@ -117,14 +118,21 @@ async def learn_from_run(ask: AskFn, host: str, run_digest: str) -> list[str]:
             "como esta. Vale registrar o que funcionou, o que enganou, como este site se comporta, que sondagem revelou o problema e "
             "falsos positivos. Nada de dados pessoais, credenciais ou valores digitados. Cada item: "
             f'{{"topic": "assunto curto", "learning": "o que lembrar, em ate {MAX_LEARNING_CHARS} caracteres, em portugues corrido sem markdown", '
-            f'"scope": "{GENERAL}" ou "{host}"}}. Responda SOMENTE com um array JSON (pode ser vazio).\n\n'
+            f'"scope": "{GENERAL}" ou "{host}" ou "{ROUTING}"}}. O escopo "{ROUTING}" e so para licoes sobre qual camada de modelo '
+            "(fast ou main) atendeu bem cada tipo de pedido e quando foi preciso subir. Responda SOMENTE com um array JSON (pode ser vazio).\n\n"
             f"APRENDIZADOS ATUAIS:\n{json.dumps(current, ensure_ascii=False)[:6000]}\n\nRESUMO DA EXECUCAO:\n{run_digest[:5000]}"
+            + (f"\n\nROTEAMENTO DESTA EXECUCAO (camada usada em cada chamada e se precisou subir):\n{routing[:3000]}" if routing else "")
         )
-        raw = await ask(prompt, None, 1500, tier="fast")
+        hint = Hint(
+            purpose="atualizar a memoria de aprendizados a partir do resumo de uma execucao de teste",
+            brief=f"{len(current)} aprendizados atuais; resumo de {len(run_digest)} caracteres",
+            validate=lambda r: isinstance(extract_json(r, "array"), list),
+        )
+        raw = await ask(prompt, None, 1500, hint=hint)
         returned = extract_json(raw, "array")
         if not isinstance(returned, list):
             return []
-        merged = merge_changes(existing, returned, {GENERAL, host})
+        merged = merge_changes(existing, returned, {GENERAL, host, ROUTING})
         _save(merged)
         return sorted({e["topic"] for e in merged if e.get("scope") in (GENERAL, host)})
     except Exception:  # noqa: BLE001 - aprender e' bonus: falha aqui nunca derruba o teste

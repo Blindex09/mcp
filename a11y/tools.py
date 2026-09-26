@@ -7,7 +7,8 @@ from typing import Any
 
 from mcp.server.fastmcp import Context
 
-from llm import NO_MODEL_HELP, ask_model, extract_json
+from llm import NO_MODEL_HELP, Hint, extract_json
+from router import ask_routed
 
 from . import audit
 from .compare import compare_browsers
@@ -68,7 +69,18 @@ def register(mcp: Any) -> None:
             "intent, not by shared words. Answer ONLY with a JSON array of catalog names.\n\n"
             f"TASK:\n{task}\n\nCATALOG:\n{_json(catalog)}"
         )
-        raw = await ask_model(ctx, prompt, max_tokens=400, tier="fast")  # escolher guias e' tarefa leve
+        known = {c["name"] for c in catalog}
+
+        def names_exist(reply: str | None) -> bool:  # fato objetivo: e um array e todo nome devolvido existe no catalogo
+            picked_names = extract_json(reply, "array")
+            return isinstance(picked_names, list) and all(isinstance(n, str) and n in known for n in picked_names)
+
+        hint = Hint(
+            purpose="escolher, num catalogo de guias e exemplos de acessibilidade, os que servem a uma tarefa descrita em linguagem natural",
+            brief=f"tarefa de {len(task)} caracteres; catalogo com {len(catalog)} itens",
+            validate=names_exist,
+        )
+        raw = await ask_routed(ctx, prompt, max_tokens=400, hint=hint)
         names = extract_json(raw, "array")
         if not isinstance(names, list):  # sem sampling ou resposta ilegivel: o modelo chamador escolhe
             return _json(

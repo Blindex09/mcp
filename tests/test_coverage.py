@@ -57,7 +57,7 @@ async def test_page_map_gives_facts_about_all_the_content(rich):
     assert d["reading_order"]["inverted_pairs"] >= 1 and d["reading_order"]["css_order_used"] >= 2
     assert d["landmarks"]["total"] >= 3
     assert m["frames"][0]["map"]["headings"]["outline"][0]["text"] == "Dentro"  # cada iframe tem o seu mapa
-    assert {"on": "document", "type": "click"} in m["delegated_listeners"]  # acao delegada: alvo real desconhecido
+    assert any(d["on"] == "document" and d["type"] == "click" for d in m["delegated_listeners"])  # acao delegada: alvo real desconhecido
 
 
 async def test_page_map_scope_error_and_fact_only_output(rich):

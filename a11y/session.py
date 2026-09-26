@@ -83,6 +83,7 @@ class Coverage:
     stress_kinds: set[str] = field(default_factory=set)
     urls: set[str] = field(default_factory=set)
     actions: int = 0
+    delegated: list[dict[str, Any]] = field(default_factory=list)  # acoes que a pagina trata em ancestrais (alvo real desconhecido)
 
 
 def is_local_dev(url: str | None) -> bool:
@@ -458,20 +459,33 @@ class Session:
             )
 
     # ------------------------------------------------------------- observacao
-    async def _focus_probe(self) -> dict[str, Any] | None:
-        """Quem tem o foco AGORA, atravessando Shadow DOM aberto e iframes (o foco pode estar dentro de um frame)."""
+    async def _focus_probe(self, with_identity: bool = False) -> dict[str, Any] | None:
+        """Quem tem o foco AGORA, atravessando Shadow DOM aberto e iframes (o foco pode estar dentro de um frame).
+
+        with_identity acrescenta `_ident` (indice do frame, numero do no): o no real, para comparar paradas sem
+        confundir dois elementos que tem a mesma descricao."""
         page = self._need()
         f = await page.evaluate(js.FOCUS_JS)
+        frame_index = 0
         if f and f.get("tag") in ("iframe", "frame"):
-            for fr in page.frames[1:]:
+            for i, fr in enumerate(page.frames):
+                if i == 0:
+                    continue
                 try:
                     inner = await fr.evaluate(js.FOCUS_JS)
                 except Exception:  # noqa: BLE001, S112 - frame fechado
                     continue
                 if inner:
                     inner["in_frame"] = fr.url[:60]
-                    return dict(inner)
-        return dict(f) if f else None
+                    f, frame_index = inner, i
+                    break
+        if not f:
+            return None
+        out = dict(f)
+        node = out.pop("node", None)  # so a identidade sai daqui, o resto do formato nao muda
+        if with_identity:
+            out["_ident"] = (frame_index, node)
+        return out
 
     async def _tree_lines(self) -> list[str]:
         page = self._need()
@@ -682,6 +696,15 @@ class Session:
             limits.append("sem CDP: clickable so por listener registrado/propriedade on* (nao ve delegacao a ancestrais); papel/nome pelo aria snapshot do Playwright")
         if any(not e["actionable"] for e in elements):
             limits.append("elementos em Shadow DOM fechado foram medidos mas nao podem receber acoes (actionable=false)")
+        delegated = await page.evaluate("() => window.__a11yDelegated || []")
+        attributed = [d for d in delegated if d.get("source")]
+        self.coverage.delegated = attributed
+        if attributed:  # fato do gancho: um script da pagina trata acoes em document/window/raiz, nao no elemento
+            result["delegated_listeners"] = delegated
+            limits.append(
+                "a pagina trata acoes em ancestrais (document/window): elementos clicaveis por delegacao nao aparecem "
+                "nesta lista porque o alvo real e desconhecido; confira pelo mapa da pagina, pela captura de tela e agindo"
+            )
         if limits:
             result["limits"] = limits
         return result
@@ -700,12 +723,15 @@ class Session:
             except Exception as e:  # noqa: BLE001 - frame fechado/inacessivel: registra e segue
                 frames.append({"frame": i, "url": fr.url[:100], "error": f"{type(e).__name__}: {str(e)[:80]}"})
         delegated = await page.evaluate("() => window.__a11yDelegated || []")
+        self.coverage.delegated = [d for d in delegated if d.get("source")]
         self.coverage.page_map = True
         self.coverage.frames_mapped = len([f for f in frames if "map" in f]) + 1
         return {
             "main": main, "frames": frames, "browser": self.browser_name, "delegated_listeners": delegated,
             "note": "Shadow DOM fechado nao e visivel a JavaScript; fatos sao aritmetica sobre DOM/CSS, sem julgamento. "
-                    "delegated_listeners: acoes tratadas por document/window/raiz (o alvo real nao e conhecido)",
+                    "delegated_listeners: acoes tratadas por document/window/raiz (o alvo real nao e conhecido); source e o "
+                    "endereco do script que registrou, e null quando o codigo nao tem endereco (avaliado, como o do proprio "
+                    "Playwright ao agir na pagina, ou HTML passado direto no Chromium): nesse caso nao se sabe se e da pagina",
         }
 
     def coverage_report(self) -> dict[str, Any]:
@@ -730,6 +756,11 @@ class Session:
         for kind in ("reflow_320", "text_spacing"):
             if kind not in c.stress_kinds:
                 gaps.append(f"estresse '{kind}' nao rodou")
+        if c.delegated:
+            gaps.append(
+                "a pagina trata acoes em ancestrais (document/window): elementos clicaveis por delegacao podem faltar no "
+                "dossie (alvo real desconhecido); nao ha fato de quais sao, entao confira pela captura de tela e agindo"
+            )
         if c.actions == 0:
             gaps.append("nenhuma acao foi executada: nada foi provado por comportamento")
         if self.blocked:
@@ -873,21 +904,21 @@ class Session:
             "() => { const b = document.body; b.setAttribute('tabindex', '-1'); b.focus(); b.removeAttribute('tabindex'); }"
         )
         path: list[dict[str, Any]] = []
-        first: str | None = None
-        previous: str | None = None
+        first: tuple[int, int] | None = None
+        previous: tuple[int, int] | None = None
         for i in range(1, max(1, min(max_tabs, 300)) + 1):
             await page.keyboard.press("Tab")
-            f = await self._focus_probe()
+            f = await self._focus_probe(with_identity=True)
             if f is None:
                 return {"reached": False, "tab_presses": i, "reason": "o foco saiu da pagina", "path": path[-15:]}
-            sig = f"{f['tag']}|{f['name']}|{f['id']}"
+            ident = f.pop("_ident")  # o no real: links com o mesmo texto e sem id nao sao "o mesmo elemento"
             if first is None:
-                first = sig
-            elif sig == first:
+                first = ident
+            elif ident == first:
                 return {"reached": False, "tab_presses": i, "reason": "o foco deu a volta sem passar pelo alvo", "path": path[-15:]}
-            if sig == previous:
+            if ident == previous:
                 return {"reached": False, "tab_presses": i, "reason": "o foco parou de mover (fim da pagina) sem passar pelo alvo", "path": path[-15:]}
-            previous = sig
+            previous = ident
             path.append({"stop": i, "tag": f["tag"], "role": f["role"], "name": f["name"], "focus_style": f["focus_style"]})
             if want and f["id"] == want:
                 return {"reached": True, "tab_presses": i, "path": path[-15:]}

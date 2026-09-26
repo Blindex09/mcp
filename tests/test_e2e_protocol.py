@@ -142,7 +142,13 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         assert "navigation" in (await call("a11y_aria_snapshot", url=index)).content[0].text
         assert js(await call("a11y_tab_order", url=index))[0]["element"]["name"] == "Início"
         cmp = js(await call("a11y_compare_browsers", url=index, browsers="chromium,firefox"))
-        assert cmp["browsers"] == ["chromium", "firefox"] and cmp["differences"]["firefox"]["tab_order"] == "identica"
+        assert cmp["browsers"] == ["chromium", "firefox"]
+        # Diferenca real entre navegadores (antes escondida: a varredura parava no 1o passo e tudo parecia "identica"):
+        # o Firefox faz o proprio iframe ser uma parada de Tab antes do conteudo dele; o Chromium vai direto ao conteudo.
+        tabs = cmp["differences"]["firefox"]["tab_order"]
+        assert tabs != "identica" and len(tabs["chromium"]) >= 8
+        assert [t for t in tabs["firefox"] if not t.startswith("iframe:")] == tabs["chromium"]
+        assert any(t.startswith("iframe:") for t in tabs["firefox"]) and not any(t.startswith("iframe:") for t in tabs["chromium"])
 
         # ---------- varias paginas
         crawl = js(await call("a11y_crawl", url=index, max_pages=8))

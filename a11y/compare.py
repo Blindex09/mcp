@@ -25,20 +25,7 @@ async def _one(url: str | None, html: str | None, level: str, browser: str) -> d
         aria = str(await page.locator("body").aria_snapshot())
         await page.add_script_tag(content=script)
         raw = await page.evaluate("tags => axe.run(document, {runOnly: {type: 'tag', values: tags}})", tags)
-        stops: list[dict[str, Any]] = []
-        first = previous = ""
-        for i in range(60):
-            await page.keyboard.press("Tab")
-            info = await page.evaluate(audit._TAB_PROBE)
-            if info is None:
-                break  # o foco saiu da pagina
-            sig = f"{info['tag']}|{info['name']}|{info['id']}"
-            if i == 0:
-                first = sig
-            elif sig == first or sig == previous:
-                break  # deu a volta, ou o foco parou de mover (fim da pagina no Firefox)
-            previous = sig
-            stops.append({"step": i + 1, **info})
+        stops = [{"step": s["step"], **s["element"]} for s in await audit.tab_stops(page, 60)]
         return {"aria": aria, "axe": audit.summarize_axe(raw), "tab_stops": stops}
 
     result: dict[str, Any] = await audit._with_page(url, html, fn, browser)

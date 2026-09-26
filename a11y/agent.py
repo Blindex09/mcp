@@ -186,8 +186,9 @@ def page_map_text(pm: dict[str, Any]) -> str:
         f"ordem de leitura: pares invertidos={d['reading_order']['inverted_pairs']}/{d['reading_order']['items_compared']} itens | css order usado={d['reading_order']['css_order_used']} | tabindex>0={d['reading_order']['tabindex_positive']}",
         f"hover que revela conteudo (dado das folhas de estilo): {[x['rule'] for x in d['hover_reveals']['items'][:5]] or 'nenhum'}",
     ]
-    if pm.get("delegated_listeners"):
-        lines.append(f"acoes delegadas a ancestrais (alvo real desconhecido): {pm['delegated_listeners'][:4]}")
+    from_page = [x for x in pm.get("delegated_listeners") or [] if x.get("source")]  # sem endereco de script nao se sabe se e da pagina
+    if from_page:
+        lines.append(f"acoes delegadas a ancestrais por scripts da pagina (alvo real desconhecido): {from_page[:4]}")
     return "\n".join(lines)
 
 

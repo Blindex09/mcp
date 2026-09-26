@@ -6,7 +6,6 @@ timeout agregado e roda um navegador headless descartavel por chamada.
 
 from __future__ import annotations
 
-import json
 import re
 from collections.abc import Awaitable, Callable
 from pathlib import Path
@@ -185,7 +184,11 @@ _TAB_PROBE = """() => {
   if (!e || e === document.body) return null;
   const r = e.getBoundingClientRect();
   const cs = getComputedStyle(e);
+  // Identidade do no (nao da descricao): dois links com o mesmo texto e sem id continuam sendo dois elementos.
+  const ids = (window.__a11yNodeIds = window.__a11yNodeIds || new WeakMap());
+  if (!ids.has(e)) ids.set(e, (window.__a11yNodeSeq = (window.__a11yNodeSeq || 0) + 1));
   return {
+    node: ids.get(e),
     tag: e.tagName.toLowerCase(),
     role: e.getAttribute('role'),
     name: (e.getAttribute('aria-label') || e.innerText || e.getAttribute('title')
@@ -197,27 +200,64 @@ _TAB_PROBE = """() => {
 }"""
 
 
+async def _focused_stop(page: Any) -> tuple[tuple[int, int], dict[str, Any]] | None:
+    """Quem tem o foco AGORA e a IDENTIDADE do no (indice do frame, numero do no), atravessando iframes.
+
+    A identidade vem do proprio no da pagina, nunca da descricao: dois links com o mesmo texto e o mesmo estilo
+    sao dois elementos. None: o foco saiu da pagina."""
+    info = await page.evaluate(_TAB_PROBE)
+    if info is None:
+        return None
+    frame_index = 0
+    if info["tag"] in ("iframe", "frame"):  # o foco esta dentro de um frame: pergunta a cada um quem o tem
+        inner_found: tuple[int, dict[str, Any]] | None = None
+        for i, fr in enumerate(page.frames):
+            if i == 0:
+                continue
+            try:
+                inner = await fr.evaluate(_TAB_PROBE)
+            except Exception:  # noqa: BLE001, S112 - frame fechado ou em transicao
+                continue
+            if inner is None:
+                continue
+            if inner_found is None:
+                inner_found = (i, inner)
+            if inner["tag"] not in ("iframe", "frame"):  # frame aninhado: o foco real esta no mais fundo
+                inner_found = (i, inner)
+                break
+        if inner_found is not None:
+            frame_index, info = inner_found
+    node = info.pop("node")
+    return (frame_index, node), info
+
+
+async def tab_stops(page: Any, steps: int) -> list[dict[str, Any]]:
+    """Aperta Tab ate o foco sair da pagina, dar a volta ou parar de mover; cada parada e um NO, nao uma descricao."""
+    seen: list[dict[str, Any]] = []
+    first: tuple[int, int] | None = None
+    previous: tuple[int, int] | None = None
+    for i in range(steps):
+        await page.keyboard.press("Tab")
+        got = await _focused_stop(page)
+        if got is None:
+            break  # o foco saiu da pagina (Chromium/WebKit no ultimo elemento)
+        ident, info = got
+        if first is None:
+            first = ident
+        elif ident in (first, previous):
+            break  # deu a volta no ciclo, ou o foco parou de mover (Firefox no ultimo elemento)
+        previous = ident
+        seen.append({"step": i + 1, "element": info})
+    return seen
+
+
 async def tab_order(
     url: str | None = None, html: str | None = None, max_steps: int = 60, browser: str = "chromium"
 ) -> list[dict[str, Any]]:
     steps = max(1, min(max_steps, 200))
 
     async def fn(page: Any) -> list[dict[str, Any]]:
-        seen: list[dict[str, Any]] = []
-        first_key = previous = ""
-        for i in range(steps):
-            await page.keyboard.press("Tab")
-            info = await page.evaluate(_TAB_PROBE)
-            if info is None:
-                break  # o foco saiu da pagina (Chromium/WebKit no ultimo elemento)
-            key = json.dumps(info, sort_keys=True)
-            if i == 0:
-                first_key = key
-            elif key == first_key or key == previous:
-                break  # deu a volta no ciclo, ou o foco parou de mover (Firefox no ultimo elemento)
-            previous = key
-            seen.append({"step": i + 1, "element": info})
-        return seen
+        return await tab_stops(page, steps)
 
     result: list[dict[str, Any]] = await _with_page(url, html, fn, browser)
     return result

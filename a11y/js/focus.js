@@ -6,7 +6,11 @@
     || e.innerText || e.getAttribute('title') || e.getAttribute('alt') || e.getAttribute('placeholder') || '')
     .trim().replace(/\s+/g, ' ').slice(0, 80);
   const cs = getComputedStyle(e);
+  // Identidade do no (nao da descricao): dois links com o mesmo texto e sem id continuam sendo dois elementos.
+  const ids = (window.__a11yNodeIds = window.__a11yNodeIds || new WeakMap());
+  if (!ids.has(e)) ids.set(e, (window.__a11yNodeSeq = (window.__a11yNodeSeq || 0) + 1));
   return {
+    node: ids.get(e),
     id: e.getAttribute('data-a11y-id'), tag: e.tagName.toLowerCase(), role: e.getAttribute('role'),
     name: name, type: e.getAttribute('type'),
     focus_style: {outline: cs.outlineStyle + ' ' + cs.outlineWidth + ' ' + cs.outlineColor + ' offset ' + cs.outlineOffset, box_shadow: cs.boxShadow},

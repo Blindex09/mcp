@@ -386,3 +386,16 @@ async def test_agent_can_inspect_focus_style_but_a_screen_reader_cannot():
     assert "focus_style" in agent._allowed_actions("default")
     assert "focus_style" in agent._allowed_actions("keyboard")
     assert "focus_style" not in agent._allowed_actions("screen_reader")
+
+
+async def test_live_region_change_is_recorded_once_not_once_per_mutation_record():
+    """Regressao: trocar textContent gera varios registros de mutacao; o anuncio deve aparecer uma vez."""
+    page = """<!doctype html><html lang="pt"><title>l</title><body><button id="b">Ir</button><div id="s" role="status"></div>
+    <script>document.getElementById('b').addEventListener('click', () => { document.getElementById('s').textContent = 'Feito'; });</script></body></html>"""
+    await SESSION.open(None, page)
+    try:
+        b = (await SESSION.dossier())["elements"][0]["id"]
+        r = await SESSION.act("click", b)
+        assert [a["text"] for a in r["announcements"]] == ["Feito"]
+    finally:
+        await SESSION.close()

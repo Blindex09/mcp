@@ -457,6 +457,7 @@ class Session:
         )
         path: list[dict[str, Any]] = []
         first: str | None = None
+        previous: str | None = None
         for i in range(1, max(1, min(max_tabs, 300)) + 1):
             await page.keyboard.press("Tab")
             f = await page.evaluate(js.FOCUS_JS)
@@ -467,6 +468,9 @@ class Session:
                 first = sig
             elif sig == first:
                 return {"reached": False, "tab_presses": i, "reason": "o foco deu a volta sem passar pelo alvo", "path": path[-15:]}
+            if sig == previous:
+                return {"reached": False, "tab_presses": i, "reason": "o foco parou de mover (fim da pagina) sem passar pelo alvo", "path": path[-15:]}
+            previous = sig
             path.append({"stop": i, "tag": f["tag"], "role": f["role"], "name": f["name"], "focus_style": f["focus_style"]})
             if want and f["id"] == want:
                 return {"reached": True, "tab_presses": i, "path": path[-15:]}

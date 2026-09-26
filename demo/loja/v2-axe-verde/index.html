@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Casa do Chá</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topo">
+  <img src="logo.svg" alt="Casa do Chá" class="logo">
+  <div class="nav">
+    <a href="#inicio">Início</a>
+    <div class="dropdown">
+      <div class="trigger">Produtos ▾</div>
+      <div class="menu">
+        <a href="#chas">Chás</a>
+        <a href="#acessorios">Acessórios</a>
+        <a href="#presentes">Presentes</a>
+      </div>
+    </div>
+    <a href="#faq">Dúvidas</a>
+  </div>
+  <button class="cart" aria-label="Carrinho"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/><path d="M1 2h3l3 10h9l2-7H5"/></svg></button>
+</header>
+
+<main>
+  <h1>Casa do Chá</h1>
+  <p class="sub">Chás selecionados, direto do produtor.</p>
+
+  <section class="filtro">
+    <label for="cat">Categoria</label>
+    <input id="cat" type="text" placeholder="Digite ou escolha" autocomplete="off">
+    <div class="options" id="opts">
+      <div class="opt">Chá verde</div>
+      <div class="opt">Chá preto</div>
+      <div class="opt">Chá branco</div>
+      <div class="opt">Chá de ervas</div>
+      <div class="opt">Chá mate</div>
+    </div>
+  </section>
+
+  <section id="chas" class="cards">
+    <div class="card">
+      <img src="cha1.svg" alt="Folhas de Sencha Premium">
+      <h3>Sencha Premium</h3>
+      <p class="preco">R$ 39,90</p>
+      <div class="btn">Comprar</div>
+    </div>
+    <div class="card">
+      <img src="cha2.svg" alt="Folhas de Earl Grey Imperial">
+      <h3>Earl Grey Imperial</h3>
+      <p class="preco">R$ 34,50</p>
+      <div class="btn">Comprar</div>
+    </div>
+    <div class="card">
+      <img src="cha3.svg" alt="Flores de Camomila da Serra">
+      <h3>Camomila da Serra</h3>
+      <p class="preco">R$ 27,00</p>
+      <div class="btn">Comprar</div>
+    </div>
+  </section>
+  <div id="toast" class="toast"></div>
+
+  <section id="faq">
+    <h2>Dúvidas frequentes</h2>
+    <div class="faq-item">
+      <div class="faq-q">Qual o prazo de entrega?</div>
+      <div class="faq-a">Entregamos em até 5 dias úteis para todo o Brasil.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Posso trocar um chá aberto?</div>
+      <div class="faq-a">Sim, em até 7 dias, se a embalagem estiver lacrada.</div>
+    </div>
+  </section>
+
+  <section class="news">
+    <h2>Receba novidades</h2>
+    <input id="email" type="email" placeholder="Seu e-mail">
+    <button class="assinar">Assinar</button>
+  </section>
+</main>
+<footer class="rodape">© Casa do Chá — feito com carinho</footer>
+<script src="app.js"></script>
+</body>
+</html>

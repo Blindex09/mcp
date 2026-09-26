@@ -1,0 +1,188 @@
+{
+  "v1-original": {
+    "axe": [
+      false,
+      "4 violação(ões): button-name, image-alt, color-contrast, html-has-lang"
+    ],
+    "T1 escolher categoria (teclado)": [
+      false,
+      "4 Tab; valor final: 'ch'"
+    ],
+    "T2 abrir o menu Produtos (teclado)": [
+      false,
+      "o item 'Produtos' nao recebe foco: menu inalcançável pelo teclado"
+    ],
+    "T3 abrir a 1ª pergunta do FAQ (teclado)": [
+      false,
+      "a pergunta do FAQ não recebe foco"
+    ],
+    "T4 comprar o 1º chá (teclado)": [
+      false,
+      "o botão 'Comprar' não recebe foco (é um <div>)"
+    ],
+    "dossie: controles só de mouse": [
+      false,
+      "5 elemento(s) clicável(is), sem foco e sem papel"
+    ],
+    "dossie: papel do campo Categoria": [
+      false,
+      "papel calculado pelo navegador: textbox"
+    ],
+    "T5 aviso de compra anunciado": [
+      false,
+      "anunciado: nada (silencioso)"
+    ],
+    "T6 foco visível (botão do carrinho)": [
+      false,
+      "outline ao focar: none 3px rgb(0, 0, 0) 0px"
+    ],
+    "T7 reflow em 320px": [
+      false,
+      "rolagem horizontal: True; 6 elemento(s) passam da tela"
+    ],
+    "T8 texto cortado com espaçamento do usuário": [
+      true,
+      "0 novo(s)"
+    ],
+    "design: corpo do texto": [
+      false,
+      "13px, entrelinha 1.1"
+    ],
+    "design: famílias de fonte": [
+      false,
+      "3: Arial, Georgia, Trebuchet MS"
+    ],
+    "design: tamanhos de fonte distintos": [
+      false,
+      "8: 13px, 14px, 12px, 17px, 18px, 15px, 22px, 13.3333px"
+    ],
+    "design: valores de espaçamento distintos": [
+      false,
+      "13 (escala de 8px?)"
+    ]
+  },
+  "v2-axe-verde": {
+    "axe": [
+      true,
+      "0 violação(ões): -"
+    ],
+    "T1 escolher categoria (teclado)": [
+      false,
+      "4 Tab; valor final: 'ch'"
+    ],
+    "T2 abrir o menu Produtos (teclado)": [
+      false,
+      "o item 'Produtos' nao recebe foco: menu inalcançável pelo teclado"
+    ],
+    "T3 abrir a 1ª pergunta do FAQ (teclado)": [
+      false,
+      "a pergunta do FAQ não recebe foco"
+    ],
+    "T4 comprar o 1º chá (teclado)": [
+      false,
+      "o botão 'Comprar' não recebe foco (é um <div>)"
+    ],
+    "dossie: controles só de mouse": [
+      false,
+      "5 elemento(s) clicável(is), sem foco e sem papel"
+    ],
+    "dossie: papel do campo Categoria": [
+      false,
+      "papel calculado pelo navegador: textbox"
+    ],
+    "T5 aviso de compra anunciado": [
+      false,
+      "anunciado: nada (silencioso)"
+    ],
+    "T6 foco visível (botão do carrinho)": [
+      false,
+      "outline ao focar: none 3px rgb(0, 0, 0) 0px"
+    ],
+    "T7 reflow em 320px": [
+      false,
+      "rolagem horizontal: True; 6 elemento(s) passam da tela"
+    ],
+    "T8 texto cortado com espaçamento do usuário": [
+      true,
+      "0 novo(s)"
+    ],
+    "design: corpo do texto": [
+      false,
+      "13px, entrelinha 1.1"
+    ],
+    "design: famílias de fonte": [
+      false,
+      "3: Arial, Georgia, Trebuchet MS"
+    ],
+    "design: tamanhos de fonte distintos": [
+      false,
+      "8: 13px, 14px, 12px, 17px, 18px, 15px, 22px, 13.3333px"
+    ],
+    "design: valores de espaçamento distintos": [
+      false,
+      "13 (escala de 8px?)"
+    ]
+  },
+  "v3-corrigido": {
+    "axe": [
+      true,
+      "0 violação(ões): -"
+    ],
+    "T1 escolher categoria (teclado)": [
+      true,
+      "6 Tab; valor final: 'Chá verde'"
+    ],
+    "T2 abrir o menu Produtos (teclado)": [
+      true,
+      "3 Tab até 'Produtos'; Enter abre; 'Chás' recebe foco: True"
+    ],
+    "T3 abrir a 1ª pergunta do FAQ (teclado)": [
+      true,
+      "10 Tab; Enter; resposta visível: True"
+    ],
+    "T4 comprar o 1º chá (teclado)": [
+      true,
+      "7 Tab; Enter; aviso: 'Adicionado ao carrinho: Sencha Premium'"
+    ],
+    "dossie: controles só de mouse": [
+      true,
+      "0 elemento(s) clicável(is), sem foco e sem papel"
+    ],
+    "dossie: papel do campo Categoria": [
+      true,
+      "papel calculado pelo navegador: combobox"
+    ],
+    "T5 aviso de compra anunciado": [
+      true,
+      "anunciado: ['Adicionado ao carrinho: Sencha Premium']"
+    ],
+    "T6 foco visível (botão do carrinho)": [
+      true,
+      "outline ao focar: solid 3px rgb(47, 107, 79) 2px"
+    ],
+    "T7 reflow em 320px": [
+      true,
+      "rolagem horizontal: False; 0 elemento(s) passam da tela"
+    ],
+    "T8 texto cortado com espaçamento do usuário": [
+      true,
+      "0 novo(s)"
+    ],
+    "design: corpo do texto": [
+      true,
+      "16px, entrelinha 1.5"
+    ],
+    "design: famílias de fonte": [
+      true,
+      "2: Arial, Georgia"
+    ],
+    "design: tamanhos de fonte distintos": [
+      true,
+      "5: 16px, 14px, 24px, 20px, 32px"
+    ],
+    "design: valores de espaçamento distintos": [
+      true,
+      "8 (escala de 8px?)"
+    ]
+  }
+}

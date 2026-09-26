@@ -130,6 +130,17 @@ O **Playwright e o navegador pedido (Chromium por padrão; Firefox/WebKit na pri
 Reinicie o Claude Desktop / Cursor. Para VS Code, o `setup.py` imprime o trecho para o `settings.json`. O `setup.ps1` faz tudo isso no Windows.
 Dependências: `mcp>=1.2,<2` (o mcp 2.x renomeou o `FastMCP`), `playwright`. O `httpx` já vem com o `mcp`.
 
+## Demonstração: "axe verde" não é acessível
+
+`demo/loja/` tem um site simples em **três versões** (`v1-original`, `v2-axe-verde`, `v3-corrigido`) e `verificar.py`, que aplica as mesmas medições do MCP
+em cada uma, separando a **camada genérica** (axe) da **camada de julgamento** (tarefas só de teclado, leitor de tela, foco, reflow, design).
+A v2 passa no axe e mesmo assim um usuário de teclado não consegue escolher categoria, abrir o menu, ler o FAQ nem comprar.
+O relatório (`demo/loja/RELATORIO.md`) mostra o que cada componente realmente é, as correções que mantêm o design e o que deu errado no caminho.
+
+```bash
+python demo/loja/verificar.py
+```
+
 ## Segurança
 
 - Navegação só em `http://` e `https://` (nunca `file:`, `javascript:`, `chrome:`); na sessão, requisições de outros esquemas são abortadas, downloads recusados, diálogos JS dispensados (e registrados), popups fechados (e registrados).

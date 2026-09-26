@@ -134,3 +134,27 @@ async def test_tools_expose_browser_and_comparison():
         await tools.get_tool("a11y_close").fn()
     status = json.loads(await tools.get_tool("a11y_status").fn())
     assert set(status["browsers"]) == {"chromium", "firefox", "webkit"}
+
+
+THREE = "<html lang=pt><title>t</title><body><main><button>A</button><button>B</button><button>C</button></main></body></html>"
+
+
+async def test_tab_order_stops_at_the_end_in_every_browser_even_when_focus_stays_on_the_last_element():
+    """Regressao: no Firefox o Tab no ultimo elemento nao sai da pagina; o laco repetia o ultimo 47 vezes."""
+    for b in ("chromium", "firefox"):
+        stops = await audit.tab_order(html=THREE, browser=b)
+        assert [s["element"]["name"] for s in stops] == ["A", "B", "C"], b
+    r = await compare_browsers(html=THREE, browsers=["chromium", "firefox"])
+    assert r["per_browser"]["chromium"]["tab_stops"] == r["per_browser"]["firefox"]["tab_stops"] == ["button:A", "button:B", "button:C"]
+    assert r["differences"]["firefox"]["tab_order"] == "identica"
+
+
+async def test_reach_reports_end_of_page_when_focus_stops_moving_in_firefox():
+    await SESSION.open(None, THREE + "<!-- x -->", browser="firefox")
+    try:
+        await SESSION.page.evaluate("() => { const d = document.createElement('div'); d.id = 'x'; d.textContent = 'nao focavel'; document.body.append(d); }")
+        r = await SESSION.reach("css:#x", max_tabs=30)
+        assert r["reached"] is False and r["tab_presses"] < 30
+        assert "fim da pagina" in r["reason"] or "saiu" in r["reason"]
+    finally:
+        await SESSION.close()

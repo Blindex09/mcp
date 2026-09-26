@@ -203,17 +203,18 @@ async def tab_order(
 
     async def fn(page: Any) -> list[dict[str, Any]]:
         seen: list[dict[str, Any]] = []
-        first_key = ""
+        first_key = previous = ""
         for i in range(steps):
             await page.keyboard.press("Tab")
             info = await page.evaluate(_TAB_PROBE)
             if info is None:
-                break
+                break  # o foco saiu da pagina (Chromium/WebKit no ultimo elemento)
             key = json.dumps(info, sort_keys=True)
             if i == 0:
                 first_key = key
-            elif key == first_key:
-                break  # deu a volta no ciclo
+            elif key == first_key or key == previous:
+                break  # deu a volta no ciclo, ou o foco parou de mover (Firefox no ultimo elemento)
+            previous = key
             seen.append({"step": i + 1, "element": info})
         return seen
 

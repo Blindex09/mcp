@@ -1,0 +1,47 @@
+/* Casa do Chá — v2 (so o que o axe apontou): visual do site, com os problemas de sempre */
+:root { --brand: #2f6b4f; --bg: #fbf8f1; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: #333; font: 13px/1.1 Arial, sans-serif; }
+*:focus { outline: none; }
+
+.topo { display: flex; align-items: center; gap: 22px; padding: 7px 13px; background: #fff; border-bottom: 1px solid #e3ddd0; }
+.logo { width: 40px; height: 40px; }
+.nav { display: flex; gap: 18px; flex: 1; align-items: center; }
+.nav a { color: var(--brand); text-decoration: none; font-weight: 600; font-size: 14px; }
+.dropdown { position: relative; }
+.trigger { color: var(--brand); font-weight: 600; font-size: 14px; cursor: default; }
+.menu { display: none; position: absolute; top: 20px; left: 0; background: #fff; border: 1px solid #ddd; padding: 6px 9px; min-width: 130px; flex-direction: column; gap: 6px; z-index: 5; }
+.dropdown:hover .menu { display: flex; }
+.cart { background: var(--brand); border: 0; border-radius: 6px; padding: 6px 9px; }
+.cart svg { fill: none; stroke: #fff; stroke-width: 2; }
+
+main { max-width: 720px; margin: 0 auto; padding: 9px 13px; }
+h1 { font: 700 22px Georgia, serif; color: var(--brand); margin: 12px 0 2px; letter-spacing: 0.3px; }
+h2 { font: 700 18px Georgia, serif; color: var(--brand); margin: 24px 0 6px; }
+h3 { font: 600 17px "Trebuchet MS", sans-serif; margin: 5px 0 2px; }
+.sub { color: #595959; font-size: 12px; margin: 0 0 14px; }
+
+.filtro { position: relative; width: 260px; margin-bottom: 14px; }
+.filtro label { display: block; font-size: 12px; margin-bottom: 3px; color: #555; }
+.filtro input { width: 100%; padding: 6px 9px; border: 1px solid #bbb; border-radius: 4px; font: 13px Arial; }
+.options { display: none; position: absolute; left: 0; right: 0; top: 52px; background: #fff; border: 1px solid #bbb; border-top: 0; z-index: 4; }
+.options.open { display: block; }
+.opt { padding: 6px 9px; cursor: pointer; }
+.opt:hover { background: #e9f2ec; }
+
+.cards { display: flex; gap: 13px; }
+.card { flex: 1; background: #fff; border: 1px solid #e3ddd0; border-radius: 8px; padding: 9px; }
+.card img { width: 100%; height: 80px; object-fit: cover; }
+.preco { color: #595959; font-size: 13px; margin: 2px 0 7px; }
+.btn { display: inline-block; background: var(--brand); color: #fff; padding: 5px 12px; border-radius: 5px; font-weight: 600; cursor: pointer; }
+
+.toast { min-height: 18px; margin: 8px 0; color: var(--brand); font-weight: 600; }
+
+.faq-item { border-bottom: 1px solid #e3ddd0; padding: 7px 0; }
+.faq-q { font: 600 15px Arial; cursor: pointer; color: #222; }
+.faq-a { display: none; margin-top: 4px; color: #555; }
+.faq-item.open .faq-a { display: block; }
+
+.news input { padding: 6px 9px; border: 1px solid #bbb; border-radius: 4px; width: 220px; }
+.assinar { background: var(--brand); color: #fff; border: 0; border-radius: 5px; padding: 6px 12px; font-weight: 600; }
+.rodape { text-align: center; padding: 22px 0; color: #595959; font-size: 12px; }

@@ -34,12 +34,45 @@ Selection of what to read is done by a model, never by keyword. The measurement 
 They cover only part of WCAG: keyboard, screen-reader and touch checks remain manual (section 5).
 Browser-based tools need `python -m playwright install chromium` once.
 
+### Testing like a user (session tools)
+
+A green audit is not accessibility. To find what really happens, open a persistent session and act as the user:
+
+| Need | Tool |
+|---|---|
+| Start/stop a session with an enforced persona (`keyboard`, `screen_reader`, `low_vision`, `mobile_touch`, `reduced_motion`, `forced_colors`) | `a11y_open` / `a11y_close` |
+| Facts about every interactive element, to decide what each one really is in this site | `a11y_dossier` |
+| Do what a user does and get the effect (focus, tree changes, announcements) | `a11y_act` |
+| Tab presses needed to reach an element; what a screen reader gets for it | `a11y_reach` / `a11y_announce` |
+| Reflow at 320 px, text-spacing clipping | `a11y_stress` |
+| The site's real design language; try a change temporarily; look at it | `a11y_design_tokens` / `a11y_preview_css` / `a11y_screenshot` |
+
+Coverage: `a11y_page_map` returns FACTS about ALL content (headings/outline, landmarks, images and alt, links, forms, tables, media, iframes, live regions, reading order,
+`:hover` rules) including open Shadow DOM and each iframe; `a11y_dossier` crosses Shadow DOM and iframes; `a11y_coverage` lists what was and was NOT covered (include it
+in every report); `a11y_crawl` scans several pages (facts only; robots.txt; GET only). On non-local sites, requests that change data are held for the person's approval (`a11y_approve`); `allow_mutations=auto|ask|allow|block`.
+Judge the content with [references/page-structure-review.md](references/page-structure-review.md) and widgets beyond the classic eleven with
+[references/more-component-patterns.md](references/more-component-patterns.md).
+
+Browsers: `a11y_open`, `a11y_audit`, `a11y_aria_snapshot`, `a11y_tab_order`, `a11y_walkthrough` and `a11y_review` take `browser` (chromium default, firefox, webkit;
+installed automatically). Chromium is the most precise; Firefox/WebKit results list their limits. `a11y_compare_browsers` shows the same page side by side
+(facts only); see [references/cross-browser-a11y.md](references/cross-browser-a11y.md).
+
+Autonomous user: `a11y_walkthrough(task, persona)` and `a11y_review(focus)` run a model as the person (with screenshots and the accessibility
+tree) and return a plain-language report; `a11y_close` interrupts them; `a11y_status` shows readiness. `a11y_focus_style` gives the facts of what :focus changes.
+`a11y_dossier` reports role/name **as computed by the browser** and whether each element is focusable/clickable (an element that is clickable but not
+focusable, with no role, is a mouse-only control).
+
+How to judge: [references/component-identity-guide.md](references/component-identity-guide.md) (what is this element, in this site),
+[references/ux-persona-testing.md](references/ux-persona-testing.md) (task-based walkthroughs and the report, including what was NOT verified),
+[references/design-language-review.md](references/design-language-review.md) (typography/spacing suggestions inside the site's own scale).
+
 ## 1. References by domain
 
 Read only what the task needs.
 
 ### A. Foundations, ARIA, audit, and testing
 
+- [references/component-identity-guide.md](references/component-identity-guide.md), [references/ux-persona-testing.md](references/ux-persona-testing.md), [references/design-language-review.md](references/design-language-review.md): judging what components are, testing like a user, and design review.
 - [references/aria-rules-dos-and-donts.md](references/aria-rules-dos-and-donts.md): native semantics, careful ARIA, accessible-name duplication, roles/states, and focus.
 - [references/audit-checklist.md](references/audit-checklist.md): automated and manual audit workflow.
 - [references/nvda-testing-guide.md](references/nvda-testing-guide.md): NVDA/browser testing.

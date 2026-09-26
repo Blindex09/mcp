@@ -35,3 +35,9 @@ def fake_ctx():
         return SimpleNamespace(session=SimpleNamespace(create_message=create_message)), prompts
 
     return make
+
+
+@pytest.fixture(autouse=True)
+def isolated_learning_home(monkeypatch, tmp_path):
+    """Nenhum teste pode ler ou escrever nos aprendizados reais da pessoa."""
+    monkeypatch.setenv("A11Y_MCP_HOME", str(tmp_path / "a11y-home"))

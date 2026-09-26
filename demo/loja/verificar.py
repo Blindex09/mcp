@@ -5,7 +5,7 @@ Duas camadas separadas, como pedido:
   2. JULGAMENTO - o que so aparece agindo como usuario: tarefas so de teclado (persona imposta pelo servidor,
      sem mouse), anuncio de leitor de tela, foco visivel, reflow, espacamento de texto e a linguagem de design.
 
-Uso:  python demo/loja/verificar.py          (imprime o quadro e grava demo/loja/resultados.json)
+Uso:  python demo/loja/verificar.py          (imprime o quadro de resultados)
 """
 
 from __future__ import annotations
@@ -13,7 +13,6 @@ from __future__ import annotations
 import asyncio
 import functools
 import http.server
-import json
 import sys
 import threading
 from pathlib import Path
@@ -183,7 +182,6 @@ async def main() -> None:
         for lab in labels:
             ok, detail = results[v].get(lab, (None, ""))
             print(f"  [{'ok' if ok else '!!'}] {lab}: {detail}")
-    (ROOT / "resultados.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 if __name__ == "__main__":

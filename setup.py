@@ -27,7 +27,7 @@ def setup_claude_desktop():
             with open(config_path, encoding="utf-8") as f:
                 config = json.load(f)
         except json.JSONDecodeError:
-            print(f"  ⚠️  Config existente mal-formado em {config_path} — sobrescrevendo.")
+            print(f"    Config existente mal-formado em {config_path} — sobrescrevendo.")
     
     # Garante mcpServers existe
     if 'mcpServers' not in config:
@@ -48,7 +48,7 @@ def setup_claude_desktop():
     with open(config_path, 'w') as f:
         json.dump(config, f, indent=2)
     
-    print(f"✅ Claude Desktop configurado em: {config_path}")
+    print(f" Claude Desktop configurado em: {config_path}")
 
 
 def setup_cursor():
@@ -66,7 +66,7 @@ def setup_cursor():
             with open(config_path, encoding="utf-8") as f:
                 config = json.load(f)
         except json.JSONDecodeError:
-            print(f"  ⚠️  Config existente mal-formado em {config_path} — sobrescrevendo.")
+            print(f"    Config existente mal-formado em {config_path} — sobrescrevendo.")
     
     # Garante mcpServers existe
     if 'mcpServers' not in config:
@@ -87,13 +87,13 @@ def setup_cursor():
     with open(config_path, 'w') as f:
         json.dump(config, f, indent=2)
     
-    print(f"✅ Cursor configurado em: {config_path}")
+    print(f" Cursor configurado em: {config_path}")
 
 
 def setup_vscode():
     """Instruções para VSCode (configuração manual via settings.json)"""
     
-    print("\n📝 Para VSCode, adicione à settings.json:")
+    print("\n Para VSCode, adicione à settings.json:")
     print("""
 {
   "mcp.servers": {
@@ -107,7 +107,7 @@ def setup_vscode():
 
 
 def main():
-    print("🔧 Accessibility MCP Server - Setup Script\n")
+    print(" Accessibility MCP Server - Setup Script\n")
     print("Registrando servidor MCP em todas as plataformas...\n")
     
     try:
@@ -115,15 +115,15 @@ def main():
         setup_cursor()
         setup_vscode()
         
-        print("\n✅ Setup concluído!")
-        print("\n⚠️  Próximos passos:")
+        print("\n Setup concluído!")
+        print("\n  Próximos passos:")
         print("1. Reinicie Claude Desktop")
         print("2. Reinicie Cursor")
         print("3. Reinicie VSCode")
         print("4. As ferramentas a11y_* estarão disponíveis")
         
     except Exception as e:
-        print(f"❌ Erro: {e}")
+        print(f" Erro: {e}")
         return 1
     
     return 0

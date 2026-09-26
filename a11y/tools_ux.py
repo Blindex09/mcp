@@ -12,6 +12,7 @@ from mcp.server.fastmcp import Context, Image
 
 from llm import NO_MODEL_HELP, ask_model, backend_status
 
+from . import learn
 from .agent import run_agent
 from .provisioning import status_of_all
 from .session import PERSONAS, SESSION, SessionError
@@ -199,8 +200,8 @@ def register_ux(mcp: Any) -> None:
         ctx: Context, mode: str, goal: str, url: str, html: str, persona: str, max_steps: int, vision: bool, browser: str,
         allow_mutations: str = "auto",
     ) -> str:  # type: ignore[type-arg]
-        async def ask(prompt: str, images: list[bytes] | None, max_tokens: int) -> str | None:
-            return await ask_model(ctx, prompt, max_tokens, images)
+        async def ask(prompt: str, images: list[bytes] | None, max_tokens: int, tier: str = "main") -> str | None:
+            return await ask_model(ctx, prompt, max_tokens, images, tier)
 
         async def progress(step: int, total: int, message: str) -> None:
             try:
@@ -257,3 +258,17 @@ def register_ux(mcp: Any) -> None:
             "model": backend_status(),
             "note": "Sem modelo configurado, as ferramentas autonomas ficam indisponiveis; as demais (dossie, acoes, medicao) funcionam.",
         })
+
+    @mcp.tool()
+    async def a11y_learnings(host: str = "") -> str:
+        """What the server has LEARNED from previous autonomous tests (kept in the user's folder, never in a project): general lessons and
+        per-site ones (how a site behaves, which probe revealed a problem, false positives). Learning happens after every a11y_walkthrough /
+        a11y_review, is applied immediately, updates the entry of the same topic instead of duplicating it, and needs no approval.
+        host: optional site name to filter. Turn off with A11Y_MCP_LEARN=0."""
+        entries = learn.relevant(host.lower()) if host else learn.load_all()
+        return _json({"enabled": learn.enabled(), "folder": str(learn.store_path()), "entries": entries})
+
+    @mcp.tool()
+    async def a11y_forget(topic: str, scope: str = "") -> str:
+        """Remove one learned entry by topic (optionally only in one scope: 'geral' or a site name). The person's control over what is kept."""
+        return _json({"removed": learn.forget(topic, scope)})

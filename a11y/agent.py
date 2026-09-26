@@ -20,6 +20,7 @@ from typing import Any
 
 from llm import extract_json
 
+from . import learn
 from .content_index import CONTENT_DIR
 from .session import PERSONAS, Session, SessionError
 
@@ -30,7 +31,7 @@ TREE_LINES_IN_PROMPT = 120
 DOSSIER_LINES_IN_PROMPT = 40
 GUIDE_CHARS = 5000
 
-AskFn = Callable[[str, list[bytes] | None, int], Awaitable[str | None]]
+AskFn = Callable[..., Awaitable[str | None]]
 ProgressFn = Callable[[int, int, str], Awaitable[None]]
 
 _POINTER_ACTIONS = {"click", "hover", "focus", "select"}
@@ -118,7 +119,7 @@ def _allowed_actions(persona: str) -> list[str]:
     )
 
 
-def _system_prompt(mode: str, persona: str, goal: str, allowed: list[str], vision: bool) -> str:
+def _system_prompt(mode: str, persona: str, goal: str, allowed: list[str], vision: bool, learned: str = "") -> str:
     about = PERSONAS[persona]["about"]
     seeing = (
         "Voce ve a tela (imagem anexa) e recebe a arvore de acessibilidade." if vision
@@ -158,7 +159,8 @@ def _system_prompt(mode: str, persona: str, goal: str, allowed: list[str], visio
         "target so nas acoes que precisam de alvo. Para press use nomes de tecla (Tab, Shift+Tab, Enter, Space, Escape, "
         "ArrowDown...). Nao invente ids: use os da lista de elementos. Escreva thought e friction em portugues corrido e natural, "
         "sem asteriscos, sem markdown e sem caracteres especiais soltos.\n\n"
-        f"CONHECIMENTO DE APOIO (guias do servidor):\n{guide}"
+        + (f"APRENDIZADOS DE EXECUCOES ANTERIORES (use se ajudarem; a pagina de hoje manda):\n{learned}\n\n" if learned else "")
+        + f"CONHECIMENTO DE APOIO (guias do servidor):\n{guide}"
     )
 
 
@@ -237,7 +239,9 @@ async def run_agent(
     opened = await session.open(url, html, persona, browser=browser, allow_mutations=allow_mutations)
     see = vision and not PERSONAS[persona].get("no_visual")
     allowed = _allowed_actions(persona)
-    system = _system_prompt(mode, persona, goal, allowed, see)
+    host = learn.host_of(url)
+    learned_entries = learn.relevant(host) if learn.enabled() else []
+    system = _system_prompt(mode, persona, goal, allowed, see, learn.render_for_prompt(learned_entries))
     narration: list[str] = []
     frictions: list[str] = []
     steps: list[dict[str, Any]] = []
@@ -353,6 +357,13 @@ async def run_agent(
         pending_at_end = session.pending_approvals()
         report = await _write_report(ask, mode, goal, persona, narration, frictions, steps, outcome, summary, stopped_by, coverage)
         model_calls += 1
+        digest = (
+            f"objetivo: {goal}\npersona: {persona}\ndesfecho: {outcome} ({stopped_by})\natritos: {frictions[:12]}\n"
+            f"acoes recusadas/erros: {[(x['action'], x.get('refused') or x.get('error')) for x in steps if x.get('refused') or x.get('error')][:8]}\n"
+            f"lacunas de cobertura: {coverage['gaps'][:6]}\nrelatorio: {report[:1500]}"
+        )
+        learned_topics = await learn.learn_from_run(ask, host, digest)
+        model_calls += 1 if learned_topics else 0
     finally:
         await session.close()
     return {
@@ -361,7 +372,7 @@ async def run_agent(
         "facts": {"mode": mode, "persona": persona, "browser": browser, "mutations": opened.get("mutations"), "limits": opened.get("limits", []), "opened": opened["opened"], "steps_used": len(steps),
                   "max_steps": max_steps, "model_calls": model_calls, "vision": bool(see),
                   "elapsed_s": round(time.monotonic() - started, 1)},
-        "pending_approvals": pending_at_end, "coverage": coverage, "not_verified": NOT_VERIFIED,
+        "learned_topics": learned_topics, "pending_approvals": pending_at_end, "coverage": coverage, "not_verified": NOT_VERIFIED,
     }
 
 

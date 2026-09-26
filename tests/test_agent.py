@@ -20,7 +20,7 @@ class Script:
         self.prompts: list[str] = []
         self.images: list[list[bytes] | None] = []
 
-    async def __call__(self, prompt, images, max_tokens):
+    async def __call__(self, prompt, images, max_tokens, tier="main"):
         self.prompts.append(prompt)
         self.images.append(images)
         if not self.replies:

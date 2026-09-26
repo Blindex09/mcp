@@ -13,23 +13,28 @@ inatividade, nenhum JavaScript arbitrario exposto ao cliente.
 from __future__ import annotations
 
 import asyncio
+import json
 import re
 import time
 from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any
+from urllib.parse import parse_qs, urlparse
 
 from . import page_scripts as js
 from .audit import _launch, validate_url
+from .patience import patient
 from .provisioning import check_browser_name, provisioner_for
 
 IDLE_TIMEOUT_S = 600
-ACTION_TIMEOUT_MS = 10_000
+ACTION_TIMEOUT_MS = 10_000  # so a 1a espera de uma acao; se estourar, repete com 3x e depois 9x
 SETTLE_QUIET_MS = 200  # silencio do DOM que caracteriza "assentou"
 SETTLE_CAP_MS = 3_000  # teto de seguranca da espera adaptativa
 _ID_RE = re.compile(r"e\d+")
 _SAFE_CSS_PROP = re.compile(r"^[a-z-]+$")
 _ALLOWED_SCHEMES = ("http:", "https:", "data:", "blob:", "about:")
+_SAFE_METHODS = ("GET", "HEAD", "OPTIONS")
+_MUTATION_MODES = ("auto", "ask", "allow", "block")
 _MAX_TREE_LINES = 400
 
 # Personas: emulacao de navegador + o que o harness PERMITE fazer.
@@ -76,6 +81,39 @@ class Coverage:
     actions: int = 0
 
 
+def is_local_dev(url: str | None) -> bool:
+    """Site de desenvolvimento local (localhost, 127.0.0.1, ::1, *.localhost, *.test) ou HTML passado direto."""
+    if not url:
+        return True
+    host = (urlparse(url.strip()).hostname or "").lower()
+    return host in ("localhost", "127.0.0.1", "::1") or host.endswith((".localhost", ".test"))
+
+
+def effective_policy(mode: str, url: str | None) -> str:
+    """auto: site local = allow (aprovacao desligada); site real = ask (aprovacao ligada: pede antes)."""
+    if mode == "auto":
+        return "allow" if is_local_dev(url) else "ask"
+    return mode
+
+
+def payload_summary(method: str, url: str, post_data: str | None, content_type: str, navigation: bool) -> dict[str, Any]:
+    """O QUE a requisicao mudaria, sem vazar valores: nomes dos campos e tamanhos, nunca o conteudo (pode ter senha)."""
+    fields: list[str] = []
+    ctype = (content_type or "").lower()
+    if post_data:
+        if "json" in ctype:
+            try:
+                data = json.loads(post_data)
+                fields = [f"{k} ({len(str(v))} caracteres)" for k, v in (data.items() if isinstance(data, dict) else [])]
+            except ValueError:
+                fields = [f"corpo JSON ilegivel ({len(post_data)} caracteres)"]
+        elif "x-www-form-urlencoded" in ctype:
+            fields = [f"{k} ({len(v[0]) if v else 0} caracteres)" for k, v in parse_qs(post_data, keep_blank_values=True).items()]
+        else:
+            fields = [f"corpo de {len(post_data)} caracteres"]
+    return {"method": method.upper(), "url": url[:120], "kind": "envio de formulario" if navigation else "chamada da pagina", "fields": fields[:20]}
+
+
 class SessionError(Exception):
     """Erro esperado de uso da sessao (mensagem para o cliente)."""
 
@@ -102,6 +140,11 @@ class Session:
         self.cdp: Any = None  # so no Chromium; Firefox/WebKit usam a descoberta por DOM + aria snapshot
         self.browser_name = "chromium"
         self.coverage = Coverage()
+        self.mutation_policy = "allow"  # allow | ask | block (resolvido no open)
+        self.mutation_mode = "auto"
+        self.blocked: list[str] = []
+        self.pending: dict[str, dict[str, Any]] = {}  # pedidos de aprovacao retidos
+        self._approval_seq = 0
         self.stop_requested = False  # pedido de cancelamento de um teste autonomo em andamento
         self._inflight: set[Any] = set()  # requisicoes em andamento (sinal de que a pagina ainda esta reagindo)
         self._frame_of: dict[str, int] = {}  # id do dossie -> indice do frame que o contem (Playwright)
@@ -115,10 +158,15 @@ class Session:
         self._console_seen = 0
         self._watchdog: asyncio.Task[None] | None = None
 
+    @property
+    def allow_mutations(self) -> bool:
+        return self.mutation_policy == "allow"
+
     # ----------------------------------------------------------- ciclo de vida
     async def open(
         self, url: str | None, html: str | None, persona: str = "default", color_scheme: str | None = None,
         browser: str = "chromium",
+        allow_mutations: str = "auto",
     ) -> dict[str, Any]:
         if bool(url) == bool(html):
             raise SessionError("informe exatamente um entre url e html")
@@ -126,6 +174,8 @@ class Session:
             raise SessionError(f"persona invalida: {persona}. Opcoes: {sorted(PERSONAS)}")
         if color_scheme not in (None, "light", "dark"):
             raise SessionError("color_scheme deve ser light ou dark")
+        if allow_mutations not in _MUTATION_MODES:
+            raise SessionError(f"allow_mutations deve ser um de: {', '.join(_MUTATION_MODES)}")
         try:
             check_browser_name(browser)
         except Exception as e:
@@ -152,6 +202,10 @@ class Session:
         try:
             self.browser = await _launch(self.pw, browser)
             self.context = await self.browser.new_context(**opts)
+            self.mutation_mode = allow_mutations
+            self.mutation_policy = effective_policy(allow_mutations, url)
+            self.blocked = []
+            self.pending = {}
             await self.context.route("**/*", self._route)
             await self.context.add_init_script(js.LIVE_OBSERVER_JS)
             await self.context.add_init_script(js.LISTENER_HOOK_JS)
@@ -181,6 +235,9 @@ class Session:
             raise
         self.persona = persona
         self.browser_name = browser
+        self.mutation_mode = allow_mutations
+        self.mutation_policy = effective_policy(allow_mutations, url)
+        self.blocked = []
         self.coverage = Coverage()
         self.coverage.urls.add(self.page.url)
         self.dialogs, self.popups, self.console_errors = [], [], []
@@ -190,10 +247,18 @@ class Session:
         return {
             "opened": self.page.url, "persona": persona, "browser": browser, "about": cfg["about"],
             "title": await self.page.title(), "limits": notes,
+            "mutations": {
+                "allow": "permitidas",
+                "ask": "COM APROVACAO: POST/PUT/PATCH/DELETE e envio de formulario ficam retidos ate a pessoa aprovar (a11y_approve)",
+                "block": "BLOQUEADAS: POST/PUT/PATCH/DELETE e envio de formulario nao sao enviados (modo estrito)",
+            }[self.mutation_policy],
         }
 
     async def close(self) -> bool:
         was_open = self.page is not None
+        for item in list(self.pending.values()):
+            if not item["future"].done():
+                item["future"].set_result("deny")  # nada fica preso; sem aprovacao nao foi enviado
         if self._watchdog and self._watchdog is not asyncio.current_task():
             self._watchdog.cancel()
         self._watchdog = None
@@ -217,12 +282,64 @@ class Session:
                 return
 
     # ------------------------------------------------- guardas de seguranca
-    @staticmethod
-    async def _route(route: Any) -> None:
-        if route.request.url.lower().startswith(_ALLOWED_SCHEMES):
+    async def _route(self, route: Any) -> None:
+        req = route.request
+        if not req.url.lower().startswith(_ALLOWED_SCHEMES):
+            await route.abort()
+            return
+        if req.method.upper() in _SAFE_METHODS or self.mutation_policy == "allow":
             await route.continue_()
+            return
+        navigation = req.is_navigation_request()
+        if self.mutation_policy == "ask":
+            self._approval_seq += 1
+            aid = f"a{self._approval_seq}"
+            item = {"id": aid, **payload_summary(req.method, req.url, req.post_data, req.headers.get("content-type", ""), navigation),
+                    "future": asyncio.get_running_loop().create_future()}
+            self.pending[aid] = item
+            self._inflight.discard(req)  # retida esperando a pessoa: nao conta como "pagina ainda reagindo"
+            decision = await item["future"]  # a requisicao fica parada ate a pessoa decidir (sem relogio)
+            self.pending.pop(aid, None)
+            if decision == "allow":
+                await route.continue_()
+                return
+            self.blocked.append(f"{req.method} {req.url[:100]} (nao aprovada)")
+        else:  # block: modo estrito escolhido pela pessoa
+            self.blocked.append(f"{req.method} {req.url[:100]}")
+        if navigation:
+            await route.fulfill(status=204, body="")  # envio de formulario: a pagina continua onde esta (abortar levaria a uma pagina de erro)
         else:
             await route.abort()
+
+    def pending_approvals(self) -> list[dict[str, Any]]:
+        return [{k: v for k, v in p.items() if k != "future"} for p in self.pending.values()]
+
+    async def decide(self, decision: str, ids: list[str] | None = None) -> dict[str, Any]:
+        """Aprovacao da pessoa: allow (esses pedidos) | deny | allow_all (aprovacao desligada para o resto da sessao)."""
+        if decision not in ("allow", "deny", "allow_all"):
+            raise SessionError("decision deve ser allow, deny ou allow_all")
+        self._need()
+        before = await self._state()
+        if decision == "allow_all":
+            self.mutation_policy = "allow"
+        targets = list(self.pending) if (decision == "allow_all" or not ids) else [i for i in ids if i in self.pending]
+        if ids and not targets:
+            raise SessionError(f"nenhum pedido pendente com esses ids: {', '.join(ids)}")
+        decided = []
+        for aid in targets:
+            item = self.pending.get(aid)
+            if item and not item["future"].done():
+                item["future"].set_result("allow" if decision in ("allow", "allow_all") else "deny")
+                decided.append({"id": aid, "method": item["method"], "url": item["url"], "decision": "allow" if decision != "deny" else "deny"})
+        await self._settle()
+        after = await self._state()
+        diff = tree_diff(before["tree"], after["tree"])
+        return {
+            "decided": decided, "policy_now": self.mutation_policy,
+            "url_changed": None if before["url"] == after["url"] else {"from": before["url"], "to": after["url"]},
+            "tree_added": diff["added"], "tree_removed": diff["removed"], "announcements": await self._live_new(),
+            "still_pending": self.pending_approvals(),
+        }
 
     async def _on_dialog(self, dialog: Any) -> None:
         self.dialogs.append(f"{dialog.type}: {dialog.message[:200]}")
@@ -318,7 +435,8 @@ class Session:
             "url": st["url"], "title": st["title"], "focus": st["focus"], "persona": self.persona,
             "accessibility_tree": st["tree"], "recent_announcements": await self._live_new(),
             "js_dialogs": self.dialogs[-5:], "popups_blocked": self.popups[-5:],
-            "console_errors": self.console_errors[-5:],
+            "console_errors": self.console_errors[-5:], "mutations_blocked": self.blocked[-5:],
+            "approvals_pending": self.pending_approvals(),
         }
 
     async def _discover(self, limit: int = 600) -> tuple[list[dict[str, Any]], int]:
@@ -546,6 +664,10 @@ class Session:
                 gaps.append(f"estresse '{kind}' nao rodou")
         if c.actions == 0:
             gaps.append("nenhuma acao foi executada: nada foi provado por comportamento")
+        if self.blocked:
+            gaps.append(f"{len(self.blocked)} requisicao(oes) que alterariam dados nao foram enviadas (bloqueadas ou nao aprovadas): o resultado dessas acoes nao foi observado")
+        if self.pending:
+            gaps.append(f"{len(self.pending)} pedido(s) de aprovacao ainda pendente(s): a pessoa precisa decidir (a11y_approve)")
         return {
             "browser": self.browser_name, "persona": self.persona,
             "interactive": {"discovered": c.discovered_total, "listed": len(c.described), "probed_by_behavior": len(c.described & c.probed),
@@ -566,17 +688,17 @@ class Session:
             raise SessionError(f"acao invalida: {action}. Opcoes: {sorted(_POINTER_ACTIONS | _KEYBOARD_ACTIONS)}")
         self._guard(action)
         before = await self._state()
-        d0, p0, c0 = len(self.dialogs), len(self.popups), len(self.console_errors)
+        d0, p0, c0, m0 = len(self.dialogs), len(self.popups), len(self.console_errors), len(self.blocked)
         await self._live_new()  # descarta o que ja foi anunciado antes da acao
         free = not PERSONAS[self.persona].get("no_pointer")
         if action == "click":
-            await self._locator(target).click()
+            await patient(lambda t: self._locator(target).click(timeout=t), ACTION_TIMEOUT_MS)
         elif action == "hover":
-            await self._locator(target).hover()
+            await patient(lambda t: self._locator(target).hover(timeout=t), ACTION_TIMEOUT_MS)
         elif action == "focus":
-            await self._locator(target).focus()
+            await patient(lambda t: self._locator(target).focus(timeout=t), ACTION_TIMEOUT_MS)
         elif action == "select":
-            await self._locator(target).select_option(value)
+            await patient(lambda t: self._locator(target).select_option(value, timeout=t), ACTION_TIMEOUT_MS)
         elif action == "press":
             if target and free:
                 await self._locator(target).focus()
@@ -600,7 +722,8 @@ class Session:
             "tree_removed": diff["removed"], "tree_added": diff["added"],
             "announcements": await self._live_new(),
             "js_dialogs": self.dialogs[d0:], "popups_blocked": self.popups[p0:],
-            "console_errors": self.console_errors[c0:],
+            "console_errors": self.console_errors[c0:], "mutations_blocked": self.blocked[m0:],
+            "approvals_pending": self.pending_approvals(),
         }
 
     async def _settle(self) -> None:

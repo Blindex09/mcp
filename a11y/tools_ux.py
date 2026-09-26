@@ -41,7 +41,8 @@ def register_ux(mcp: Any) -> None:
 
     @mcp.tool()
     async def a11y_open(
-        url: str = "", html: str = "", persona: str = "default", color_scheme: str = "", browser: str = "chromium"
+        url: str = "", html: str = "", persona: str = "default", color_scheme: str = "", browser: str = "chromium",
+        allow_mutations: str = "auto",
     ) -> str:
         """Open a persistent browser session to test a page LIKE A USER (one session at a time;
         opening a new one closes the previous). Provide EITHER url (http/https, localhost ok) OR html.
@@ -50,13 +51,31 @@ def register_ux(mcp: Any) -> None:
         screen_reader also cannot take screenshots, low_vision is a 320 px reflow viewport, mobile_touch is a phone.
         browser: chromium (default, most precise: browser-computed roles/names/clickable via CDP) | firefox | webkit
         (installed automatically on first use; less precise discovery, and the result lists the limits).
+        allow_mutations: auto (default) | ask | allow | block. Approval is on or off, never a flat refusal: auto = local dev sites
+        (localhost, 127.0.0.1, *.test) do everything (approval off); any other site HOLDS POST/PUT/PATCH/DELETE and form submissions and
+        shows what they would change until the person approves with a11y_approve (approval on). allow = do everything; block = strict,
+        never send them.
         color_scheme: light | dark (optional). Do not type real credentials into tested pages; use test accounts.
         Sessions close after 10 minutes idle."""
         try:
             async with SESSION.lock:
-                return _json(await SESSION.open(url or None, html or None, persona, color_scheme or None, browser))
+                return _json(await SESSION.open(url or None, html or None, persona, color_scheme or None, browser, allow_mutations))
         except SessionError as e:
             return _json({"error": str(e), "personas": {k: v["about"] for k, v in PERSONAS.items()}})
+        except Exception as e:  # noqa: BLE001
+            return _error(e)
+
+    @mcp.tool()
+    async def a11y_approve(decision: str, ids: str = "") -> str:
+        """Answer the person's approval for requests the session is HOLDING (they would change data on a real site): each pending item shows
+        method, URL and the NAMES of the fields it would send (never their values). decision: allow (the listed ids, or all pending if
+        ids is empty) | deny | allow_all (approval off for the rest of the session). ids: comma-separated ids like a1,a2. Returns what was
+        decided and the effect on the page. Only call this with the person's actual answer, never on your own."""
+        try:
+            async with SESSION.lock:
+                return _json(await SESSION.decide(decision, [i.strip() for i in ids.split(",") if i.strip()] or None))
+        except SessionError as e:
+            return _json({"error": str(e)})
         except Exception as e:  # noqa: BLE001
             return _error(e)
 
@@ -177,7 +196,8 @@ def register_ux(mcp: Any) -> None:
 
 
     async def _autonomous(
-        ctx: Context, mode: str, goal: str, url: str, html: str, persona: str, max_steps: int, vision: bool, browser: str
+        ctx: Context, mode: str, goal: str, url: str, html: str, persona: str, max_steps: int, vision: bool, browser: str,
+        allow_mutations: str = "auto",
     ) -> str:  # type: ignore[type-arg]
         async def ask(prompt: str, images: list[bytes] | None, max_tokens: int) -> str | None:
             return await ask_model(ctx, prompt, max_tokens, images)
@@ -192,7 +212,7 @@ def register_ux(mcp: Any) -> None:
             async with SESSION.lock:
                 result = await run_agent(
                     session=SESSION, ask=ask, mode=mode, goal=goal, url=url or None, html=html or None,
-                    persona=persona, max_steps=max_steps, vision=vision, progress=progress, browser=browser,
+                    persona=persona, max_steps=max_steps, vision=vision, progress=progress, browser=browser, allow_mutations=allow_mutations,
                 )
         except SessionError as e:
             return _json({"error": str(e), "personas": {k: v["about"] for k, v in PERSONAS.items()}})
@@ -205,7 +225,7 @@ def register_ux(mcp: Any) -> None:
     @mcp.tool()
     async def a11y_walkthrough(
         ctx: Context, task: str, url: str = "", html: str = "", persona: str = "default", max_steps: int = 25, vision: bool = True,  # type: ignore[type-arg]
-        browser: str = "chromium",
+        browser: str = "chromium", allow_mutations: str = "auto",
     ) -> str:
         """AUTONOMOUS user test: a model plays a real person with the given persona trying to accomplish a task on the
         page (url http/https or html), step by step, seeing the screen (screenshot) and the accessibility tree, and
@@ -214,19 +234,19 @@ def register_ux(mcp: Any) -> None:
         see a11y_status) or a client that offers sampling. The harness enforces the persona (keyboard/screen_reader
         have no mouse), a step cap (max 60), a time budget and stops repeated identical actions.
         task: the person's goal in plain words, e.g. "sign up for the newsletter" or "find the return policy"."""
-        return await _autonomous(ctx, "task", task, url, html, persona, max_steps, vision, browser)
+        return await _autonomous(ctx, "task", task, url, html, persona, max_steps, vision, browser, allow_mutations)
 
     @mcp.tool()
     async def a11y_review(
         ctx: Context, focus: str = "componentes e design", url: str = "", html: str = "", persona: str = "default", max_steps: int = 30, vision: bool = True,  # type: ignore[type-arg]
-        browser: str = "chromium",
+        browser: str = "chromium", allow_mutations: str = "auto",
     ) -> str:
         """AUTONOMOUS UX review: a model explores the page, PROBES each important interactive component to learn what it
         really is for people in this site's context (text field vs combobox vs list vs menu vs navigation vs accordion...),
         compares with what it exposes today, and reviews typography/spacing against the site's own design language.
         Returns a plain-language report with evidence, fixes that keep the design, and what could not be verified.
         Same requirements and enforced limits as a11y_walkthrough. focus: what to review, in your own words."""
-        return await _autonomous(ctx, "review", focus, url, html, persona, max_steps, vision, browser)
+        return await _autonomous(ctx, "review", focus, url, html, persona, max_steps, vision, browser, allow_mutations)
 
     @mcp.tool()
     async def a11y_status() -> str:

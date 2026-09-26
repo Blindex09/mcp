@@ -9,6 +9,8 @@ Quem responde (o servidor e um MCP standalone, sem depender de outro projeto):
    descontinuou o sampling em favor de chamar a API do provedor):
    - A11Y_MCP_BACKEND  = anthropic | openai | openai-compatible | ollama (opcional; senao detecta pelo ambiente)
    - A11Y_MCP_MODEL    = id do modelo. OBRIGATORIO: nao ha modelo padrao embutido, a escolha e sua.
+   - A11Y_MCP_MODEL_FAST = (opcional) modelo mais barato para o que e leve (escolher guias, resumir aprendizados); o julgamento
+                        pesado (usuario autonomo, relatorio) usa sempre A11Y_MCP_MODEL. Sem ele, tudo usa A11Y_MCP_MODEL.
    - ANTHROPIC_API_KEY / OPENAI_API_KEY / A11Y_MCP_API_KEY = chave (so do ambiente, nunca registrada)
    - A11Y_MCP_BASE_URL = endereco de um servidor compativel com OpenAI (xAI, OpenRouter, LM Studio, Ollama /v1...)
    - OLLAMA_HOST       = endereco do Ollama nativo (padrao http://localhost:11434)
@@ -26,12 +28,14 @@ from typing import Any
 
 import httpx
 
+from a11y.patience import patient
+
 logger = logging.getLogger(__name__)
 
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 OPENAI_BASE = "https://api.openai.com/v1"
 OLLAMA_DEFAULT_HOST = "http://localhost:11434"
-BACKEND_TIMEOUT_S = 120.0
+BACKEND_TIMEOUT_S = 120.0  # so a 1a espera; se estourar, o mesmo pedido e' repetido com 3x, depois 9x
 BACKENDS = ("anthropic", "openai", "openai-compatible", "ollama")
 
 NO_MODEL_HELP = (
@@ -42,11 +46,16 @@ NO_MODEL_HELP = (
 
 
 async def _http_post(url: str, headers: dict[str, str], payload: dict[str, Any]) -> dict[str, Any]:
-    async with httpx.AsyncClient(timeout=BACKEND_TIMEOUT_S) as client:
-        resp = await client.post(url, headers=headers, json=payload)
-        resp.raise_for_status()
-        data = resp.json()
-        return data if isinstance(data, dict) else {}
+    """Chamada ao provedor. Se demorar, repete o MESMO pedido com mais tempo (regra: nenhum relogio fixo mata trabalho em andamento)."""
+
+    async def once(timeout: float) -> dict[str, Any]:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.post(url, headers=headers, json=payload)
+            resp.raise_for_status()
+            data = resp.json()
+            return data if isinstance(data, dict) else {}
+
+    return await patient(once, BACKEND_TIMEOUT_S, attempts=3)
 
 
 def configured_backend() -> str | None:
@@ -74,7 +83,7 @@ def backend_status() -> dict[str, Any]:
     model = os.environ.get("A11Y_MCP_MODEL") or None
     return {
         "backend": backend,
-        "model": model,
+        "model": model, "model_fast": os.environ.get("A11Y_MCP_MODEL_FAST") or None,
         "ready": bool(backend and model),
         "problem": None if (backend and model) else (
             "defina A11Y_MCP_MODEL" if backend else "nenhum backend configurado"
@@ -98,9 +107,16 @@ def _base_url(raw: str) -> str | None:
     return raw if raw.startswith(("http://", "https://")) else None
 
 
-async def _ask_backend(prompt: str, max_tokens: int, images: list[bytes] | None) -> str | None:
+def _model_for(tier: str) -> str | None:
+    """Roteamento por PROPOSITO da chamada (economia com qualidade): leve -> modelo barato, se a pessoa configurou um."""
+    if tier == "fast":
+        return os.environ.get("A11Y_MCP_MODEL_FAST") or os.environ.get("A11Y_MCP_MODEL")
+    return os.environ.get("A11Y_MCP_MODEL")
+
+
+async def _ask_backend(prompt: str, max_tokens: int, images: list[bytes] | None, tier: str = "main") -> str | None:
     backend = configured_backend()
-    model = os.environ.get("A11Y_MCP_MODEL")
+    model = _model_for(tier)
     if not backend:
         return None
     if not model:
@@ -173,10 +189,13 @@ async def _ask_client(ctx: Any, prompt: str, max_tokens: int, images: list[bytes
         return None
 
 
-async def ask_model(ctx: Any, prompt: str, max_tokens: int = 800, images: list[bytes] | None = None) -> str | None:
-    """Pergunta ao modelo: 1) provedor configurado (direto), 2) sampling do cliente. None = nenhum respondeu."""
+async def ask_model(
+    ctx: Any, prompt: str, max_tokens: int = 800, images: list[bytes] | None = None, tier: str = "main"
+) -> str | None:
+    """Pergunta ao modelo: 1) provedor configurado (direto), 2) sampling do cliente. None = nenhum respondeu.
+    tier: main (julgamento pesado) | fast (tarefa leve; usa A11Y_MCP_MODEL_FAST se a pessoa configurou)."""
     if configured_backend() is not None:
-        reply = await _ask_backend(prompt, max_tokens, images)
+        reply = await _ask_backend(prompt, max_tokens, images, tier)
         if reply is not None:
             return reply
     if ctx is not None:

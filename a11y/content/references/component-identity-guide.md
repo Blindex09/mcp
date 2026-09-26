@@ -8,6 +8,9 @@ conventions, and justify. Do not classify by tag name, class name, or a keyword 
 > `a11y_dossier` reports each element's role and name **as computed by the browser** (`computed`), whether it is `focusable` and `clickable`,
 > and the raw attributes next to them. A `clickable` element that is not `focusable`, with role `generic` and no name, is a control only a mouse user can operate.
 
+> Widgets beyond this table (toolbar, slider, date picker, pagination, toast, stepper...) are in `more-component-patterns`; the non-interactive
+> content (headings, images, links, forms, tables, reading order) is judged with `page-structure-review` from `a11y_page_map`.
+
 ## 0. Principles
 
 1. **Meaning over appearance.** A control is what it *does for the user*, not what it looks like. A box that looks

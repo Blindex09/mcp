@@ -47,6 +47,12 @@ A green audit is not accessibility. To find what really happens, open a persiste
 | Reflow at 320 px, text-spacing clipping | `a11y_stress` |
 | The site's real design language; try a change temporarily; look at it | `a11y_design_tokens` / `a11y_preview_css` / `a11y_screenshot` |
 
+Coverage: `a11y_page_map` returns FACTS about ALL content (headings/outline, landmarks, images and alt, links, forms, tables, media, iframes, live regions, reading order,
+`:hover` rules) including open Shadow DOM and each iframe; `a11y_dossier` crosses Shadow DOM and iframes; `a11y_coverage` lists what was and was NOT covered (include it
+in every report); `a11y_crawl` scans several pages (facts only; robots.txt; GET only). On non-local sites, requests that change data are blocked unless `allow_mutations=allow`.
+Judge the content with [references/page-structure-review.md](references/page-structure-review.md) and widgets beyond the classic eleven with
+[references/more-component-patterns.md](references/more-component-patterns.md).
+
 Browsers: `a11y_open`, `a11y_audit`, `a11y_aria_snapshot`, `a11y_tab_order`, `a11y_walkthrough` and `a11y_review` take `browser` (chromium default, firefox, webkit;
 installed automatically). Chromium is the most precise; Firefox/WebKit results list their limits. `a11y_compare_browsers` shows the same page side by side
 (facts only); see [references/cross-browser-a11y.md](references/cross-browser-a11y.md).

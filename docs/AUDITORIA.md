@@ -113,3 +113,28 @@ O Playwright roda os três; o MCP passou a aceitar `browser` na sessão, nas med
 - Motivo de existir: Firefox + NVDA é a combinação mais comum entre usuários de NVDA; a mesma página pode expor a acessibilidade de forma diferente.
 - Validado de verdade: Firefox nas 11 verificações da suíte; WebKit baixado sozinho em 8 s e a sessão abriu nele (o resto do WebKit segue o
   mesmo caminho do Firefox, mas não tem suíte própria).
+
+## 7. Cobertura total
+
+Pergunta do dono: "esse julgamento serve para todos os elementos de uma página?". Resposta antes: só para os interativos da página principal. O que mudou:
+
+| Lacuna | Como foi coberta |
+|---|---|
+| Conteúdo **não interativo** (títulos, imagens, links, formulários, tabelas, mídia, ordem de leitura) | `a11y_page_map`: fatos de todo o conteúdo; guia `page-structure-review` para julgar; o agente autônomo recebe o mapa a cada página nova |
+| **Shadow DOM** e **iframes** | O `DOMSnapshot` do Chromium já inclui shadow roots (abertos e fechados) e documentos de iframes; o dossiê e o mapa os atravessam; ações e `a11y_reach` alcançam esses elementos (Shadow DOM fechado é medido, mas marcado `actionable=false`) |
+| Firefox/WebKit só viam `cursor: pointer` | Gancho em `addEventListener` (init script em todos os frames): clicável por listener; ações **delegadas** a `document`/`window` são reportadas como "alvo real desconhecido" |
+| Menus abertos só por **hover** | `hover_reveals`: regras `:hover` das folhas de estilo que mudam exibição/visibilidade (dado, não opinião); o dossiê marca o gatilho |
+| Estados que só existem depois de agir | O agente lista primeiro o que **ainda não foi sondado** e vê a cobertura a cada passo; exploração protegida (abaixo) |
+| Padrões fora dos 11 clássicos | guia `more-component-patterns` (toolbar, slider, switch, radio, seletor de data, breadcrumbs, paginação, busca, toast, popover, stepper, upload, carregamento) |
+| **Uma página por vez** | `a11y_crawl`: várias páginas, fatos consolidados |
+| O relatório não dizia o que foi coberto | `a11y_coverage` e `coverage` no resultado do agente: lista de **lacunas** (elementos nunca sondados, mapa não lido, iframes sem mapa, requisições bloqueadas) |
+
+**Exploração segura.** Cobrir mais significa clicar mais. Em sites que não são de desenvolvimento local, requisições que alteram dados
+(POST/PUT/PATCH/DELETE, envio de formulário) são bloqueadas e registradas; envio de formulário responde 204 para a página continuar onde está.
+`allow_mutations=allow` só quando o dono pediu.
+
+**Bugs achados no caminho:** o foco por teclado não atravessava Shadow DOM/iframes (`document.activeElement` devolve o host); a ordem de leitura usava limiar
+e lista de tags (agora inversões exatas entre pares); o mapa não detectava o `order` do flexbox por causa dessa lista.
+
+**Limites que permanecem:** Shadow DOM fechado não recebe ações; Firefox/WebKit não detectam clique delegado; a bateria completa segue em Chromium; não é leitor de tela real;
+o julgamento autônomo por um modelo real ainda não foi exercitado (sem modelo configurado nesta máquina).

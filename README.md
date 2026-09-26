@@ -10,7 +10,7 @@ Ele dá à IA quatro coisas: **conhecimento** (guias e exemplos de acessibilidad
 - 🧠 **Escolha pelo modelo**: `a11y_find` recebe a tarefa em linguagem natural, em qualquer idioma, e o modelo escolhe os guias e exemplos certos pelo sentido. Nada de palavra-chave, regex ou ranking lexical.
 - 🔬 **Medição de fatos**: contraste WCAG, auditoria axe-core num navegador real, árvore de acessibilidade e ordem de foco por teclado.
 
-## Ferramentas (25)
+## Ferramentas (28)
 
 ### Conhecimento e escolha
 
@@ -57,6 +57,20 @@ O relatório deve listar o **que não foi verificado** (leitores de tela reais, 
 O modelo decide **tudo que é julgamento**; o servidor só impõe limites: persona (teclado e leitor de tela sem mouse), formato da
 ação, no máximo 60 passos, tempo, parada se repetir a mesma ação no mesmo estado, e fechamento da sessão. Precisa do modelo do servidor
 (veja abaixo) ou de um cliente com sampling. Cada passo é narrado; `a11y_close` interrompe sem perder o progresso.
+
+### Cobertura total (todo o conteúdo, Shadow DOM, iframes, vários navegadores)
+
+| Ferramenta | O que faz |
+|---|---|
+| `a11y_page_map(scope)` | **Fatos de TODO o conteúdo**, não só do interativo: hierarquia de títulos e saltos de nível, landmarks, imagens (alt ausente × vazio × descritivo), links (mesmo texto p/ destinos diferentes), formulários e campos, tabelas, listas, mídia (legendas), iframes, regiões vivas, **ordem de leitura × ordem visual** (inversões exatas), regras `:hover` que revelam conteúdo e listeners delegados. Atravessa Shadow DOM aberto e mapeia cada iframe |
+| `a11y_coverage()` | O que a sessão **cobriu e o que NÃO cobriu**: interativos descobertos/listados/sondados, mapa da página, iframes, design, estresse, requisições bloqueadas e a lista de lacunas. Inclua no relatório |
+| `a11y_crawl(url, max_pages)` | Varre **várias páginas** do mesmo site (sitemap + links; respeita `robots.txt`; só GET; ritmo educado; até 30) e consolida **fatos**: axe por regra e por página, títulos repetidos, páginas sem `lang`/`title`/`h1`, saltos de título, imagens sem alt |
+
+O dossiê agora atravessa **Shadow DOM (aberto e fechado)** e **iframes**; as ações e o `a11y_reach` alcançam esses elementos. No Firefox/WebKit, um gancho em
+`addEventListener` detecta clicável por listener (antes só havia `cursor: pointer`).
+
+**Exploração segura:** em sites que **não** são de desenvolvimento local (`localhost`, `127.0.0.1`, `*.localhost`, `*.test`), requisições que alteram dados
+(POST/PUT/PATCH/DELETE e envio de formulário) são **bloqueadas e registradas**, para o teste não alterar dados reais. `allow_mutations` = `auto` (padrão) | `block` | `allow` (só se o dono pediu).
 
 ### Vários navegadores
 

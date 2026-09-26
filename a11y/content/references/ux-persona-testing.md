@@ -63,6 +63,10 @@ Use different sessions per persona (a new `a11y_open` replaces the previous one)
 
 ## 6. Cautions
 
+- **Coverage:** call `a11y_coverage` before reporting and include its gaps (interactive elements never probed, page map not read, iframes unmapped, blocked requests).
+  A clean walkthrough of some flows is not a clean site; sample more pages with `a11y_crawl`.
+- **Safety:** on non-local sites the server blocks requests that change data (POST/PUT/PATCH/DELETE, form submissions) and reports them; do not lift it (`allow_mutations=allow`) unless the owner asked.
+
 - The accessibility tree is a proxy for a screen reader, not the real thing. Announcement wording and browse-mode
   behavior differ per product; recommend a manual pass with NVDA/VoiceOver before sign-off (`nvda-testing-guide`).
 - Do not type real credentials or personal data into tested pages; use test accounts and test data.

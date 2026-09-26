@@ -12,6 +12,7 @@ from llm import NO_MODEL_HELP, ask_model, extract_json
 from . import audit
 from .compare import compare_browsers
 from .content_index import ContentIndex
+from .crawl import crawl
 from .tools_ux import register_ux
 
 _MAX_CHARS = 40_000
@@ -67,7 +68,7 @@ def register(mcp: Any) -> None:
             "intent, not by shared words. Answer ONLY with a JSON array of catalog names.\n\n"
             f"TASK:\n{task}\n\nCATALOG:\n{_json(catalog)}"
         )
-        raw = await ask_model(ctx, prompt, max_tokens=400)
+        raw = await ask_model(ctx, prompt, max_tokens=400, tier="fast")  # escolher guias e' tarefa leve
         names = extract_json(raw, "array")
         if not isinstance(names, list):  # sem sampling ou resposta ilegivel: o modelo chamador escolhe
             return _json(
@@ -164,6 +165,18 @@ def register(mcp: Any) -> None:
         try:
             names = [b.strip() for b in browsers.split(",") if b.strip()]
             return _json(await compare_browsers(url or None, html or None, names, level))
+        except Exception as e:  # noqa: BLE001 - fronteira da ferramenta: devolve erro ao cliente
+            return _error(e)
+
+    @mcp.tool()
+    async def a11y_crawl(url: str, max_pages: int = 10, level: str = "AA", browser: str = "chromium") -> str:
+        """Scan SEVERAL pages of the same site and return consolidated FACTS (no judgment): axe violations per page and per
+        rule, page-map summaries (lang, title, h1 count, heading jumps, images without alt, links without text, unnamed fields,
+        landmarks, reading order), duplicate titles, pages missing lang/title/h1. Discovers URLs from sitemap.xml plus
+        same-site links; respects robots.txt; GET only (anything that would change data is blocked); polite pause; max 30 pages.
+        A sample, not a substitute for testing important flows like a user (a11y_open / a11y_walkthrough). url: http/https start page."""
+        try:
+            return _json(await crawl(url, max_pages, level, browser))
         except Exception as e:  # noqa: BLE001 - fronteira da ferramenta: devolve erro ao cliente
             return _error(e)
 

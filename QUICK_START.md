@@ -38,6 +38,12 @@ Você:   essa fonte e esse espaçamento estão bons?
 Claude: [a11y_design_tokens mede a escala do site → propõe dentro dela → a11y_preview_css + a11y_screenshot
          para mostrar antes/depois, sem tocar no site]
 
+Você:   revisa a estrutura da página inteira (títulos, imagens, links, formulários, ordem de leitura)
+Claude: [a11y_page_map → fatos de todo o conteúdo → julga com o guia page-structure-review → a11y_coverage mostra o que ficou de fora]
+
+Você:   varre o site todo (até 20 páginas)
+Claude: [a11y_crawl → axe por página e por regra, títulos repetidos, páginas sem h1/lang — só fatos, respeitando o robots.txt]
+
 Você:   compara essa página no Chrome e no Firefox
 Claude: [a11y_compare_browsers → o que a árvore, o axe e o foco têm de diferente em cada navegador]
 

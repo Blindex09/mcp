@@ -56,6 +56,7 @@ mcp = FastMCP(
         "report the effect; a11y_stress checks reflow and text spacing; a11y_close ends it. "
         "3) DESIGN: a11y_design_tokens measures the site's own design language; a11y_screenshot and a11y_preview_css "
         "let you try a change temporarily before recommending it, inside the site's scale. "
+        "COVERAGE: a11y_page_map gives FACTS about ALL content (headings, images, links, forms, tables, media, iframes, reading order, hover rules), and the dossier crosses Shadow DOM and iframes; a11y_coverage lists what was and was NOT covered (always include it in reports); a11y_crawl scans several pages of a site (facts only, robots.txt respected, GET only). SAFETY: on non-local sites, requests that change data (POST/PUT/PATCH/DELETE, form submits) are blocked and reported unless allow_mutations=allow. "
         "AUTONOMOUS: a11y_walkthrough(task, persona) and a11y_review(focus) run a model as the user (with screenshots) and return a report; a11y_close interrupts; a11y_status shows browser/model readiness. "
         "BROWSERS: pass browser=chromium|firefox|webkit (chromium is the most precise; the others list their limits); a11y_compare_browsers shows the same page side by side. "
         "4) QUICK CHECKS without a session: a11y_audit (axe-core), a11y_aria_snapshot, a11y_tab_order, a11y_contrast. "

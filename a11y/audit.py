@@ -6,7 +6,6 @@ timeout agregado e roda um navegador headless descartavel por chamada.
 
 from __future__ import annotations
 
-import asyncio
 import json
 import re
 from collections.abc import Awaitable, Callable
@@ -14,11 +13,12 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from .patience import with_patience
 from .provisioning import provisioner_for
 
 AXE_PATH = Path(__file__).parent / "vendor" / "axe.min.js"
 NAV_TIMEOUT_MS = 30_000
-TOTAL_TIMEOUT_S = 90
+TOTAL_TIMEOUT_S = 90  # so a 1a espera; se estourar, repete com 3x e depois 9x
 _LEVEL_TAGS = {
     "A": ["wcag2a", "wcag21a"],
     "AA": ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"],
@@ -111,7 +111,7 @@ async def _with_page(
             finally:
                 await instance.close()
 
-    return await asyncio.wait_for(run(), timeout=TOTAL_TIMEOUT_S)
+    return await with_patience(run, TOTAL_TIMEOUT_S)  # se demorar, repete com mais tempo (nada de relogio fixo)
 
 
 def summarize_axe(raw: dict[str, Any], max_nodes: int = 5) -> dict[str, Any]:

@@ -23,8 +23,7 @@ from llm import extract_json
 from .content_index import CONTENT_DIR
 from .session import PERSONAS, Session, SessionError
 
-MAX_STEPS_CEILING = 60
-TIME_BUDGET_S = 420
+STALL_STEPS = 10  # passos seguidos sem NENHUM progresso (mesma pagina, mesma arvore, nada novo sondado) = travado
 REPEAT_LIMIT = 3
 HISTORY_LINES = 10
 TREE_LINES_IN_PROMPT = 120
@@ -36,7 +35,8 @@ ProgressFn = Callable[[int, int, str], Awaitable[None]]
 
 _POINTER_ACTIONS = {"click", "hover", "focus", "select"}
 _TARGET_ACTIONS = _POINTER_ACTIONS | {"reach", "announce", "focus_style"}
-_ALL_ACTIONS = _POINTER_ACTIONS | {"press", "type", "wait", "reach", "announce", "focus_style"}
+_ALL_ACTIONS = _POINTER_ACTIONS | {"press", "type", "wait", "reach", "announce", "focus_style", "page_map"}
+DOSSIER_POOL = 200  # o dossie e lido inteiro; o prompt mostra primeiro o que ainda NAO foi sondado (cobertura)
 
 # Fatos sobre o que este harness NAO consegue verificar (nao e julgamento: e o alcance das ferramentas).
 NOT_VERIFIED = [
@@ -100,6 +100,11 @@ def effect_summary(r: dict[str, Any]) -> str:
         parts.append(f"dialogo JS: {r['js_dialogs'][0][:50]}")
     if r.get("popups_blocked"):
         parts.append("popup bloqueado")
+    if r.get("mutations_blocked"):
+        parts.append(f"requisicao que altera dados NAO enviada: {r['mutations_blocked'][0][:60]}")
+    if r.get("approvals_pending"):
+        a = r["approvals_pending"][0]
+        parts.append(f"PEDIDO DE APROVACAO retido (a pessoa decide; nao foi enviado): {a['method']} {a['url'][:50]} campos={a['fields'][:4]}")
     if r.get("console_errors"):
         parts.append(f"erro de console: {r['console_errors'][0][:50]}")
     return "; ".join(parts)
@@ -138,21 +143,62 @@ def _system_prompt(mode: str, persona: str, goal: str, allowed: list[str], visio
             "linguagem do proprio site. Registre cada achado em 'friction' com a evidencia. Encerre quando tiver coberto "
             "os componentes mais importantes (nao precisa de todos)."
         )
-        guide = _guide("component-identity-guide") + "\n\n" + _guide("design-language-review")[:2500]
+        guide = (
+            _guide("component-identity-guide") + "\n\n" + _guide("design-language-review")[:2500]
+            + "\n\n" + _guide("page-structure-review")[:2500]
+        )
     return (
         f"{role}\n\nAcoes permitidas AGORA: {', '.join(allowed)}, finish. "
         "Responda SOMENTE com um objeto JSON: "
         '{"thought": "o que voce percebe e por que age assim, em portugues corrido e natural", '
         '"friction": "atrito ou achado deste passo, ou null", '
+        '"look_next": true se voce precisa VER a tela no proximo passo (a tela so e enviada no 1o passo, ao mudar de pagina ou quando voce pede; economiza custo), '
         '"action": {"type": "<acao>", "target": "<id do dossie, ex.: e12, ou css:seletor>", "value": "<tecla/texto/opcao>"} '
         'OU {"type": "finish", "outcome": "completed|completed_with_friction|not_completed", "summary": "..."}}. '
         "target so nas acoes que precisam de alvo. Para press use nomes de tecla (Tab, Shift+Tab, Enter, Space, Escape, "
-        "ArrowDown...). Nao invente ids: use os da lista de elementos.\n\n"
+        "ArrowDown...). Nao invente ids: use os da lista de elementos. Escreva thought e friction em portugues corrido e natural, "
+        "sem asteriscos, sem markdown e sem caracteres especiais soltos.\n\n"
         f"CONHECIMENTO DE APOIO (guias do servidor):\n{guide}"
     )
 
 
-def _observation_text(obs: dict[str, Any], elements: list[str], history: list[str], step: int, max_steps: int) -> str:
+def page_map_text(pm: dict[str, Any]) -> str:
+    """Fatos do mapa da pagina em poucas linhas (sem veredito), para o modelo julgar o conteudo nao interativo."""
+    d = pm["main"]
+    doc, h, lm, im, lk, fm, tb = d["document"], d["headings"], d["landmarks"], d["images"], d["links"], d["forms"], d["tables"]
+    lines = [
+        (
+            f"documento: lang={doc['lang']} titulo={doc['title']!r} meta-viewport={'sim' if doc['viewport_meta'] else 'nao'} "
+            f"shadow-abertos={doc['shadow_hosts_open']} iframes={len(pm['frames'])}"
+        ),
+        "titulos: " + (" > ".join(f"h{x['level']}:{x['text'][:28]}" for x in h["outline"][:18]) or "(nenhum)")
+        + f" | h1={h['h1_count']} | saltos de nivel={[(j['from'], j['to']) for j in h['level_jumps']] or 'nenhum'}",
+        f"landmarks: {[(x['role'], x['name']) for x in lm['items'][:10]]} | texto fora de landmark: {lm['text_chars_outside_landmarks']}/{lm['text_chars_total']} caracteres",
+        "imagens: " + (", ".join(
+            f"{i['tag']}[alt={'ausente' if i['alt'] is None else repr(i['alt'][:24])}{',em-link' if i['in_link_or_button'] else ''}]" for i in im["items"][:14]
+        ) or "(nenhuma)"),
+        f"links: {lk['total']} | mesmo texto p/ destinos diferentes={lk['same_text_different_destination'][:5] or 'nenhum'} | sem texto={lk['empty_text']}",
+        f"formularios: {len(fm['forms'])} | campos={fm['fields_total']} sem nome(label/aria)={fm['fields_without_any_name']}",
+        f"tabelas: {[(t['header_cells'], t['rows']) for t in tb['items'][:6]]} (celulas-th, linhas)",
+        f"midia: {[(m['tag'], 'legenda' if m['tracks'] else 'sem-legenda') for m in d['media'][:4]] or 'nenhuma'} | regioes vivas: {len(d['live_regions'])}",
+        f"ordem de leitura: pares invertidos={d['reading_order']['inverted_pairs']}/{d['reading_order']['items_compared']} itens | css order usado={d['reading_order']['css_order_used']} | tabindex>0={d['reading_order']['tabindex_positive']}",
+        f"hover que revela conteudo (dado das folhas de estilo): {[x['rule'] for x in d['hover_reveals']['items'][:5]] or 'nenhum'}",
+    ]
+    if pm.get("delegated_listeners"):
+        lines.append(f"acoes delegadas a ancestrais (alvo real desconhecido): {pm['delegated_listeners'][:4]}")
+    return "\n".join(lines)
+
+
+def coverage_line(cov: dict[str, Any]) -> str:
+    i = cov["interactive"]
+    gaps = "; ".join(cov["gaps"][:4]) or "nenhuma lacuna conhecida"
+    return f"COBERTURA ate agora: interativos listados {i['listed']}/{i['discovered']}, sondados por comportamento {i['probed_by_behavior']}. Lacunas: {gaps}"
+
+
+def _observation_text(
+    obs: dict[str, Any], elements: list[str], history: list[str], step: int, max_steps: int,
+    page_map: str = "", coverage: str = "",
+) -> str:
     tree = "\n".join(obs["accessibility_tree"][:TREE_LINES_IN_PROMPT])
     hist = "\n".join(history[-HISTORY_LINES:]) or "(primeiro passo)"
     ann = "; ".join(a["text"] for a in obs.get("recent_announcements", [])) or "(nada)"
@@ -161,7 +207,9 @@ def _observation_text(obs: dict[str, Any], elements: list[str], history: list[st
         f"PASSO {step}/{max_steps}\nURL: {obs['url']}\nTitulo: {obs['title']}\n"
         f"Foco: {focus['tag'] + ' ' + repr(focus['name']) if focus else 'nenhum'}\n"
         f"Anuncios recentes: {ann}\n\nHISTORICO:\n{hist}\n\n"
-        f"ELEMENTOS INTERATIVOS (fatos):\n" + "\n".join(elements) + f"\n\nARVORE DE ACESSIBILIDADE:\n{tree}"
+        + (f"MAPA DA PAGINA (fatos de TODO o conteudo):\n{page_map}\n\n" if page_map else "")
+        + "ELEMENTOS INTERATIVOS (fatos; os ainda nao sondados vem primeiro):\n" + "\n".join(elements)
+        + f"\n\n{coverage}\n\nARVORE DE ACESSIBILIDADE:\n{tree}"
     )
 
 
@@ -175,6 +223,7 @@ async def run_agent(
     html: str | None,
     persona: str = "default",
     browser: str = "chromium",
+    allow_mutations: str = "auto",
     max_steps: int = 25,
     vision: bool = True,
     progress: ProgressFn | None = None,
@@ -183,9 +232,9 @@ async def run_agent(
         raise SessionError("mode deve ser task ou review")
     if not goal.strip():
         raise SessionError("informe o objetivo (task) ou o foco da revisao")
-    max_steps = max(1, min(int(max_steps), MAX_STEPS_CEILING))
+    max_steps = max(1, int(max_steps))  # orcamento configurado pela pessoa; nao ha teto fixo nem relogio
     started = time.monotonic()
-    opened = await session.open(url, html, persona, browser=browser)
+    opened = await session.open(url, html, persona, browser=browser, allow_mutations=allow_mutations)
     see = vision and not PERSONAS[persona].get("no_visual")
     allowed = _allowed_actions(persona)
     system = _system_prompt(mode, persona, goal, allowed, see)
@@ -198,19 +247,39 @@ async def run_agent(
     outcome = "not_completed"
     summary = ""
     repeats: dict[str, int] = {}
+    mapped_url = ""
+    last_progress: tuple[Any, ...] | None = None
+    last_shot_url = ""
+    look_next = False
+    stalled = 0
     try:
         for step in range(1, max_steps + 1):
             if session.stop_requested:
                 stopped_by = "cancelled"
                 break
-            if time.monotonic() - started > TIME_BUDGET_S:
-                stopped_by = "time_budget"
-                break
             obs = await session.observe()
-            dossier = await session.dossier("", DOSSIER_LINES_IN_PROMPT)
-            elements = [compact_element(e) for e in dossier.get("elements", [])]
-            shot = [await session.screenshot()] if see else None
-            prompt = f"{system}\n\n{_observation_text(obs, elements, history, step, max_steps)}"
+            progress_sig = (obs["url"], len(session.coverage.probed), hash(tuple(obs["accessibility_tree"][:80])), len(obs.get("recent_announcements", [])))
+            stalled = stalled + 1 if progress_sig == last_progress else 0
+            last_progress = progress_sig
+            if stalled >= STALL_STEPS:
+                stopped_by = "stalled"
+                break
+            dossier = await session.dossier("", DOSSIER_POOL)
+            pool = dossier.get("elements", [])
+            pool = [e for e in pool if e["id"] not in session.coverage.probed] + [e for e in pool if e["id"] in session.coverage.probed]
+            elements = [compact_element(e) for e in pool[:DOSSIER_LINES_IN_PROMPT]]
+            if len(pool) > DOSSIER_LINES_IN_PROMPT:
+                elements.append(f"(+{len(pool) - DOSSIER_LINES_IN_PROMPT} elementos listados nao mostrados neste passo; agem sobre o que ja foi sondado para abrir espaco)")
+            map_text = ""
+            if obs["url"] != mapped_url:
+                map_text = page_map_text(await session.page_map())
+                mapped_url = obs["url"]
+            want_look = step == 1 or obs["url"] != last_shot_url or look_next  # 1o passo, pagina nova ou pedido do modelo
+            shot = [await session.screenshot()] if (see and want_look) else None
+            if shot:
+                last_shot_url = obs["url"]
+            look_next = False
+            prompt = f"{system}\n\n{_observation_text(obs, elements, history, step, max_steps, map_text, coverage_line(session.coverage_report()))}"
             decision: dict[str, Any] | None = None
             for attempt in (1, 2):
                 model_calls += 1
@@ -226,6 +295,7 @@ async def run_agent(
                 stopped_by = stopped_by if stopped_by == "model_unavailable" else "model_invalid_output"
                 break
             thought = str(decision.get("thought") or "").strip()
+            look_next = bool(decision.get("look_next"))
             if decision.get("friction"):
                 frictions.append(f"Passo {step}: {str(decision['friction']).strip()}")
             action = decision["action"]
@@ -260,6 +330,9 @@ async def run_agent(
                     if kind == "reach":
                         result = await session.reach(str(action["target"]))
                         eff = f"Tab ate o alvo: alcancado={result['reached']} apos {result['tab_presses']} Tab" + (f" ({result.get('reason')})" if result.get("reason") else "")
+                    elif kind == "page_map":
+                        pmap = await session.page_map()
+                        eff = "mapa da pagina relido: " + page_map_text(pmap).replace("\n", " | ")[:300]
                     elif kind == "focus_style":
                         result = await session.focus_style(str(action["target"]))
                         eff = f"ao focar muda {result['properties_changed']} propriedades; outline={result['outline_when_focused'].strip()!r}; box-shadow={result['box_shadow_when_focused']!r}"
@@ -276,23 +349,25 @@ async def run_agent(
                     history.append(f"{step}. {kind} {action.get('target') or ''} -> ERRO: {record['error']}")
             steps.append(record)
             await asyncio.sleep(0)  # ponto de cancelamento cooperativo
-        report = await _write_report(ask, mode, goal, persona, narration, frictions, steps, outcome, summary, stopped_by)
+        coverage = session.coverage_report()
+        pending_at_end = session.pending_approvals()
+        report = await _write_report(ask, mode, goal, persona, narration, frictions, steps, outcome, summary, stopped_by, coverage)
         model_calls += 1
     finally:
         await session.close()
     return {
         "outcome": outcome, "stopped_by": stopped_by, "report": report, "narration": narration,
         "frictions": frictions, "steps": steps,
-        "facts": {"mode": mode, "persona": persona, "browser": browser, "limits": opened.get("limits", []), "opened": opened["opened"], "steps_used": len(steps),
+        "facts": {"mode": mode, "persona": persona, "browser": browser, "mutations": opened.get("mutations"), "limits": opened.get("limits", []), "opened": opened["opened"], "steps_used": len(steps),
                   "max_steps": max_steps, "model_calls": model_calls, "vision": bool(see),
                   "elapsed_s": round(time.monotonic() - started, 1)},
-        "not_verified": NOT_VERIFIED,
+        "pending_approvals": pending_at_end, "coverage": coverage, "not_verified": NOT_VERIFIED,
     }
 
 
 async def _write_report(
     ask: AskFn, mode: str, goal: str, persona: str, narration: list[str], frictions: list[str],
-    steps: list[dict[str, Any]], outcome: str, summary: str, stopped_by: str,
+    steps: list[dict[str, Any]], outcome: str, summary: str, stopped_by: str, coverage: dict[str, Any] | None = None,
 ) -> str:
     log = "\n".join(
         f"{s['step']}. {s['action']} {s.get('target') or ''} {s.get('value') or ''} -> "
@@ -300,7 +375,7 @@ async def _write_report(
     )
     limits = {
         "step_limit": "a execucao atingiu o limite de passos antes de terminar",
-        "time_budget": "a execucao atingiu o limite de tempo",
+        "stalled": "a execucao parou por falta de progresso (mesma pagina e nada novo por varios passos)",
         "repeated_action": "a execucao parou por repetir a mesma acao no mesmo estado (possivel laco)",
         "cancelled": "voce interrompeu a execucao (a11y_close)",
         "model_unavailable": "o modelo deixou de responder",
@@ -308,12 +383,14 @@ async def _write_report(
         "finished": "o proprio usuario simulado encerrou",
     }.get(stopped_by, stopped_by)
     prompt = (
-        "Escreva o RELATORIO desta sessao em portugues, em texto corrido e humano, para quem constroi o site. "
+        "Escreva o RELATORIO desta sessao em portugues, em texto corrido e humano, para quem constroi o site, sem asteriscos, "
+        "sem markdown e sem caracteres especiais soltos (titulos simples em linhas proprias, itens por frases). "
         + ("Modo: tarefa de usuario." if mode == "task" else "Modo: revisao de componentes e design.")
         + f"\nPersona: {persona}\nObjetivo/foco: {goal}\nDesfecho: {outcome}. Como terminou: {limits}.\n"
         f"Resumo do proprio agente: {summary or '(nenhum)'}\n\nO QUE VOCE PERCEBEU PASSO A PASSO:\n" + "\n".join(narration)
         + "\n\nATRITOS E ACHADOS REGISTRADOS:\n" + ("\n".join(frictions) or "(nenhum)") + f"\n\nLOG DE ACOES:\n{log}\n\n"
-        "Estruture: 1) o que aconteceu e se deu para cumprir o objetivo; 2) achados ordenados por gravidade "
+        + (f"\nCOBERTURA (fatos medidos pelo servidor; diga no relatorio o que ficou de fora): {json.dumps(coverage, ensure_ascii=False)[:1400]}\n" if coverage else "")
+        + "Estruture: 1) o que aconteceu e se deu para cumprir o objetivo; 2) achados ordenados por gravidade "
         "(bloqueio, serio, moderado, leve), cada um com a evidencia observada, por que importa para a pessoa e a "
         "correcao que mantem o design do site; 3) o que voce NAO conseguiu verificar. Nao chame de acessivel algo so "
         "porque nada falhou; diga o que foi de fato provado."

@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from .provisioning import PROVISIONER
+from .provisioning import provisioner_for
 
 AXE_PATH = Path(__file__).parent / "vendor" / "axe.min.js"
 NAV_TIMEOUT_MS = 30_000
@@ -70,36 +70,38 @@ def validate_url(url: str) -> str:
     return url.strip()
 
 
-async def _launch(pw: Any) -> Any:
+async def _launch(pw: Any, browser: str = "chromium") -> Any:
+    kind = getattr(pw, browser)
     try:
-        return await pw.chromium.launch(headless=True)
-    except Exception as first:  # binario da versao exata ausente: tenta outro instalado
-        root = Path.home() / "AppData" / "Local" / "ms-playwright"
-        for exe in sorted(root.glob("chromium-*/chrome-win*/chrome.exe"), reverse=True):
-            try:
-                return await pw.chromium.launch(headless=True, executable_path=str(exe))
-            except Exception:  # noqa: BLE001, S112 - tenta o proximo binario
-                continue
+        return await kind.launch(headless=True)
+    except Exception as first:  # binario da versao exata ausente: no Chromium, tenta outro instalado
+        if browser == "chromium":
+            root = Path.home() / "AppData" / "Local" / "ms-playwright"
+            for exe in sorted(root.glob("chromium-*/chrome-win*/chrome.exe"), reverse=True):
+                try:
+                    return await kind.launch(headless=True, executable_path=str(exe))
+                except Exception:  # noqa: BLE001, S112 - tenta o proximo binario
+                    continue
         raise RuntimeError(
-            "Chromium do Playwright indisponivel. Rode: python -m playwright install chromium"
+            f"{browser} do Playwright indisponivel. Rode: python -m playwright install {browser}"
         ) from first
 
 
 async def _with_page(
-    url: str | None, html: str | None, fn: Callable[[Any], Awaitable[Any]]
+    url: str | None, html: str | None, fn: Callable[[Any], Awaitable[Any]], browser: str = "chromium"
 ) -> Any:
     if bool(url) == bool(html):
         raise ValueError("informe exatamente um entre url e html")
     if url:
         validate_url(url)  # antes de subir o navegador
-    await PROVISIONER.ensure()  # instala Playwright/Chromium sozinho se faltar
+    await provisioner_for(browser).ensure()  # instala Playwright/navegador sozinho se faltar
     from playwright.async_api import async_playwright
 
     async def run() -> Any:
         async with async_playwright() as pw:
-            browser = await _launch(pw)
+            instance = await _launch(pw, browser)
             try:
-                page = await browser.new_page()
+                page = await instance.new_page()
                 page.set_default_timeout(NAV_TIMEOUT_MS)
                 if url:
                     await page.goto(url.strip(), wait_until="load")
@@ -107,7 +109,7 @@ async def _with_page(
                     await page.set_content(html or "", wait_until="load")
                 return await fn(page)
             finally:
-                await browser.close()
+                await instance.close()
 
     return await asyncio.wait_for(run(), timeout=TOTAL_TIMEOUT_S)
 
@@ -150,7 +152,9 @@ def summarize_axe(raw: dict[str, Any], max_nodes: int = 5) -> dict[str, Any]:
     }
 
 
-async def run_axe(url: str | None = None, html: str | None = None, level: str = "AA") -> dict[str, Any]:
+async def run_axe(
+    url: str | None = None, html: str | None = None, level: str = "AA", browser: str = "chromium"
+) -> dict[str, Any]:
     tags = _LEVEL_TAGS.get(level.upper())
     if tags is None:
         raise ValueError("level deve ser A, AA ou AAA")
@@ -163,15 +167,15 @@ async def run_axe(url: str | None = None, html: str | None = None, level: str = 
         )
         return summarize_axe(raw)
 
-    result: dict[str, Any] = await _with_page(url, html, fn)
+    result: dict[str, Any] = await _with_page(url, html, fn, browser)
     return result
 
 
-async def aria_snapshot(url: str | None = None, html: str | None = None) -> str:
+async def aria_snapshot(url: str | None = None, html: str | None = None, browser: str = "chromium") -> str:
     async def fn(page: Any) -> str:
         return str(await page.locator("body").aria_snapshot())
 
-    result: str = await _with_page(url, html, fn)
+    result: str = await _with_page(url, html, fn, browser)
     return result
 
 
@@ -193,7 +197,7 @@ _TAB_PROBE = """() => {
 
 
 async def tab_order(
-    url: str | None = None, html: str | None = None, max_steps: int = 60
+    url: str | None = None, html: str | None = None, max_steps: int = 60, browser: str = "chromium"
 ) -> list[dict[str, Any]]:
     steps = max(1, min(max_steps, 200))
 
@@ -213,5 +217,5 @@ async def tab_order(
             seen.append({"step": i + 1, "element": info})
         return seen
 
-    result: list[dict[str, Any]] = await _with_page(url, html, fn)
+    result: list[dict[str, Any]] = await _with_page(url, html, fn, browser)
     return result

@@ -10,6 +10,7 @@ from mcp.server.fastmcp import Context
 from llm import NO_MODEL_HELP, ask_model, extract_json
 
 from . import audit
+from .compare import compare_browsers
 from .content_index import ContentIndex
 from .tools_ux import register_ux
 
@@ -122,34 +123,47 @@ def register(mcp: Any) -> None:
             return _error(e)
 
     @mcp.tool()
-    async def a11y_audit(url: str = "", html: str = "", level: str = "AA") -> str:
+    async def a11y_audit(url: str = "", html: str = "", level: str = "AA", browser: str = "chromium") -> str:
         """Run an automated axe-core WCAG audit in headless Chromium. Provide EITHER url
-        (http/https only) OR html (a full HTML string). level: A | AA | AAA.
+        (http/https only) OR html (a full HTML string). level: A | AA | AAA. browser: chromium | firefox | webkit (installed automatically on first use).
         Returns violations sorted by impact, items needing manual review, and pass count.
         Automated checks catch only part of WCAG - always follow up with keyboard and
         screen-reader testing (see a11y_get_reference "audit-checklist")."""
         try:
-            return _json(await audit.run_axe(url or None, html or None, level))
+            return _json(await audit.run_axe(url or None, html or None, level, browser))
         except Exception as e:  # noqa: BLE001 - fronteira da ferramenta: devolve erro ao cliente
             return _error(e)
 
     @mcp.tool()
-    async def a11y_aria_snapshot(url: str = "", html: str = "") -> str:
+    async def a11y_aria_snapshot(url: str = "", html: str = "", browser: str = "chromium") -> str:
         """Return the page's accessibility tree (roles, accessible names, states) as YAML,
         i.e. what a screen reader is given. Provide EITHER url (http/https) OR html.
         Use to compare visible content with computed names and spot duplicated or missing semantics."""
         try:
-            return _clip(await audit.aria_snapshot(url or None, html or None))
+            return _clip(await audit.aria_snapshot(url or None, html or None, browser))
         except Exception as e:  # noqa: BLE001 - fronteira da ferramenta: devolve erro ao cliente
             return _error(e)
 
     @mcp.tool()
-    async def a11y_tab_order(url: str = "", html: str = "", max_steps: int = 60) -> str:
+    async def a11y_tab_order(url: str = "", html: str = "", max_steps: int = 60, browser: str = "chromium") -> str:
         """Press Tab repeatedly and report the keyboard focus order: element, role, accessible
         name, visibility and whether a focus indicator is present. Provide EITHER url (http/https)
         OR html. Useful to detect keyboard traps, illogical order, and invisible focus."""
         try:
-            return _json(await audit.tab_order(url or None, html or None, max_steps))
+            return _json(await audit.tab_order(url or None, html or None, max_steps, browser))
+        except Exception as e:  # noqa: BLE001 - fronteira da ferramenta: devolve erro ao cliente
+            return _error(e)
+
+    @mcp.tool()
+    async def a11y_compare_browsers(url: str = "", html: str = "", browsers: str = "chromium,firefox", level: str = "AA") -> str:
+        """Same page in several browsers, side by side, FACTS only: accessibility-tree differences, axe violations that
+        appear in only one browser, and keyboard focus order per browser. browsers: comma list of chromium, firefox,
+        webkit (at least 2; missing ones are installed automatically). Provide EITHER url (http/https) OR html.
+        Whether a difference is a page bug or just how each browser exposes accessibility is your judgment
+        (see the guide cross-browser-a11y). Not a real screen reader."""
+        try:
+            names = [b.strip() for b in browsers.split(",") if b.strip()]
+            return _json(await compare_browsers(url or None, html or None, names, level))
         except Exception as e:  # noqa: BLE001 - fronteira da ferramenta: devolve erro ao cliente
             return _error(e)
 

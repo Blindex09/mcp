@@ -18,14 +18,14 @@ def fake_env(monkeypatch, *, importable, chromium):
     imp, chr_ = list(importable), list(chromium)
     monkeypatch.setattr(pv, "playwright_importable", lambda: imp.pop(0) if len(imp) > 1 else imp[0])
 
-    async def present():
+    async def present(browser="chromium"):
         return chr_.pop(0) if len(chr_) > 1 else chr_[0]
 
     async def run(*cmd, timeout):
         calls.append(cmd)
         return 0, "ok"
 
-    monkeypatch.setattr(pv, "chromium_present", present)
+    monkeypatch.setattr(pv, "browser_present", present)
     monkeypatch.setattr(pv, "_run", run)
     return calls
 
@@ -52,7 +52,7 @@ async def test_only_browser_missing(prov, monkeypatch):
 
 async def test_install_that_does_not_fix_it_is_reported_not_hidden(prov, monkeypatch):
     fake_env(monkeypatch, importable=[True], chromium=[False])
-    with pytest.raises(pv.ProvisioningError, match="Chromium"):
+    with pytest.raises(pv.ProvisioningError, match="chromium"):
         await prov.ensure()
     assert prov.state == "failed"
 
@@ -102,7 +102,7 @@ async def test_state_is_checking_while_only_verifying_and_installing_only_when_d
     seen: list[tuple[str, str]] = []
     fake_env(monkeypatch, importable=[True], chromium=[False, True])
 
-    async def present():
+    async def present(browser="chromium"):
         seen.append(("verificando", prov.state))
         return len(seen) > 1  # a 1a checagem diz que falta; a 2a (depois de instalar) diz que ha
 
@@ -110,8 +110,24 @@ async def test_state_is_checking_while_only_verifying_and_installing_only_when_d
         seen.append(("baixando", prov.state))
         return 0, "ok"
 
-    monkeypatch.setattr(pv, "chromium_present", present)
+    monkeypatch.setattr(pv, "browser_present", present)
     monkeypatch.setattr(pv, "_run", run)
     await prov.ensure()
     assert seen[0] == ("verificando", "checking")  # so olhando: nao diz que esta instalando
     assert ("baixando", "installing") in seen and prov.state == "ready"
+
+
+async def test_each_browser_is_installed_by_its_own_name(monkeypatch):
+    monkeypatch.delenv("A11Y_MCP_AUTO_INSTALL", raising=False)
+    for name in ("firefox", "webkit"):
+        p = pv.Provisioner(name)
+        calls = fake_env(monkeypatch, importable=[True], chromium=[False, True])
+        await p.ensure()
+        assert p.state == "ready" and calls[0][2:5] == ("playwright", "install", name)
+
+
+def test_invalid_browser_name_is_refused_and_status_lists_all():
+    with pytest.raises(pv.ProvisioningError, match="navegador invalido"):
+        pv.provisioner_for("edge")
+    st = pv.status_of_all()
+    assert set(st) == {"chromium", "firefox", "webkit"} and st["chromium"]["state"] != ""

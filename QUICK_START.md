@@ -38,6 +38,9 @@ Você:   essa fonte e esse espaçamento estão bons?
 Claude: [a11y_design_tokens mede a escala do site → propõe dentro dela → a11y_preview_css + a11y_screenshot
          para mostrar antes/depois, sem tocar no site]
 
+Você:   compara essa página no Chrome e no Firefox
+Claude: [a11y_compare_browsers → o que a árvore, o axe e o foco têm de diferente em cada navegador]
+
 Você:   #767676 sobre #ffffff passa no AA?
 Claude: [a11y_contrast → razão e aprovação para texto normal/grande e componentes]
 ```

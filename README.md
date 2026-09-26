@@ -10,7 +10,7 @@ Ele dá à IA quatro coisas: **conhecimento** (guias e exemplos de acessibilidad
 - 🧠 **Escolha pelo modelo**: `a11y_find` recebe a tarefa em linguagem natural, em qualquer idioma, e o modelo escolhe os guias e exemplos certos pelo sentido. Nada de palavra-chave, regex ou ranking lexical.
 - 🔬 **Medição de fatos**: contraste WCAG, auditoria axe-core num navegador real, árvore de acessibilidade e ordem de foco por teclado.
 
-## Ferramentas (24)
+## Ferramentas (25)
 
 ### Conhecimento e escolha
 
@@ -29,7 +29,7 @@ O modelo do cliente é quem **julga**; estas ferramentas **agem e devolvem fatos
 
 | Ferramenta | O que faz |
 |---|---|
-| `a11y_open(url \| html, persona)` | Abre a sessão. Personas **impostas pelo servidor**: `keyboard` e `screen_reader` não têm mouse; `screen_reader` também não vê a tela; `low_vision` = 320 px (zoom 400%); `mobile_touch`; `reduced_motion`; `forced_colors` |
+| `a11y_open(url \| html, persona, browser)` | Abre a sessão em `chromium` (padrão, o mais preciso), `firefox` ou `webkit` (baixados sozinhos na primeira vez; o resultado lista os limites de cada um). Personas **impostas pelo servidor**: `keyboard` e `screen_reader` não têm mouse; `screen_reader` também não vê a tela; `low_vision` = 320 px (zoom 400%); `mobile_touch`; `reduced_motion`; `forced_colors` |
 | `a11y_dossier(scope, max_elements)` | **Fatos** de cada elemento que o **navegador** aponta como focável ou clicável (inclui quem só tem `addEventListener`): papel e nome **calculados pelo Chromium**, foco, clicável, estados, opções/popup, landmark/heading, estilo. Não classifica: o modelo decide se é campo de texto, combobox, menu, acordeão… |
 | `a11y_act(action, target, value)` | Faz o que o usuário faz (click, hover, focus, select, press, type, wait) e devolve o **efeito**: foco antes/depois, linhas da árvore que apareceram/sumiram, o que foi anunciado, URL, diálogos/popups |
 | `a11y_reach(target)` | Quantos Tab até chegar ao elemento e o caminho do foco (inalcançável? em loop?) |
@@ -57,6 +57,23 @@ O relatório deve listar o **que não foi verificado** (leitores de tela reais, 
 O modelo decide **tudo que é julgamento**; o servidor só impõe limites: persona (teclado e leitor de tela sem mouse), formato da
 ação, no máximo 60 passos, tempo, parada se repetir a mesma ação no mesmo estado, e fechamento da sessão. Precisa do modelo do servidor
 (veja abaixo) ou de um cliente com sampling. Cada passo é narrado; `a11y_close` interrompe sem perder o progresso.
+
+### Vários navegadores
+
+| Ferramenta | O que faz |
+|---|---|
+| `a11y_compare_browsers(url \| html, browsers)` | A mesma página em 2+ navegadores, lado a lado, **só fatos**: diferenças na árvore de acessibilidade, violações do axe que aparecem em um só e ordem de foco por navegador. Se a diferença é bug da página ou modo de o navegador expor, é julgamento do modelo (guia `cross-browser-a11y`) |
+
+Todas as medições (`a11y_audit`, `a11y_aria_snapshot`, `a11y_tab_order`), a sessão e os testes autônomos aceitam `browser`.
+
+| Recurso | Chromium | Firefox / WebKit |
+|---|---|---|
+| Papel/nome/estado | calculados pelo navegador (CDP) | aria snapshot do Playwright, elemento a elemento |
+| Focável | árvore de acessibilidade | `tabIndex` calculado pelo navegador |
+| Clicável (inclui só `addEventListener`) | sim (`DOMSnapshot.isClickable`) | **não** (só `cursor: pointer`, sinal mais fraco) |
+| `a11y_focus_style` | `:focus` forçado, sem eventos | foca de verdade (dispara focus/blur) |
+
+Cada resultado diz qual navegador o produziu e o que ele não mede. Nenhum é leitor de tela real.
 
 ### Medição rápida (sem sessão)
 
@@ -107,7 +124,7 @@ pip install -r requirements.txt            # ou: uv sync
 python setup.py                            # registra no Claude Desktop e Cursor (entrada "accessibility")
 ```
 
-O **Playwright e o Chromium são instalados sozinhos** em segundo plano na primeira vez que o servidor sobe (leva alguns minutos e ~150 MB;
+O **Playwright e o navegador pedido (Chromium por padrão; Firefox/WebKit na primeira vez que forem usados) são instalados sozinhos** em segundo plano na primeira vez que o servidor sobe (leva alguns minutos e ~150 MB;
 `a11y_status` mostra o andamento). Para desligar: `A11Y_MCP_AUTO_INSTALL=0` (aí rode `python -m playwright install chromium`).
 
 Reinicie o Claude Desktop / Cursor. Para VS Code, o `setup.py` imprime o trecho para o `settings.json`. O `setup.ps1` faz tudo isso no Windows.
@@ -133,7 +150,8 @@ c:\mcp\
 │   ├── tools_ux.py      ← ferramentas de sessão: dossiê, ações, personas, design
 │   ├── session.py       ← sessão de navegador persistente (personas impostas, descoberta pelo Chromium, efeitos, estresse)
 │   ├── agent.py         ← usuário autônomo: o modelo decide, o harness impõe limites
-│   ├── provisioning.py  ← instala Playwright/Chromium sozinho
+│   ├── provisioning.py  ← instala Playwright e Chromium/Firefox/WebKit sozinho
+│   ├── compare.py       ← mesma página em vários navegadores (fatos lado a lado)
 │   ├── page_scripts.py + js/ ← scripts que coletam FATOS dentro da página (nunca classificam)
 │   ├── audit.py         ← contraste, axe-core, árvore de acessibilidade, ordem de foco
 │   ├── content_index.py ← catálogo dos guias/exemplos (leitura só por nome)

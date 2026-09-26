@@ -66,7 +66,10 @@ def compact_element(e: dict[str, Any]) -> str:
     name = comp.get("name") or e.get("text")
     bits.append(f"nome={str(name)[:50]!r}" if name else "nome=(vazio)")
     bits.append(f"focavel={'sim' if e.get('focusable') else 'nao'}")
-    bits.append(f"clicavel={'sim' if e.get('clickable') else 'nao'}")
+    if e.get("clickable") is None:
+        bits.append(f"clicavel=desconhecido(cursor-pointer={'sim' if e.get('pointer_cursor') else 'nao'})")
+    else:
+        bits.append(f"clicavel={'sim' if e.get('clickable') else 'nao'}")
     for key in ("expanded", "haspopup", "checked", "selected", "pressed", "invalid"):
         if st.get(key) not in (None, False, "false"):
             bits.append(f"{key}={st[key]}")
@@ -171,6 +174,7 @@ async def run_agent(
     url: str | None,
     html: str | None,
     persona: str = "default",
+    browser: str = "chromium",
     max_steps: int = 25,
     vision: bool = True,
     progress: ProgressFn | None = None,
@@ -181,7 +185,7 @@ async def run_agent(
         raise SessionError("informe o objetivo (task) ou o foco da revisao")
     max_steps = max(1, min(int(max_steps), MAX_STEPS_CEILING))
     started = time.monotonic()
-    opened = await session.open(url, html, persona)
+    opened = await session.open(url, html, persona, browser=browser)
     see = vision and not PERSONAS[persona].get("no_visual")
     allowed = _allowed_actions(persona)
     system = _system_prompt(mode, persona, goal, allowed, see)
@@ -279,7 +283,7 @@ async def run_agent(
     return {
         "outcome": outcome, "stopped_by": stopped_by, "report": report, "narration": narration,
         "frictions": frictions, "steps": steps,
-        "facts": {"mode": mode, "persona": persona, "opened": opened["opened"], "steps_used": len(steps),
+        "facts": {"mode": mode, "persona": persona, "browser": browser, "limits": opened.get("limits", []), "opened": opened["opened"], "steps_used": len(steps),
                   "max_steps": max_steps, "model_calls": model_calls, "vision": bool(see),
                   "elapsed_s": round(time.monotonic() - started, 1)},
         "not_verified": NOT_VERIFIED,

@@ -98,3 +98,18 @@ focáveis sem nome no GOV.UK; foco do GOV.UK com contorno transparente + `box-sh
 5. **Varredura de várias páginas** (sitemap) com relatório consolidado e exportação (WCAG-EM).
 6. **W3C AT Driver**, quando houver implementação estável, como alternativa portátil ao Guidepup.
 7. Rodar o `a11y_walkthrough`/`a11y_review` de verdade com o seu modelo e comparar o relatório com uma auditoria manual, para calibrar prompts e guias.
+
+## 6. Vários navegadores (Chromium, Firefox, WebKit)
+
+O Playwright roda os três; o MCP passou a aceitar `browser` na sessão, nas medições e nos testes autônomos, e ganhou
+`a11y_compare_browsers`. O que muda por navegador está na tabela do README e no guia `cross-browser-a11y`:
+
+- **Chromium** mantém a descoberta exata (CDP: árvore de acessibilidade + `DOMSnapshot.isClickable`).
+- **Firefox e WebKit** não têm CDP: focável vem do `tabIndex` calculado pelo navegador, `cursor: pointer` entra como sinal **mais fraco**,
+  e papel/nome vêm do aria snapshot do Playwright. **Não detectam clicável só por `addEventListener`** (um botão só de mouse sem
+  `cursor: pointer` passa despercebido) e o `a11y_focus_style` foca de verdade (dispara eventos). Tudo isso é declarado em `limits`
+  no resultado; o agente autônomo o recebe e o relatório deve dizer o que não foi medido.
+- Firefox não emula `is_mobile`: a persona de celular usa viewport e toque, e avisa.
+- Motivo de existir: Firefox + NVDA é a combinação mais comum entre usuários de NVDA; a mesma página pode expor a acessibilidade de forma diferente.
+- Validado de verdade: Firefox nas 11 verificações da suíte; WebKit baixado sozinho em 8 s e a sessão abriu nele (o resto do WebKit segue o
+  mesmo caminho do Firefox, mas não tem suíte própria).

@@ -20,7 +20,7 @@ from typing import Any
 
 from . import page_scripts as js
 from .audit import _launch, validate_url
-from .provisioning import PROVISIONER
+from .provisioning import check_browser_name, provisioner_for
 
 IDLE_TIMEOUT_S = 600
 ACTION_TIMEOUT_MS = 10_000
@@ -83,7 +83,8 @@ class Session:
         self.context: Any = None
         self.page: Any = None
         self.persona = "default"
-        self.cdp: Any = None
+        self.cdp: Any = None  # so no Chromium; Firefox/WebKit usam a descoberta por DOM + aria snapshot
+        self.browser_name = "chromium"
         self.stop_requested = False  # pedido de cancelamento de um teste autonomo em andamento
         self._inflight: set[Any] = set()  # requisicoes em andamento (sinal de que a pagina ainda esta reagindo)
         self._ids: dict[int, str] = {}  # backendNodeId -> id estavel (eN) entre chamadas do dossie
@@ -98,7 +99,8 @@ class Session:
 
     # ----------------------------------------------------------- ciclo de vida
     async def open(
-        self, url: str | None, html: str | None, persona: str = "default", color_scheme: str | None = None
+        self, url: str | None, html: str | None, persona: str = "default", color_scheme: str | None = None,
+        browser: str = "chromium",
     ) -> dict[str, Any]:
         if bool(url) == bool(html):
             raise SessionError("informe exatamente um entre url e html")
@@ -106,23 +108,31 @@ class Session:
             raise SessionError(f"persona invalida: {persona}. Opcoes: {sorted(PERSONAS)}")
         if color_scheme not in (None, "light", "dark"):
             raise SessionError("color_scheme deve ser light ou dark")
+        try:
+            check_browser_name(browser)
+        except Exception as e:
+            raise SessionError(str(e)) from e
         if url:
             validate_url(url)
-        await PROVISIONER.ensure()  # instala Playwright/Chromium sozinho se faltar
+        await provisioner_for(browser).ensure()  # instala Playwright/navegador sozinho se faltar
         await self.close()
         self.stop_requested = False
         from playwright.async_api import async_playwright
 
         cfg = PERSONAS[persona]
         opts: dict[str, Any] = {"accept_downloads": False}
+        notes: list[str] = []
         for key in ("viewport", "is_mobile", "has_touch", "reduced_motion", "forced_colors"):
             if key in cfg:
+                if key == "is_mobile" and browser == "firefox":
+                    notes.append("Firefox nao emula is_mobile: o celular usa so viewport e toque")
+                    continue
                 opts[key] = cfg[key]
         if color_scheme:
             opts["color_scheme"] = color_scheme
         self.pw = await async_playwright().start()
         try:
-            self.browser = await _launch(self.pw)
+            self.browser = await _launch(self.pw, browser)
             self.context = await self.browser.new_context(**opts)
             await self.context.route("**/*", self._route)
             await self.context.add_init_script(js.LIVE_OBSERVER_JS)
@@ -131,9 +141,15 @@ class Session:
             self.context.on("requestfinished", self._request_done)
             self.context.on("requestfailed", self._request_done)
             self.page = await self.context.new_page()
-            self.cdp = await self.context.new_cdp_session(self.page)
-            await self.cdp.send("DOM.enable")
-            await self.cdp.send("Accessibility.enable")
+            if browser == "chromium":
+                self.cdp = await self.context.new_cdp_session(self.page)
+                await self.cdp.send("DOM.enable")
+                await self.cdp.send("Accessibility.enable")
+            else:
+                notes.append(
+                    f"{browser}: sem CDP. O dossie usa o tabIndex do navegador (focavel) e cursor:pointer (sinal mais fraco) e o papel/nome "
+                    "vem do aria snapshot do Playwright; nao detecta clicavel por addEventListener; a11y_focus_style foca de verdade (dispara eventos)"
+                )
             self.page.set_default_timeout(ACTION_TIMEOUT_MS)
             self.page.on("dialog", self._on_dialog)
             self.page.on("console", self._on_console)
@@ -145,11 +161,15 @@ class Session:
             await self.close()
             raise
         self.persona = persona
+        self.browser_name = browser
         self.dialogs, self.popups, self.console_errors = [], [], []
         self._live_seen = self._console_seen = 0
         self.last_used = time.monotonic()
         self._watchdog = asyncio.create_task(self._idle_watchdog())
-        return {"opened": self.page.url, "persona": persona, "about": cfg["about"], "title": await self.page.title()}
+        return {
+            "opened": self.page.url, "persona": persona, "browser": browser, "about": cfg["about"],
+            "title": await self.page.title(), "limits": notes,
+        }
 
     async def close(self) -> bool:
         was_open = self.page is not None
@@ -264,6 +284,8 @@ class Session:
         """O NAVEGADOR aponta o que e focavel (arvore de acessibilidade) ou clicavel (DOMSnapshot.isClickable,
         que inclui quem so tem addEventListener). Nenhuma lista de tags nem heuristica de cursor."""
         cdp = self.cdp
+        if cdp is None:
+            return await self._discover_dom(limit)
         await cdp.send("DOM.getDocument", {"depth": 0})
         snap = await cdp.send("DOMSnapshot.captureSnapshot", {"computedStyles": [], "includeDOMRects": True})
         doc, strings = snap["documents"][0], snap["strings"]
@@ -305,6 +327,35 @@ class Session:
             await tag(item, node_id)
         return found, total
 
+    async def _discover_dom(self, limit: int) -> tuple[list[dict[str, Any]], int]:
+        """Firefox/WebKit (sem CDP): focavel = tabIndex calculado pelo navegador; cursor:pointer e um sinal mais fraco."""
+        page = self._need()
+        res = await page.evaluate(js.DISCOVER_JS, limit)
+        found = [
+            {"id": f["id"], "focusable": f["focusable"], "clickable": None, "pointer_cursor": f["pointer_cursor"], "ax": None}
+            for f in res["found"]
+        ]
+        return found, int(res["total"])
+
+    @staticmethod
+    def parse_snapshot_head(snapshot: str) -> dict[str, Any] | None:
+        """Le a 1a linha do aria snapshot do Playwright: `- role "nome" [estado] [estado=v]` (estrutura, nao semantica)."""
+        line = next((ln.strip() for ln in snapshot.splitlines() if ln.strip().startswith("- ")), "")
+        if not line:
+            return None
+        body = line[2:].rstrip(":")
+        role, _, rest = body.partition(" ")
+        name = ""
+        if rest.startswith('"'):
+            end = rest.find('"', 1)
+            while end != -1 and rest[end - 1] == "\\":
+                end = rest.find('"', end + 1)
+            name = rest[1:end] if end != -1 else rest[1:]
+            rest = rest[end + 1 :] if end != -1 else ""
+        attrs = [a.strip("[]") for a in rest.split() if a.startswith("[") and a.endswith("]")]
+        return {"role": role.rstrip(":"), "name": name, "description": None, "ignored": False,
+                "properties": {"attrs": attrs}, "source": "playwright-aria-snapshot"}
+
     async def dossier(self, scope: str = "", max_elements: int = 60) -> dict[str, Any]:
         """FATOS dos elementos que o navegador aponta como focaveis/clicaveis, com papel e nome COMPUTADOS por ele."""
         page = self._need()
@@ -319,10 +370,17 @@ class Session:
         for e in result["elements"]:
             f = by_id[e["id"]]
             e["focusable"], e["clickable"] = f["focusable"], f["clickable"]
+            if self.cdp is None:  # sem CDP: papel/nome do aria snapshot do Playwright, elemento a elemento
+                e["pointer_cursor"] = f.get("pointer_cursor")
+                snap = await page.locator(f'[data-a11y-id="{e["id"]}"]').first.aria_snapshot()
+                f["ax"] = self.parse_snapshot_head(str(snap))
             e["computed"] = f["ax"]  # papel, nome, descricao e propriedades como o navegador os expoe (None = fora da arvore)
         result["discovered_total"] = total
         result["discovery_truncated"] = total > len(found)
+        result["browser"] = self.browser_name
         result["note"] = "iframes nao sao percorridos; ids sao atributos data-a11y-id colocados na pagina"
+        if self.cdp is None:
+            result["limits"] = ["sem CDP: clickable desconhecido (so cursor:pointer), papel/nome pelo aria snapshot do Playwright"]
         return result
 
     async def design_tokens(self) -> dict[str, Any]:
@@ -422,6 +480,8 @@ class Session:
         loc = self._locator(target)
         if await loc.count() == 0:
             raise SessionError("elemento nao encontrado (rode a11y_dossier de novo depois de navegar)")
+        if self.cdp is None:
+            return await self._focus_style_by_focusing(target, loc)
         eid = await loc.get_attribute("data-a11y-id")
         cdp = self.cdp
         root = (await cdp.send("DOM.getDocument", {"depth": 0}))["root"]["nodeId"]
@@ -443,6 +503,22 @@ class Session:
             "target": target, "changed_on_focus": dict(list(changed.items())[:25]), "properties_changed": len(changed),
             "outline_when_focused": " ".join(after.get(k, "") for k in ("outline-style", "outline-width", "outline-color", "outline-offset")),
             "box_shadow_when_focused": after.get("box-shadow"),
+            "note": "fatos do :focus; se e visivel e com contraste suficiente para a pessoa e julgamento (veja screenshot)",
+        }
+
+    async def _focus_style_by_focusing(self, target: str, loc: Any) -> dict[str, Any]:
+        """Sem CDP nao ha pseudo-estado forcado: foca DE VERDADE (dispara focus/blur), mede e desfoca."""
+        got: dict[str, Any] = await loc.evaluate(
+            """el => { const snap = () => { const cs = getComputedStyle(el); const o = {}; for (const p of cs) o[p] = cs.getPropertyValue(p); return o; };
+              const before = snap(); el.focus({preventScroll: true}); const after = snap(); el.blur(); return {before, after}; }"""
+        )
+        before, after = got["before"], got["after"]
+        changed = {k: [before.get(k), v] for k, v in after.items() if before.get(k) != v}
+        return {
+            "target": target, "changed_on_focus": dict(list(changed.items())[:25]), "properties_changed": len(changed),
+            "outline_when_focused": " ".join(after.get(k, "") for k in ("outline-style", "outline-width", "outline-color", "outline-offset")),
+            "box_shadow_when_focused": after.get("box-shadow"),
+            "method": f"{self.browser_name}: foco real (dispara eventos de foco/blur; :focus-visible pode diferir de foco por teclado)",
             "note": "fatos do :focus; se e visivel e com contraste suficiente para a pessoa e julgamento (veja screenshot)",
         }
 

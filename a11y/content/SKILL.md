@@ -47,6 +47,10 @@ A green audit is not accessibility. To find what really happens, open a persiste
 | Reflow at 320 px, text-spacing clipping | `a11y_stress` |
 | The site's real design language; try a change temporarily; look at it | `a11y_design_tokens` / `a11y_preview_css` / `a11y_screenshot` |
 
+Browsers: `a11y_open`, `a11y_audit`, `a11y_aria_snapshot`, `a11y_tab_order`, `a11y_walkthrough` and `a11y_review` take `browser` (chromium default, firefox, webkit;
+installed automatically). Chromium is the most precise; Firefox/WebKit results list their limits. `a11y_compare_browsers` shows the same page side by side
+(facts only); see [references/cross-browser-a11y.md](references/cross-browser-a11y.md).
+
 Autonomous user: `a11y_walkthrough(task, persona)` and `a11y_review(focus)` run a model as the person (with screenshots and the accessibility
 tree) and return a plain-language report; `a11y_close` interrupts them; `a11y_status` shows readiness. `a11y_focus_style` gives the facts of what :focus changes.
 `a11y_dossier` reports role/name **as computed by the browser** and whether each element is focusable/clickable (an element that is clickable but not

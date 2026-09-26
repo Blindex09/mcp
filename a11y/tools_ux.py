@@ -13,7 +13,7 @@ from mcp.server.fastmcp import Context, Image
 from llm import NO_MODEL_HELP, ask_model, backend_status
 
 from .agent import run_agent
-from .provisioning import PROVISIONER
+from .provisioning import status_of_all
 from .session import PERSONAS, SESSION, SessionError
 
 
@@ -40,17 +40,21 @@ def register_ux(mcp: Any) -> None:
     """Registra as ferramentas de sessao/UX no servidor FastMCP."""
 
     @mcp.tool()
-    async def a11y_open(url: str = "", html: str = "", persona: str = "default", color_scheme: str = "") -> str:
+    async def a11y_open(
+        url: str = "", html: str = "", persona: str = "default", color_scheme: str = "", browser: str = "chromium"
+    ) -> str:
         """Open a persistent browser session to test a page LIKE A USER (one session at a time;
         opening a new one closes the previous). Provide EITHER url (http/https, localhost ok) OR html.
         persona: default | keyboard | screen_reader | low_vision | mobile_touch | reduced_motion | forced_colors.
         The persona is ENFORCED: keyboard and screen_reader have no mouse (click/hover/focus/select are refused),
         screen_reader also cannot take screenshots, low_vision is a 320 px reflow viewport, mobile_touch is a phone.
+        browser: chromium (default, most precise: browser-computed roles/names/clickable via CDP) | firefox | webkit
+        (installed automatically on first use; less precise discovery, and the result lists the limits).
         color_scheme: light | dark (optional). Do not type real credentials into tested pages; use test accounts.
         Sessions close after 10 minutes idle."""
         try:
             async with SESSION.lock:
-                return _json(await SESSION.open(url or None, html or None, persona, color_scheme or None))
+                return _json(await SESSION.open(url or None, html or None, persona, color_scheme or None, browser))
         except SessionError as e:
             return _json({"error": str(e), "personas": {k: v["about"] for k, v in PERSONAS.items()}})
         except Exception as e:  # noqa: BLE001
@@ -152,7 +156,9 @@ def register_ux(mcp: Any) -> None:
         return await _run(SESSION.stress(kind))
 
 
-    async def _autonomous(ctx: Context, mode: str, goal: str, url: str, html: str, persona: str, max_steps: int, vision: bool) -> str:  # type: ignore[type-arg]
+    async def _autonomous(
+        ctx: Context, mode: str, goal: str, url: str, html: str, persona: str, max_steps: int, vision: bool, browser: str
+    ) -> str:  # type: ignore[type-arg]
         async def ask(prompt: str, images: list[bytes] | None, max_tokens: int) -> str | None:
             return await ask_model(ctx, prompt, max_tokens, images)
 
@@ -166,7 +172,7 @@ def register_ux(mcp: Any) -> None:
             async with SESSION.lock:
                 result = await run_agent(
                     session=SESSION, ask=ask, mode=mode, goal=goal, url=url or None, html=html or None,
-                    persona=persona, max_steps=max_steps, vision=vision, progress=progress,
+                    persona=persona, max_steps=max_steps, vision=vision, progress=progress, browser=browser,
                 )
         except SessionError as e:
             return _json({"error": str(e), "personas": {k: v["about"] for k, v in PERSONAS.items()}})
@@ -179,6 +185,7 @@ def register_ux(mcp: Any) -> None:
     @mcp.tool()
     async def a11y_walkthrough(
         ctx: Context, task: str, url: str = "", html: str = "", persona: str = "default", max_steps: int = 25, vision: bool = True,  # type: ignore[type-arg]
+        browser: str = "chromium",
     ) -> str:
         """AUTONOMOUS user test: a model plays a real person with the given persona trying to accomplish a task on the
         page (url http/https or html), step by step, seeing the screen (screenshot) and the accessibility tree, and
@@ -187,25 +194,26 @@ def register_ux(mcp: Any) -> None:
         see a11y_status) or a client that offers sampling. The harness enforces the persona (keyboard/screen_reader
         have no mouse), a step cap (max 60), a time budget and stops repeated identical actions.
         task: the person's goal in plain words, e.g. "sign up for the newsletter" or "find the return policy"."""
-        return await _autonomous(ctx, "task", task, url, html, persona, max_steps, vision)
+        return await _autonomous(ctx, "task", task, url, html, persona, max_steps, vision, browser)
 
     @mcp.tool()
     async def a11y_review(
         ctx: Context, focus: str = "componentes e design", url: str = "", html: str = "", persona: str = "default", max_steps: int = 30, vision: bool = True,  # type: ignore[type-arg]
+        browser: str = "chromium",
     ) -> str:
         """AUTONOMOUS UX review: a model explores the page, PROBES each important interactive component to learn what it
         really is for people in this site's context (text field vs combobox vs list vs menu vs navigation vs accordion...),
         compares with what it exposes today, and reviews typography/spacing against the site's own design language.
         Returns a plain-language report with evidence, fixes that keep the design, and what could not be verified.
         Same requirements and enforced limits as a11y_walkthrough. focus: what to review, in your own words."""
-        return await _autonomous(ctx, "review", focus, url, html, persona, max_steps, vision)
+        return await _autonomous(ctx, "review", focus, url, html, persona, max_steps, vision, browser)
 
     @mcp.tool()
     async def a11y_status() -> str:
         """Readiness check: is the browser (Playwright/Chromium) installed or being installed automatically, and is a
         model configured for the autonomous tools (a11y_find, a11y_walkthrough, a11y_review)? Never shows secrets."""
         return _json({
-            "browser": {"state": PROVISIONER.state, "detail": PROVISIONER.detail or None},
+            "browsers": status_of_all(),
             "model": backend_status(),
             "note": "Sem modelo configurado, as ferramentas autonomas ficam indisponiveis; as demais (dossie, acoes, medicao) funcionam.",
         })

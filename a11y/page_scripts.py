@@ -29,3 +29,6 @@ CLIPPED_JS = _load("clipped")
 
 # Espera adaptativa: a pagina "assentou" quando o DOM fica quieto (sem tempo fixo; so ha um teto).
 SETTLE_JS = _load("settle")
+
+# Descoberta sem CDP (Firefox/WebKit): focavel pelo tabIndex do navegador ou cursor:pointer (sinal mais fraco).
+DISCOVER_JS = _load("discover")

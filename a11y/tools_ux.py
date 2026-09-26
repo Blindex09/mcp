@@ -86,6 +86,26 @@ def register_ux(mcp: Any) -> None:
         return await _run(SESSION.dossier(scope, max_elements))
 
     @mcp.tool()
+    async def a11y_page_map(scope: str = "") -> str:
+        """FACTS about ALL the content of the page (not just interactive elements), including open Shadow DOM and each
+        iframe: heading outline and level jumps, landmarks, images (alt, size, in links), links (same text to different
+        destinations), forms and fields (labels, autocomplete, errors), tables, lists, media (captions/tracks), iframes
+        (titles), live regions, reading order versus visual order, and CSS :hover rules that reveal content (menus opened
+        only by hover). No verdicts: YOU judge (does the alt make sense? does the hierarchy match the visual? is the
+        reading order right?). scope: optional CSS selector for the main document. Use with a11y_dossier for interactive parts."""
+        return await _run(SESSION.page_map(scope))
+
+    @mcp.tool()
+    async def a11y_coverage() -> str:
+        """What this session has and has NOT covered, as facts: interactive elements discovered/listed/probed by behavior,
+        whether the page map, design measurement and stress tests ran, iframes mapped, actions taken, pages visited, and a
+        list of gaps. Include it (and the gaps) in any report so a green result is never mistaken for full coverage."""
+        try:
+            return _json(SESSION.coverage_report())
+        except SessionError as e:
+            return _json({"error": str(e)})
+
+    @mcp.tool()
     async def a11y_observe() -> str:
         """Current state as a user would perceive it: URL, title, focused element, the accessibility tree
         (what a screen reader gets), recent live-region announcements, JS dialogs dismissed, popups blocked."""

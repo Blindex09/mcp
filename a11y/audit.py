@@ -180,7 +180,8 @@ async def aria_snapshot(url: str | None = None, html: str | None = None, browser
 
 
 _TAB_PROBE = """() => {
-  const e = document.activeElement;
+  let e = document.activeElement;
+  while (e && e.shadowRoot && e.shadowRoot.activeElement) e = e.shadowRoot.activeElement;  // atravessa Shadow DOM aberto
   if (!e || e === document.body) return null;
   const r = e.getBoundingClientRect();
   const cs = getComputedStyle(e);

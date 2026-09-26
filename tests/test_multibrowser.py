@@ -47,19 +47,16 @@ async def test_firefox_dossier_gives_facts_with_honest_limits(firefox):
     assert link["computed"]["role"] == "link" and link["computed"]["name"] == "Inicio"
 
 
-async def test_firefox_cannot_see_listener_only_controls_and_says_so():
-    """No Chromium o div so com addEventListener e descoberto; no Firefox nao (limite declarado, nao escondido)."""
+async def test_firefox_sees_listener_only_controls_through_the_listener_hook():
+    """Firefox nao tem isClickable, mas o gancho em addEventListener registra quem tem listener de acao."""
     await SESSION.open(None, MIXED, browser="firefox")
     try:
         d = await SESSION.dossier()
-        tags = {e["tag"] for e in d["elements"]}
-        assert "div" not in tags and {"button", "x-chip"} <= tags
-        assert any("clickable desconhecido" in x for x in d["limits"])
-    finally:
-        await SESSION.close()
-    await SESSION.open(None, MIXED, browser="chromium")
-    try:
-        assert "div" in {e["tag"] for e in (await SESSION.dossier())["elements"]}
+        by_tag = {e["tag"]: e for e in d["elements"]}
+        assert {"button", "x-chip", "div"} <= set(by_tag)
+        assert by_tag["div"]["clickable"] is True and by_tag["div"]["focusable"] is False
+        assert "click" in by_tag["div"]["behavior_hints"]["click_listeners"]
+        assert by_tag["x-chip"]["clickable"] is None  # so focavel: clicavel desconhecido, nao finge saber
     finally:
         await SESSION.close()
 

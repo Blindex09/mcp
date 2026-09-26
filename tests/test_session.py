@@ -76,8 +76,10 @@ async def test_dossier_gives_facts_not_classification(site):
 async def test_dossier_scope_and_limits(site):
     d = await site.dossier("nav", 10)
     assert {e["tag"] for e in d["elements"]} == {"a"}
-    assert (await site.dossier("#nao-existe"))["error"]
-    assert (await site.dossier("", 2))["not_listed_over_limit"] > 0
+    empty = await site.dossier("#nao-existe")
+    assert empty["elements"] == [] and "nenhum elemento interativo dentro de" in empty["scope_note"]
+    limited = await site.dossier("", 2)
+    assert len(limited["elements"]) == 2 and limited["not_listed_over_limit"] > 0
 
 
 async def test_act_click_shows_state_change_in_tree(site):

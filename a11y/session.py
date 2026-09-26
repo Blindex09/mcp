@@ -16,6 +16,7 @@ import asyncio
 import re
 import time
 from collections import Counter
+from dataclasses import dataclass, field
 from typing import Any
 
 from . import page_scripts as js
@@ -60,6 +61,21 @@ _POINTER_ACTIONS = {"click", "hover", "focus", "select"}
 _KEYBOARD_ACTIONS = {"press", "type", "wait"}
 
 
+@dataclass
+class Coverage:
+    """O que ESTA sessao ja viu e provou (fatos de cobertura, sem opiniao)."""
+
+    described: set[str] = field(default_factory=set)  # ids listados pelo dossie
+    probed: set[str] = field(default_factory=set)  # ids sobre os quais se agiu / que se mediu
+    discovered_total: int = 0
+    page_map: bool = False
+    frames_mapped: int = 0
+    design_measured: bool = False
+    stress_kinds: set[str] = field(default_factory=set)
+    urls: set[str] = field(default_factory=set)
+    actions: int = 0
+
+
 class SessionError(Exception):
     """Erro esperado de uso da sessao (mensagem para o cliente)."""
 
@@ -85,8 +101,10 @@ class Session:
         self.persona = "default"
         self.cdp: Any = None  # so no Chromium; Firefox/WebKit usam a descoberta por DOM + aria snapshot
         self.browser_name = "chromium"
+        self.coverage = Coverage()
         self.stop_requested = False  # pedido de cancelamento de um teste autonomo em andamento
         self._inflight: set[Any] = set()  # requisicoes em andamento (sinal de que a pagina ainda esta reagindo)
+        self._frame_of: dict[str, int] = {}  # id do dossie -> indice do frame que o contem (Playwright)
         self._ids: dict[int, str] = {}  # backendNodeId -> id estavel (eN) entre chamadas do dossie
         self.last_used = time.monotonic()
         self.lock = asyncio.Lock()
@@ -136,6 +154,7 @@ class Session:
             self.context = await self.browser.new_context(**opts)
             await self.context.route("**/*", self._route)
             await self.context.add_init_script(js.LIVE_OBSERVER_JS)
+            await self.context.add_init_script(js.LISTENER_HOOK_JS)
             self.context.on("page", self._on_popup)
             self.context.on("request", self._request_started)
             self.context.on("requestfinished", self._request_done)
@@ -162,6 +181,8 @@ class Session:
             raise
         self.persona = persona
         self.browser_name = browser
+        self.coverage = Coverage()
+        self.coverage.urls.add(self.page.url)
         self.dialogs, self.popups, self.console_errors = [], [], []
         self._live_seen = self._console_seen = 0
         self.last_used = time.monotonic()
@@ -184,6 +205,7 @@ class Session:
                     pass
         self.pw = self.browser = self.context = self.page = self.cdp = None
         self._ids = {}
+        self._frame_of = {}
         self._inflight = set()
         return was_open
 
@@ -231,7 +253,11 @@ class Session:
         page = self._need()
         t = (target or "").strip()
         if _ID_RE.fullmatch(t):
-            loc = page.locator(f'[data-a11y-id="{t}"]')
+            self.coverage.probed.add(t)
+            frames = page.frames
+            idx = self._frame_of.get(t, 0)
+            scope = frames[idx] if idx < len(frames) else page
+            loc = scope.locator(f'[data-a11y-id="{t}"]')  # o seletor do Playwright atravessa Shadow DOM aberto
         elif t.startswith("css:") and 0 < len(t) <= 300:
             loc = page.locator(t[4:])
         else:
@@ -247,6 +273,21 @@ class Session:
             )
 
     # ------------------------------------------------------------- observacao
+    async def _focus_probe(self) -> dict[str, Any] | None:
+        """Quem tem o foco AGORA, atravessando Shadow DOM aberto e iframes (o foco pode estar dentro de um frame)."""
+        page = self._need()
+        f = await page.evaluate(js.FOCUS_JS)
+        if f and f.get("tag") in ("iframe", "frame"):
+            for fr in page.frames[1:]:
+                try:
+                    inner = await fr.evaluate(js.FOCUS_JS)
+                except Exception:  # noqa: BLE001, S112 - frame fechado
+                    continue
+                if inner:
+                    inner["in_frame"] = fr.url[:60]
+                    return dict(inner)
+        return dict(f) if f else None
+
     async def _tree_lines(self) -> list[str]:
         page = self._need()
         try:
@@ -267,7 +308,7 @@ class Session:
         return {
             "url": page.url,
             "title": await page.title(),
-            "focus": await page.evaluate(js.FOCUS_JS),
+            "focus": await self._focus_probe(),
             "tree": await self._tree_lines(),
         }
 
@@ -282,37 +323,45 @@ class Session:
 
     async def _discover(self, limit: int = 600) -> tuple[list[dict[str, Any]], int]:
         """O NAVEGADOR aponta o que e focavel (arvore de acessibilidade) ou clicavel (DOMSnapshot.isClickable,
-        que inclui quem so tem addEventListener). Nenhuma lista de tags nem heuristica de cursor."""
+        que inclui quem so tem addEventListener), em TODOS os documentos: pagina, Shadow DOM aberto/fechado e iframes.
+        Nenhuma lista de tags nem heuristica de cursor."""
         cdp = self.cdp
         if cdp is None:
             return await self._discover_dom(limit)
         await cdp.send("DOM.getDocument", {"depth": 0})
         snap = await cdp.send("DOMSnapshot.captureSnapshot", {"computedStyles": [], "includeDOMRects": True})
-        doc, strings = snap["documents"][0], snap["strings"]
-        nodes = doc["nodes"]
-        clickable = set(nodes.get("isClickable", {}).get("index", []))
-        layout = doc["layout"]
-        rendered = {i for i, b in zip(layout["nodeIndex"], layout["bounds"], strict=False) if b[2] > 0 and b[3] > 0}
-        ax_by: dict[int, dict[str, Any]] = {}
-        for n in (await cdp.send("Accessibility.getFullAXTree"))["nodes"]:
-            bid = n.get("backendDOMNodeId")
-            if bid is None:
-                continue
-            props = {p["name"]: p["value"].get("value") for p in n.get("properties", [])}
-            ax_by[bid] = {
-                "role": (n.get("role") or {}).get("value"), "name": (n.get("name") or {}).get("value") or "",
-                "description": (n.get("description") or {}).get("value") or None,
-                "ignored": bool(n.get("ignored")), "properties": props,
-            }
+        strings = snap["strings"]
         found: list[dict[str, Any]] = []
-        for idx, bid in enumerate(nodes["backendNodeId"]):
-            if nodes["nodeType"][idx] != 1 or idx not in rendered or strings[nodes["nodeName"][idx]] in ("HTML", "BODY"):
-                continue
-            ax = ax_by.get(bid)
-            focusable = bool(ax and not ax["ignored"] and ax["properties"].get("focusable"))
-            is_clickable = idx in clickable
-            if focusable or is_clickable:
-                found.append({"backend": bid, "focusable": focusable, "clickable": is_clickable, "ax": ax})
+        for di, doc in enumerate(snap["documents"]):
+            nodes = doc["nodes"]
+            clickable = set(nodes.get("isClickable", {}).get("index", []))
+            layout = doc["layout"]
+            rendered = {i for i, b in zip(layout["nodeIndex"], layout["bounds"], strict=False) if b[2] > 0 and b[3] > 0}
+            frame_id = strings[doc["frameId"]] if doc.get("frameId", -1) >= 0 else None
+            try:
+                params = {"frameId": frame_id} if di > 0 and frame_id else {}
+                ax_nodes = (await cdp.send("Accessibility.getFullAXTree", params))["nodes"]
+            except Exception:  # noqa: BLE001 - frame sem arvore acessivel: segue so com o clicavel
+                ax_nodes = []
+            ax_by: dict[int, dict[str, Any]] = {}
+            for n in ax_nodes:
+                bid = n.get("backendDOMNodeId")
+                if bid is None:
+                    continue
+                props = {p["name"]: p["value"].get("value") for p in n.get("properties", [])}
+                ax_by[bid] = {
+                    "role": (n.get("role") or {}).get("value"), "name": (n.get("name") or {}).get("value") or "",
+                    "description": (n.get("description") or {}).get("value") or None,
+                    "ignored": bool(n.get("ignored")), "properties": props,
+                }
+            for idx, bid in enumerate(nodes["backendNodeId"]):
+                if nodes["nodeType"][idx] != 1 or idx not in rendered or strings[nodes["nodeName"][idx]] in ("HTML", "BODY"):
+                    continue
+                ax = ax_by.get(bid)
+                focusable = bool(ax and not ax["ignored"] and ax["properties"].get("focusable"))
+                is_clickable = idx in clickable
+                if focusable or is_clickable:
+                    found.append({"backend": bid, "focusable": focusable, "clickable": is_clickable, "ax": ax, "document": di})
         total = len(found)
         found = found[:limit]
         pushed = await cdp.send("DOM.pushNodesByBackendIdsToFrontend", {"backendNodeIds": [f["backend"] for f in found]})
@@ -325,17 +374,42 @@ class Session:
 
         for item, node_id in zip(found, pushed["nodeIds"], strict=False):
             await tag(item, node_id)
+        await self._map_ids_to_frames()
         return found, total
 
-    async def _discover_dom(self, limit: int) -> tuple[list[dict[str, Any]], int]:
-        """Firefox/WebKit (sem CDP): focavel = tabIndex calculado pelo navegador; cursor:pointer e um sinal mais fraco."""
+    async def _map_ids_to_frames(self) -> None:
+        """Descobre em qual frame do Playwright cada id esta (o seletor atravessa Shadow DOM aberto)."""
         page = self._need()
-        res = await page.evaluate(js.DISCOVER_JS, limit)
-        found = [
-            {"id": f["id"], "focusable": f["focusable"], "clickable": None, "pointer_cursor": f["pointer_cursor"], "ax": None}
-            for f in res["found"]
-        ]
-        return found, int(res["total"])
+        self._frame_of = {}
+        for fi, fr in enumerate(page.frames):
+            try:
+                ids = await fr.locator("[data-a11y-id]").evaluate_all("els => els.map(e => e.getAttribute('data-a11y-id'))")
+            except Exception:  # noqa: BLE001, S112 - frame fechado durante a leitura
+                continue
+            for i in ids:
+                self._frame_of[i] = fi
+
+    async def _discover_dom(self, limit: int) -> tuple[list[dict[str, Any]], int]:
+        """Firefox/WebKit (sem CDP): focavel = tabIndex do navegador; clicavel = listener registrado (gancho) ou propriedade on*;
+        cursor:pointer entra como sinal MAIS FRACO. Percorre Shadow DOM aberto e cada iframe."""
+        page = self._need()
+        found: list[dict[str, Any]] = []
+        total = 0
+        counter = 0
+        for fi, fr in enumerate(page.frames):
+            try:
+                res = await fr.evaluate(js.DISCOVER_JS, {"start": counter, "limit": max(0, limit - len(found))})
+            except Exception:  # noqa: BLE001, S112 - frame fechado/inacessivel
+                continue
+            counter = int(res["next"])
+            total += int(res["total"])
+            for f in res["found"]:
+                found.append({
+                    "id": f["id"], "focusable": f["focusable"], "clickable": True if f["listener"] else None,
+                    "pointer_cursor": f["pointer_cursor"], "ax": None, "frame": fi,
+                })
+                self._frame_of[f["id"]] = fi
+        return found, total
 
     @staticmethod
     def parse_snapshot_head(snapshot: str) -> dict[str, Any] | None:
@@ -356,34 +430,133 @@ class Session:
         return {"role": role.rstrip(":"), "name": name, "description": None, "ignored": False,
                 "properties": {"attrs": attrs}, "source": "playwright-aria-snapshot"}
 
-    async def dossier(self, scope: str = "", max_elements: int = 60) -> dict[str, Any]:
-        """FATOS dos elementos que o navegador aponta como focaveis/clicaveis, com papel e nome COMPUTADOS por ele."""
+    async def _facts_of(self, item: dict[str, Any], scope: str | None) -> dict[str, Any] | None:
+        """Fatos de UM elemento, na propria raiz dele (Shadow DOM aberto/fechado, iframe)."""
+        if self.cdp is not None and "backend" in item:
+            cdp = self.cdp
+            oid = (await cdp.send("DOM.resolveNode", {"backendNodeId": item["backend"]}))["object"]["objectId"]
+            try:
+                r = await cdp.send("Runtime.callFunctionOn", {
+                    "objectId": oid, "functionDeclaration": js.DOSSIER_ITEM_JS, "arguments": [{"value": scope}], "returnByValue": True,
+                })
+            finally:
+                await cdp.send("Runtime.releaseObject", {"objectId": oid})
+            val = r.get("result", {}).get("value")
+            return dict(val) if val else None
+        loc = self._locator_raw(item["id"])
+        val = await loc.evaluate(f"(el, scope) => ({js.DOSSIER_ITEM_JS}).call(el, scope)", scope)
+        return dict(val) if val else None
+
+    def _locator_raw(self, eid: str) -> Any:
         page = self._need()
+        frames = page.frames
+        idx = self._frame_of.get(eid, 0)
+        return (frames[idx] if idx < len(frames) else page).locator(f'[data-a11y-id="{eid}"]').first
+
+    async def dossier(self, scope: str = "", max_elements: int = 60) -> dict[str, Any]:
+        """FATOS dos elementos que o navegador aponta como focaveis/clicaveis (pagina, Shadow DOM, iframes), com papel e
+        nome COMPUTADOS por ele quando ha CDP (Chromium)."""
+        page = self._need()
+        limit = max(1, min(max_elements, 200))
         found, total = await self._discover()
         found = [f for f in found if "id" in f]
-        result = dict(await page.evaluate(
-            js.DOSSIER_JS, {"ids": [f["id"] for f in found], "scope": scope or None, "max": max(1, min(max_elements, 200))}
-        ))
-        if "error" in result:
-            return result
-        by_id = {f["id"]: f for f in found}
-        for e in result["elements"]:
-            f = by_id[e["id"]]
-            e["focusable"], e["clickable"] = f["focusable"], f["clickable"]
-            if self.cdp is None:  # sem CDP: papel/nome do aria snapshot do Playwright, elemento a elemento
-                e["pointer_cursor"] = f.get("pointer_cursor")
-                snap = await page.locator(f'[data-a11y-id="{e["id"]}"]').first.aria_snapshot()
-                f["ax"] = self.parse_snapshot_head(str(snap))
-            e["computed"] = f["ax"]  # papel, nome, descricao e propriedades como o navegador os expoe (None = fora da arvore)
-        result["discovered_total"] = total
-        result["discovery_truncated"] = total > len(found)
-        result["browser"] = self.browser_name
-        result["note"] = "iframes nao sao percorridos; ids sao atributos data-a11y-id colocados na pagina"
+        elements: list[dict[str, Any]] = []
+        outside_scope = 0
+        over_limit = 0
+        for chunk_start in range(0, len(found), 40):
+            chunk = found[chunk_start : chunk_start + 40]
+            facts = await asyncio.gather(*(self._facts_of(f, scope or None) for f in chunk), return_exceptions=True)
+            for f, fact in zip(chunk, facts, strict=False):
+                if isinstance(fact, BaseException) or fact is None:
+                    outside_scope += 1
+                    continue
+                if len(elements) >= limit:
+                    over_limit += 1
+                    continue
+                fact["focusable"], fact["clickable"] = f["focusable"], f["clickable"]
+                if self.cdp is None:
+                    fact["pointer_cursor"] = f.get("pointer_cursor")
+                    snap = await self._locator_raw(f["id"]).aria_snapshot()
+                    f["ax"] = self.parse_snapshot_head(str(snap))
+                fact["computed"] = f["ax"]  # papel, nome, descricao e propriedades como o navegador os expoe (None = fora da arvore)
+                fact["actionable"] = f["id"] in self._frame_of  # False: Shadow DOM fechado (medido, mas o Playwright nao consegue agir)
+                elements.append(fact)
+        result: dict[str, Any] = {
+            "url": page.url, "title": await page.title(), "elements": elements, "browser": self.browser_name,
+            "discovered_total": total, "discovery_truncated": total > len(found), "not_in_scope_or_gone": outside_scope,
+            "not_listed_over_limit": over_limit, "frames": len(page.frames),
+        }
+        self.coverage.described |= {e["id"] for e in elements}
+        self.coverage.discovered_total = total
+        result["note"] = "ids sao atributos data-a11y-id colocados na pagina; cobre a pagina, Shadow DOM e iframes"
+        if scope and not elements:
+            result["scope_note"] = f"nenhum elemento interativo dentro de {scope!r} (o seletor e' aplicado na raiz de cada elemento)"
+        limits: list[str] = []
         if self.cdp is None:
-            result["limits"] = ["sem CDP: clickable desconhecido (so cursor:pointer), papel/nome pelo aria snapshot do Playwright"]
+            limits.append("sem CDP: clickable so por listener registrado/propriedade on* (nao ve delegacao a ancestrais); papel/nome pelo aria snapshot do Playwright")
+        if any(not e["actionable"] for e in elements):
+            limits.append("elementos em Shadow DOM fechado foram medidos mas nao podem receber acoes (actionable=false)")
+        if limits:
+            result["limits"] = limits
         return result
 
+    async def page_map(self, scope: str = "") -> dict[str, Any]:
+        """FATOS de todo o conteudo da pagina (nao so o interativo), inclusive Shadow DOM aberto e cada iframe."""
+        page = self._need()
+        main = dict(await page.evaluate(js.PAGE_MAP_JS, scope or None))
+        if "error" in main:
+            return main
+        frames: list[dict[str, Any]] = []
+        for i, fr in enumerate(page.frames[1:], start=1):
+            try:
+                fm = dict(await fr.evaluate(js.PAGE_MAP_JS, None))
+                frames.append({"frame": i, "url": fr.url[:100], "map": fm})
+            except Exception as e:  # noqa: BLE001 - frame fechado/inacessivel: registra e segue
+                frames.append({"frame": i, "url": fr.url[:100], "error": f"{type(e).__name__}: {str(e)[:80]}"})
+        delegated = await page.evaluate("() => window.__a11yDelegated || []")
+        self.coverage.page_map = True
+        self.coverage.frames_mapped = len([f for f in frames if "map" in f]) + 1
+        return {
+            "main": main, "frames": frames, "browser": self.browser_name, "delegated_listeners": delegated,
+            "note": "Shadow DOM fechado nao e visivel a JavaScript; fatos sao aritmetica sobre DOM/CSS, sem julgamento. "
+                    "delegated_listeners: acoes tratadas por document/window/raiz (o alvo real nao e conhecido)",
+        }
+
+    def coverage_report(self) -> dict[str, Any]:
+        """Fatos sobre o que foi coberto NESTA sessao e o que ficou de fora (para o relatorio dizer a verdade)."""
+        page = self._need()
+        c = self.coverage
+        never_probed = sorted(c.described - c.probed, key=lambda x: int(x[1:]) if x[1:].isdigit() else 0)
+        not_listed = max(0, c.discovered_total - len(c.described))
+        gaps: list[str] = []
+        if not c.described:
+            gaps.append("o dossie nao foi consultado: nenhum elemento interativo foi listado")
+        if not_listed:
+            gaps.append(f"{not_listed} elemento(s) interativo(s) descoberto(s) nao foram listados (limite por chamada; use scope ou max_elements)")
+        if never_probed:
+            gaps.append(f"{len(never_probed)} elemento(s) listado(s) nunca foram sondados por comportamento")
+        if not c.page_map:
+            gaps.append("o mapa da pagina nao foi consultado: titulos, imagens, links, formularios, tabelas, midia e ordem de leitura sem fatos")
+        elif c.frames_mapped < len(page.frames):
+            gaps.append(f"{len(page.frames) - c.frames_mapped} iframe(s) sem mapa")
+        if not c.design_measured:
+            gaps.append("a linguagem de design nao foi medida")
+        for kind in ("reflow_320", "text_spacing"):
+            if kind not in c.stress_kinds:
+                gaps.append(f"estresse '{kind}' nao rodou")
+        if c.actions == 0:
+            gaps.append("nenhuma acao foi executada: nada foi provado por comportamento")
+        return {
+            "browser": self.browser_name, "persona": self.persona,
+            "interactive": {"discovered": c.discovered_total, "listed": len(c.described), "probed_by_behavior": len(c.described & c.probed),
+                            "listed_never_probed": never_probed[:40]},
+            "page_map": c.page_map, "frames": {"total": len(page.frames), "mapped": c.frames_mapped},
+            "design_measured": c.design_measured, "stress_run": sorted(c.stress_kinds),
+            "actions_taken": c.actions, "pages_visited": sorted(c.urls)[:20], "gaps": gaps,
+        }
+
     async def design_tokens(self) -> dict[str, Any]:
+        self.coverage.design_measured = True
         return dict(await self._need().evaluate(js.DESIGN_JS))
 
     # ------------------------------------------------------------------ acoes
@@ -416,6 +589,8 @@ class Session:
             await page.wait_for_timeout(max(0, min(int(value or 500), 3000)))
         await self._settle()
         after = await self._state()
+        self.coverage.actions += 1
+        self.coverage.urls.add(after["url"])
         diff = tree_diff(before["tree"], after["tree"])
         return {
             "action": action, "target": target or None, "value": value if action != "type" else f"({len(value)} caracteres)",
@@ -460,7 +635,7 @@ class Session:
         previous: str | None = None
         for i in range(1, max(1, min(max_tabs, 300)) + 1):
             await page.keyboard.press("Tab")
-            f = await page.evaluate(js.FOCUS_JS)
+            f = await self._focus_probe()
             if f is None:
                 return {"reached": False, "tab_presses": i, "reason": "o foco saiu da pagina", "path": path[-15:]}
             sig = f"{f['tag']}|{f['name']}|{f['id']}"
@@ -549,6 +724,7 @@ class Session:
     # ---------------------------------------------------------------- estresse
     async def stress(self, kind: str) -> dict[str, Any]:
         page = self._need()
+        self.coverage.stress_kinds.add(kind)
         if kind == "reflow_320":
             orig = page.viewport_size or {"width": 1280, "height": 800}
             await page.set_viewport_size({"width": 320, "height": 256})

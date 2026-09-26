@@ -1,5 +1,6 @@
 () => {
-  const e = document.activeElement;
+  let e = document.activeElement;
+  while (e && e.shadowRoot && e.shadowRoot.activeElement) e = e.shadowRoot.activeElement;  // atravessa Shadow DOM (aberto)
   if (!e || e === document.body || e === document.documentElement) return null;
   const name = (e.getAttribute('aria-label') || (e.labels && e.labels[0] && e.labels[0].innerText)
     || e.innerText || e.getAttribute('title') || e.getAttribute('alt') || e.getAttribute('placeholder') || '')

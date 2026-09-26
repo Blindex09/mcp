@@ -19,8 +19,8 @@ def _load(name: str) -> str:
 LIVE_OBSERVER_JS = _load("live_observer")
 # Descritor curto do elemento em foco (usado nos relatorios de efeito).
 FOCUS_JS = _load("focus")
-# Dossie: FATOS de elementos que o navegador apontou como focaveis/clicaveis (recebe ids).
-DOSSIER_JS = _load("dossier")
+# Dossie de UM elemento: FATOS (Shadow DOM aberto/fechado e iframes, porque a raiz e o proprio documento do elemento).
+DOSSIER_ITEM_JS = _load("dossier")  # function(scope){...} com this = o elemento (via CDP callFunctionOn ou Playwright)
 # Linguagem de design real do site (contagens do que ele usa).
 DESIGN_JS = _load("design")
 # Estresse: reflow em 320 px (WCAG 1.4.10) e texto cortado com espacamento do usuario (WCAG 1.4.12).
@@ -32,3 +32,10 @@ SETTLE_JS = _load("settle")
 
 # Descoberta sem CDP (Firefox/WebKit): focavel pelo tabIndex do navegador ou cursor:pointer (sinal mais fraco).
 DISCOVER_JS = _load("discover")
+
+# Mapa da pagina: fatos de TODO o conteudo (titulos, landmarks, imagens, links, formularios, tabelas, midia, iframes,
+# regioes vivas, ordem de leitura, regras :hover), atravessando Shadow DOM aberto.
+PAGE_MAP_JS = _load("page_map")
+
+# Gancho instalado antes dos scripts da pagina: quem tem listener de acao (Firefox/WebKit) e acoes delegadas a ancestrais.
+LISTENER_HOOK_JS = _load("listener_hook")

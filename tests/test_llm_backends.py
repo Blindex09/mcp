@@ -163,3 +163,48 @@ async def test_no_model_anywhere_explains_how_to_configure(fake_ctx):
     data = json.loads(await tool.fn(task="x", ctx=ctx))
     assert data["selection"] == "unavailable"
     assert "A11Y_MCP_MODEL" in data["note"] and data["catalog"]
+
+
+async def test_ollama_cloud_sends_the_key_as_bearer_and_defaults_to_the_cloud_host(monkeypatch, calls):
+    """Ollama Cloud: https://ollama.com/api com Authorization Bearer (OLLAMA_API_KEY); so a chave basta para escolher o backend."""
+    log, reply = calls
+    monkeypatch.setenv("OLLAMA_API_KEY", "SEGREDO-NUVEM")
+    monkeypatch.setenv("A11Y_MCP_MODEL", "gemma4:31b")
+    assert llm.configured_backend() == "ollama"
+    assert llm.backend_status()["ready"] is True
+    reply["data"] = {"message": {"content": "resposta"}}
+    assert await llm.ask_model(None, "x") == "resposta"
+    assert log[0]["url"] == "https://ollama.com/api/chat"
+    assert log[0]["headers"]["authorization"] == "Bearer SEGREDO-NUVEM"
+    assert log[0]["payload"]["model"] == "gemma4:31b"
+
+
+async def test_ollama_local_host_never_gets_an_authorization_header(monkeypatch, calls):
+    log, reply = calls
+    monkeypatch.setenv("A11Y_MCP_BACKEND", "ollama")
+    monkeypatch.setenv("A11Y_MCP_MODEL", "llava")
+    reply["data"] = {"message": {"content": "ok"}}
+    assert await llm.ask_model(None, "x") == "ok"
+    assert log[0]["url"] == "http://localhost:11434/api/chat"
+    assert "authorization" not in log[0]["headers"]
+
+
+async def test_ollama_explicit_host_with_key_uses_that_host(monkeypatch, calls):
+    log, reply = calls
+    monkeypatch.setenv("OLLAMA_API_KEY", "k")
+    monkeypatch.setenv("OLLAMA_HOST", "https://ollama.exemplo.com")
+    monkeypatch.setenv("A11Y_MCP_MODEL", "m")
+    reply["data"] = {"message": {"content": "ok"}}
+    assert await llm.ask_model(None, "x") == "ok"
+    assert log[0]["url"] == "https://ollama.exemplo.com/api/chat"
+    assert log[0]["headers"]["authorization"] == "Bearer k"
+
+
+async def test_ollama_cloud_key_is_never_logged_on_failure(monkeypatch, calls, caplog):
+    _, reply = calls
+    monkeypatch.setenv("OLLAMA_API_KEY", "SEGREDO-NUVEM")
+    monkeypatch.setenv("A11Y_MCP_MODEL", "m")
+    reply["error"] = httpx.HTTPStatusError("401", request=httpx.Request("POST", "https://ollama.com/api/chat"),
+                                           response=httpx.Response(401))
+    assert await llm.ask_model(None, "x") is None
+    assert "SEGREDO-NUVEM" not in caplog.text

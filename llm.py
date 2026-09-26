@@ -14,6 +14,8 @@ Quem responde (o servidor e um MCP standalone, sem depender de outro projeto):
    - ANTHROPIC_API_KEY / OPENAI_API_KEY / A11Y_MCP_API_KEY = chave (so do ambiente, nunca registrada)
    - A11Y_MCP_BASE_URL = endereco de um servidor compativel com OpenAI (xAI, OpenRouter, LM Studio, Ollama /v1...)
    - OLLAMA_HOST       = endereco do Ollama nativo (padrao http://localhost:11434)
+   - OLLAMA_API_KEY    = chave do Ollama Cloud (Authorization Bearer). Sozinha ja escolhe o backend ollama e o endereco
+                        https://ollama.com; no acesso direto o modelo e o nome da lista de tags (ex.: gemma4:31b), sem -cloud
 2. O modelo do proprio cliente via MCP sampling, se o cliente ainda oferecer (bonus; nao conte com ele).
 Imagens (visao) sao aceitas nos dois caminhos; modelo sem visao simplesmente nao as usa bem - isso e da sua escolha.
 """
@@ -35,12 +37,13 @@ logger = logging.getLogger(__name__)
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 OPENAI_BASE = "https://api.openai.com/v1"
 OLLAMA_DEFAULT_HOST = "http://localhost:11434"
+OLLAMA_CLOUD_HOST = "https://ollama.com"
 BACKEND_TIMEOUT_S = 120.0  # so a 1a espera; se estourar, o mesmo pedido e' repetido com 3x, 9x, 27x...
 BACKENDS = ("anthropic", "openai", "openai-compatible", "ollama")
 
 NO_MODEL_HELP = (
     "Nenhum modelo disponivel: defina A11Y_MCP_MODEL e a chave do provedor (ANTHROPIC_API_KEY, OPENAI_API_KEY, "
-    "A11Y_MCP_BASE_URL+A11Y_MCP_API_KEY para compativeis com OpenAI, ou A11Y_MCP_BACKEND=ollama). "
+    "A11Y_MCP_BASE_URL+A11Y_MCP_API_KEY para compativeis com OpenAI, OLLAMA_API_KEY para o Ollama Cloud, ou A11Y_MCP_BACKEND=ollama). "
     "O cliente tambem nao oferece sampling."
 )
 
@@ -72,7 +75,7 @@ def configured_backend() -> str | None:
         return "openai-compatible"
     if os.environ.get("OPENAI_API_KEY"):
         return "openai"
-    if os.environ.get("OLLAMA_HOST"):
+    if os.environ.get("OLLAMA_HOST") or os.environ.get("OLLAMA_API_KEY"):
         return "ollama"
     return None
 
@@ -98,7 +101,7 @@ def _b64(images: list[bytes] | None) -> list[str]:
 def _ollama_host() -> str | None:
     raw = os.environ.get("OLLAMA_HOST", "").strip()
     if not raw:
-        return OLLAMA_DEFAULT_HOST
+        return OLLAMA_CLOUD_HOST if os.environ.get("OLLAMA_API_KEY") else OLLAMA_DEFAULT_HOST
     return _base_url(raw if raw.startswith(("http://", "https://")) else f"http://{raw}")
 
 
@@ -163,8 +166,11 @@ async def _ask_backend(prompt: str, max_tokens: int, images: list[bytes] | None,
             msg: dict[str, Any] = {"role": "user", "content": prompt}
             if pics:
                 msg["images"] = pics
+            ollama_headers = {"content-type": "application/json"}
+            if os.environ.get("OLLAMA_API_KEY"):  # Ollama Cloud; o servidor local nao pede chave
+                ollama_headers["authorization"] = f"Bearer {os.environ['OLLAMA_API_KEY']}"
             data = await _http_post(
-                f"{host}/api/chat", {"content-type": "application/json"},
+                f"{host}/api/chat", ollama_headers,
                 {"model": model, "stream": False, "options": {"num_predict": max_tokens}, "messages": [msg]},
             )
             return str(data.get("message", {}).get("content", "")) or None

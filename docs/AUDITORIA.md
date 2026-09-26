@@ -178,3 +178,15 @@ Regra 16, supervisão calibrada. Cumpre: a pessoa é consultada nas ações que 
 ## 9. Prova ponta a ponta pelo protocolo
 
 O teste tests/test_e2e_protocol.py sobe o servidor MCP como processo separado, como o Claude faz, e chama todas as ferramentas registradas, uma por uma, contra um mini-site de várias páginas com defeitos de todo tipo (Shadow DOM, iframe, vídeo sem legenda, tabela sem cabeçalho, formulário, menu só de hover, botões só de mouse, aviso mudo, robots.txt e sitemap). O modelo é um servidor falso compatível com OpenAI, então o usuário autônomo, a escolha de guias e o aprendizado passam por HTTP de verdade. A matriz falha se qualquer ferramenta registrada ficar sem ser exercitada. Essa prova achou dois bugs que os testes unitários não acharam: o foco por estilo não funcionava dentro de iframes e Shadow DOM, e o envio de formulário com aprovação travava a página.
+
+## 10. Correções achadas ao testar uma loja de exemplo (setembro de 2026)
+
+Um site de propósito inacessível, com várias páginas, foi testado com todas as ferramentas. Dois erros do servidor apareceram e foram corrigidos, cada um com teste de regressão.
+
+Ordem de Tab. a11y_tab_order e a11y_compare_browsers decidiam que o foco tinha parado de mover comparando a descrição do elemento (tag, nome, estilo). Quatro links com o mesmo texto e sem id pareciam um só, e a varredura terminava no primeiro. O a11y_reach tinha o mesmo defeito latente, escondido pelos ids do dossiê. Agora cada parada é identificada pelo nó real (índice do frame e número do nó), a lógica está numa função só (audit.tab_stops) e atravessa iframes e Shadow DOM. Consequência: o compare_browsers passou a mostrar uma diferença que sempre existiu, o Firefox parar no próprio iframe antes do conteúdo dele, e o teste de ponta a ponta foi corrigido para afirmar isso em vez de "idêntica".
+
+Ações delegadas. Depois de qualquer ação, o Playwright registra listeners em window na página, e o gancho os reportava como se fossem da página. Cada entrada de delegated_listeners agora traz source, o endereço do script que registrou, ou null quando o código não tem endereço (avaliado, como o do Playwright, ou HTML passado direto no Chromium). Nada é filtrado no gancho: quem lê decide. O prompt do agente e o aviso do dossiê e da cobertura só usam entradas com origem confirmada. O dossiê continua sem listar elementos clicáveis por delegação, porque só cursor: pointer os apontaria e isso é heurística; ele agora avisa, como fato, que a página usa delegação.
+
+Ollama Cloud. OLLAMA_API_KEY envia Authorization Bearer e, sem OLLAMA_HOST, usa https://ollama.com. No acesso direto o modelo é o nome da lista de tags, sem o sufixo -cloud. A chave nunca vai para log e o conftest a remove do ambiente dos testes.
+
+Limite que permanece: em Chromium com HTML passado direto não há endereço de script, então a proveniência dos listeners é desconhecida nesse modo.

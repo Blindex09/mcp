@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 @pytest.fixture(autouse=True)
 def no_real_model_backend(monkeypatch):
     """Nenhum teste pode chamar modelo de verdade por causa de variaveis do ambiente do dev."""
-    for var in ("ANTHROPIC_API_KEY", "A11Y_MCP_BACKEND", "A11Y_MCP_MODEL", "A11Y_MCP_BASE_URL", "A11Y_MCP_API_KEY", "OPENAI_API_KEY", "OLLAMA_HOST"):
+    for var in ("ANTHROPIC_API_KEY", "A11Y_MCP_BACKEND", "A11Y_MCP_MODEL", "A11Y_MCP_BASE_URL", "A11Y_MCP_API_KEY", "OPENAI_API_KEY", "OLLAMA_HOST", "OLLAMA_API_KEY"):
         monkeypatch.delenv(var, raising=False)
 
 

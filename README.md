@@ -133,6 +133,7 @@ A especificação MCP de 2026-07-28 descontinuou o sampling (o servidor deve cha
 | `A11Y_MCP_BASE_URL` (+ `A11Y_MCP_API_KEY`) | qualquer servidor compatível com OpenAI (xAI, OpenRouter, LM Studio, Ollama `/v1`…) |
 | `A11Y_MCP_BACKEND` | `anthropic` \| `openai` \| `openai-compatible` \| `ollama` (opcional; senão detecta pelo ambiente) |
 | `OLLAMA_HOST` | Ollama nativo (padrão `http://localhost:11434`; use um modelo com visão para as capturas) |
+| `OLLAMA_API_KEY` | Ollama Cloud: a chave sozinha escolhe o backend `ollama` e o endereço `https://ollama.com`; use como `A11Y_MCP_MODEL` o nome da lista de tags (por exemplo `gemma4:31b`, sem `-cloud`) |
 
 Exemplo no JSON do cliente: `"env": {"ANTHROPIC_API_KEY": "...", "A11Y_MCP_MODEL": "<seu modelo>"}` na entrada do servidor.
 

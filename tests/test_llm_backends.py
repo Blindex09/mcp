@@ -44,7 +44,7 @@ def test_status_never_leaks_the_key(monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "SEGREDO-123")
     monkeypatch.setenv("A11Y_MCP_MODEL", "m1")
     st = llm.backend_status()
-    assert st == {"backend": "anthropic", "model": "m1", "ready": True, "problem": None}
+    assert st == {"backend": "anthropic", "model": "m1", "model_fast": None, "ready": True, "problem": None}
     assert "SEGREDO-123" not in json.dumps(st)
 
 

@@ -39,3 +39,6 @@ PAGE_MAP_JS = _load("page_map")
 
 # Gancho instalado antes dos scripts da pagina: quem tem listener de acao (Firefox/WebKit) e acoes delegadas a ancestrais.
 LISTENER_HOOK_JS = _load("listener_hook")
+
+# Contador de mutacoes do DOM: sinal de progresso para as esperas adaptativas (a pagina ainda esta trabalhando?).
+ACTIVITY_JS = _load("activity")

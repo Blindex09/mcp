@@ -127,10 +127,10 @@ Pergunta do dono: "esse julgamento serve para todos os elementos de uma página?
 | Estados que só existem depois de agir | O agente lista primeiro o que ainda não foi sondado e vê a cobertura a cada passo; exploração protegida (abaixo) |
 | Padrões fora dos 11 clássicos | guia `more-component-patterns` (toolbar, slider, switch, radio, seletor de data, breadcrumbs, paginação, busca, toast, popover, stepper, upload, carregamento) |
 | Uma página por vez | `a11y_crawl`: várias páginas, fatos consolidados |
-| O relatório não dizia o que foi coberto | `a11y_coverage` e `coverage` no resultado do agente: lista de lacunas (elementos nunca sondados, mapa não lido, iframes sem mapa, requisições bloqueadas) |
+| O relatório não dizia o que foi coberto | `a11y_coverage` e `coverage` no resultado do agente: lista de lacunas (elementos nunca sondados, mapa não lido, iframes sem mapa, requisições não enviadas) |
 
 Exploração segura. Cobrir mais significa clicar mais. Em sites que não são de desenvolvimento local, requisições que alteram dados
-(POST/PUT/PATCH/DELETE, envio de formulário) são bloqueadas e registradas; envio de formulário responde 204 para a página continuar onde está.
+(POST/PUT/PATCH/DELETE, envio de formulário) ficam retidas e o servidor mostra o que mudariam, até a pessoa aprovar (seção 8).
 `allow_mutations=allow` só quando o dono pediu.
 
 Bugs achados no caminho: o foco por teclado não atravessava Shadow DOM/iframes (`document.activeElement` devolve o host); a ordem de leitura usava limiar
@@ -138,3 +138,43 @@ e lista de tags (agora inversões exatas entre pares); o mapa não detectava o `
 
 Limites que permanecem: Shadow DOM fechado não recebe ações; Firefox/WebKit não detectam clique delegado; a bateria completa segue em Chromium; não é leitor de tela real;
 o julgamento autônomo por um modelo real ainda não foi exercitado (sem modelo configurado nesta máquina).
+
+## 8. Conformidade com as regras mestras
+
+Conferência do MCP contra o documento de regras mestras do dono do projeto. Onde havia violação, foi corrigida; o que ainda não cumpre está dito.
+
+Regra 1, agente é modelo mais harness. Cumpre. O modelo decide o conteúdo; o código impõe persona, formato, teto de orçamento, aprovação, cancelamento e fechamento.
+
+Regra 2, IA semântica sem heurística. Cumpre com as exceções justificadas da seção 2.4. Não há palavra-chave, regex nem ranking para julgamento. Ainda existem faixas de 8 px para agrupar linhas na ordem de leitura, declaradas como aritmética do mapa da página.
+
+Regra 3, conversa corrida e humana. Cumpre no que o MCP entrega: o usuário autônomo narra cada passo em texto corrido e os prompts pedem português sem asteriscos nem markdown. Não se aplica o token a token, porque ferramentas MCP devolvem resultados completos; o progresso segue por notificações.
+
+Regra 4, interface e leitor de tela. Não se aplica, o MCP não tem interface própria.
+
+Regra 5, autonomia. Cumpre: instala Playwright e os navegadores sozinho e refaz a ação que falha. Limite: se o modelo não está configurado, o servidor não pode escolher um por conta própria, porque a regra 9 proíbe modelo padrão; ele diz exatamente o que definir. Também não inicia um Ollama parado.
+
+Regra 6, contexto. Cumpre em parte: os aprendizados persistem entre execuções. Não consulta conversas de outros agentes.
+
+Regra 7, aprovação ligada ou desligada, nunca bloqueio. Estava violada com um bloqueio seco; corrigido. Site local tem aprovação desligada; em site real a requisição que altera dados fica retida com o que mudaria (nomes e tamanhos, nunca valores) até a pessoa decidir com a11y_approve. block existe só como modo estrito escolhido pela pessoa. As restrições de persona (teclado sem mouse) são limites do harness, não aprovação.
+
+Regra 8, tempo adaptativo. Estava violada: havia relógios fixos de 420 s, 240 s, 90 s, 120 s e 3 s. Corrigido em duas rodadas. Primeiro, o que demora é tentado de novo com mais tempo, sem repetir ações com efeito (o clique roda uma vez). Depois, a pedido do dono, os últimos números fixos viraram tempos que se adaptam: a espera por elemento segue enquanto a página progride (rede ou DOM mudando) e desiste só quando ela para; a espera por página assentar aguarda toda requisição realmente em andamento, ignora as que nunca terminam (event stream, long-poll) com um limite que acompanha a lentidão já vista no site, e esse ritmo é reiniciado a cada sessão; a sessão parada só fecha depois de dez vezes o maior intervalo da conversa; as tentativas de modelo escalam sem teto prático. O teste autônomo para por falta de progresso, cancelamento ou pelo orçamento de passos da pessoa.
+
+Regra 9, economia, qualidade e roteamento. Cumpre em parte. Não há modelo padrão embutido. A11Y_MCP_MODEL_FAST atende às chamadas leves, e a captura de tela só vai no primeiro passo, ao mudar de página ou quando o modelo pede. Limite: a escolha entre modelo leve e pesado é por propósito da chamada, definida no código, e não por um classificador semântico entre vários modelos.
+
+Regra 10, aprendizado sempre. Estava ausente; implementado (a11y/learn.py). Limite: o conhecimento que muda no mundo, como o WCAG, não se atualiza sozinho a partir de fontes confiáveis; os guias são atualizados por revisão.
+
+Regra 11, verde não é funcionando. Cumpre no espírito do projeto inteiro e na prova ponta a ponta pelo protocolo. Limite: quem executa o teste autônomo também julga; o harness verifica os fatos (cobertura, aprovação, limites), mas não há um verificador independente do julgamento do modelo.
+
+Regra 12, engenharia de qualidade. ruff, mypy e pytest passam. Removidos do projeto os arquivos extras (capturas de tela e JSON gerado no demo), o relatório virou README, e os scripts de instalação ficaram sem emojis, que quebravam no console do Windows. Todo bug corrigido ganhou teste de regressão.
+
+Regra 13, acessibilidade e visão de UX. É o objetivo do projeto.
+
+Regra 14, paridade entre interfaces. Não se aplica aos chats do projeto principal. Há paridade entre navegadores com os limites declarados.
+
+Regra 15, processo de trabalho. Documentação junto do código, commits por etapa, nenhum merge feito sem autorização, documentos para o usuário sem negrito, emoji nem setas.
+
+Regra 16, supervisão calibrada. Cumpre: a pessoa é consultada nas ações que alteram dados em site real e fica fora do caminho no resto.
+
+## 9. Prova ponta a ponta pelo protocolo
+
+O teste tests/test_e2e_protocol.py sobe o servidor MCP como processo separado, como o Claude faz, e chama todas as ferramentas registradas, uma por uma, contra um mini-site de várias páginas com defeitos de todo tipo (Shadow DOM, iframe, vídeo sem legenda, tabela sem cabeçalho, formulário, menu só de hover, botões só de mouse, aviso mudo, robots.txt e sitemap). O modelo é um servidor falso compatível com OpenAI, então o usuário autônomo, a escolha de guias e o aprendizado passam por HTTP de verdade. A matriz falha se qualquer ferramenta registrada ficar sem ser exercitada. Essa prova achou dois bugs que os testes unitários não acharam: o foco por estilo não funcionava dentro de iframes e Shadow DOM, e o envio de formulário com aprovação travava a página.

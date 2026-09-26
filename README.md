@@ -10,7 +10,7 @@ Ele dá à IA quatro coisas: conhecimento (guias e exemplos de acessibilidade), 
 -  Escolha pelo modelo: `a11y_find` recebe a tarefa em linguagem natural, em qualquer idioma, e o modelo escolhe os guias e exemplos certos pelo sentido. Nada de palavra-chave, regex ou ranking lexical.
 -  Medição de fatos: contraste WCAG, auditoria axe-core num navegador real, árvore de acessibilidade e ordem de foco por teclado.
 
-## Ferramentas (28)
+## Ferramentas (31)
 
 ### Conhecimento e escolha
 
@@ -69,8 +69,21 @@ ação, no máximo 60 passos, tempo, parada se repetir a mesma ação no mesmo e
 O dossiê agora atravessa Shadow DOM (aberto e fechado) e iframes; as ações e o `a11y_reach` alcançam esses elementos. No Firefox/WebKit, um gancho em
 `addEventListener` detecta clicável por listener (antes só havia `cursor: pointer`).
 
-Exploração segura: em sites que não são de desenvolvimento local (`localhost`, `127.0.0.1`, `*.localhost`, `*.test`), requisições que alteram dados
-(POST/PUT/PATCH/DELETE e envio de formulário) são bloqueadas e registradas, para o teste não alterar dados reais. `allow_mutations` = `auto` (padrão) | `block` | `allow` (só se o dono pediu).
+Aprovação ligada ou desligada, nunca recusa seca. Em site local (localhost, 127.0.0.1, `*.localhost`, `*.test`) a aprovação fica desligada e tudo roda.
+Em qualquer outro site, requisições que alteram dados (POST, PUT, PATCH, DELETE e envio de formulário) ficam retidas e o servidor mostra o que elas mudariam
+(método, endereço e os nomes e tamanhos dos campos, nunca os valores). Elas só seguem quando a pessoa aprova com `a11y_approve` (allow, deny ou allow_all).
+Um envio de formulário retido deixa a página onde está; se a pessoa aprovar, a ação dela é refeita uma única vez. `allow_mutations` aceita auto (padrão), ask, allow e block
+(modo estrito escolhido pela pessoa).
+
+| Ferramenta | O que faz |
+|---|---|
+| `a11y_approve(decision, ids)` | Resposta da pessoa aos pedidos retidos: allow, deny ou allow_all (aprovação desligada pelo resto da sessão) |
+| `a11y_learnings(host)` | O que o servidor aprendeu em testes anteriores, guardado na pasta do usuário (A11Y_MCP_HOME, padrão ~/.a11y-mcp) |
+| `a11y_forget(topic, scope)` | Remove um aprendizado |
+
+Aprendizado sempre: depois de cada teste autônomo o modelo decide o que vale lembrar (só as mudanças; omitir nunca apaga; mesmo assunto atualiza, sem duplicar), na hora e sem fila de aprovação.
+Economia: `A11Y_MCP_MODEL_FAST` (opcional) é um modelo mais barato para o que é leve (escolher guias, resumir aprendizados); o julgamento pesado usa `A11Y_MCP_MODEL`.
+Tempo adaptativo: nenhum relógio fixo encerra um trabalho em andamento. A espera por um elemento continua enquanto a página mostra sinais de progresso (rede ou DOM mudando) e só desiste quando ela para de mudar, por um tempo proporcional ao que já esperou. A espera por uma página assentar continua enquanto houver requisição realmente em andamento; requisições que não terminam por natureza (event stream, long-poll) não contam como trabalho, e o limite para reconhecê-las acompanha a lentidão que o próprio site já mostrou (cada sessão aprende o ritmo do seu site). A chamada ao modelo, a auditoria e o carregamento de páginas são repetidos com mais tempo a cada tentativa, e a ação com efeito (clique, envio) roda uma única vez. A sessão parada só é fechada depois de um tempo que cresce com o ritmo da conversa (dez vezes o maior intervalo já visto, no mínimo dez minutos). O teste autônomo para por falta de progresso, por cancelamento (`a11y_close`) ou pelo orçamento de passos que a pessoa configurou.
 
 ### Vários navegadores
 

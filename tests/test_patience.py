@@ -106,3 +106,35 @@ async def test_slow_action_is_retried_with_more_time_not_failed(monkeypatch):
         assert r["action"] == "click"
     finally:
         await SESSION.close()
+
+
+async def test_an_action_with_effect_runs_exactly_once_even_when_the_wait_is_slow(monkeypatch):
+    """Regressao: a paciencia repetia o CLIQUE a cada estouro de tempo; repetir uma acao com efeito (comprar, enviar) e' perigoso."""
+    from a11y import session as sm
+
+    monkeypatch.setattr(sm, "ACTION_TIMEOUT_MS", 60)
+    page = """<!doctype html><html lang="pt"><title>u</title><body><div id="host"></div><div id="n">0</div>
+    <script>setTimeout(() => { const b = document.createElement('button'); b.id = 'b'; b.textContent = 'Comprar';
+      b.addEventListener('click', () => { const n = document.getElementById('n'); n.textContent = String(+n.textContent + 1); });
+      document.getElementById('host').append(b); }, 300);</script></body></html>"""
+    await SESSION.open(None, page)
+    try:
+        await SESSION.act("click", "css:#b")  # o botao so existe daqui a 300ms; a espera paciente cresce ate ele aparecer
+        assert await SESSION.page.locator("#n").inner_text() == "1"  # clicou UMA vez
+    finally:
+        await SESSION.close()
+
+
+async def test_clicking_a_form_submit_does_not_hang_waiting_for_a_held_navigation():
+    """Regressao: click esperava a navegacao terminar; com a requisicao retida esperando aprovacao, travava minutos."""
+    import time
+
+    page = """<!doctype html><html lang="pt"><title>f</title><body><form method="post" action="http://api.example.invalid/x"><button>Enviar</button></form></body></html>"""
+    await SESSION.open(None, page, allow_mutations="ask")
+    try:
+        t = time.monotonic()
+        r = await SESSION.act("click", "css:button")
+        assert time.monotonic() - t < 8  # voltou logo, com o pedido retido
+        assert len(r["approvals_pending"]) == 1 and r["approvals_pending"][0]["kind"] == "envio de formulario"
+    finally:
+        await SESSION.close()

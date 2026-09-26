@@ -153,3 +153,12 @@ async def test_tools_registered_and_json():
         assert cov["page_map"] is True and cov["gaps"]
     finally:
         await tools.get_tool("a11y_close").fn()
+
+
+async def test_focus_style_works_for_elements_inside_shadow_dom_and_iframes(rich):
+    """Regressao (achada pela prova ponta a ponta): focus_style procurava so no documento principal."""
+    d = await rich.dossier("", 100)
+    by_text = {e["text"]: e for e in d["elements"] if e["text"]}
+    for text in ("Botao no shadow", "Botao do iframe", "Principal"):
+        fs = await rich.focus_style(by_text[text]["id"])
+        assert "changed_on_focus" in fs and "outline_when_focused" in fs, text

@@ -220,7 +220,7 @@ async def test_agent_prompt_carries_the_page_map_and_coverage_and_report_gets_th
     p = s.prompts[0]
     assert "MAPA DA PAGINA" in p and "titulos:" in p and "imagens:" in p and "ordem de leitura:" in p
     assert "COBERTURA ate agora" in p
-    report_prompt = s.prompts[-1]
+    report_prompt = next(x for x in s.prompts if "RELATORIO desta sessao" in x)  # depois dele vem o prompt de aprendizado
     assert "COBERTURA (fatos medidos pelo servidor" in report_prompt and "gaps" in report_prompt
     assert r["coverage"]["page_map"] is True and r["coverage"]["interactive"]["listed"] > 0
     assert any("nunca foram sondados" in g for g in r["coverage"]["gaps"])
@@ -270,7 +270,8 @@ async def test_screenshot_only_when_needed_first_step_new_page_or_model_asks():
 async def test_prompts_ask_for_plain_text_without_markdown():
     s = Script(FINISH, "R")
     await run(s)
-    assert "sem asteriscos" in s.prompts[0] and "sem asteriscos" in s.prompts[-1]
+    report_prompt = next(x for x in s.prompts if "RELATORIO desta sessao" in x)
+    assert "sem asteriscos" in s.prompts[0] and "sem asteriscos" in report_prompt
 
 
 async def test_fast_tier_uses_the_cheaper_model_only_for_light_calls(monkeypatch, fake_ctx):

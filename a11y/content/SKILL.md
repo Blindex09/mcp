@@ -49,7 +49,7 @@ A green audit is not accessibility. To find what really happens, open a persiste
 
 Coverage: `a11y_page_map` returns FACTS about ALL content (headings/outline, landmarks, images and alt, links, forms, tables, media, iframes, live regions, reading order,
 `:hover` rules) including open Shadow DOM and each iframe; `a11y_dossier` crosses Shadow DOM and iframes; `a11y_coverage` lists what was and was NOT covered (include it
-in every report); `a11y_crawl` scans several pages (facts only; robots.txt; GET only). On non-local sites, requests that change data are blocked unless `allow_mutations=allow`.
+in every report); `a11y_crawl` scans several pages (facts only; robots.txt; GET only). On non-local sites, requests that change data are held for the person's approval (`a11y_approve`); `allow_mutations=auto|ask|allow|block`.
 Judge the content with [references/page-structure-review.md](references/page-structure-review.md) and widgets beyond the classic eleven with
 [references/more-component-patterns.md](references/more-component-patterns.md).
 

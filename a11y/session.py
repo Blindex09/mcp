@@ -23,13 +23,17 @@ from urllib.parse import parse_qs, urlparse
 
 from . import page_scripts as js
 from .audit import _launch, validate_url
-from .patience import patient
+from .patience import PATIENCE_FACTOR
 from .provisioning import check_browser_name, provisioner_for
 
-IDLE_TIMEOUT_S = 600
+IDLE_MIN_S = 600  # so o piso; o limite real cresce com o ritmo da conversa (10x o maior intervalo visto)
+LONG_LIVED_TYPES = ('eventsource', 'websocket', 'ping', 'beacon')  # nunca terminam por natureza: nao contam como 'trabalhando'
+LONG_POLL_FLOOR_S = 30.0  # requisicao em voo por mais que isso E muito mais que as ja concluidas: tratada como long-poll
+QUIET_FLOOR_S = 2.0  # quietude minima antes de desistir de esperar um elemento
+READY_SLICE_MS = 1000
 ACTION_TIMEOUT_MS = 10_000  # so a 1a espera de uma acao; se estourar, repete com 3x e depois 9x
 SETTLE_QUIET_MS = 200  # silencio do DOM que caracteriza "assentou"
-SETTLE_CAP_MS = 3_000  # teto de seguranca da espera adaptativa
+SETTLE_CAP_MS = 3_000  # so o PISO da espera de mutacoes; requisicoes em andamento sempre sao esperadas
 _ID_RE = re.compile(r"e\d+")
 _SAFE_CSS_PROP = re.compile(r"^[a-z-]+$")
 _ALLOWED_SCHEMES = ("http:", "https:", "data:", "blob:", "about:")
@@ -145,8 +149,14 @@ class Session:
         self.blocked: list[str] = []
         self.pending: dict[str, dict[str, Any]] = {}  # pedidos de aprovacao retidos
         self._approval_seq = 0
+        self._allow_once: set[tuple[str, str]] = set()  # (metodo, url) aprovados: passam UMA vez
+        self._last: dict[str, Any] = {}  # ultima acao da pessoa (para refazer apos aprovar uma navegacao)
         self.stop_requested = False  # pedido de cancelamento de um teste autonomo em andamento
         self._inflight: set[Any] = set()  # requisicoes em andamento (sinal de que a pagina ainda esta reagindo)
+        self._req_t0: dict[Any, float] = {}
+        self._req_durations: list[float] = []  # quanto o site demorou para responder: adapta as esperas
+        self._req_count = 0
+        self._max_gap = 0.0  # maior intervalo entre chamadas da conversa
         self._frame_of: dict[str, int] = {}  # id do dossie -> indice do frame que o contem (Playwright)
         self._ids: dict[int, str] = {}  # backendNodeId -> id estavel (eN) entre chamadas do dossie
         self.last_used = time.monotonic()
@@ -209,6 +219,7 @@ class Session:
             await self.context.route("**/*", self._route)
             await self.context.add_init_script(js.LIVE_OBSERVER_JS)
             await self.context.add_init_script(js.LISTENER_HOOK_JS)
+            await self.context.add_init_script(js.ACTIVITY_JS)
             self.context.on("page", self._on_popup)
             self.context.on("request", self._request_started)
             self.context.on("requestfinished", self._request_done)
@@ -235,6 +246,7 @@ class Session:
             raise
         self.persona = persona
         self.browser_name = browser
+        self._req_durations, self._req_t0, self._req_count = [], {}, 0  # o ritmo aprendido e' DESTE site, nao do anterior
         self.mutation_mode = allow_mutations
         self.mutation_policy = effective_policy(allow_mutations, url)
         self.blocked = []
@@ -257,8 +269,9 @@ class Session:
     async def close(self) -> bool:
         was_open = self.page is not None
         for item in list(self.pending.values()):
-            if not item["future"].done():
-                item["future"].set_result("deny")  # nada fica preso; sem aprovacao nao foi enviado
+            fut = item.get("future")
+            if fut is not None and not fut.done():
+                fut.set_result("deny")  # nada fica preso; sem aprovacao nao foi enviado
         if self._watchdog and self._watchdog is not asyncio.current_task():
             self._watchdog.cancel()
         self._watchdog = None
@@ -272,12 +285,17 @@ class Session:
         self._ids = {}
         self._frame_of = {}
         self._inflight = set()
+        self._req_t0 = {}
         return was_open
+
+    def idle_limit_s(self) -> float:
+        """Sessao parada so e' fechada (liberar recurso, nao encerrar trabalho) depois de um tempo que cresce com o ritmo de quem conversa."""
+        return max(IDLE_MIN_S, 10 * self._max_gap)
 
     async def _idle_watchdog(self) -> None:
         while self.page is not None:
             await asyncio.sleep(30)
-            if time.monotonic() - self.last_used > IDLE_TIMEOUT_S:
+            if time.monotonic() - self.last_used > self.idle_limit_s():
                 await self.close()
                 return
 
@@ -287,6 +305,11 @@ class Session:
         if not req.url.lower().startswith(_ALLOWED_SCHEMES):
             await route.abort()
             return
+        key = (req.method.upper(), req.url)
+        if key in self._allow_once:  # aprovado pela pessoa: passa uma vez
+            self._allow_once.discard(key)
+            await route.continue_()
+            return
         if req.method.upper() in _SAFE_METHODS or self.mutation_policy == "allow":
             await route.continue_()
             return
@@ -294,25 +317,46 @@ class Session:
         if self.mutation_policy == "ask":
             self._approval_seq += 1
             aid = f"a{self._approval_seq}"
-            item = {"id": aid, **payload_summary(req.method, req.url, req.post_data, req.headers.get("content-type", ""), navigation),
-                    "future": asyncio.get_running_loop().create_future()}
+            item: dict[str, Any] = {
+                "id": aid, **payload_summary(req.method, req.url, req.post_data, req.headers.get("content-type", ""), navigation),
+                "replay": dict(self._last), "navigation": navigation, "full_url": req.url,
+            }
             self.pending[aid] = item
-            self._inflight.discard(req)  # retida esperando a pessoa: nao conta como "pagina ainda reagindo"
-            decision = await item["future"]  # a requisicao fica parada ate a pessoa decidir (sem relogio)
+            self._inflight.discard(req)
+            if navigation:
+                # Reter uma NAVEGACAO deixaria a pagina "navegando" (qualquer leitura travaria). A pagina fica onde esta e, se a pessoa
+                # aprovar, a acao dela e refeita UMA vez com esta requisicao liberada.
+                await route.fulfill(status=204, body="")
+                return
+            item["future"] = asyncio.get_running_loop().create_future()
+            decision = await item["future"]  # chamada da pagina (fetch/XHR): retida ate a pessoa decidir, sem relogio
             self.pending.pop(aid, None)
             if decision == "allow":
                 await route.continue_()
                 return
             self.blocked.append(f"{req.method} {req.url[:100]} (nao aprovada)")
-        else:  # block: modo estrito escolhido pela pessoa
-            self.blocked.append(f"{req.method} {req.url[:100]}")
+            await route.abort()
+            return
+        self.blocked.append(f"{req.method} {req.url[:100]}")  # block: modo estrito escolhido pela pessoa
         if navigation:
-            await route.fulfill(status=204, body="")  # envio de formulario: a pagina continua onde esta (abortar levaria a uma pagina de erro)
+            await route.fulfill(status=204, body="")  # a pagina continua onde esta (abortar levaria a uma pagina de erro)
         else:
             await route.abort()
 
+    @staticmethod
+    def _full_url(item: dict[str, Any]) -> str:
+        return str(item.get("full_url") or item["url"])
+
+    async def _replay(self, last: dict[str, Any]) -> None:
+        page = self._need()
+        action, target, value = last.get("action"), last.get("target"), last.get("value") or ""
+        if action == "click" and target:
+            await self._locator(target).click(timeout=ACTION_TIMEOUT_MS * PATIENCE_FACTOR, no_wait_after=True)
+        elif action == "press":
+            await page.keyboard.press(value)
+
     def pending_approvals(self) -> list[dict[str, Any]]:
-        return [{k: v for k, v in p.items() if k != "future"} for p in self.pending.values()]
+        return [{k: v for k, v in p.items() if k not in ("future", "replay", "full_url")} for p in self.pending.values()]
 
     async def decide(self, decision: str, ids: list[str] | None = None) -> dict[str, Any]:
         """Aprovacao da pessoa: allow (esses pedidos) | deny | allow_all (aprovacao desligada para o resto da sessao)."""
@@ -326,11 +370,25 @@ class Session:
         if ids and not targets:
             raise SessionError(f"nenhum pedido pendente com esses ids: {', '.join(ids)}")
         decided = []
+        replays: list[dict[str, Any]] = []
         for aid in targets:
             item = self.pending.get(aid)
-            if item and not item["future"].done():
-                item["future"].set_result("allow" if decision in ("allow", "allow_all") else "deny")
-                decided.append({"id": aid, "method": item["method"], "url": item["url"], "decision": "allow" if decision != "deny" else "deny"})
+            if not item:
+                continue
+            allow = decision in ("allow", "allow_all")
+            if item.get("navigation"):
+                self.pending.pop(aid, None)
+                if allow:
+                    self._allow_once.add((item["method"], self._full_url(item)))
+                    replays.append(item["replay"])
+                else:
+                    self.blocked.append(f"{item['method']} {item['url'][:100]} (nao aprovada)")
+                decided.append({"id": aid, "method": item["method"], "url": item["url"], "decision": "allow" if allow else "deny"})
+            elif not item["future"].done():
+                item["future"].set_result("allow" if allow else "deny")
+                decided.append({"id": aid, "method": item["method"], "url": item["url"], "decision": "allow" if allow else "deny"})
+        for last in replays:  # refaz a acao da pessoa UMA vez, agora com a requisicao liberada
+            await self._replay(last)
         await self._settle()
         after = await self._state()
         diff = tree_diff(before["tree"], after["tree"])
@@ -351,9 +409,17 @@ class Session:
             asyncio.ensure_future(page.close())
 
     def _request_started(self, request: Any) -> None:
-        self._inflight.add(request)
+        self._req_count += 1
+        if request.resource_type not in LONG_LIVED_TYPES:
+            self._inflight.add(request)
+            self._req_t0[request] = time.monotonic()
 
     def _request_done(self, request: Any) -> None:
+        self._req_count += 1
+        t0 = self._req_t0.pop(request, None)
+        if t0 is not None and request in self._inflight:
+            self._req_durations.append(time.monotonic() - t0)
+            del self._req_durations[:-50]
         self._inflight.discard(request)
 
     def _on_console(self, msg: Any) -> None:
@@ -363,7 +429,9 @@ class Session:
     def _need(self) -> Any:
         if self.page is None:
             raise SessionError("nenhuma sessao aberta: chame a11y_open primeiro")
-        self.last_used = time.monotonic()
+        now = time.monotonic()
+        self._max_gap = max(self._max_gap, min(now - self.last_used, 6 * 3600))
+        self.last_used = now
         return self.page
 
     def _locator(self, target: str) -> Any:
@@ -691,14 +759,21 @@ class Session:
         d0, p0, c0, m0 = len(self.dialogs), len(self.popups), len(self.console_errors), len(self.blocked)
         await self._live_new()  # descarta o que ja foi anunciado antes da acao
         free = not PERSONAS[self.persona].get("no_pointer")
-        if action == "click":
-            await patient(lambda t: self._locator(target).click(timeout=t), ACTION_TIMEOUT_MS)
-        elif action == "hover":
-            await patient(lambda t: self._locator(target).hover(timeout=t), ACTION_TIMEOUT_MS)
-        elif action == "focus":
-            await patient(lambda t: self._locator(target).focus(timeout=t), ACTION_TIMEOUT_MS)
-        elif action == "select":
-            await patient(lambda t: self._locator(target).select_option(value, timeout=t), ACTION_TIMEOUT_MS)
+        self._last = {"action": action, "target": target or None, "value": value}
+        if action in _POINTER_ACTIONS:
+            loc = self._locator(target)
+            # A espera paciente vale so para o elemento ficar pronto (mais tempo a cada tentativa). A ACAO roda UMA vez:
+            # repetir um clique com efeito (enviar, comprar) por causa de um estouro de tempo seria perigoso.
+            await self._wait_ready(loc)
+            once = ACTION_TIMEOUT_MS * PATIENCE_FACTOR
+            if action == "click":
+                await loc.click(timeout=once, no_wait_after=True)  # nao espera a navegacao: _settle espera a pagina assentar
+            elif action == "hover":
+                await loc.hover(timeout=once)
+            elif action == "focus":
+                await loc.focus(timeout=once)
+            else:
+                await loc.select_option(value, timeout=once)
         elif action == "press":
             if target and free:
                 await self._locator(target).focus()
@@ -726,22 +801,66 @@ class Session:
             "approvals_pending": self.pending_approvals(),
         }
 
+    def _long_poll_age_s(self) -> float:
+        """Requisicao em voo por mais que isso, e muito mais do que o site costuma levar, e' tratada como long-poll (nao e' trabalho)."""
+        done = sorted(self._req_durations)
+        p95 = done[int(0.95 * (len(done) - 1))] if done else 0.0
+        return max(LONG_POLL_FLOOR_S, 8 * p95)
+
+    def _working_requests(self) -> int:
+        now, limit = time.monotonic(), self._long_poll_age_s()
+        return sum(1 for r in self._inflight if now - self._req_t0.get(r, now) < limit)
+
     async def _settle(self) -> None:
-        """Espera adaptativa: navegacao terminou, nao ha requisicoes em voo e o DOM ficou quieto.
-        Nao ha sleep fixo; SETTLE_CAP_MS e' so o teto de seguranca para a acao inteira."""
+        """Espera adaptativa: navegacao terminou, nao ha requisicao REALMENTE em andamento e o DOM ficou quieto.
+        Nao ha relogio fixo: enquanto ha trabalho na rede a espera continua (o tempo que for); so a agitacao continua do DOM sem
+        rede (animacao, relogio na tela) e' limitada, e esse limite acompanha a lentidao que o proprio site ja mostrou."""
         page = self._need()
-        deadline = time.monotonic() + SETTLE_CAP_MS / 1000
+        done = sorted(self._req_durations)
+        slow = done[int(0.95 * (len(done) - 1))] if done else 0.0
+        dom_cap = max(SETTLE_CAP_MS / 1000, 4 * slow)
         try:
-            await page.wait_for_load_state("load", timeout=SETTLE_CAP_MS)
+            await page.wait_for_load_state("load", timeout=max(SETTLE_CAP_MS, int(dom_cap * 1000)))
             while True:
-                left = max(0.0, deadline - time.monotonic())
-                await page.evaluate(js.SETTLE_JS, {"quiet": SETTLE_QUIET_MS, "cap": int(left * 1000) + 1})
-                if not self._inflight or time.monotonic() >= deadline:
+                started = time.monotonic()
+                await page.evaluate(js.SETTLE_JS, {"quiet": SETTLE_QUIET_MS, "cap": int(dom_cap * 1000) + 1})
+                if not self._working_requests():
                     return
-                while self._inflight and time.monotonic() < deadline:  # rede ainda ocupada: espera esvaziar
+                while self._working_requests():  # rede trabalhando: espera terminar, sem teto
                     await asyncio.sleep(0.05)
+                if time.monotonic() - started < 0.001:
+                    return
         except Exception:  # noqa: BLE001 - pagina navegando/fechando: o estado seguinte mostra o que houver
             return
+
+    async def _activity_signature(self) -> tuple[Any, ...]:
+        page = self._need()
+        try:
+            muts = await asyncio.wait_for(page.evaluate("() => window.__a11yMutations || 0"), 2)
+        except Exception:  # noqa: BLE001 - pagina em transicao: conta como agitacao
+            muts = -1
+        return (page.url, muts, self._req_count)
+
+    async def _wait_ready(self, loc: Any) -> None:
+        """Espera um elemento ficar pronto pelo tempo que a pagina continuar PROGREDINDO (rede ou DOM mudando); so desiste quando ela
+        para de mudar por um tempo proporcional ao que ja esperou. Nao ha prazo fixo."""
+        from playwright.async_api import TimeoutError as PlaywrightTimeout
+
+        start = last_change = time.monotonic()
+        sig = await self._activity_signature()
+        while True:
+            try:
+                await loc.wait_for(state="visible", timeout=min(ACTION_TIMEOUT_MS, READY_SLICE_MS))
+                return
+            except PlaywrightTimeout:
+                now = time.monotonic()
+                new = await self._activity_signature()
+                if new != sig:
+                    sig, last_change = new, now
+                quiet = now - last_change
+                worked = last_change - start
+                if quiet > max(QUIET_FLOOR_S, 0.5 * worked):
+                    raise
 
     async def reach(self, target: str, max_tabs: int = 100) -> dict[str, Any]:
         """Quantas vezes o usuario de teclado aperta Tab, do inicio da pagina, para chegar ao alvo."""
@@ -786,8 +905,13 @@ class Session:
             return await self._focus_style_by_focusing(target, loc)
         eid = await loc.get_attribute("data-a11y-id")
         cdp = self.cdp
-        root = (await cdp.send("DOM.getDocument", {"depth": 0}))["root"]["nodeId"]
-        node = (await cdp.send("DOM.querySelector", {"nodeId": root, "selector": f'[data-a11y-id="{eid}"]'}))["nodeId"]
+        backend = next((b for b, i in self._ids.items() if i == eid), None)
+        if backend is not None:  # pelo id interno do navegador: atravessa iframes e Shadow DOM
+            await cdp.send("DOM.getDocument", {"depth": 0})
+            node = (await cdp.send("DOM.pushNodesByBackendIdsToFrontend", {"backendNodeIds": [backend]}))["nodeIds"][0]
+        else:
+            root = (await cdp.send("DOM.getDocument", {"depth": 0}))["root"]["nodeId"]
+            node = (await cdp.send("DOM.querySelector", {"nodeId": root, "selector": f'[data-a11y-id="{eid}"]'}))["nodeId"]
         await cdp.send("CSS.enable")
 
         async def computed() -> dict[str, str]:

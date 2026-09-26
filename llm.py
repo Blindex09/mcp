@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 OPENAI_BASE = "https://api.openai.com/v1"
 OLLAMA_DEFAULT_HOST = "http://localhost:11434"
-BACKEND_TIMEOUT_S = 120.0  # so a 1a espera; se estourar, o mesmo pedido e' repetido com 3x, depois 9x
+BACKEND_TIMEOUT_S = 120.0  # so a 1a espera; se estourar, o mesmo pedido e' repetido com 3x, 9x, 27x...
 BACKENDS = ("anthropic", "openai", "openai-compatible", "ollama")
 
 NO_MODEL_HELP = (
@@ -55,7 +55,7 @@ async def _http_post(url: str, headers: dict[str, str], payload: dict[str, Any])
             data = resp.json()
             return data if isinstance(data, dict) else {}
 
-    return await patient(once, BACKEND_TIMEOUT_S, attempts=3)
+    return await patient(once, BACKEND_TIMEOUT_S, attempts=6)  # 2 min, 6, 18, 54 min...: quem encerra e' o cancelamento
 
 
 def configured_backend() -> str | None:

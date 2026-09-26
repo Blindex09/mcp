@@ -13,7 +13,7 @@ from typing import Any, TypeVar
 T = TypeVar("T")
 
 PATIENCE_FACTOR = 3  # cada nova tentativa espera esse tanto a mais
-PATIENCE_ATTEMPTS = 3
+PATIENCE_ATTEMPTS = 5  # 1x, 3x, 9x, 27x, 81x: na pratica sem teto; quem encerra e' o cancelamento
 
 
 def _timeout_types() -> tuple[type[BaseException], ...]:

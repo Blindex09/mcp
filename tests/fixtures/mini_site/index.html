@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Mini Loja</title>
+<style>
+  body { font: 13px/1.1 Arial, sans-serif; margin: 8px; }
+  .dd:hover .menu { display: block; } .menu { display: none; }
+  .menu a { display: block; }
+  .comprar { display: inline-block; background: #2f6b4f; color: #fff; padding: 4px 9px; cursor: pointer; }
+  *:focus { outline: none; }
+</style>
+</head>
+<body>
+<header>
+  <nav aria-label="Principal">
+    <a href="/index.html">Início</a>
+    <a href="/produtos.html">Produtos</a>
+    <a href="/contato.html">Contato</a>
+    <div class="dd"><span>Mais ▾</span><div class="menu"><a href="/sobre.html">Sobre</a><a href="/privado/x.html">Área privada</a></div></div>
+  </nav>
+</header>
+<main>
+  <h1>Mini Loja</h1>
+  <h3>Destaques (pulou o h2)</h3>
+  <img src="a.png">
+  <img src="b.png" alt="">
+  <figure><img src="c.png" alt="Gráfico de vendas do mês"><figcaption>Vendas</figcaption></figure>
+  <p><a href="/produtos.html">Leia mais</a> sobre os produtos e <a href="/sobre.html">Leia mais</a> sobre nós.</p>
+  <div class="comprar" id="comprar">Comprar</div>
+  <div id="aviso"></div>
+  <x-cartao></x-cartao>
+  <iframe title="Mapa da loja" srcdoc="&lt;html&gt;&lt;body&gt;&lt;h1&gt;Mapa&lt;/h1&gt;&lt;button&gt;Abrir mapa&lt;/button&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+  <video controls width="200"><source src="v.mp4" type="video/mp4"></video>
+  <table><tr><td>Chá</td><td>R$ 10</td></tr><tr><td>Café</td><td>R$ 12</td></tr></table>
+</main>
+<script>
+  document.getElementById('comprar').addEventListener('click', () => { document.getElementById('aviso').textContent = 'Adicionado ao carrinho'; });
+  const host = document.querySelector('x-cartao').attachShadow({ mode: 'open' });
+  host.innerHTML = '<button id="det">Ver detalhes</button><div id="fav">Favoritar</div>';
+  host.getElementById('fav').addEventListener('click', () => { window.favoritou = true; });
+</script>
+</body>
+</html>

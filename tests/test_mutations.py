@@ -221,3 +221,55 @@ async def test_decide_validates_and_the_tool_reports_errors(api):
         assert "nenhum pedido pendente" in json.loads(await tool.fn(decision="allow", ids="a42"))["error"]
     finally:
         await SESSION.close()
+
+
+# ---------------- envio de formulario (navegacao) com aprovacao ----------------
+
+def real_form(api_url: str) -> str:
+    return f"""<!doctype html><html lang="pt"><title>f</title><body><h1>Contato</h1>
+    <form method="post" action="{api_url}/form"><input name="email" value="a@b.com"><button id="enviar">Enviar</button></form></body></html>"""
+
+
+async def test_form_submission_is_held_without_freezing_the_page_and_replayed_once_on_approval(api):
+    await SESSION.open(None, real_form(api), allow_mutations="ask")
+    try:
+        els = {e["text"]: e for e in (await SESSION.dossier())["elements"] if e["text"]}
+        r = await SESSION.act("click", els["Enviar"]["id"])
+        assert len(r["approvals_pending"]) == 1
+        item = r["approvals_pending"][0]
+        assert item["kind"] == "envio de formulario" and item["fields"] == ["email (7 caracteres)"] and "a@b.com" not in str(item)
+        assert "POST" not in Recorder.seen  # nada foi enviado
+        assert (await SESSION.observe())["title"] == "f"  # a pagina continua utilizavel (nao travou "navegando")
+        out = await SESSION.decide("allow", [item["id"]])
+        assert out["decided"][0]["decision"] == "allow" and out["still_pending"] == []
+        assert Recorder.seen.count("POST") == 1  # UMA vez so, depois da aprovacao
+        assert "recebido" in " ".join(out["tree_added"]).lower() or "ok" in " ".join(out["tree_added"]).lower()
+    finally:
+        await SESSION.close()
+
+
+async def test_denied_form_submission_is_never_sent_and_the_page_stays(api):
+    await SESSION.open(None, real_form(api), allow_mutations="ask")
+    try:
+        els = {e["text"]: e for e in (await SESSION.dossier())["elements"] if e["text"]}
+        item = (await SESSION.act("click", els["Enviar"]["id"]))["approvals_pending"][0]
+        out = await SESSION.decide("deny", [item["id"]])
+        assert out["decided"][0]["decision"] == "deny" and "POST" not in Recorder.seen
+        assert await SESSION.page.locator("h1").inner_text() == "Contato"
+        again = await SESSION.act("hover", els["Enviar"]["id"])  # pagina viva
+        assert again["approvals_pending"] == []
+    finally:
+        await SESSION.close()
+
+
+async def test_keyboard_submission_is_also_held_and_replayed(api):
+    await SESSION.open(None, real_form(api), allow_mutations="ask", persona="keyboard")
+    try:
+        await SESSION.act("press", "", "Tab")  # campo de e-mail
+        await SESSION.act("press", "", "Tab")  # botao Enviar
+        r = await SESSION.act("press", "", "Enter")
+        assert len(r["approvals_pending"]) == 1 and "POST" not in Recorder.seen
+        await SESSION.decide("allow")
+        assert Recorder.seen.count("POST") == 1
+    finally:
+        await SESSION.close()

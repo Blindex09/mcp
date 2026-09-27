@@ -86,15 +86,17 @@ async def test_agent_learns_after_a_run_and_the_next_run_starts_knowing_it():
     assert len(learn.load_all()) == 1  # o segundo aprendizado atualizou o mesmo assunto
 
 
-async def test_every_call_tells_the_router_what_it_is_for_and_none_names_a_tier():
-    """A camada nao e mais fixada no codigo: cada chamada descreve a finalidade em texto livre e o roteador decide."""
+async def test_pipeline_steps_have_a_fixed_role_only_the_memory_update_still_asks_the_classifier():
+    """Visao, raciocinio e relatorio tem um PAPEL fixo - fato tecnico (so visao entende imagem) ou preferencia que a
+    pessoa configurou (quem escreve o relatorio), nunca um julgamento de custo/qualidade do roteador. So decidir se
+    vale a pena lembrar algo (a atualizacao de memoria) continua descrevendo a finalidade em texto livre para o
+    classificador escolher a camada - isso sim e' um julgamento de custo, nao uma exigencia de capacidade."""
     script = Script(FINISH, "R", entries_json(("t", "l", learn.GENERAL)))
-    await run(script)
-    assert all(h is not None and h.purpose for h in script.hints)
-    purposes = [h.purpose for h in script.hints]
-    assert "decidir o proximo passo" in purposes[0] and "relatorio" in purposes[-2] and "memoria" in purposes[-1]
-    assert not any(hasattr(h, "tier") for h in script.hints)
-    assert script.hints[0].validate is not None and script.hints[-1].validate is not None  # fatos objetivos para a cascata
+    await run(script)  # vision=False (padrao do helper): so decisao, relatorio, memoria
+    assert script.tiers == ["main", "write", None]
+    assert script.hints[0] is None and script.hints[1] is None  # papel fixo: nao passa pelo classificador
+    assert script.hints[2] is not None and "memoria" in script.hints[2].purpose
+    assert script.hints[2].validate is not None  # fato objetivo (JSON legivel) para a cascata desta chamada
 
 
 async def test_tools_list_and_forget():

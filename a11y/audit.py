@@ -12,12 +12,11 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from .patience import with_patience
+from .patience import patient
 from .provisioning import provisioner_for
 
 AXE_PATH = Path(__file__).parent / "vendor" / "axe.min.js"
-NAV_TIMEOUT_MS = 30_000
-TOTAL_TIMEOUT_S = 90  # so a 1a espera; se estourar, repete com 3x e depois 9x
+NAV_TIMEOUT_MS = 30_000  # so a 1a espera; a MESMA navegacao e' tentada de novo com mais tempo (3x, 9x...), nao so o pedido inteiro
 _LEVEL_TAGS = {
     "A": ["wcag2a", "wcag21a"],
     "AA": ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"],
@@ -89,6 +88,9 @@ async def _launch(pw: Any, browser: str = "chromium") -> Any:
 async def _with_page(
     url: str | None, html: str | None, fn: Callable[[Any], Awaitable[Any]], browser: str = "chromium"
 ) -> Any:
+    """Abre a pagina e roda fn(page). A navegacao (e a verificacao em si) usa tempo ADAPTATIVO: se a pagina/o site
+    demorar mais que a 1a espera, a MESMA tentativa de navegar e' refeita com mais tempo (3x, 9x, 27x...), num
+    navegador novo - nunca so um relogio unico que desiste e deixa de verificar um site so porque ele e' lento."""
     if bool(url) == bool(html):
         raise ValueError("informe exatamente um entre url e html")
     if url:
@@ -96,21 +98,22 @@ async def _with_page(
     await provisioner_for(browser).ensure()  # instala Playwright/navegador sozinho se faltar
     from playwright.async_api import async_playwright
 
-    async def run() -> Any:
+    async def attempt(timeout_s: float) -> Any:
+        nav_ms = int(timeout_s * 1000)
         async with async_playwright() as pw:
             instance = await _launch(pw, browser)
             try:
                 page = await instance.new_page()
-                page.set_default_timeout(NAV_TIMEOUT_MS)
+                page.set_default_timeout(nav_ms)  # piso para qualquer espera dentro de fn() sem timeout proprio
                 if url:
-                    await page.goto(url.strip(), wait_until="load")
+                    await page.goto(url.strip(), wait_until="load", timeout=nav_ms)
                 else:
-                    await page.set_content(html or "", wait_until="load")
+                    await page.set_content(html or "", wait_until="load", timeout=nav_ms)
                 return await fn(page)
             finally:
                 await instance.close()
 
-    return await with_patience(run, TOTAL_TIMEOUT_S)  # se demorar, repete com mais tempo (nada de relogio fixo)
+    return await patient(attempt, NAV_TIMEOUT_MS / 1000)
 
 
 def summarize_axe(raw: dict[str, Any], max_nodes: int = 5) -> dict[str, Any]:

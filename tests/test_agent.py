@@ -20,11 +20,13 @@ class Script:
         self.prompts: list[str] = []
         self.images: list[list[bytes] | None] = []
         self.hints: list = []  # a dica de roteamento que cada chamada mandou (finalidade em texto livre)
+        self.tiers: list = []  # o PAPEL fixo que cada chamada exigiu (vision/main/write), quando exigiu algum
 
-    async def __call__(self, prompt, images, max_tokens, hint=None):
+    async def __call__(self, prompt, images, max_tokens, hint=None, tier=None):
         self.prompts.append(prompt)
         self.images.append(images)
         self.hints.append(hint)
+        self.tiers.append(tier)
         if not self.replies:
             return "RELATORIO FINAL"
         r = self.replies.pop(0)
@@ -36,6 +38,7 @@ async def run(script, **kw):
     kw.setdefault("goal", "abrir os detalhes")
     kw.setdefault("url", None)
     kw.setdefault("html", SITE)
+    kw.setdefault("vision", False)  # so os testes que falam de captura de tela ligam isso explicitamente
     return await agent.run_agent(session=SESSION, ask=script, **kw)
 
 
@@ -130,16 +133,23 @@ async def test_only_lack_of_progress_stops_a_long_task_not_the_clock(monkeypatch
 
 
 async def test_vision_only_for_personas_that_can_see():
-    seeing = Script(FINISH, "R")
-    await run(seeing, persona="default")
-    assert seeing.images[0] and seeing.images[0][0][:2] == b"\xff\xd8"
-    assert seeing.images[1] is None  # o relatorio nao leva imagem
+    """Com visao, o que ve a tela primeiro e' o PAPEL vision (fato tecnico: so ele entende imagem); o raciocinio
+    (papel main) recebe a descricao em texto, nunca a imagem crua - e' a "captura, depois cruza tudo" que a pessoa pediu."""
+    seeing = Script("ha um botao Comprar em destaque", FINISH, "R")
+    await run(seeing, persona="default", vision=True)
+    assert seeing.tiers == ["vision", "main", "write", None]  # a ultima e a atualizacao de memoria (classificador, sem papel fixo)
+    assert seeing.images[0] and seeing.images[0][0][:2] == b"\xff\xd8"  # so a chamada de visao recebe a imagem
+    assert seeing.images[1] is None and "ha um botao Comprar em destaque" in seeing.prompts[1]  # cruzada como texto
+    assert seeing.images[2] is None  # o relatorio tambem nao leva imagem
+
     blind = Script(FINISH, "R")
-    await run(blind, persona="screen_reader")
+    await run(blind, persona="screen_reader", vision=True)
+    assert blind.tiers == ["main", "write", None]  # sem visao (persona cega): nem existe a chamada de visao
     assert blind.images[0] is None and "NAO ve a tela" in blind.prompts[0]
+
     off = Script(FINISH, "R")
     await run(off, persona="default", vision=False)
-    assert off.images[0] is None
+    assert off.tiers == ["main", "write", None] and off.images[0] is None  # visao desligada por quem chamou: idem
 
 
 async def test_review_mode_brings_the_identity_and_design_guides():
@@ -167,7 +177,7 @@ async def test_validation_and_cleanup():
     with pytest.raises(SessionError):
         await run(Script(), goal="  ")
 
-    async def boom(prompt, images, max_tokens, hint=None):
+    async def boom(prompt, images, max_tokens, hint=None, tier=None):
         raise RuntimeError("falha do modelo")
 
     with pytest.raises(RuntimeError):
@@ -212,7 +222,7 @@ async def test_tools_fail_clearly_without_any_model_and_work_with_a_provider(mon
 
     monkeypatch.setattr(llm, "_http_post", fake_post)
     ctx2, _ = fake_ctx(None)
-    out = json.loads(await tools.get_tool("a11y_walkthrough").fn(ctx2, task="abrir detalhes", html=SITE))
+    out = json.loads(await tools.get_tool("a11y_walkthrough").fn(ctx2, task="abrir detalhes", html=SITE, vision=False))
     assert out["outcome"] == "completed" and out["report"] == "Relatorio do provedor"
 
 
@@ -261,12 +271,15 @@ async def test_agent_reports_blocked_mutations_to_the_model():
 
 
 async def test_screenshot_only_when_needed_first_step_new_page_or_model_asks():
+    """Cada vez que uma captura e' pedida, e' uma chamada de visao A MAIS antes do raciocinio, nao a imagem
+    embutida na mesma chamada - por isso a sequencia de papeis, nao so a de imagens, prova quando isso acontece."""
     press = decision({"type": "press", "value": "Tab"})
     ask_look = json.dumps({"thought": "quero ver", "friction": None, "look_next": True, "action": {"type": "press", "value": "Tab"}})
-    s = Script(press, ask_look, press, FINISH, "R")
-    await run(s, persona="keyboard")
-    have_image = [img is not None for img in s.images[:4]]
-    assert have_image == [True, False, True, False]  # 1o passo; nada novo; o modelo pediu (no passo 2) para ver; nada novo
+    s = Script("visao 1", press, ask_look, "visao 2", press, FINISH, "R")
+    await run(s, persona="keyboard", vision=True)
+    assert s.tiers == ["vision", "main", "main", "vision", "main", "main", "write", None]
+    # 1o passo pede visao; passo 2 nada mudou (sem visao); passo 3 o modelo pediu para ver de novo; passo 4 nada mudou
+    assert [img is not None for img in s.images] == [True, False, False, True, False, False, False, False]
 
 
 async def test_prompts_ask_for_plain_text_without_markdown():

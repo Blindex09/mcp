@@ -270,29 +270,49 @@ async def test_find_tool_is_routed_and_a_made_up_name_makes_the_cheap_answer_cli
     assert status["routing"]["escalated_by_fact"] == 1 and status["routing"]["active"] is True
 
 
-async def test_agent_routes_every_kind_of_call_and_feeds_the_outcomes_to_the_learning_step(world):
-    """Passo, relatorio e memoria passam pelo roteador; a memoria recebe o que foi rodado em cada camada."""
+async def test_pipeline_roles_bypass_the_router_only_memory_still_goes_through_it(monkeypatch, world):
+    """Passo (papel main) e relatorio (papel write, com o proprio modelo da pessoa) nunca passam pelo classificador -
+    sao papel fixo, fato tecnico ou preferencia configurada. So a atualizacao de memoria continua roteada."""
     from a11y import agent
     from a11y.session import SESSION
 
     log, script = world
+    GEN_WRITE = "modelo-que-escreve-relatorio"
+    monkeypatch.setenv("A11Y_MCP_MODEL_WRITE", GEN_WRITE)
     decision = json.dumps({"thought": "x", "friction": None, "action": {"type": "press", "value": "Tab"}})
-    script["fast"] = decision  # serve ao passo; ao relatorio (texto livre); e falha a validacao da memoria (nao e array)
-    script["main"] = "[]"  # a camada forte devolve o array vazio da memoria
+    script["router"] = '{"tier": "fast", "verify": false, "reason": "atualizar memoria e barato"}'
 
-    async def ask(prompt, images, max_tokens, hint=None):
-        return await router.ask_routed(None, prompt, images=images, max_tokens=max_tokens, hint=hint)
+    async def fake_post(url, headers, payload):
+        prompt = payload["messages"][0]["content"]
+        text = prompt if isinstance(prompt, str) else next(p["text"] for p in prompt if p["type"] == "text")
+        if payload["model"] == GEN_WRITE:
+            role, reply = "write", "RELATORIO ESCRITO PELO PAPEL WRITE"
+        elif "ROTEADOR" in text:
+            role, reply = "router", script["router"]
+        elif "VERIFICADOR" in text:
+            role, reply = "verifier", script["verifier"]
+        elif "mantem a memoria" in text:  # so esta chamada passa pela escolha de camada
+            role, reply = "memory", "[]"
+        else:  # o proprio passo do agente: papel main forcado, nunca chega aqui vindo do roteador
+            role, reply = "decision", decision
+        log.append({"role": role, "model": payload["model"], "prompt": text})
+        return {"choices": [{"message": {"content": reply}}]}
+
+    monkeypatch.setattr(llm, "_http_post", fake_post)
+
+    async def ask(prompt, images, max_tokens, hint=None, tier=None):
+        return await router.ask_routed(None, prompt, images=images, max_tokens=max_tokens, hint=hint, tier=tier)
 
     async def noop(*a, **k):
         return None
 
     r = await agent.run_agent(session=SESSION, ask=ask, mode="task", goal="comprar", url=None, html=PAGE,
                               persona="keyboard", max_steps=2, vision=False, progress=noop)
-    routed_purposes = [c["prompt"] for c in log if c["role"] == "router"]
-    assert any("decidir o proximo passo" in p for p in routed_purposes)
-    assert any("escrever o relatorio final" in p for p in routed_purposes)
-    assert any("atualizar a memoria" in p for p in routed_purposes)
-    learn_call = next(c for c in log if c["role"] == "main" and "ROTEAMENTO DESTA EXECUCAO" in c["prompt"])
-    assert "camada fast" in learn_call["prompt"] and "decidir o proximo passo" in learn_call["prompt"]
     assert r["stopped_by"] == "step_limit" and len(r["steps"]) == 2
-    assert router.stats()["to_fast"] >= 3
+    assert r["report"] == "RELATORIO ESCRITO PELO PAPEL WRITE"
+    assert [c["role"] for c in log if c["role"] in ("decision", "write")] == ["decision", "decision", "write"]
+    assert all(c["model"] == GEN_MAIN for c in log if c["role"] == "decision")  # papel main: sempre o mesmo modelo
+    assert all(c["model"] == GEN_WRITE for c in log if c["role"] == "write")  # papel write: o modelo que a pessoa escolheu
+    memory_calls = [c for c in log if c["role"] in ("router", "memory")]
+    assert any(c["role"] == "router" and "atualizar a memoria" in c["prompt"] for c in memory_calls)  # so ela e' roteada
+    assert router.stats()["forced_calls"] == 3  # 2 decisoes + 1 relatorio, nenhuma passou pelo classificador

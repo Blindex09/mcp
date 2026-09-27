@@ -145,20 +145,35 @@ def _base_url(raw: str) -> str | None:
 
 
 def _model_for(tier: str) -> str | None:
-    """So a escolha EXPLICITA (env), sem rede nem resolucao automatica - usado onde so isso importa (ex.: o roteador
-    decide se ha duas camadas distintas antes de perguntar qual usar em cada chamada)."""
-    if tier == "fast":
-        return os.environ.get("A11Y_MCP_MODEL_FAST") or os.environ.get("A11Y_MCP_MODEL")
-    return os.environ.get("A11Y_MCP_MODEL")
+    """So a escolha EXPLICITA (env), com o fast/QUALQUER-PAPEL caindo no principal quando so main foi definido - usado
+    onde so isso importa (ex.: o roteador decide se ha duas camadas distintas antes de perguntar qual usar)."""
+    if tier == "main":
+        return os.environ.get("A11Y_MCP_MODEL")
+    return os.environ.get(f"A11Y_MCP_MODEL_{tier.upper()}") or os.environ.get("A11Y_MCP_MODEL")
+
+
+def _explicit_role_env(tier: str) -> str | None:
+    """A variavel do PROPRIO papel, sem cair no principal - usado por _resolve_model para so ai' checar o que a
+    pessoa ja guardou para este papel antes de herdar o principal (senao a queda no A11Y_MCP_MODEL aqui dentro
+    esconderia essa escolha guardada, que devia vir primeiro)."""
+    if tier == "main":
+        return os.environ.get("A11Y_MCP_MODEL")
+    return os.environ.get(f"A11Y_MCP_MODEL_{tier.upper()}")
 
 
 async def _resolve_model(ctx: Any, tier: str, backend: str) -> str | None:
-    """Escolha explicita primeiro; sem ela (so p/ tier=main), a resolucao automatica de models.py."""
-    explicit = _model_for(tier)
+    """Escolha explicita primeiro; papeis que nao sao main (fast, vision, write, ...) so tem resolucao automatica
+    por catalogo se a PESSOA ja guardou uma preferencia para aquele papel; sem isso, usam o mesmo modelo do
+    julgamento principal (nunca inventam um papel por conta propria)."""
+    explicit = _explicit_role_env(tier)
     if explicit:
         return explicit
-    if tier == "fast":
-        return await _resolve_model(ctx, "main", backend)  # sem modelo rapido proprio, usa o mesmo do principal
+    if tier != "main":
+        import models  # import tardio: so models.py precisa de llm.py, nao o contrario
+
+        if (choice := models.persisted(backend, tier)) is not None:
+            return choice
+        return await _resolve_model(ctx, "main", backend)  # sem escolha propria para este papel: usa a do principal
     import models  # import tardio: so models.py precisa de llm.py, nao o contrario
 
     base_url = _base_url(os.environ.get("A11Y_MCP_BASE_URL", "")) if backend == "openai-compatible" else None

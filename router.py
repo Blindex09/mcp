@@ -49,7 +49,7 @@ def reset() -> None:
 def stats() -> dict[str, Any]:
     """Contadores para provar a economia (nao ha estado escondido): quantas rotas, para onde, quantas subidas e por que."""
     keys = ("calls", "router_calls", "to_fast", "to_main", "router_fallbacks", "escalated_by_fact",
-            "escalated_by_verifier", "verifier_calls")
+            "escalated_by_verifier", "verifier_calls", "forced_calls")
     return {**{k: _STATS[k] for k in keys}, "active": _tiers() is not None}
 
 
@@ -136,10 +136,18 @@ async def _verify(ctx: Any, prompt: str, reply: str, hint: Hint) -> tuple[bool, 
 
 
 async def ask_routed(
-    ctx: Any, prompt: str, *, images: list[bytes] | None = None, max_tokens: int = 800, hint: Hint | None = None
+    ctx: Any, prompt: str, *, images: list[bytes] | None = None, max_tokens: int = 800,
+    hint: Hint | None = None, tier: str | None = None,
 ) -> str | None:
-    """Pergunta ao modelo certo. None = nenhum respondeu. Sem dica ou sem escolha possivel, vai direto a camada forte."""
+    """Pergunta ao modelo certo. None = nenhum respondeu. Sem dica ou sem escolha possivel, vai direto a camada forte.
+
+    tier: quando quem chama exige um PAPEL especifico (ex.: vision, so um modelo com visao entende a imagem; write,
+    a pessoa escolheu qual modelo escreve o relatorio final), pula o classificador - isso e' exigencia tecnica ou
+    preferencia configurada, nao uma decisao de custo/qualidade para o roteador arbitrar."""
     _STATS["calls"] += 1
+    if tier is not None:
+        _STATS["forced_calls"] += 1
+        return await llm.ask_model(ctx, prompt, max_tokens, images, tier)
     tiers = _tiers()
     if tiers is None or hint is None:
         return await llm.ask_model(ctx, prompt, max_tokens, images, "main")

@@ -61,7 +61,7 @@ class FakeModel(http.server.BaseHTTPRequestHandler):
         content = body["messages"][0]["content"]
         text = content if isinstance(content, str) else " ".join(p.get("text", "") for p in content if p.get("type") == "text")
         has_image = isinstance(content, list) and any(p.get("type") == "image_url" for p in content)
-        kind = "router" if "ROTEADOR" in text else "verifier" if "VERIFICADOR" in text else "learn" if "Voce mantem a memoria" in text else "report" if "RELATORIO desta sessao" in text else "find" if "You route accessibility work" in text else "step"
+        kind = "router" if "ROTEADOR" in text else "verifier" if "VERIFICADOR" in text else "learn" if "Voce mantem a memoria" in text else "report" if "RELATORIO desta sessao" in text else "find" if "You route accessibility work" in text else "vision" if "FATOS visiveis nesta captura" in text else "step"
         FakeModel.requests.append({"model": body["model"], "kind": kind, "image": has_image, "auth": self.headers.get("authorization")})
         reply = self._reply(kind, text)
         data = json.dumps({"choices": [{"message": {"content": reply}}]}).encode()
@@ -82,6 +82,8 @@ class FakeModel(http.server.BaseHTTPRequestHandler):
             return "Relatorio: o usuario conseguiu ler a pagina, mas o botao Comprar nao recebe foco e o aviso de compra nao e anunciado. Nao foi verificado com leitor de tela real."
         if kind == "find":
             return json.dumps(["component-identity-guide", "nome-que-nao-existe"])
+        if kind == "vision":
+            return "A tela mostra o titulo da pagina no topo e um botao no centro."
         step = int(re.search(r"PASSO (\d+)/", text).group(1))
         buy = re.search(r"^(e\d+) <div> .*nome='Comprar'.*$", text, re.MULTILINE)
         if step == 1:
@@ -228,11 +230,10 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         routers = [k for k in kinds if k[0] == "router"]
         work = [k for k in kinds if k[0] != "router"]
         assert routers and all(model == "fake-leve" and not image for _, model, image in routers)  # o roteador e barato e so le texto
-        assert len(routers) == len(work)  # toda chamada passou pelo roteador: nenhuma camada fixada no codigo
-        assert work[0] == ("step", "fake-principal", True)  # o roteador mandou o 1o passo para a camada forte, com captura de tela
-        assert all(model == "fake-principal" for kind, model, _ in work if kind in ("step", "report"))  # decisao do roteador, respeitada
-        assert ("learn", "fake-leve", False) in work  # o roteador mandou lembrar para a camada barata
-        assert not any(image for kind, _, image in work[1:] if kind == "step")  # captura so quando precisa
+        assert len(routers) == 1 and ("learn", "fake-leve", False) in work  # so a memoria e' decisao de custo/qualidade; o resto do pipeline tem papel fixo
+        assert work[0] == ("vision", "fake-principal", True)  # 1o passo com pagina nova: a visao descreve a captura de tela antes do raciocinio
+        assert all(model == "fake-principal" for kind, model, _ in work if kind in ("vision", "step", "report"))  # papel fixo, nao decisao do roteador
+        assert not any(image for kind, _, image in work[1:] if kind == "step")  # a captura vai para a visao, nao para o passo de raciocinio
         rv = js(await call("a11y_review", focus="componentes e estrutura", url=index, max_steps=4))
         assert rv["report"].startswith("Relatorio:") and rv["facts"]["mode"] == "review"
         learned = js(await call("a11y_learnings"))

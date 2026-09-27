@@ -77,21 +77,60 @@ async def test_model_call_repeats_the_same_request_with_more_time(monkeypatch):
     assert timeouts == [120.0, 360.0]  # o pedido nao foi abandonado: recebeu mais tempo
 
 
-async def test_audit_uses_patience_instead_of_a_hard_deadline(monkeypatch):
+async def test_audit_uses_patience_on_the_navigation_itself_not_just_the_whole_call(monkeypatch):
+    """A verificacao de acessibilidade (a11y_audit e as demais) usa tempo adaptativo NA PROPRIA navegacao: cada
+    tentativa recebe mais tempo (a mesma que patient() ja usa em todo o resto), nao so um relogio unico em volta
+    de tudo que desistiria sempre no mesmo limite se o site for lento."""
     calls = []
 
     async def spy(factory, first, attempts=3):
         calls.append(first)
-        return await factory()
+        return await factory(first)
 
-    monkeypatch.setattr(audit, "with_patience", spy)
+    monkeypatch.setattr(audit, "patient", spy)
 
     async def fn(page):
         return "ok"
 
     html = "<html lang=pt><title>t</title><body><p>oi</p></body></html>"
     assert await audit._with_page(None, html, fn) == "ok"
-    assert calls == [audit.TOTAL_TIMEOUT_S]  # a 1a espera e' so o comeco: a paciencia cuida do resto
+    assert calls == [audit.NAV_TIMEOUT_MS / 1000]  # a 1a espera e' so o comeco: a mesma paciencia de sempre cuida do resto
+
+
+async def test_a_slow_real_page_load_still_succeeds_because_the_navigation_timeout_grows(monkeypatch):
+    """Regressao: antes, a navegacao tinha um relogio FIXO (30 s) que nao crescia entre tentativas, mesmo com uma
+    espera 'adaptativa' por fora - um site que sempre demora mais que isso nunca seria verificado. Aqui a 1a espera
+    e' propositalmente curta (estoura de verdade) e so a 2a/3a (3x, 9x) e' longa o bastante para a pagina de 1,2 s."""
+    import asyncio
+
+    monkeypatch.setattr(audit, "NAV_TIMEOUT_MS", 300)  # 0.3s: a pagina de 1,2s NAO caberia sem a paciencia crescer
+
+    import http.server
+    import threading
+
+    class Slow(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            import time
+
+            time.sleep(1.2)
+            body = b"<html lang='pt'><title>lento</title><body><h1>Chegou</h1></body></html>"
+            self.send_response(200)
+            self.send_header("content-type", "text/html")
+            self.send_header("content-length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *a, **k):
+            return
+
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Slow)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        result = await audit.aria_snapshot(url=f"http://127.0.0.1:{srv.server_address[1]}/")
+        assert "Chegou" in result
+    finally:
+        srv.shutdown()
+    await asyncio.sleep(0)
 
 
 async def test_slow_action_is_retried_with_more_time_not_failed(monkeypatch):

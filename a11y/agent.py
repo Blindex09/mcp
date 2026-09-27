@@ -18,7 +18,7 @@ import time
 from collections.abc import Awaitable, Callable
 from typing import Any
 
-from llm import Hint, extract_json
+from llm import extract_json
 from router import drain_outcomes
 
 from . import learn
@@ -31,6 +31,14 @@ HISTORY_LINES = 10
 TREE_LINES_IN_PROMPT = 120
 DOSSIER_LINES_IN_PROMPT = 40
 GUIDE_CHARS = 5000
+VISION_TOKENS = 500
+
+_VISION_PROMPT = (
+    "Descreva em texto corrido, em portugues, so os FATOS visiveis nesta captura de tela: o que aparece, onde esta "
+    "cada coisa (topo, centro, ao lado de que), textos legiveis, cores e contraste que chamem atencao, o que parece "
+    "focado ou destacado. Nao julgue nem decida nada, so descreva o que um modelo sem visao precisa saber para "
+    "raciocinar sobre a pagina a partir da sua descricao."
+)
 
 AskFn = Callable[..., Awaitable[str | None]]
 
@@ -293,18 +301,23 @@ async def run_agent(
             if shot:
                 last_shot_url = obs["url"]
             look_next = False
-            prompt = f"{system}\n\n{_observation_text(obs, elements, history, step, max_steps, map_text, coverage_line(session.coverage_report()))}"
+            visual = ""
+            if shot:
+                model_calls += 1
+                visual = await ask(_VISION_PROMPT, shot, VISION_TOKENS, tier="vision") or ""
+            observation = _observation_text(obs, elements, history, step, max_steps, map_text, coverage_line(session.coverage_report()))
+            if visual:
+                observation = f"DESCRICAO VISUAL DA TELA (de um modelo com visao):\n{visual.strip()}\n\n{observation}"
+            prompt = f"{system}\n\n{observation}"
             decision: dict[str, Any] | None = None
-            step_hint = Hint(
-                purpose=f"decidir o proximo passo de um usuario simulado (persona {persona}) numa pagina, lendo a arvore de acessibilidade "
-                        "e, quando ha, uma captura de tela; a resposta e um JSON com a acao a executar",
-                brief=f"objetivo: {goal[:200]}; passo {step} de {max_steps}; pagina {obs['url']}; {len(elements)} elementos no dossie; "
-                      f"captura de tela anexa: {'sim' if shot else 'nao'}",
-                validate=lambda r: _decision_of(r) is not None,
-            )
+            # A imagem so vai direto ao raciocinio se o passo acima (com visao) nao respondeu (degrada, nao perde a visao).
+            reasoning_shot = shot if (shot and not visual) else None
             for attempt in (1, 2):
                 model_calls += 1
-                raw = await ask(prompt if attempt == 1 else prompt + "\n\nSua resposta anterior nao era um JSON valido. Responda SOMENTE com o JSON pedido.", shot, 900, hint=step_hint)
+                raw = await ask(
+                    prompt if attempt == 1 else prompt + "\n\nSua resposta anterior nao era um JSON valido. Responda SOMENTE com o JSON pedido.",
+                    reasoning_shot, 900, tier="main",
+                )
                 if raw is None:
                     stopped_by = "model_unavailable"
                     break
@@ -422,12 +435,7 @@ async def _write_report(
         "correcao que mantem o design do site; 3) o que voce NAO conseguiu verificar. Nao chame de acessivel algo so "
         "porque nada falhou; diga o que foi de fato provado."
     )
-    report_hint = Hint(
-        purpose="escrever o relatorio final de uma sessao de teste de acessibilidade, em texto corrido, com achados por gravidade, "
-                "evidencia, correcao e o que nao foi verificado",
-        brief=f"modo {mode}; persona {persona}; {len(narration)} passos narrados; {len(frictions)} atritos registrados; desfecho: {outcome}",
-    )
-    raw = await ask(prompt, None, 1800, hint=report_hint)
+    raw = await ask(prompt, None, 1800, tier="write")
     return raw or "(o modelo nao respondeu ao pedido de relatorio; use a narracao e os atritos abaixo)"
 
 

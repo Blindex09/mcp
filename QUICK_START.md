@@ -68,6 +68,10 @@ fixar você mesmo, `A11Y_MCP_MODEL` continua funcionando. Outros provedores (Ope
 estão no `README.md`. Confira com `a11y_status`. Sem chave nenhuma, as ferramentas de sessão (`a11y_open`, `a11y_dossier`, `a11y_act`…) continuam
 funcionando com o modelo do próprio cliente; só `a11y_walkthrough`/`a11y_review` e a escolha automática do `a11y_find` precisam de um modelo.
 
+O `a11y_walkthrough`/`a11y_review` usa 3 papéis fixos (visão descreve a tela, raciocínio decide o passo, relatório escreve o resultado final),
+cada um com sua env var opcional (`A11Y_MCP_MODEL_VISION`, `A11Y_MCP_MODEL_WRITE`); sem ela, herda a resolução automática do papel principal.
+Detalhe em `README.md`.
+
 ### Deixe o servidor testar sozinho
 
 ```

@@ -23,7 +23,7 @@ from urllib.parse import parse_qs, urlparse
 
 from . import page_scripts as js
 from .audit import _launch, validate_url
-from .patience import PATIENCE_FACTOR
+from .patience import PATIENCE_FACTOR, patient
 from .provisioning import check_browser_name, provisioner_for
 
 IDLE_MIN_S = 600  # so o piso; o limite real cresce com o ritmo da conversa (10x o maior intervalo visto)
@@ -209,42 +209,50 @@ class Session:
                 opts[key] = cfg[key]
         if color_scheme:
             opts["color_scheme"] = color_scheme
-        self.pw = await async_playwright().start()
-        try:
-            self.browser = await _launch(self.pw, browser)
-            self.context = await self.browser.new_context(**opts)
-            self.mutation_mode = allow_mutations
-            self.mutation_policy = effective_policy(allow_mutations, url)
-            self.blocked = []
-            self.pending = {}
-            await self.context.route("**/*", self._route)
-            await self.context.add_init_script(js.LIVE_OBSERVER_JS)
-            await self.context.add_init_script(js.LISTENER_HOOK_JS)
-            await self.context.add_init_script(js.ACTIVITY_JS)
-            self.context.on("page", self._on_popup)
-            self.context.on("request", self._request_started)
-            self.context.on("requestfinished", self._request_done)
-            self.context.on("requestfailed", self._request_done)
-            self.page = await self.context.new_page()
-            if browser == "chromium":
-                self.cdp = await self.context.new_cdp_session(self.page)
-                await self.cdp.send("DOM.enable")
-                await self.cdp.send("Accessibility.enable")
-            else:
-                notes.append(
-                    f"{browser}: sem CDP. O dossie usa o tabIndex do navegador (focavel) e cursor:pointer (sinal mais fraco) e o papel/nome "
-                    "vem do aria snapshot do Playwright; nao detecta clicavel por addEventListener; a11y_focus_style foca de verdade (dispara eventos)"
-                )
-            self.page.set_default_timeout(ACTION_TIMEOUT_MS)
-            self.page.on("dialog", self._on_dialog)
-            self.page.on("console", self._on_console)
-            if url:
-                await self.page.goto(url.strip(), wait_until="load", timeout=30_000)
-            else:
-                await self.page.set_content(html or "", wait_until="load")
-        except Exception:
-            await self.close()
-            raise
+
+        async def attempt(timeout_s: float) -> None:
+            """Uma tentativa inteira (navegador, contexto, pagina, navegacao) com um tempo de navegacao. Se a
+            pagina/o site for lento e estourar, patient() refaz esta MESMA tentativa com mais tempo, num
+            navegador novo - nunca desiste so porque um site real demora para carregar."""
+            nav_ms = int(timeout_s * 1000)
+            self.pw = await async_playwright().start()
+            try:
+                self.browser = await _launch(self.pw, browser)
+                self.context = await self.browser.new_context(**opts)
+                self.mutation_mode = allow_mutations
+                self.mutation_policy = effective_policy(allow_mutations, url)
+                self.blocked = []
+                self.pending = {}
+                await self.context.route("**/*", self._route)
+                await self.context.add_init_script(js.LIVE_OBSERVER_JS)
+                await self.context.add_init_script(js.LISTENER_HOOK_JS)
+                await self.context.add_init_script(js.ACTIVITY_JS)
+                self.context.on("page", self._on_popup)
+                self.context.on("request", self._request_started)
+                self.context.on("requestfinished", self._request_done)
+                self.context.on("requestfailed", self._request_done)
+                self.page = await self.context.new_page()
+                if browser == "chromium":
+                    self.cdp = await self.context.new_cdp_session(self.page)
+                    await self.cdp.send("DOM.enable")
+                    await self.cdp.send("Accessibility.enable")
+                self.page.set_default_timeout(nav_ms)
+                self.page.on("dialog", self._on_dialog)
+                self.page.on("console", self._on_console)
+                if url:
+                    await self.page.goto(url.strip(), wait_until="load", timeout=nav_ms)
+                else:
+                    await self.page.set_content(html or "", wait_until="load", timeout=nav_ms)
+            except Exception:
+                await self.close()  # descarta o que esta tentativa criou antes da proxima (com mais tempo)
+                raise
+
+        await patient(attempt, ACTION_TIMEOUT_MS / 1000)
+        if browser != "chromium":
+            notes.append(
+                f"{browser}: sem CDP. O dossie usa o tabIndex do navegador (focavel) e cursor:pointer (sinal mais fraco) e o papel/nome "
+                "vem do aria snapshot do Playwright; nao detecta clicavel por addEventListener; a11y_focus_style foca de verdade (dispara eventos)"
+            )
         self.persona = persona
         self.browser_name = browser
         self._req_durations, self._req_t0, self._req_count = [], {}, 0  # o ritmo aprendido e' DESTE site, nao do anterior

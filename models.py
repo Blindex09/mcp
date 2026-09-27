@@ -51,16 +51,24 @@ def native_auto(backend: str, base_url: str | None) -> str | None:
     return None
 
 
-def persisted(backend: str) -> str | None:
-    """Escolha guardada de uma resolucao anterior (aprendizado, nunca refeita a toa)."""
+def _topic(backend: str, role: str) -> str:
+    """main usa o topico historico (so o backend); outros papeis (vision, write, ...) tem o seu proprio, e caem
+    para o de main quando nao tem escolha guardada (ver llm._resolve_model) - a pessoa so precisa nomear os
+    papeis que quer separar."""
+    return backend if role == "main" else f"{backend}:{role}"
+
+
+def persisted(backend: str, role: str = "main") -> str | None:
+    """Escolha guardada de uma resolucao ou de uma preferencia da pessoa para este PAPEL (aprendizado, nunca refeita a toa)."""
+    topic = _topic(backend, role)
     for e in learn.load_all():
-        if e.get("scope") == MODEL_SCOPE and e.get("topic") == backend:
+        if e.get("scope") == MODEL_SCOPE and e.get("topic") == topic:
             return str(e["learning"]) or None
     return None
 
 
-def remember(backend: str, model: str) -> None:
-    learn.remember(MODEL_SCOPE, backend, model)
+def remember(backend: str, model: str, role: str = "main") -> None:
+    learn.remember(MODEL_SCOPE, _topic(backend, role), model)
 
 
 async def _get(url: str, headers: dict[str, str]) -> dict[str, Any] | None:

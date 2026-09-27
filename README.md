@@ -144,6 +144,14 @@ por provedor. Sem chave nenhuma, ou com um cliente sem sampling e nada resolvido
 
 Exemplo no JSON do cliente: `"env": {"ANTHROPIC_API_KEY": "..."}` — só isso já é suficiente. Para fixar você mesmo: `"env": {"ANTHROPIC_API_KEY": "...", "A11Y_MCP_MODEL": "<seu modelo>"}`.
 
+**Papéis nomeados, além de main/fast.** O agente autônomo (`a11y_walkthrough`/`a11y_review`) usa 3 papéis fixos, não uma decisão de custo/qualidade:
+`vision` descreve em texto a captura de tela antes de qualquer raciocínio, `main` decide a próxima ação, e `write` escreve o relatório final
+cruzando tudo. Cada papel tem sua própria env var opcional (`A11Y_MCP_MODEL_VISION`, `A11Y_MCP_MODEL_WRITE`); sem ela, o papel herda a mesma
+resolução automática de `A11Y_MCP_MODEL` (a escolha específica do papel, se já foi feita antes, é reaproveitada primeiro). Ex.: com Ollama Cloud,
+`OLLAMA_API_KEY` sozinha basta, e cada papel aprende seu próprio modelo real do catálogo (visão precisa de um modelo multimodal, como
+`gemma4:31b`; main e write podem ser qualquer outro, como `deepseek-v4.1-flash` e `gpt-oss:120b`). Isso é diferente do roteador fast/main
+(`router.py`), que continua sendo uma decisão de julgamento do modelo, sem papel fixo — ver seção 13 de `docs/AUDITORIA.md`.
+
 2. Sampling do cliente, se ele ainda oferecer (bônus; o Claude Code não oferece).
 3. Sem nenhum dos dois: `a11y_find` devolve o catálogo para o modelo que chamou escolher, e `a11y_walkthrough`/`a11y_review` explicam como configurar.
    As ferramentas de sessão (`a11y_open`, `a11y_dossier`, `a11y_act`…) funcionam sempre, porque aí o modelo do próprio cliente conduz.

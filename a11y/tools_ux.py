@@ -202,8 +202,10 @@ def register_ux(mcp: Any) -> None:
         ctx: Context, mode: str, goal: str, url: str, html: str, persona: str, max_steps: int, vision: bool, browser: str,
         allow_mutations: str = "auto",
     ) -> str:  # type: ignore[type-arg]
-        async def ask(prompt: str, images: list[bytes] | None, max_tokens: int, hint: Hint | None = None) -> str | None:
-            return await ask_routed(ctx, prompt, images=images, max_tokens=max_tokens, hint=hint)
+        async def ask(
+            prompt: str, images: list[bytes] | None, max_tokens: int, hint: Hint | None = None, tier: str | None = None
+        ) -> str | None:
+            return await ask_routed(ctx, prompt, images=images, max_tokens=max_tokens, hint=hint, tier=tier)
 
         async def progress(step: int, total: int, message: str) -> None:
             try:

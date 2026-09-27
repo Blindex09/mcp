@@ -217,3 +217,83 @@ async def test_fast_tier_without_its_own_choice_reuses_whatever_main_resolves_to
     monkeypatch.setattr(llm, "_http_post", fake_post)
     await llm.ask_model(None, "oi", tier="fast")
     assert posted["model"] == models.OPENAI_NATIVE_AUTO
+
+
+# --------------------------------------------------------------- papeis (vision/write/...)
+
+def test_persisted_and_remember_are_per_role_main_keeps_the_old_bare_topic(tmp_path, monkeypatch):
+    monkeypatch.setenv("A11Y_MCP_HOME", str(tmp_path))
+    models.remember("ollama", "modelo-principal")  # role="main" (padrao): topico continua so o backend
+    models.remember("ollama", "modelo-visao", role="vision")
+    models.remember("ollama", "modelo-escritor", role="write")
+    assert models.persisted("ollama") == "modelo-principal"
+    assert models.persisted("ollama", "main") == "modelo-principal"
+    assert models.persisted("ollama", "vision") == "modelo-visao"
+    assert models.persisted("ollama", "write") == "modelo-escritor"
+    topics = {(e["topic"]) for e in learn.load_all() if e["scope"] == models.MODEL_SCOPE}
+    assert topics == {"ollama", "ollama:vision", "ollama:write"}  # main sem sufixo: compativel com o que ja existia
+
+
+async def test_role_without_its_own_choice_falls_back_to_main_never_invents_one(tmp_path, monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "k")
+    monkeypatch.setenv("A11Y_MCP_HOME", str(tmp_path))
+    monkeypatch.setenv("A11Y_MCP_MODEL", "modelo-principal")
+    posted = []
+
+    async def fake_post(url, headers, payload):
+        posted.append(payload["model"])
+        return {"choices": [{"message": {"content": "ok"}}]}
+
+    monkeypatch.setattr(llm, "_http_post", fake_post)
+    await llm.ask_model(None, "x", tier="vision")  # ninguem escolheu um modelo de visao ainda
+    assert posted == ["modelo-principal"]
+
+
+async def test_explicit_env_for_a_role_wins_over_a_persisted_choice(tmp_path, monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "k")
+    monkeypatch.setenv("A11Y_MCP_HOME", str(tmp_path))
+    monkeypatch.setenv("A11Y_MCP_MODEL", "modelo-principal")
+    monkeypatch.setenv("A11Y_MCP_MODEL_WRITE", "modelo-da-variavel")
+    models.remember("openai", "modelo-guardado", role="write")
+    posted = []
+
+    async def fake_post(url, headers, payload):
+        posted.append(payload["model"])
+        return {"choices": [{"message": {"content": "ok"}}]}
+
+    monkeypatch.setattr(llm, "_http_post", fake_post)
+    await llm.ask_model(None, "x", tier="write")
+    assert posted == ["modelo-da-variavel"]  # a variavel de ambiente sempre vence
+
+
+async def test_a_role_with_a_remembered_choice_uses_it_without_asking_again(tmp_path, monkeypatch, fake_ctx):
+    monkeypatch.setenv("OPENAI_API_KEY", "k")
+    monkeypatch.setenv("A11Y_MCP_HOME", str(tmp_path))
+    monkeypatch.setenv("A11Y_MCP_MODEL", "modelo-principal")
+    models.remember("openai", "modelo-de-visao-escolhido", role="vision")
+    posted = []
+
+    async def fake_post(url, headers, payload):
+        posted.append(payload["model"])
+        return {"choices": [{"message": {"content": "ok"}}]}
+
+    monkeypatch.setattr(llm, "_http_post", fake_post)
+    ctx, prompts = fake_ctx("nao deveria ser chamado")  # o cliente nem precisa ser perguntado
+    await llm.ask_model(ctx, "x", tier="vision")
+    assert posted == ["modelo-de-visao-escolhido"] and prompts == []
+
+
+async def test_role_resolution_never_triggers_the_catalog_bootstrap_by_itself(tmp_path, monkeypatch):
+    """So o papel main tenta descobrir sozinho por catalogo; um papel especializado sem escolha nunca dispara isso -
+    so herda o que main ja resolveu (evita 3 buscas de catalogo/3 perguntas ao cliente por sessao)."""
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
+    monkeypatch.setenv("A11Y_MCP_HOME", str(tmp_path))
+    called = False
+
+    async def boom(*_a, **_k):
+        nonlocal called
+        called = True
+
+    monkeypatch.setattr(models, "fetch_catalog", boom)
+    assert await llm._resolve_model(None, "vision", "anthropic") is None
+    assert called is True  # tentou UMA vez, herdando a resolucao do papel "main" - nao existe busca propria do "vision"

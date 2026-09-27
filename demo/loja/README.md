@@ -15,7 +15,7 @@ Camada de julgamento (agir como um usuário). Só aparece usando o site. A bater
 - escolher a categoria, abrir o menu Produtos, abrir uma pergunta do FAQ e comprar um chá, tudo só com teclado;
 - controles só de mouse, o papel do campo de categoria calculado pelo navegador, o aviso de compra anunciado, o foco visível, o reflow em 320 px e a linguagem de design.
 
-Resultado: a v1 falha em quase tudo, a v2 passa no axe mas falha nas mesmas coisas da v1 (é o verde que engana), e a v3 passa em tudo.
+Resultado: a v1 falha em quase tudo, a v2 passa no axe mas falha nas mesmas coisas da v1 (é o verde que engana), e a v3 passa em toda a bateria fixa deste script (python demo/loja/verificar.py).
 
 O que cada componente é naquele site
 - O campo Categoria com opções que filtram ao digitar é um combobox editável. Na v1 era um campo de texto com divs clicáveis. Na v3 tem papel de combobox, lista com opções, setas, Enter, Escape, Home e End.
@@ -31,3 +31,6 @@ Limites conhecidos
 - O gatilho do menu Produtos da v1 não aparece na lista do dossiê porque só reage a hover em CSS. Ele foi achado passando o mouse e vendo a árvore mudar. O mapa da página agora aponta as regras de hover das folhas de estilo.
 - A medição de espaçamento conta valores calculados, então uma margem automática vira um número em pixels.
 - A bateria completa roda no Chromium. Não é leitor de tela real.
+
+Confirmação ao vivo com o agente autônomo (setembro de 2026)
+Além da bateria fixa do verificar.py, a v1 e a v3 foram testadas de novo com a11y_walkthrough de verdade, contra o Ollama Cloud, usando o pipeline de 3 papéis (visão descreve a tela, deepseek-v4.1-flash raciocina, gpt-oss:120b escreve o relatório), pedindo à persona de teclado para comprar um chá verde. Na v1 o agente tentou onze ações reais (tabular, digitar "Chá verde" no filtro, confirmar com Enter, sondar com announce o botão sem nome do cabeçalho) e nunca conseguiu comprar: todo caminho termina num controle sem foco. Na v3 o agente completou a compra em poucos passos, mas achou dois atritos que a bateria fixa do verificar.py não cobre, porque ela só confirma que o foco chega até "Chás" (t2), não o que acontece depois: ao abrir o menu Produtos os itens aparecem como listitem vazio na árvore (sem rótulo, e o foco não pula para o primeiro item ao expandir), e ao ativar o link "Chás" o foco se perde por completo, obrigando quem usa teclado a recomeçar a tabulação do zero. Ou seja, "a v3 passa em tudo" vale para a bateria fixa; testar com um agente que persegue um objetivo livre, sem passos fixados de antemão, achou uma fricção mais fina, que o script determinístico nunca chega a perguntar. Isso é o próprio ponto do projeto: verde automatizado (ou bateria fixa) não é o mesmo que comprovadamente usável.

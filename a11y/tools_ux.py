@@ -233,7 +233,8 @@ def register_ux(mcp: Any) -> None:
         """AUTONOMOUS user test: a model plays a real person with the given persona trying to accomplish a task on the
         page (url http/https or html), step by step, seeing the screen (screenshot) and the accessibility tree, and
         writes a plain-language report of what happened, where the person struggled, and what to fix (keeping the
-        design), including what could NOT be verified. Needs the server's own model (A11Y_MCP_MODEL + provider key,
+        design), including what could NOT be verified. Needs the server's own model (a provider key is usually enough -
+        the server resolves the model by itself; see a11y_status - or a client with sampling,
         see a11y_status) or a client that offers sampling. The harness enforces the persona (keyboard/screen_reader
         have no mouse), a step cap (max 60), a time budget and stops repeated identical actions.
         task: the person's goal in plain words, e.g. "sign up for the newsletter" or "find the return policy"."""

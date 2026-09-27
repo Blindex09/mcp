@@ -8,7 +8,8 @@ Quem responde (o servidor e um MCP standalone, sem depender de outro projeto):
 1. Um modelo configurado por ambiente, chamando o provedor DIRETO (caminho principal: o MCP de 2026-07-28
    descontinuou o sampling em favor de chamar a API do provedor):
    - A11Y_MCP_BACKEND  = anthropic | openai | openai-compatible | ollama (opcional; senao detecta pelo ambiente)
-   - A11Y_MCP_MODEL    = id do modelo. OBRIGATORIO: nao ha modelo padrao embutido, a escolha e sua.
+   - A11Y_MCP_MODEL    = id do modelo, se voce quiser escolher. Nao ha modelo padrao EMBUTIDO no codigo (nenhuma
+                        opiniao nossa sobre "qual e bom"); sem esta variavel, models.py resolve automaticamente.
    - A11Y_MCP_MODEL_FAST = (opcional) modelo mais barato para o que e leve (escolher guias, resumir aprendizados); o julgamento
                         pesado (usuario autonomo, relatorio) usa sempre A11Y_MCP_MODEL. Sem ele, tudo usa A11Y_MCP_MODEL.
    - ANTHROPIC_API_KEY / OPENAI_API_KEY / A11Y_MCP_API_KEY = chave (so do ambiente, nunca registrada)
@@ -16,6 +17,11 @@ Quem responde (o servidor e um MCP standalone, sem depender de outro projeto):
    - OLLAMA_HOST       = endereco do Ollama nativo (padrao http://localhost:11434)
    - OLLAMA_API_KEY    = chave do Ollama Cloud (Authorization Bearer). Sozinha ja escolhe o backend ollama e o endereco
                         https://ollama.com; no acesso direto o modelo e o nome da lista de tags (ex.: gemma4:31b), sem -cloud
+
+   A11Y_MCP_MODEL e opcional: sem ele, models.py resolve sozinho (nesta ordem) - roteador nativo do provedor quando
+   existe (gpt-5-auto na OpenAI, openrouter/auto na OpenRouter), ou o catalogo real da conta lido por um modelo
+   (o do cliente, via sampling) e guardado para nao perguntar de novo. So fica sem modelo quem nao tem chave nenhuma
+   ou cujo cliente nao oferece sampling na primeira vez; nesse caso a11y_status/a11y_find mostram o catalogo real.
 2. O modelo do proprio cliente via MCP sampling, se o cliente ainda oferecer (bonus; nao conte com ele).
 Imagens (visao) sao aceitas nos dois caminhos; modelo sem visao simplesmente nao as usa bem - isso e da sua escolha.
 """
@@ -44,9 +50,10 @@ BACKEND_TIMEOUT_S = 120.0  # so a 1a espera; se estourar, o mesmo pedido e' repe
 BACKENDS = ("anthropic", "openai", "openai-compatible", "ollama")
 
 NO_MODEL_HELP = (
-    "Nenhum modelo disponivel: defina A11Y_MCP_MODEL e a chave do provedor (ANTHROPIC_API_KEY, OPENAI_API_KEY, "
-    "A11Y_MCP_BASE_URL+A11Y_MCP_API_KEY para compativeis com OpenAI, OLLAMA_API_KEY para o Ollama Cloud, ou A11Y_MCP_BACKEND=ollama). "
-    "O cliente tambem nao oferece sampling."
+    "Nenhum modelo disponivel: defina a chave do provedor (ANTHROPIC_API_KEY, OPENAI_API_KEY, "
+    "A11Y_MCP_BASE_URL+A11Y_MCP_API_KEY para compativeis com OpenAI, OLLAMA_API_KEY para o Ollama Cloud, ou A11Y_MCP_BACKEND=ollama) - "
+    "so a chave costuma bastar, o servidor resolve o modelo sozinho na primeira chamada. O cliente tambem nao oferece sampling "
+    "(precisa dele para essa primeira resolucao, ou de A11Y_MCP_MODEL definido a mao)."
 )
 
 
@@ -95,16 +102,29 @@ def configured_backend() -> str | None:
 
 
 def backend_status() -> dict[str, Any]:
-    """Estado do modelo de apoio para diagnostico (nunca inclui chaves)."""
+    """Estado do modelo de apoio para diagnostico, SEM chamada de rede (nunca inclui chaves).
+
+    model/model_source cobrem so o que ja da para saber sem sair a rede: a escolha explicita, uma escolha ja
+    guardada de uma resolucao anterior, ou o roteador nativo do provedor. O quarto caminho (catalogo ao vivo +
+    escolha por um modelo) so acontece na primeira chamada de verdade (ask_model), por isso pode faltar aqui e
+    ainda assim funcionar depois - dai auto=true quando ha backend mas nenhuma das tres primeiras resolveu."""
     backend = configured_backend()
-    model = os.environ.get("A11Y_MCP_MODEL") or None
+    model = os.environ.get("A11Y_MCP_MODEL")
+    source = "pessoa" if model else None
+    if not model and backend:
+        import models
+
+        base_url = _base_url(os.environ.get("A11Y_MCP_BASE_URL", "")) if backend == "openai-compatible" else None
+        if (learned := models.persisted(backend)) is not None:
+            model, source = learned, "aprendido"
+        elif (native := models.native_auto(backend, base_url)) is not None:
+            model, source = native, "nativo"
+    auto = bool(backend and not model)  # sem modelo fixo ainda, mas a 1a chamada de verdade pode resolver sozinha
     return {
-        "backend": backend,
-        "model": model, "model_fast": os.environ.get("A11Y_MCP_MODEL_FAST") or None,
-        "ready": bool(backend and model),
-        "problem": None if (backend and model) else (
-            "defina A11Y_MCP_MODEL" if backend else "nenhum backend configurado"
-        ),
+        "backend": backend, "model": model, "model_source": source, "auto": auto,
+        "model_fast": os.environ.get("A11Y_MCP_MODEL_FAST") or None,
+        "ready": bool(model),
+        "problem": None if backend else "nenhum backend configurado",
     }
 
 
@@ -125,19 +145,46 @@ def _base_url(raw: str) -> str | None:
 
 
 def _model_for(tier: str) -> str | None:
-    """Roteamento por PROPOSITO da chamada (economia com qualidade): leve -> modelo barato, se a pessoa configurou um."""
+    """So a escolha EXPLICITA (env), sem rede nem resolucao automatica - usado onde so isso importa (ex.: o roteador
+    decide se ha duas camadas distintas antes de perguntar qual usar em cada chamada)."""
     if tier == "fast":
         return os.environ.get("A11Y_MCP_MODEL_FAST") or os.environ.get("A11Y_MCP_MODEL")
     return os.environ.get("A11Y_MCP_MODEL")
 
 
-async def _ask_backend(prompt: str, max_tokens: int, images: list[bytes] | None, tier: str = "main") -> str | None:
+async def _resolve_model(ctx: Any, tier: str, backend: str) -> str | None:
+    """Escolha explicita primeiro; sem ela (so p/ tier=main), a resolucao automatica de models.py."""
+    explicit = _model_for(tier)
+    if explicit:
+        return explicit
+    if tier == "fast":
+        return await _resolve_model(ctx, "main", backend)  # sem modelo rapido proprio, usa o mesmo do principal
+    import models  # import tardio: so models.py precisa de llm.py, nao o contrario
+
+    base_url = _base_url(os.environ.get("A11Y_MCP_BASE_URL", "")) if backend == "openai-compatible" else None
+    key_env = {
+        "ANTHROPIC_API_KEY": os.environ.get("ANTHROPIC_API_KEY", ""),
+        "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY", ""),
+        "A11Y_MCP_API_KEY": os.environ.get("A11Y_MCP_API_KEY", ""),
+        "OLLAMA_API_KEY": os.environ.get("OLLAMA_API_KEY", ""),
+        "_ollama_host": _ollama_host() or "",
+    }
+    resolution = await models.resolve(ctx, backend, base_url, key_env)
+    return resolution.model
+
+
+async def _ask_backend(
+    prompt: str, max_tokens: int, images: list[bytes] | None, tier: str = "main", ctx: Any = None
+) -> str | None:
     backend = configured_backend()
-    model = _model_for(tier)
     if not backend:
         return None
+    model = await _resolve_model(ctx, tier, backend)
     if not model:
-        logger.warning("backend %s sem A11Y_MCP_MODEL: nao ha modelo padrao, defina o seu", backend)
+        logger.warning(
+            "backend %s sem modelo resolvido: defina A11Y_MCP_MODEL, ou peca ao cliente (a11y_status mostra o catalogo)",
+            backend,
+        )
         return None
     pics = _b64(images)
     try:
@@ -193,7 +240,9 @@ async def _ask_backend(prompt: str, max_tokens: int, images: list[bytes] | None,
     return None
 
 
-async def _ask_client(ctx: Any, prompt: str, max_tokens: int, images: list[bytes] | None) -> str | None:
+async def ask_client(ctx: Any, prompt: str, max_tokens: int, images: list[bytes] | None = None) -> str | None:
+    """So o modelo do CLIENTE (MCP sampling), sem tentar backend nenhum. Usado quando ainda nao ha modelo do
+    servidor para perguntar (ex.: models.py escolhendo qual modelo o servidor vai usar)."""
     try:
         from mcp.types import ImageContent, SamplingMessage, TextContent
 
@@ -209,17 +258,20 @@ async def _ask_client(ctx: Any, prompt: str, max_tokens: int, images: list[bytes
         return None
 
 
+_ask_client = ask_client  # nome antigo, mantido para nao quebrar quem ja importava a versao "privada"
+
+
 async def ask_model(
     ctx: Any, prompt: str, max_tokens: int = 800, images: list[bytes] | None = None, tier: str = "main"
 ) -> str | None:
     """Pergunta ao modelo: 1) provedor configurado (direto), 2) sampling do cliente. None = nenhum respondeu.
     tier: main (julgamento pesado) | fast (tarefa leve; usa A11Y_MCP_MODEL_FAST se a pessoa configurou)."""
     if configured_backend() is not None:
-        reply = await _ask_backend(prompt, max_tokens, images, tier)
+        reply = await _ask_backend(prompt, max_tokens, images, tier, ctx)
         if reply is not None:
             return reply
     if ctx is not None:
-        return await _ask_client(ctx, prompt, max_tokens, images)
+        return await ask_client(ctx, prompt, max_tokens, images)
     return None
 
 

@@ -127,15 +127,22 @@ A especificação MCP de 2026-07-28 descontinuou o sampling (o servidor deve cha
 
 | Variável | Uso |
 |---|---|
-| `A11Y_MCP_MODEL` | obrigatória: id do modelo. Não há modelo padrão embutido; a escolha é sua |
 | `ANTHROPIC_API_KEY` | ativa o provedor Anthropic |
 | `OPENAI_API_KEY` | ativa o provedor OpenAI |
 | `A11Y_MCP_BASE_URL` (+ `A11Y_MCP_API_KEY`) | qualquer servidor compatível com OpenAI (xAI, OpenRouter, LM Studio, Ollama `/v1`…) |
 | `A11Y_MCP_BACKEND` | `anthropic` \| `openai` \| `openai-compatible` \| `ollama` (opcional; senão detecta pelo ambiente) |
 | `OLLAMA_HOST` | Ollama nativo (padrão `http://localhost:11434`; use um modelo com visão para as capturas) |
-| `OLLAMA_API_KEY` | Ollama Cloud: a chave sozinha escolhe o backend `ollama` e o endereço `https://ollama.com`; use como `A11Y_MCP_MODEL` o nome da lista de tags (por exemplo `gemma4:31b`, sem `-cloud`) |
+| `OLLAMA_API_KEY` | Ollama Cloud: a chave sozinha escolhe o backend `ollama` e o endereço `https://ollama.com` |
+| `A11Y_MCP_MODEL` | opcional: id do modelo, se você quiser escolher você mesmo. Sobrepõe qualquer resolução automática |
 
-Exemplo no JSON do cliente: `"env": {"ANTHROPIC_API_KEY": "...", "A11Y_MCP_MODEL": "<seu modelo>"}` na entrada do servidor.
+**A chave sozinha costuma bastar** — `A11Y_MCP_MODEL` não é mais obrigatório. Sem ele, `models.py` resolve o modelo sozinho, nesta ordem, sem
+nenhuma tabela ou opinião nossa sobre "qual é bom": (1) uma escolha já feita antes fica guardada e é reaproveitada; (2) quando o provedor tem
+roteador nativo — `gpt-5-auto` na OpenAI, `openrouter/auto` quando `A11Y_MCP_BASE_URL` é literalmente o da OpenRouter —, delega para o produto
+deles; (3) senão, busca ao vivo o catálogo real de modelos da conta e pede ao modelo do cliente (via MCP sampling) que escolha um, pelo
+significado da tarefa; a resposta só vale se for um nome que existe de fato no catálogo, e a escolha fica guardada, então isso acontece uma vez
+por provedor. Sem chave nenhuma, ou com um cliente sem sampling e nada resolvido ainda, `a11y_status` mostra o catálogo real para você escolher.
+
+Exemplo no JSON do cliente: `"env": {"ANTHROPIC_API_KEY": "..."}` — só isso já é suficiente. Para fixar você mesmo: `"env": {"ANTHROPIC_API_KEY": "...", "A11Y_MCP_MODEL": "<seu modelo>"}`.
 
 2. Sampling do cliente, se ele ainda oferecer (bônus; o Claude Code não oferece).
 3. Sem nenhum dos dois: `a11y_find` devolve o catálogo para o modelo que chamou escolher, e `a11y_walkthrough`/`a11y_review` explicam como configurar.

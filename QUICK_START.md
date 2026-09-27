@@ -53,17 +53,20 @@ Claude: [a11y_contrast, depois razão e aprovação para texto normal/grande e c
 
 O que o automático não cobre (teclado de ponta a ponta, leitor de tela, toque) o Claude lembra de testar à mão, seguindo o guia `nvda-testing-guide`.
 
-### Dê um modelo ao servidor (para o usuário autônomo e o `a11y_find`)
+### Dê uma chave ao servidor (para o usuário autônomo e o `a11y_find`)
 
-A especificação MCP de 2026 descontinuou o sampling, então o servidor chama o provedor direto. Na entrada do servidor no JSON, em `"env"`:
+A especificação MCP de 2026 descontinuou o sampling, então o servidor chama o provedor direto. Na entrada do servidor no JSON, em `"env"`,
+só a chave já basta — o servidor resolve sozinho qual modelo usar:
 
 ```json
-"env": { "ANTHROPIC_API_KEY": "sk-ant-...", "A11Y_MCP_MODEL": "<o modelo que você escolher>" }
+"env": { "ANTHROPIC_API_KEY": "sk-ant-..." }
 ```
 
-Não há modelo padrão: `A11Y_MCP_MODEL` é sua escolha. Outros provedores (OpenAI, xAI/OpenRouter/LM Studio via `A11Y_MCP_BASE_URL`, Ollama)
-estão no `README.md`. Confira com `a11y_status`. Sem modelo, as ferramentas de sessão (`a11y_open`, `a11y_dossier`, `a11y_act`…) continuam
-funcionando com o modelo do próprio cliente; só `a11y_walkthrough`/`a11y_review` e a escolha automática do `a11y_find` precisam dele.
+Não há modelo padrão embutido no código, mas também não é preciso escolher um: sem `A11Y_MCP_MODEL`, o servidor usa o roteador nativo do
+provedor quando existe, ou pede ao modelo do cliente que escolha pelo catálogo real da conta (uma vez; a escolha fica guardada). Se quiser
+fixar você mesmo, `A11Y_MCP_MODEL` continua funcionando. Outros provedores (OpenAI, OpenRouter/xAI/LM Studio via `A11Y_MCP_BASE_URL`, Ollama)
+estão no `README.md`. Confira com `a11y_status`. Sem chave nenhuma, as ferramentas de sessão (`a11y_open`, `a11y_dossier`, `a11y_act`…) continuam
+funcionando com o modelo do próprio cliente; só `a11y_walkthrough`/`a11y_review` e a escolha automática do `a11y_find` precisam de um modelo.
 
 ### Deixe o servidor testar sozinho
 

@@ -8,6 +8,10 @@ import llm
 import mcp_server
 
 
+async def _no_catalog(*_a, **_k):
+    return None
+
+
 @pytest.fixture()
 def calls(monkeypatch):
     """Intercepta o HTTP; devolve o log de chamadas e o dict que define a resposta."""
@@ -44,16 +48,26 @@ def test_status_never_leaks_the_key(monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "SEGREDO-123")
     monkeypatch.setenv("A11Y_MCP_MODEL", "m1")
     st = llm.backend_status()
-    assert st == {"backend": "anthropic", "model": "m1", "model_fast": None, "ready": True, "problem": None}
+    assert st == {
+        "backend": "anthropic", "model": "m1", "model_source": "pessoa", "auto": False,
+        "model_fast": None, "ready": True, "problem": None,
+    }
     assert "SEGREDO-123" not in json.dumps(st)
 
 
-async def test_there_is_no_built_in_default_model(monkeypatch, calls):
+async def test_no_hardcoded_default_falls_back_to_auto_resolution_and_gives_up_without_a_catalog(monkeypatch, calls):
+    """Sem A11Y_MCP_MODEL o codigo nao tem opiniao propria sobre qual modelo usar: tenta resolver sozinho
+    (models.resolve), e sem catalogo nem cliente que julgue, desiste sem chamar o provedor de chat."""
+    import models
+
     log, _ = calls
     monkeypatch.setenv("ANTHROPIC_API_KEY", "k")  # chave sem modelo escolhido
+    monkeypatch.setattr(models, "fetch_catalog", _no_catalog)
     assert await llm.ask_model(None, "x") is None
     assert log == []
-    assert "A11Y_MCP_MODEL" in llm.backend_status()["problem"]
+    st = llm.backend_status()
+    assert st["auto"] is True and st["model"] is None and st["ready"] is False  # sem modelo fixo AINDA
+    assert st["problem"] is None  # nao e um erro: a proxima chamada de verdade pode resolver sozinha
 
 
 async def test_direct_provider_has_priority_over_client_sampling(monkeypatch, calls, fake_ctx):

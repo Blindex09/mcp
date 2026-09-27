@@ -66,6 +66,14 @@ def relevant(host: str) -> list[dict[str, Any]]:
     return [e for e in load_all() if e.get("scope") in (GENERAL, host)]
 
 
+def remember(scope: str, topic: str, learning: str) -> None:
+    """Grava um FATO direto (sem passar por modelo), reaproveitando a mesma fusao/dedup/limite dos aprendizados
+    normais. Usado para coisas decididas uma vez e reaproveitadas (ex.: qual modelo um provedor resolveu ser),
+    nao para julgamento de execucao."""
+    merged = merge_changes(load_all(), [{"topic": topic, "learning": learning, "scope": scope}], {scope})
+    _save(merged)
+
+
 def render_for_prompt(entries: list[dict[str, Any]]) -> str:
     lines = [f"- [{e['scope']}] {e['topic']}: {e['learning']}" for e in entries]
     return "\n".join(lines)[:PROMPT_CHARS]

@@ -423,17 +423,20 @@ async def _write_report(
         "finished": "o proprio usuario simulado encerrou",
     }.get(stopped_by, stopped_by)
     prompt = (
-        "Escreva o RELATORIO desta sessao em portugues, em texto corrido e humano, para quem constroi o site, sem asteriscos, "
-        "sem markdown e sem caracteres especiais soltos (titulos simples em linhas proprias, itens por frases). "
+        "Escreva o RELATORIO desta sessao em portugues, todo em linguagem natural, direto e objetivo, em texto "
+        "corrido do comeco ao fim - sem titulos, sem topicos, sem numeracao, sem rotulos como 'Evidencia:' ou "
+        "'Correcao:', sem asteriscos nem markdown. Nao repita a mesma forma para cada achado como se fosse um "
+        "formulario preenchido; escreva como quem conta o que viu para a pessoa que construiu o site, em paragrafos "
+        "corridos, cada um encadeado no anterior. "
         + ("Modo: tarefa de usuario." if mode == "task" else "Modo: revisao de componentes e design.")
         + f"\nPersona: {persona}\nObjetivo/foco: {goal}\nDesfecho: {outcome}. Como terminou: {limits}.\n"
         f"Resumo do proprio agente: {summary or '(nenhum)'}\n\nO QUE VOCE PERCEBEU PASSO A PASSO:\n" + "\n".join(narration)
         + "\n\nATRITOS E ACHADOS REGISTRADOS:\n" + ("\n".join(frictions) or "(nenhum)") + f"\n\nLOG DE ACOES:\n{log}\n\n"
         + (f"\nCOBERTURA (fatos medidos pelo servidor; diga no relatorio o que ficou de fora): {json.dumps(coverage, ensure_ascii=False)[:1400]}\n" if coverage else "")
-        + "Estruture: 1) o que aconteceu e se deu para cumprir o objetivo; 2) achados ordenados por gravidade "
-        "(bloqueio, serio, moderado, leve), cada um com a evidencia observada, por que importa para a pessoa e a "
-        "correcao que mantem o design do site; 3) o que voce NAO conseguiu verificar. Nao chame de acessivel algo so "
-        "porque nada falhou; diga o que foi de fato provado."
+        + "Conte, nessa ordem, mas em prosa continua: o que aconteceu e se deu para cumprir o objetivo; os problemas "
+        "encontrados, do mais grave (o que bloqueia por completo) ao mais leve, cada um explicado com o que voce viu "
+        "de fato, por que isso afeta a pessoa usando o site e como corrigir sem mudar o visual; e por fim o que voce "
+        "nao conseguiu verificar. Nao chame de acessivel algo so porque nada falhou; diga o que foi de fato provado."
     )
     raw = await ask(prompt, None, 1800, tier="write")
     return raw or "(o modelo nao respondeu ao pedido de relatorio; use a narracao e os atritos abaixo)"

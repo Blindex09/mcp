@@ -247,7 +247,10 @@ async def _ask_backend(
                 ollama_headers["authorization"] = f"Bearer {os.environ['OLLAMA_API_KEY']}"
             data = await _http_post(
                 f"{host}/api/chat", ollama_headers,
-                {"model": model, "stream": False, "options": {"num_predict": max_tokens}, "messages": [msg]},
+                # think=False: nosso proprio prompt ja pede o raciocinio dentro do JSON (campo "thought"), e sem
+                # isso um modelo com pensamento estendido pode gastar todo o num_predict pensando e nunca escrever
+                # o conteudo - fato observado (done_reason "length", content vazio), nao suposicao.
+                {"model": model, "stream": False, "think": False, "options": {"num_predict": max_tokens}, "messages": [msg]},
             )
             return str(data.get("message", {}).get("content", "")) or None
     except (httpx.HTTPError, ValueError) as e:

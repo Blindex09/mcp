@@ -149,6 +149,19 @@ async def test_ollama_backend_with_image(monkeypatch, calls):
     assert log[0]["payload"]["model"] == "llava" and log[0]["payload"]["messages"][0]["images"]
 
 
+async def test_ollama_disables_thinking_so_the_answer_isnt_eaten_by_it(monkeypatch, calls):
+    """Regressao real (achada testando a demo/loja ao vivo): um modelo com pensamento estendido (deepseek-v4.1-flash,
+    via Ollama Cloud) pode gastar todo o num_predict "pensando" e nunca escrever o conteudo (done_reason "length",
+    content vazio) - o pedido chega com HTTP 200, mas a resposta que interessa nunca sai. Nosso proprio prompt ja
+    pede o raciocinio dentro do JSON (campo "thought"), entao o pensamento estendido do provedor e' redundante."""
+    log, reply = calls
+    monkeypatch.setenv("A11Y_MCP_BACKEND", "ollama")
+    monkeypatch.setenv("A11Y_MCP_MODEL", "deepseek-v4.1-flash")
+    reply["data"] = {"message": {"content": "ok"}}
+    assert await llm.ask_model(None, "x") == "ok"
+    assert log[0]["payload"]["think"] is False
+
+
 @pytest.mark.parametrize("error", [httpx.ConnectError("x"), httpx.ReadTimeout("t"), ValueError("json")])
 async def test_failure_returns_none_and_never_leaks_key(monkeypatch, calls, caplog, error):
     _, reply = calls

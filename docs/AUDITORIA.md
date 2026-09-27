@@ -246,3 +246,17 @@ O que é fato e não julgamento: o valor de NAV_TIMEOUT_MS/ACTION_TIMEOUT_MS é 
 Teste de regressão. tests/test_patience.py ganhou um teste que prova que patient() é chamado com o tempo da 1a tentativa passado direto para a navegação (não um relógio único por fora), e um teste com um servidor HTTP local de verdade, lento de propósito (1,2s), com NAV_TIMEOUT_MS reduzido para 0,3s só nesse teste: a 1a tentativa estoura de verdade, e só a 2a/3a (tempo maior) tem sucesso — provando que o mecanismo funciona de ponta a ponta, não só que a função foi chamada.
 
 Limite. Não há hoje um teste de regressão equivalente, com servidor lento real, para a11y/session.py::Session.open() (só a prova unitária de que patient() e o padrão attempt(timeout_s) estão no lugar, via os testes de test_patience.py que já cobrem SESSION.act e envio de formulário retido).
+
+## 15. Bug real ao testar ao vivo: pensamento estendido comia a resposta (setembro de 2026)
+
+Achado testando a demo/loja (site "ruim" v1-original) com o pipeline de 3 papéis de verdade, contra o Ollama Cloud: o passo de raciocínio (papel main, deepseek-v4.1-flash) parava com "model_unavailable" mesmo com a chamada HTTP voltando 200 OK. O log confirmava as 5 chamadas para https://ollama.com/api/chat com sucesso, então não era rede nem chave.
+
+Investigação. Chamando o mesmo endpoint direto, com um prompt tão longo quanto o real (mapa da página + observação), a resposta veio com content vazio, thinking com milhares de caracteres, e done_reason "length": o modelo gastou todo o num_predict (900) pensando e nunca chegou a escrever o JSON pedido. llm.py:252 tratava content vazio como "" or None, ou seja, como se o modelo não tivesse respondido — o pedido chegou, o provedor devolveu 200, mas o dado que interessa nunca saiu.
+
+Correção. a11y/llm.py agora manda think: false em toda chamada ao backend ollama. Nosso próprio prompt já pede o raciocínio dentro do JSON (campo "thought"), então o pensamento estendido do provedor é redundante para esse uso — e sem ele o mesmo prompt real voltou com content de 351 caracteres, JSON válido, em 109 tokens em vez de 900 gastos e zero úteis.
+
+O que é fato e não julgamento: done_reason "length" com content vazio é um resultado observado, não uma suposição; think é um campo documentado da API do Ollama, uma configuração, não uma opinião sobre qual modelo é bom.
+
+Teste de regressão. tests/test_llm_backends.py::test_ollama_disables_thinking_so_the_answer_isnt_eaten_by_it prova que toda chamada ao backend ollama leva think: false no corpo da requisição.
+
+Na mesma sessão de teste ao vivo: o pedido do dono de que o relatório final saia todo em linguagem natural, direto e objetivo, em texto corrido — sem títulos, tópicos nem rótulos tipo "Evidência:"/"Correção:" repetidos por achado, que é como o relatório estava saindo até aqui. O prompt de a11y/agent.py::_write_report (papel write) foi reescrito para pedir prosa corrida e proibir explicitamente títulos, listas, numeração e rótulos, mantendo o conteúdo pedido (o que aconteceu, achados do mais grave ao mais leve com evidência/motivo/correção, o que não foi verificado) mas exigindo que venha encadeado em parágrafos, não em formulário. Não há teste de código para "isto está em prosa" (seria heurística de julgamento sobre texto livre do modelo); a verificação é ao vivo, testando de novo depois de reiniciar o cliente MCP.

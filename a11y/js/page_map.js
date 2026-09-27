@@ -93,12 +93,22 @@
   const live = q('[aria-live]:not([aria-live=off]),[role=alert],[role=status],[role=log],[role=alertdialog]').map(e => ({role: e.getAttribute('role'), live: e.getAttribute('aria-live'), atomic: e.getAttribute('aria-atomic'), text_length: clean(e.textContent).length}));
 
   // --- ordem de leitura x ordem visual: inversoes EXATAS entre pares (aritmetica; sem limiar nem lista de tags)
+  // "Mesma linha" e' sobreposicao vertical real entre as caixas, nao uma banda fixa de pixels: dois elementos
+  // inline na mesma linha podem ter alturas bem diferentes (padding, fonte), e um bucket fixo os separa em
+  // "linhas" diferentes mesmo estando lado a lado - foi o que um teste ao vivo achou (bug real, nao suposicao).
   const ownText = (e) => Array.from(e.childNodes).some(n => n.nodeType === 3 && clean(n.textContent));
   const flow = all.filter(e => visible(e) && (ownText(e) || e.matches('img,input,select,textarea,button,a[href],[role=button],[role=img]'))).slice(0, 400);
   const rtl = (document.documentElement.getAttribute('dir') || getComputedStyle(document.body).direction) === 'rtl';
-  const visualSorted = flow.map((e, i) => ({e, i, r: e.getBoundingClientRect()})).sort((a, b) => {
-    const ya = Math.round((a.r.top + scrollY) / 8), yb = Math.round((b.r.top + scrollY) / 8);
-    return ya !== yb ? ya - yb : (rtl ? b.r.left - a.r.left : a.r.left - b.r.left); });
+  const byTop = flow.map((e, i) => ({e, i, r: e.getBoundingClientRect()})).sort((a, b) => (a.r.top - b.r.top) || (a.r.left - b.r.left));
+  const lines = [];
+  for (const item of byTop) {
+    const top = item.r.top + scrollY, bottom = item.r.bottom + scrollY;
+    const line = lines[lines.length - 1];
+    // mesma linha se o topo do proximo comeca antes do fundo da linha atual acabar (sobreposicao vertical real)
+    if (line && top < line.bottom) { line.items.push(item); line.bottom = Math.max(line.bottom, bottom); }
+    else lines.push({bottom, items: [item]});
+  }
+  const visualSorted = lines.flatMap((line) => line.items.slice().sort((a, b) => rtl ? b.r.left - a.r.left : a.r.left - b.r.left));
   const rank = new Array(flow.length); visualSorted.forEach((x, vi) => { rank[x.i] = vi; });
   let inversions = 0; const adjacent = [];
   for (let i = 0; i < flow.length; i++) for (let j = i + 1; j < flow.length; j++) if (rank[i] > rank[j]) { inversions++; if (j === i + 1 && adjacent.length < 8) adjacent.push({first_in_dom: clean(flow[i].textContent || flow[i].getAttribute('alt') || '').slice(0, 40), appears_visually_first: clean(flow[j].textContent || flow[j].getAttribute('alt') || '').slice(0, 40)}); }

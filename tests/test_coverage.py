@@ -60,6 +60,25 @@ async def test_page_map_gives_facts_about_all_the_content(rich):
     assert any(d["on"] == "document" and d["type"] == "click" for d in m["delegated_listeners"])  # acao delegada: alvo real desconhecido
 
 
+async def test_reading_order_same_visual_line_is_not_a_false_inversion_just_because_boxes_differ_in_height():
+    """Regressao real (achada testando um site proprio ao vivo): dois elementos na MESMA linha visual, um mais
+    alto que o outro (padding maior), tinham a borda superior separada por mais de 8px - o bucket fixo antigo
+    os jogava em "linhas" diferentes e acusava uma inversao de ordem de leitura que nao existe: da esquerda pra
+    direita, quem vem primeiro no DOM tambem aparece primeiro na tela."""
+    html = (
+        "<!doctype html><html lang='pt'><title>t</title><body>"
+        "<button style='padding:1px 6px'>Primeiro</button>"
+        "<span style='display:inline-block;padding:8px 16px'>Segundo</span>"
+        "</body></html>"
+    )
+    await SESSION.open(None, html)
+    try:
+        d = (await SESSION.page_map())["main"]
+        assert d["reading_order"]["inverted_pairs"] == 0
+    finally:
+        await SESSION.close()
+
+
 async def test_page_map_scope_error_and_fact_only_output(rich):
     assert "scope nao encontrado" in (await rich.page_map("#nao-existe"))["error"]
     text = json.dumps(await rich.page_map())

@@ -21,6 +21,7 @@ from dataclasses import dataclass, field
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
+from . import findings
 from . import page_scripts as js
 from .audit import _launch, validate_url
 from .patience import PATIENCE_FACTOR, patient
@@ -81,6 +82,7 @@ class Coverage:
     frames_mapped: int = 0
     design_measured: bool = False
     stress_kinds: set[str] = field(default_factory=set)
+    probes: set[str] = field(default_factory=set)  # sondas de comportamento ja executadas (tab_walk, dialog, tabs...)
     urls: set[str] = field(default_factory=set)
     actions: int = 0
     delegated: list[dict[str, Any]] = field(default_factory=list)  # acoes que a pagina trata em ancestrais (alvo real desconhecido)
@@ -165,6 +167,9 @@ class Session:
         self.dialogs: list[str] = []
         self.popups: list[str] = []
         self.console_errors: list[str] = []
+        self.trace: list[dict[str, Any]] = []  # rastro ordenado do que foi feito e do que aconteceu (evidencia dos achados)
+        self.findings: list[dict[str, Any]] = []  # achados registrados por quem opera a sessao (a11y_finding)
+        self.elements_seen: dict[str, dict[str, Any]] = {}  # id do dossie -> {descriptor, brief}
         self._live_seen = 0
         self._console_seen = 0
         self._watchdog: asyncio.Task[None] | None = None
@@ -262,6 +267,7 @@ class Session:
         self.coverage = Coverage()
         self.coverage.urls.add(self.page.url)
         self.dialogs, self.popups, self.console_errors = [], [], []
+        self.trace, self.findings, self.elements_seen = [], [], {}
         self._live_seen = self._console_seen = 0
         self.last_used = time.monotonic()
         self._watchdog = asyncio.create_task(self._idle_watchdog())
@@ -695,6 +701,8 @@ class Session:
             "not_listed_over_limit": over_limit, "frames": len(page.frames),
         }
         self.coverage.described |= {e["id"] for e in elements}
+        for e in elements:
+            self.elements_seen[e["id"]] = findings.seen_entry(e)
         self.coverage.discovered_total = total
         result["note"] = "ids sao atributos data-a11y-id colocados na pagina; cobre a pagina, Shadow DOM e iframes"
         if scope and not elements:
@@ -771,6 +779,8 @@ class Session:
             )
         if c.actions == 0:
             gaps.append("nenhuma acao foi executada: nada foi provado por comportamento")
+        if "tab_walk" not in c.probes:
+            gaps.append("a varredura de Tab (sonda tab_walk) nao rodou: armadilha de teclado, foco coberto e ordem de foco sem fatos")
         if self.blocked:
             gaps.append(f"{len(self.blocked)} requisicao(oes) que alterariam dados nao foram enviadas (bloqueadas ou nao aprovadas): o resultado dessas acoes nao foi observado")
         if self.pending:
@@ -780,13 +790,18 @@ class Session:
             "interactive": {"discovered": c.discovered_total, "listed": len(c.described), "probed_by_behavior": len(c.described & c.probed),
                             "listed_never_probed": never_probed[:40]},
             "page_map": c.page_map, "frames": {"total": len(page.frames), "mapped": c.frames_mapped},
-            "design_measured": c.design_measured, "stress_run": sorted(c.stress_kinds),
+            "design_measured": c.design_measured, "stress_run": sorted(c.stress_kinds), "probes_run": sorted(c.probes),
             "actions_taken": c.actions, "pages_visited": sorted(c.urls)[:20], "gaps": gaps,
         }
 
     async def design_tokens(self) -> dict[str, Any]:
         self.coverage.design_measured = True
         return dict(await self._need().evaluate(js.DESIGN_JS))
+
+    def log_trace(self, kind: str, target: str | None, value: str | None, facts: dict[str, Any]) -> int:
+        """Acrescenta ao rastro e devolve o numero do passo (1, 2, 3...). E' a evidencia a que os achados se referem."""
+        self.trace.append({"n": len(self.trace) + 1, "kind": kind, "target": target, "value": value, "url": self.page.url if self.page else None, "facts": facts})
+        return len(self.trace)
 
     # ------------------------------------------------------------------ acoes
     async def act(self, action: str, target: str = "", value: str = "") -> dict[str, Any]:
@@ -828,13 +843,19 @@ class Session:
         self.coverage.actions += 1
         self.coverage.urls.add(after["url"])
         diff = tree_diff(before["tree"], after["tree"])
+        announcements = await self._live_new()
+        self.log_trace("act:" + action, target or None, value if action != "type" else None, {
+            "focus_before": before["focus"] and f"{before['focus']['tag']} {before['focus']['name']!r}", "focus_after": after["focus"] and f"{after['focus']['tag']} {after['focus']['name']!r}",
+            "url_changed": after["url"] if before["url"] != after["url"] else None, "tree_added": diff["added"][:6], "tree_removed": diff["removed"][:4],
+            "announced": [a["text"][:60] for a in announcements][:3],
+        })
         return {
             "action": action, "target": target or None, "value": value if action != "type" else f"({len(value)} caracteres)",
             "persona": self.persona,
             "url_changed": None if before["url"] == after["url"] else {"from": before["url"], "to": after["url"]},
             "focus_before": before["focus"], "focus_after": after["focus"],
             "tree_removed": diff["removed"], "tree_added": diff["added"],
-            "announcements": await self._live_new(),
+            "announcements": announcements,
             "js_dialogs": self.dialogs[d0:], "popups_blocked": self.popups[p0:],
             "console_errors": self.console_errors[c0:], "mutations_blocked": self.blocked[m0:],
             "approvals_pending": self.pending_approvals(),
@@ -903,6 +924,11 @@ class Session:
 
     async def reach(self, target: str, max_tabs: int = 100) -> dict[str, Any]:
         """Quantas vezes o usuario de teclado aperta Tab, do inicio da pagina, para chegar ao alvo."""
+        result = await self._reach(target, max_tabs)
+        self.log_trace("reach", target, None, {"reached": result["reached"], "tab_presses": result["tab_presses"], "reason": result.get("reason")})
+        return result
+
+    async def _reach(self, target: str, max_tabs: int = 100) -> dict[str, Any]:
         page = self._need()
         loc = self._locator(target)
         if await loc.count() == 0:

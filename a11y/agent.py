@@ -21,8 +21,10 @@ from typing import Any
 from llm import extract_json
 from router import drain_outcomes
 
-from . import learn
+from . import findings as findings_mod
+from . import learn, runs, verify
 from .content_index import CONTENT_DIR
+from .probes import PROBES, run_probe
 from .session import PERSONAS, Session, SessionError
 
 STALL_STEPS = 10  # passos seguidos sem NENHUM progresso (mesma pagina, mesma arvore, nada novo sondado) = travado
@@ -53,7 +55,7 @@ ProgressFn = Callable[[int, int, str], Awaitable[None]]
 
 _POINTER_ACTIONS = {"click", "hover", "focus", "select"}
 _TARGET_ACTIONS = _POINTER_ACTIONS | {"reach", "announce", "focus_style"}
-_ALL_ACTIONS = _POINTER_ACTIONS | {"press", "type", "wait", "reach", "announce", "focus_style", "page_map"}
+_ALL_ACTIONS = _POINTER_ACTIONS | {"press", "type", "wait", "reach", "announce", "focus_style", "page_map", "probe"}
 DOSSIER_POOL = 200  # o dossie e lido inteiro; o prompt mostra primeiro o que ainda NAO foi sondado (cobertura)
 
 # Fatos sobre o que este harness NAO consegue verificar (nao e julgamento: e o alcance das ferramentas).
@@ -100,6 +102,21 @@ def compact_element(e: dict[str, Any]) -> str:
     if e.get("context", {}).get("landmark"):
         bits.append(f"em={e['context']['landmark']}")
     return " ".join(bits)
+
+
+def probe_effect(r: dict[str, Any]) -> str:
+    """O que uma sonda mostrou, em poucas linhas: o resumo e cada verificacao nao atendida com esperado x observado."""
+    parts = [f"sonda {r['probe']}: {r['summary']}"]
+    for c in r.get("checks", []):
+        if c["met"] is False:
+            parts.append(f"{c['check']} (esperado: {c['expected']}; observado: {c['observed']})")
+    if r.get("stuck_at"):
+        parts.append(f"foco preso em {r['stuck_at'][0]['tag']} {r['stuck_at'][0]['name']!r}: {r['ended_because']}")
+    for o in (r.get("obscured") or [])[:3]:
+        parts.append(f"foco coberto em {o['tag']} {o['name']!r} por {(o.get('obscured') or {}).get('by')}")
+    for o in (r.get("fail_spacing_exception") or [])[:4]:
+        parts.append(f"alvo pequeno {o['tag']} {o['name']!r} {o['size']} encostado em {o['touches']}")
+    return " | ".join(parts)[:900]
 
 
 def effect_summary(r: dict[str, Any]) -> str:
@@ -165,17 +182,24 @@ def _system_prompt(mode: str, persona: str, goal: str, allowed: list[str], visio
             _guide("component-identity-guide") + "\n\n" + _guide("design-language-review")[:2500]
             + "\n\n" + _guide("page-structure-review")[:2500]
         )
+    guide += "\n\n" + _guide("wcag-evidence-and-probes")[:2800]
     return (
         f"{role}\n\nAcoes permitidas AGORA: {', '.join(allowed)}, finish. "
         "Responda SOMENTE com um objeto JSON: "
         '{"thought": "o que voce percebe e por que age assim, em portugues corrido e natural", '
         '"friction": "atrito ou achado deste passo, ou null", '
         '"look_next": true se voce precisa VER a tela no proximo passo (a tela so e enviada no 1o passo, ao mudar de pagina ou quando voce pede; economiza custo), '
+        '"finding": null OU um achado com evidencia {"criterion": "numero WCAG 2.2 como 2.1.2, ou vazio se nao tiver certeza", "severity": "blocker|serious|moderate|minor", '
+        '"target": "id do elemento ou null", "claim": "uma frase simples sobre o que esta errado e para quem", "evidence_steps": [numeros dos passos cujo resultado mostra isso]}, '
         '"action": {"type": "<acao>", "target": "<id do dossie, ex.: e12, ou css:seletor>", "value": "<tecla/texto/opcao>"} '
         'OU {"type": "finish", "outcome": "completed|completed_with_friction|not_completed", "summary": "..."}}. '
         "target so nas acoes que precisam de alvo. Para press use nomes de tecla (Tab, Shift+Tab, Enter, Space, Escape, "
         "ArrowDown...). Nao invente ids: use os da lista de elementos. Escreva thought e friction em portugues corrido e natural, "
         "sem asteriscos, sem markdown e sem caracteres especiais soltos.\n\n"
+        "SONDAS: a acao probe com value = o nome da sonda age como o teclado de uma pessoa e devolve esperado x observado. "
+        "Voce decide o que o componente e e escolhe a sonda: " + "; ".join(f"{k} ({v[2]})" for k, v in PROBES.items()) + ". "
+        "Comece pela varredura tab_walk. Registre em finding SO o que as evidencias mostram: um verificador confere cada achado contra os fatos "
+        "medidos e descarta o que eles contradizem; sem evidencia ele vira 'nao confirmado'. Uma afirmacao sobre um atributo ARIA so vale se o fato do elemento mostra isso.\n\n"
         + (f"APRENDIZADOS DE EXECUCOES ANTERIORES (use se ajudarem; a pagina de hoje manda):\n{learned}\n\n" if learned else "")
         + f"CONHECIMENTO DE APOIO (guias do servidor):\n{guide}"
     )
@@ -274,6 +298,11 @@ async def run_agent(
     last_shot_url = ""
     look_next = False
     stalled = 0
+    trace: dict[int, dict[str, Any]] = {}  # passo -> registro (a evidencia a que os achados se referem)
+    elements_seen = session.elements_seen  # id do dossie -> {descriptor, brief}: o que se viu de cada elemento (a sessao os guarda a cada dossie)
+    found: list[dict[str, Any]] = []
+    finding_notes: list[str] = []
+    last_map = ""
     try:
         for step in range(1, max_steps + 1):
             if session.stop_requested:
@@ -295,6 +324,7 @@ async def run_agent(
             map_text = ""
             if obs["url"] != mapped_url:
                 map_text = page_map_text(await session.page_map())
+                last_map = map_text
                 mapped_url = obs["url"]
             want_look = step == 1 or obs["url"] != last_shot_url or look_next  # 1o passo, pagina nova ou pedido do modelo
             shot = [await session.screenshot()] if (see and want_look) else None
@@ -331,6 +361,12 @@ async def run_agent(
             look_next = bool(decision.get("look_next"))
             if decision.get("friction"):
                 frictions.append(f"Passo {step}: {str(decision['friction']).strip()}")
+            raw_finding = decision.get("finding")
+            for raw_f in raw_finding if isinstance(raw_finding, list) else ([raw_finding] if raw_finding else []):
+                new_f, problems = findings_mod.build(raw_f, step=step, steps_seen=set(trace), elements_seen=elements_seen, persona=persona)
+                if new_f:
+                    found.append(new_f)
+                finding_notes.extend(f"Passo {step}: {p}" for p in problems)
             action = decision["action"]
             kind = str(action.get("type"))
             narration.append(f"Passo {step}: {thought or '(sem comentario)'}")
@@ -348,6 +384,10 @@ async def run_agent(
                 problem = f"acao '{kind}' nao permitida para a persona {persona}. Permitidas: {', '.join(allowed)}"
             elif kind in _TARGET_ACTIONS and not action.get("target"):
                 problem = f"a acao '{kind}' precisa de target"
+            elif kind == "probe" and str(action.get("value")) not in PROBES:
+                problem = f"a acao 'probe' precisa de value = uma sonda: {', '.join(PROBES)}"
+            elif kind == "probe" and PROBES[str(action.get("value"))][1] and not action.get("target"):
+                problem = f"a sonda '{action.get('value')}' precisa de target"
             if problem:
                 record["refused"] = problem
                 history.append(f"{step}. {kind} -> RECUSADA pelo servidor: {problem}")
@@ -358,9 +398,14 @@ async def run_agent(
                     stopped_by = "repeated_action"
                     record["refused"] = f"mesma acao no mesmo estado {REPEAT_LIMIT} vezes"
                     steps.append(record)
+                    trace[step] = record
                     break
+                n_trace = len(session.trace)
                 try:
-                    if kind == "reach":
+                    if kind == "probe":
+                        result = await run_probe(session, str(action["value"]), str(action["target"]) if action.get("target") else None)
+                        eff = probe_effect(result)
+                    elif kind == "reach":
                         result = await session.reach(str(action["target"]))
                         eff = f"Tab ate o alvo: alcancado={result['reached']} apos {result['tab_presses']} Tab" + (f" ({result.get('reason')})" if result.get("reason") else "")
                     elif kind == "page_map":
@@ -376,28 +421,41 @@ async def run_agent(
                         result = await session.act(kind, str(action.get("target") or ""), str(action.get("value") or ""))
                         eff = effect_summary(result)
                     record["effect"] = eff
+                    if len(session.trace) > n_trace:
+                        record["facts"] = session.trace[-1]["facts"]
                     history.append(f"{step}. {kind} {action.get('target') or ''} {action.get('value') or ''} -> {eff}".replace("  ", " "))
                 except Exception as e:  # noqa: BLE001 - erro da acao vira observacao para o modelo decidir
                     record["error"] = f"{type(e).__name__}: {str(e)[:160]}"
                     history.append(f"{step}. {kind} {action.get('target') or ''} -> ERRO: {record['error']}")
             steps.append(record)
+            trace[step] = record
             await asyncio.sleep(0)  # ponto de cancelamento cooperativo
         coverage = session.coverage_report()
         pending_at_end = session.pending_approvals()
-        report = await _write_report(ask, mode, goal, persona, narration, frictions, steps, outcome, summary, stopped_by, coverage)
+        findings_mod.number(found)
+        model_calls += await verify.verify(ask, found, trace, elements_seen, last_map)
+        kept = [f for f in found if f["outcome"] in ("failed", "cantTell")]
+        refuted = [f for f in found if f["outcome"] == "unsupported"]
+        report = await _write_report(ask, mode, goal, persona, narration, frictions, steps, outcome, summary, stopped_by, coverage, kept, refuted)
         model_calls += 1
         digest = (
             f"objetivo: {goal}\npersona: {persona}\ndesfecho: {outcome} ({stopped_by})\natritos: {frictions[:12]}\n"
+            f"achados verificados:\n{findings_mod.digest(kept)}\nachados refutados pela evidencia: {[f['claim'][:80] for f in refuted][:6]}\n"
             f"acoes recusadas/erros: {[(x['action'], x.get('refused') or x.get('error')) for x in steps if x.get('refused') or x.get('error')][:8]}\n"
             f"lacunas de cobertura: {coverage['gaps'][:6]}\nrelatorio: {report[:1500]}"
         )
         learned_topics = await learn.learn_from_run(ask, host, digest, routing=drain_outcomes())
         model_calls += 1 if learned_topics else 0
+        run_id = runs.save(host, {
+            "url": opened["opened"], "persona": persona, "browser": browser, "mode": mode, "goal": goal, "outcome": outcome, "stopped_by": stopped_by,
+            "findings": found, "frictions": frictions, "report": report, "steps": steps,
+        })
     finally:
         await session.close()
     return {
         "outcome": outcome, "stopped_by": stopped_by, "report": report, "narration": narration,
-        "frictions": frictions, "steps": steps,
+        "frictions": frictions, "steps": steps, "run_id": run_id,
+        "findings": kept, "rejected_findings": refuted, "finding_notes": finding_notes,
         "facts": {"mode": mode, "persona": persona, "browser": browser, "mutations": opened.get("mutations"), "limits": opened.get("limits", []), "opened": opened["opened"], "steps_used": len(steps),
                   "max_steps": max_steps, "model_calls": model_calls, "vision": bool(see),
                   "elapsed_s": round(time.monotonic() - started, 1)},
@@ -408,6 +466,7 @@ async def run_agent(
 async def _write_report(
     ask: AskFn, mode: str, goal: str, persona: str, narration: list[str], frictions: list[str],
     steps: list[dict[str, Any]], outcome: str, summary: str, stopped_by: str, coverage: dict[str, Any] | None = None,
+    kept: list[dict[str, Any]] | None = None, refuted: list[dict[str, Any]] | None = None,
 ) -> str:
     log = "\n".join(
         f"{s['step']}. {s['action']} {s.get('target') or ''} {s.get('value') or ''} -> "
@@ -433,6 +492,14 @@ async def _write_report(
         f"Resumo do proprio agente: {summary or '(nenhum)'}\n\nO QUE VOCE PERCEBEU PASSO A PASSO:\n" + "\n".join(narration)
         + "\n\nATRITOS E ACHADOS REGISTRADOS:\n" + ("\n".join(frictions) or "(nenhum)") + f"\n\nLOG DE ACOES:\n{log}\n\n"
         + (f"\nCOBERTURA (fatos medidos pelo servidor; diga no relatorio o que ficou de fora): {json.dumps(coverage, ensure_ascii=False)[:1400]}\n" if coverage else "")
+        + (
+            "\nACHADOS CONFERIDOS CONTRA A EVIDENCIA (failed = a evidencia mostra; cantTell = nao deu para confirmar, diga isso com naturalidade, sem tratar como certo):\n"
+            + findings_mod.digest(kept or []) + "\n" if kept else ""
+        )
+        + (
+            "\nAFIRMACOES REFUTADAS PELA EVIDENCIA (NAO as conte como problema; se citar, e so para dizer que foram descartadas): "
+            + "; ".join(f["claim"][:120] for f in refuted) + "\n" if refuted else ""
+        )
         + "Conte, nessa ordem, mas em prosa continua: o que aconteceu e se deu para cumprir o objetivo; os problemas "
         "encontrados, do mais grave (o que bloqueia por completo) ao mais leve, cada um explicado com o que voce viu "
         "de fato, por que isso afeta a pessoa usando o site e como corrigir sem mudar o visual; e por fim o que voce "

@@ -197,6 +197,18 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         cov = js(await call("a11y_coverage"))
         assert cov["page_map"] is True and cov["design_measured"] and cov["stress_run"] == ["reflow_320", "text_spacing"]
         assert any("nunca foram sondados" in g for g in cov["gaps"])
+        # ---------- sondas de comportamento, achados com evidencia e exportacao
+        walk = js(await call("a11y_probe", kind="tab_walk"))
+        assert walk["stops_total"] >= 3 and "ended_because" in walk
+        assert "tab_walk" in js(await call("a11y_coverage"))["probes_run"]
+        trace = js(await call("a11y_trace"))
+        n_probe = trace["steps"][-1]["n"]
+        assert trace["steps"][-1]["kind"] == "probe:tab_walk"
+        rec = js(await call("a11y_finding", claim="o botao Comprar so funciona com mouse", criterion="2.1.1", severity="blocker", target=by_text["Comprar"]["id"], evidence_steps=str(n_probe)))
+        assert rec["recorded"]["outcome"] == "failed" and rec["recorded"]["element"]["name"] == "Comprar"
+        earl = js(await call("a11y_report", format="earl"))
+        assert earl["@graph"][0]["earl:result"]["earl:outcome"] == {"@id": "earl:failed"}
+        assert js(await call("a11y_report", format="sarif"))["runs"][0]["results"][0]["ruleId"] == "WCAG-2.1.1"
         assert js(await call("a11y_close"))["closed"] is True
 
         # ---------- persona imposta pelo servidor (sem mouse)
@@ -239,6 +251,12 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         learned = js(await call("a11y_learnings"))
         assert [e["topic"] for e in learned["entries"]] == ["botao so de mouse"] and str(tmp_path / "home") in learned["folder"]
         assert js(await call("a11y_forget", topic="botao so de mouse"))["removed"] == 1
+        # ---------- execucoes salvas: listar, exportar, comparar
+        assert wt["run_id"] and rv["run_id"] and wt["run_id"] != rv["run_id"]
+        listing = js(await call("a11y_runs"))
+        assert {r["run_id"] for r in listing["runs"]} >= {wt["run_id"], rv["run_id"]} and listing["enabled"] is True
+        assert js(await call("a11y_export", run_id=wt["run_id"], format="sarif"))["version"] == "2.1.0"
+        assert js(await call("a11y_diff", base_run_id=wt["run_id"], head_run_id=rv["run_id"]))["counts"]["new"] >= 0
 
         # ---------- diagnostico
         st = js(await call("a11y_status"))

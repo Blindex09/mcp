@@ -42,3 +42,10 @@ LISTENER_HOOK_JS = _load("listener_hook")
 
 # Contador de mutacoes do DOM: sinal de progresso para as esperas adaptativas (a pagina ainda esta trabalhando?).
 ACTIVITY_JS = _load("activity")
+
+# Sondas de contrato (teclado/ARIA): fatos de um elemento, do dialogo aberto, das abas, de quem cobre o foco e do estado de um formulario.
+PROBE_EL_JS = _load("probe_el")
+PROBE_DIALOG_JS = _load("probe_dialog")
+PROBE_TABS_JS = _load("probe_tabs")
+PROBE_OBSCURED_JS = _load("probe_obscured")
+PROBE_FORM_JS = _load("probe_form")

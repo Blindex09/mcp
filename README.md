@@ -6,11 +6,11 @@ Ele dá à IA quatro coisas: conhecimento (guias e exemplos de acessibilidade), 
 
 ## O que faz
 
--  Base de conhecimento embutida (`a11y/content/`): 27 guias (WCAG 2.2, ARIA, NVDA/VoiceOver/TalkBack, checklist de auditoria, IA conversacional acessível, mobile, frameworks, XR…), 42 exemplos de componentes acessíveis (modal, abas, combobox, treegrid, chat de IA…) e o template React (10 arquivos) de chat/agente acessível.
+-  Base de conhecimento embutida (`a11y/content/`): 31 guias (WCAG 2.2, ARIA, NVDA/VoiceOver/TalkBack, checklist de auditoria, IA conversacional acessível, mobile, frameworks, XR…), 42 exemplos de componentes acessíveis (modal, abas, combobox, treegrid, chat de IA…) e o template React (10 arquivos) de chat/agente acessível.
 -  Escolha pelo modelo: `a11y_find` recebe a tarefa em linguagem natural, em qualquer idioma, e o modelo escolhe os guias e exemplos certos pelo sentido. Nada de palavra-chave, regex ou ranking lexical.
 -  Medição de fatos: contraste WCAG, auditoria axe-core num navegador real, árvore de acessibilidade e ordem de foco por teclado.
 
-## Ferramentas (31)
+## Ferramentas (38)
 
 ### Conhecimento e escolha
 
@@ -84,6 +84,24 @@ Um envio de formulário retido deixa a página onde está; se a pessoa aprovar, 
 Aprendizado sempre: depois de cada teste autônomo o modelo decide o que vale lembrar (só as mudanças; omitir nunca apaga; mesmo assunto atualiza, sem duplicar), na hora e sem fila de aprovação.
 Roteador semântico (router.py): com `A11Y_MCP_MODEL_FAST` diferente de `A11Y_MCP_MODEL`, quem escolhe a camada de cada chamada é um modelo, não uma regra. O modelo barato lê a finalidade do pedido, o contexto, fatos objetivos (tamanho, imagens anexas, saída esperada), os resultados recentes e as lições aprendidas, e decide a camada e se a resposta deve ser conferida. A resposta barata só sobe de camada quando não veio, quando a validação objetiva de quem chamou falhou (JSON ilegível, nome que não existe no catálogo) ou quando um verificador independente e mais forte a julgou inadequada; nunca pela confiança que o próprio modelo declara. Sem decisão válida do roteador, vale a camada forte. Com um só modelo não há chamada de roteamento. Os contadores aparecem em `a11y_status` (`routing`), e as lições de roteamento ficam na memória de aprendizado, no escopo `roteamento`.
 Tempo adaptativo: nenhum relógio fixo encerra um trabalho em andamento. A espera por um elemento continua enquanto a página mostra sinais de progresso (rede ou DOM mudando) e só desiste quando ela para de mudar, por um tempo proporcional ao que já esperou. A espera por uma página assentar continua enquanto houver requisição realmente em andamento; requisições que não terminam por natureza (event stream, long-poll) não contam como trabalho, e o limite para reconhecê-las acompanha a lentidão que o próprio site já mostrou (cada sessão aprende o ritmo do seu site). A chamada ao modelo, a auditoria e o carregamento de páginas são repetidos com mais tempo a cada tentativa, e a ação com efeito (clique, envio) roda uma única vez. A sessão parada só é fechada depois de um tempo que cresce com o ritmo da conversa (dez vezes o maior intervalo já visto, no mínimo dez minutos). O teste autônomo para por falta de progresso, por cancelamento (`a11y_close`) ou pelo orçamento de passos que a pessoa configurou.
+
+### Provar o comportamento e registrar achados com evidência
+
+O que o axe e os scanners não enxergam aparece **agindo**: armadilha de teclado, foco que se perde, modal que vaza, mensagem que ninguém anuncia. As sondas agem como o teclado de uma pessoa e devolvem fatos; o achado só vira falha se a evidência medida o sustenta.
+
+| Ferramenta | O que faz |
+|---|---|
+| `a11y_probe(kind, target)` | `tab_walk` (Tab do início ao fim: paradas, foco preso, foco coberto), `focus_obscured` (2.4.11), `target_size` (2.5.8), e o contrato do APG de `dialog`, `disclosure`, `menu`, `tabs`, `combobox`, mais `form_errors` (erro por campo, foco e anúncio) e `route_change` (título, foco e anúncio da nova tela). Os contratos devolvem `esperado × observado × met` (`null` = não deu para medir, não é aprovação) |
+| `a11y_finding(claim, criterion, severity, target, evidence_steps)` | Registra um achado com critério WCAG 2.2 (validado: número inexistente é descartado), gravidade, elemento e passos de evidência. Sem evidência válida vira `cantTell`, nunca `failed` |
+| `a11y_trace()` | O rastro ordenado da sessão (ações, `reach`, sondas); os números são a evidência que os achados citam |
+| `a11y_report(format)` | Os achados da sessão em `json`, `earl` (W3C EARL 1.0 JSON-LD: failed / cantTell) ou `sarif` (SARIF 2.1.0, para CI) |
+| `a11y_runs()` / `a11y_export(run_id, format)` / `a11y_diff(base, head)` | Cada teste autônomo guarda seus achados em `~/.a11y-mcp/runs` (desligar: `A11Y_MCP_RUNS=0`). Exporta uma execução e compara duas: o que é novo, o que foi corrigido e o que persiste (a identidade é critério + persona + papel e nome do elemento, não o id) |
+
+No teste autônomo, o agente tem a ação `probe` e o campo `finding`. Antes do relatório, um **verificador** confere cada achado contra o rastro e os fatos do elemento: `supported` (vira `failed`), `unsupported` (refutado: sai do relatório, fica registrado) ou `cantTell`. Sem resposta válida do verificador, o achado nunca vira falha. O guia `wcag-evidence-and-probes` ensina qual sonda prova qual critério.
+
+### Bancada de avaliação
+
+`python -m a11y.bench facts` parte de uma página correta (`evals/boa.html`) e injeta um defeito conhecido por vez (13 mutações, cada uma com o critério WCAG que viola). Compara o axe sozinho com o conjunto de ferramentas e confere que a página boa não dispara alarme. Roda sem modelo e está nos testes. `python -m a11y.bench agent` roda o agente de verdade (com o modelo configurado) e mede recall e falsos positivos por modelo, para saber se uma mudança melhorou ou piorou. O gabarito é dos defeitos plantados, não de todos os defeitos de um site real.
 
 ### Vários navegadores
 
@@ -162,7 +180,7 @@ A auditoria completa (pesquisa, o que foi removido por ser heurística e o que f
 ## Instalação
 
 ```bash
-cd c:\mcp
+cd "C:\projetos IA\mcp"
 pip install -r requirements.txt            # ou: uv sync
 python setup.py                            # registra no Claude Desktop e Cursor (entrada "accessibility")
 ```
@@ -196,7 +214,7 @@ python demo/loja/verificar.py
 ## Estrutura
 
 ```
-c:\mcp\
+C:\projetos IA\mcp\
 ├── mcp_server.py        ← servidor FastMCP (entrada)
 ├── llm.py               ← acesso ao modelo: provedores diretos (com visão) e sampling do cliente
 ├── a11y/
@@ -204,6 +222,9 @@ c:\mcp\
 │   ├── tools_ux.py      ← ferramentas de sessão: dossiê, ações, personas, design
 │   ├── session.py       ← sessão de navegador persistente (personas impostas, descoberta pelo Chromium, efeitos, estresse)
 │   ├── agent.py         ← usuário autônomo: o modelo decide, o harness impõe limites
+│   ├── probes.py        ← sondas de comportamento (Tab, contratos APG, formulários, troca de tela) + js/probe_*.js
+│   ├── findings.py + wcag.py + verify.py + runs.py ← achados com evidência, EARL/SARIF, verificador, execuções salvas e diff
+│   ├── bench.py         ← bancada de avaliação por mutação (evals/boa.html)
 │   ├── provisioning.py  ← instala Playwright e Chromium/Firefox/WebKit sozinho
 │   ├── compare.py       ← mesma página em vários navegadores (fatos lado a lado)
 │   ├── page_scripts.py + js/ ← scripts que coletam FATOS dentro da página (nunca classificam)

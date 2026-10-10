@@ -39,6 +39,20 @@ async def _run(coro: Any) -> str:
         return _error(e)
 
 
+def _export(fmt: str, items: list[dict[str, Any]], url: str, created: str = "") -> dict[str, Any]:
+    from . import findings as fnd
+
+    if fmt == "earl":
+        return fnd.to_earl(items, url, created=created)
+    if fmt == "sarif":
+        return fnd.to_sarif(items, url)
+    if fmt == "json":
+        live = [f for f in items if f.get("outcome") in ("failed", "cantTell")]
+        return {"url": url, "findings": live, "refuted": [f for f in items if f.get("outcome") == "unsupported"], "counts": {
+            o: sum(1 for f in items if f.get("outcome") == o) for o in fnd.OUTCOMES}}
+    return {"error": "format deve ser json, earl ou sarif"}
+
+
 def register_ux(mcp: Any) -> None:
     """Registra as ferramentas de sessao/UX no servidor FastMCP."""
 
@@ -197,6 +211,96 @@ def register_ux(mcp: Any) -> None:
         elements at 320 px width) | text_spacing (WCAG 1.4.12: text clipped after applying user text-spacing)."""
         return await _run(SESSION.stress(kind))
 
+
+    @mcp.tool()
+    async def a11y_probe(kind: str, target: str = "", container: str = "", max_stops: int = 150) -> str:
+        """BEHAVIOR PROBE: acts like a person's keyboard and returns FACTS of what only shows up by doing (scanners like axe do not see these).
+        kind: tab_walk (Tab from the top to the end: stops, keyboard trap, focus covered by a sticky header; WCAG 2.1.2/2.4.3/2.4.11) |
+        focus_obscured | target_size (targets under 24x24 px and the spacing exception; 2.5.8) | dialog (APG modal dialog contract, target = the button that
+        opens it) | disclosure (accordion/FAQ/nav submenu button) | menu (menu button) | tabs (target = any tab) | combobox (target = the field) |
+        form_errors (submits the form by keyboard and measures error marking, description, focus, announcement; target = submit button or field) |
+        route_change (activates a link/button and measures title, focus and announcement of the new screen). target: dossier id or 'css:<selector>'.
+        container: optional CSS selector of the dialog for kind=dialog. Contract probes return checks with expected (WAI-ARIA Authoring Practices) x
+        observed x met (true | false | null = could not measure, not a pass). YOU decide what the component really is and whether a deviation hurts.
+        Read a11y_get_reference "wcag-evidence-and-probes". Every probe is added to the session trace (cite its number in a11y_finding)."""
+        from .probes import run_probe
+
+        return await _run(run_probe(SESSION, kind, target or None, container or None, max_stops))
+
+    @mcp.tool()
+    async def a11y_finding(claim: str, criterion: str = "", severity: str = "moderate", target: str = "", evidence_steps: str = "") -> str:
+        """Record a finding of this session WITH EVIDENCE. claim: one plain sentence (what is wrong, for whom). criterion: WCAG 2.2 number such as
+        2.1.2 (empty if unsure; an unknown number is dropped). severity: blocker | serious | moderate | minor. target: dossier id or css:<selector>
+        (an id never listed by a11y_dossier is dropped). evidence_steps: comma-separated trace numbers (the n in a11y_trace) whose result shows it;
+        without valid evidence the finding is recorded as cantTell (not confirmed), never as failed. Findings feed a11y_report (JSON, EARL, SARIF)."""
+        from . import findings as fnd
+        from . import verify
+
+        try:
+            async with SESSION.lock:
+                SESSION._need()
+                trace = {t["n"]: {"action": t["kind"], "target": t["target"], "value": t["value"], "facts": t["facts"]} for t in SESSION.trace}
+                cited = [int(x) for x in evidence_steps.replace(" ", "").split(",") if x.isdigit()]
+                raw = {"claim": claim, "criterion": criterion, "severity": severity, "target": target or None, "evidence_steps": cited}
+                f, problems = fnd.build(raw, step=len(trace) + 1, steps_seen=set(trace), elements_seen=SESSION.elements_seen, persona=SESSION.persona, source="operator", default_evidence=False)
+                if f is None:
+                    return _json({"error": "; ".join(problems)})
+                f["id"] = f"f{len(SESSION.findings) + 1}"
+                if verify.packet_of(f, trace, SESSION.elements_seen):
+                    f["verification"] = {"verdict": "recorded", "reason": "registrado por quem opera a sessao, com evidencia anexada (sem verificador automatico)"}
+                else:
+                    f["outcome"], f["verification"] = "cantTell", {"verdict": "cantTell", "reason": "nenhuma evidencia valida acompanha o achado: nao da para confirmar"}
+                SESSION.findings.append(f)
+                return _json({"recorded": f, "notes": problems})
+        except SessionError as e:
+            return _json({"error": str(e)})
+
+    @mcp.tool()
+    async def a11y_trace() -> str:
+        """The ordered trace of this session (every action, reach and probe with the facts it returned). The step numbers here are the evidence a11y_finding cites."""
+        try:
+            SESSION._need()
+            return _json({"steps": SESSION.trace[-80:], "total": len(SESSION.trace)})
+        except SessionError as e:
+            return _json({"error": str(e)})
+
+    @mcp.tool()
+    async def a11y_report(format: str = "json") -> str:
+        """Export the findings recorded in this session with a11y_finding. format: json | earl (W3C EARL 1.0 JSON-LD: failed / cantTell) | sarif (SARIF 2.1.0 for CI)."""
+        try:
+            page = SESSION._need()
+            return _json(_export(format, list(SESSION.findings), page.url))
+        except SessionError as e:
+            return _json({"error": str(e)})
+
+    @mcp.tool()
+    async def a11y_runs(limit: int = 30) -> str:
+        """Past autonomous tests saved in the user's folder (newest first): run_id, site, persona, goal and how many findings per outcome. Turn off with A11Y_MCP_RUNS=0."""
+        from . import runs
+
+        return _json({"enabled": runs.enabled(), "folder": str(learn.store_path() / "runs"), "runs": runs.list_runs(max(1, min(limit, 100)))})
+
+    @mcp.tool()
+    async def a11y_export(run_id: str, format: str = "json") -> str:
+        """Export the findings of a saved run (a11y_runs). format: json | earl (W3C EARL 1.0 JSON-LD) | sarif (SARIF 2.1.0, for CI and code scanning)."""
+        from . import runs
+
+        run = runs.load(run_id)
+        if run is None:
+            return _json({"error": f"execucao '{run_id}' nao encontrada (veja a11y_runs)"})
+        return _json(_export(format, run.get("findings", []), run.get("url", ""), run.get("created", "")))
+
+    @mcp.tool()
+    async def a11y_diff(base_run_id: str, head_run_id: str) -> str:
+        """Compare two saved runs of the same site: findings that are NEW, FIXED and PERSISTING (identity = criterion + persona + the element's role and name, not the
+        eN id). Use it to check that a fix worked and nothing regressed. Only failed and cantTell findings count; refuted ones are ignored."""
+        from . import findings as fnd
+        from . import runs
+
+        base, head = runs.load(base_run_id), runs.load(head_run_id)
+        if base is None or head is None:
+            return _json({"error": "execucao nao encontrada (veja a11y_runs)"})
+        return _json({"base": base_run_id, "head": head_run_id, **fnd.diff(base.get("findings", []), head.get("findings", []))})
 
     async def _autonomous(
         ctx: Context, mode: str, goal: str, url: str, html: str, persona: str, max_steps: int, vision: bool, browser: str,

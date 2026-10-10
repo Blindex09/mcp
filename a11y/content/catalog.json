@@ -30,6 +30,7 @@
     "spatial-xr-3d-gaming": "Acessibilidade em WebXR/AR/VR, canvas 3D e jogos: requisitos XAUR, audio espacial, selecao por olhar, Three.js/Babylon.js com sobreposicao DOM e diretrizes de jogos. Use em experiencias 3D e imersivas.",
     "ui-components-apg": "Contratos de ARIA e teclado, com WCAG 2.2, para 11 componentes: modais, menus, acordeoes, texto alternativo e graficos, tooltips, comboboxes, abas, arvores, tabelas de dados, carrosseis e arrastar e soltar. Use ao implementar ou revisar qualquer um desses padroes.",
     "ux-persona-testing": "Como testar como um usuario de verdade com personas (teclado, leitor de tela, baixa visao, celular, menos movimento, cores forcadas): tarefa, passos, atritos, gravidade e o relatorio, incluindo o que NAO foi verificado. Use para conduzir um teste de usuario com as ferramentas de sessao.",
+    "wcag-evidence-and-probes": "Como registrar um achado com criterio WCAG, gravidade, elemento e evidencia (e por que o que a evidencia nao sustenta vira 'nao sei dizer'), e qual sonda de comportamento prova qual criterio (varredura de Tab, foco coberto, tamanho de alvo, contrato de dialogo, menu, abas, combobox, erros de formulario, troca de tela). Use ao registrar achados ou ao decidir como provar um comportamento agindo.",
     "web-components-a11y": "Web Components e Custom Elements: elementos associados a formularios (ElementInternals), superficie da API de acessibilidade, Shadow DOM entre raizes e padroes em Lit 3 e Stencil 4. Use ao criar componentes reutilizaveis nativos."
   },
   "example": {

@@ -2,7 +2,7 @@
   "mcpServers": {
     "accessibility": {
       "command": "uv",
-      "args": ["--directory", "c:\\mcp", "run", "mcp_server.py"]
+      "args": ["--directory", "C:\\projetos IA\\mcp", "run", "mcp_server.py"]
     }
   }
 }

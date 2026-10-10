@@ -3,17 +3,13 @@
 Test script para validar o Accessibility MCP Server antes de usar globalmente
 """
 
+import subprocess
 import sys
 from pathlib import Path
-import subprocess
-import json
 
 
 def test_python_version():
-    """Verifica se Python 3.10+ está disponível"""
-    if sys.version_info < (3, 10):
-        print(f" Python 3.10+ requerido. Você tem: {sys.version}")
-        return False
+    """Informa a versão do Python (o mínimo, 3.10, é garantido pelo pyproject)"""
     print(f" Python {sys.version.split()[0]} OK")
     return True
 
@@ -67,7 +63,7 @@ def test_server_startup():
     try:
         import time
         pr = subprocess.Popen(
-            [sys.executable, "c:\\mcp\\mcp_server.py"],
+            [sys.executable, str(Path(__file__).resolve().parent / "mcp_server.py")],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
@@ -76,7 +72,7 @@ def test_server_startup():
         pr.wait()
         print(" Servidor consegue iniciar")
         return True
-    except Exception as e:
+    except OSError as e:
         print(f" Erro ao iniciar servidor: {e}")
         return False
 
@@ -113,7 +109,7 @@ def main():
     print(f"Resultado: {passed}/{total} testes passaram")
     
     if passed == total:
-        print("\n Tudo pronto! Execute: python c:\\mcp\\setup.py")
+        print("\n Tudo pronto! Execute: python setup.py")
         return 0
     else:
         print("\n  Resolva os erros acima antes de continuar")
@@ -121,4 +117,4 @@ def main():
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())

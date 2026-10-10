@@ -5,7 +5,10 @@ Setup script para registrar o Accessibility MCP Server em Claude Desktop, VSCode
 
 import json
 import os
+import sys
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
 
 
 def setup_claude_desktop():
@@ -41,7 +44,7 @@ def setup_claude_desktop():
 
     config['mcpServers']['accessibility'] = {
         "command": "uv",
-        "args": ["--directory", "c:/mcp", "run", "mcp_server.py"]
+        "args": ["--directory", str(ROOT), "run", "mcp_server.py"]
     }
     
     # Salva
@@ -80,7 +83,7 @@ def setup_cursor():
 
     config['mcpServers']['accessibility'] = {
         "command": "uv",
-        "args": ["--directory", "c:\\mcp", "run", "mcp_server.py"]
+        "args": ["--directory", "C:\\projetos IA\\mcp", "run", "mcp_server.py"]
     }
     
     # Salva
@@ -94,15 +97,15 @@ def setup_vscode():
     """Instruções para VSCode (configuração manual via settings.json)"""
     
     print("\n Para VSCode, adicione à settings.json:")
-    print("""
-{
-  "mcp.servers": {
-    "accessibility": {
+    print(f"""
+{{
+  "mcp.servers": {{
+    "accessibility": {{
       "command": "uv",
-      "args": ["--directory", "c:\\\\mcp", "run", "mcp_server.py"]
-    }
-  }
-}
+      "args": ["--directory", {json.dumps(str(ROOT))}, "run", "mcp_server.py"]
+    }}
+  }}
+}}
     """)
 
 
@@ -122,7 +125,7 @@ def main():
         print("3. Reinicie VSCode")
         print("4. As ferramentas a11y_* estarão disponíveis")
         
-    except Exception as e:
+    except (OSError, ValueError) as e:
         print(f" Erro: {e}")
         return 1
     
@@ -130,4 +133,4 @@ def main():
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())

@@ -5,7 +5,7 @@
 O Playwright e o Chromium são instalados sozinhos na primeira vez (alguns minutos; `a11y_status` mostra o andamento).
 
 ```powershell
-cd c:\mcp
+cd "C:\projetos IA\mcp"
 python -m pip install -r requirements.txt      # ou: uv sync
 python setup.py                                # registra no Claude Desktop e Cursor
 ```
@@ -92,7 +92,7 @@ Claude: [a11y_review, depois prova o comportamento de cada componente e propõe 
   "mcpServers": {
     "accessibility": {
       "command": "uv",
-      "args": ["--directory", "c:\\mcp", "run", "mcp_server.py"]
+      "args": ["--directory", "C:\\projetos IA\\mcp", "run", "mcp_server.py"]
     }
   }
 }
@@ -101,8 +101,8 @@ Claude: [a11y_review, depois prova o comportamento de cada componente e propõe 
 ### 🆘 Se não funcionar
 
 ```bash
-python c:\mcp\test.py          # confere dependências, conteúdo embutido e inicialização
-python c:\mcp\mcp_server.py    # roda o servidor e mostra o log no stderr
+python "C:\projetos IA\mcp\test.py"          # confere dependências, conteúdo embutido e inicialização
+python "C:\projetos IA\mcp\mcp_server.py"    # roda o servidor e mostra o log no stderr
 ```
 
 Navegador não sobe: veja `a11y_status`. Se a instalação automática estiver desligada (`A11Y_MCP_AUTO_INSTALL=0`), rode `python -m playwright install chromium`.

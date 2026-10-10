@@ -300,8 +300,8 @@ Conferência na demo da loja (servida em localhost, sem modelo): na `v1-original
 ### Fase 5, execuções salvas, exportação e diff
 `a11y/runs.py`. Cada teste autônomo grava seus achados em `~/.a11y-mcp/runs` (as últimas 100; `A11Y_MCP_RUNS=0` desliga). `a11y_runs`, `a11y_export` (json, EARL, SARIF) e `a11y_diff`: novo, corrigido e persistente, com a identidade do achado dada por critério, persona e papel e nome do elemento (o id `eN` muda entre execuções). A leitura é só por id validado (letras, números e hífen), nunca por caminho vindo do cliente. Dois achados no mesmo segundo não se sobrescrevem.
 
-### Fase 6, leitor de tela real (não feita)
-Continua pendente e depende da sua autorização: o `@guidepup/setup` mexe na configuração do sistema para automatizar o NVDA. O repositório do Guidepup para Playwright também estava sem atividade recente quando pesquisei; vale conferir se ainda é mantido antes de adotar.
+### Fase 6, leitor de tela real (teste de fumaca feito; ligacao ao MCP pendente)
+Ver a seção 19. A afirmação anterior de que o `@guidepup/setup` mexe na configuração do sistema estava errada para o Windows: lá o comando `setup` não faz nada (o código só faz `break`); o que existe é o `install nvda`, que baixa um NVDA portátil para `%LOCALAPPDATA%\guidepup`.
 
 ### Limites
 - Nada disto foi exercitado com um modelo real: o agente, o verificador e a bancada `agent` foram provados com modelo roteirizado e HTTP simulado; a qualidade do julgamento depende do modelo escolhido.
@@ -320,3 +320,25 @@ Pergunta do dono: o software está completo? Revisão feita sem chamar modelo ne
 - Metadados. Descrição e versão (2.1.0) refletem o que o projeto faz hoje.
 
 Continua pendente, e não por falta de trabalho técnico: licença do repositório (escolha do dono, não inventei uma), a Fase 6 (leitor de tela real, depende de autorização para mexer na configuração do sistema) e rodar o verificador, as sondas e a bancada `agent` com um modelo real, que exigem crédito.
+
+## 19. NVDA real pelo Guidepup: teste de fumaça (outubro de 2026)
+
+Pergunta do dono: o projeto que roda o NVDA na máquina como um usuário funciona de verdade? Pesquisa na comunidade: o Guidepup é bem visto por quem o conhece (a reação pública mais conhecida é de Simon Willison, 2024), é de nicho (cerca de 4 mil downloads por semana no npm), está ativo (11 issues abertas, a mais recente de 4 de outubro de 2026, todas de confiabilidade sobre VoiceOver, nenhuma sobre NVDA) e só suporta NVDA no Windows e VoiceOver no macOS. Não há relatos públicos de gente usando o driver do NVDA no dia a dia: funcionar aqui só se descobria testando.
+
+O que foi feito, sem modelo nenhum. Pasta `nvda/` (Node, fora do pacote Python): `npm install @guidepup/guidepup @guidepup/setup playwright` e `npx @guidepup/setup install nvda` (baixa o NVDA portátil do próprio Guidepup, 405 MB, separado do NVDA instalado). O script `nvda/spike.mjs <url> <rotulo> [tabs] [leituras]` abre a página no Edge, liga o NVDA portátil, aperta Tab e grava o que o NVDA fala a cada parada, e depois lê a página do topo, item a item, no modo de leitura. Resultados em `nvda/out/` (ignorado pelo git).
+
+Resultado: funciona. O NVDA sobe, fala em português e o log de fala é capturado. Contra a demo da loja:
+- v1 (ruim): o Tab alcança só 4 paradas (Dúvidas, o botão do carrinho sem nome, o e-mail e Assinar); o menu Produtos é lido como texto solto ("Produtos triângulo pequeno preenchido apontando para baixo") e nunca recebe Tab; os três Comprar saem como "clicável, Comprar", idênticos e inalcançáveis; as perguntas do FAQ saem como "clicável"; o campo de categoria é só "edição"; as imagens não aparecem.
+- v3 (corrigida): 11 paradas de Tab; "Produtos, botão, recolhido"; "Comprar Sencha Premium, botão" (um por chá); o campo de categoria é "caixa de combinação, recolhido, possui autocompletar, editável, abre lista"; o FAQ são botões recolhidos; as imagens têm nome ("Folhas de Sencha Premium").
+Isso confirma, com a fala real, o que o agente já concluía lendo a árvore de acessibilidade.
+
+Pegadinhas reais encontradas, para quem for ligar isto ao MCP:
+1. O alerta do Firewall do Windows aparece na primeira vez que o `nvda.exe` portátil abre a porta local; ele toma o foco e o Tab percorre o alerta ("Permitir, Cancelar, Mostrar mais"). O Guidepup só fala com o NVDA em loopback, então negar é seguro. Tem que ser respondido por uma pessoa.
+2. `page.bringToFront()` do Playwright só troca de aba; o foco do sistema precisa ir para a janela do Edge (`windowsActivate` do Guidepup), senão o NVDA lê outra janela (no teste, a tela de Acessibilidade das Configurações do Windows).
+3. O NVDA do Windows só tem uma instância: o encerramento do portátil (`--quit`) fecha também o NVDA instalado do usuário. Quem usa o NVDA para operar o computador precisa ser avisado antes e reabri-lo depois.
+4. O modo de leitura continua de onde o cursor parou; sem `Control+Home` antes, a leitura da v3 ficou presa no rodapé.
+5. `lastSpokenPhrase` perde frases rápidas; o script usa `spokenPhraseLog` e zera o log a cada passo.
+
+Pendente e não resolvido: o campo Categoria não aparece na fala do Tab em nenhuma das duas versões, embora o Playwright o alcance com Tab. Pode ser o log perdendo frases ou uma diferença real; ainda não sei, então nada é afirmado sobre isso.
+
+Limites. Cobre estreito e fundo (sozinho, cerca de 6 de 55 critérios do WCAG); só Windows e NVDA; exige sessão de desktop visível e toma o NVDA da máquina durante o teste (a fala sai nas caixas de som). Ainda não está ligado ao MCP: o passo seguinte é uma ferramenta que devolva a fala real do NVDA como evidência dos achados, no lugar da árvore simulada.

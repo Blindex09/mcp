@@ -1,6 +1,7 @@
 // Teste de fumaca: abre uma pagina no navegador, liga o NVDA portatil do Guidepup e grava o que ele FALA.
 // Sem modelo de IA: so teclas (Tab e navegacao do NVDA) e o log de fala real.
 // Uso: node spike.mjs <url> <rotulo> [tabs=15] [setas=15]
+// Silencio (para rodar numa VM sem ninguem ouvir): NVDA_SILENCIO=volume (voz em 0) ou NVDA_SILENCIO=sem-fala (sintetizador "Sem fala").
 import { mkdirSync, writeFileSync } from "node:fs";
 import { nvda, windowsActivate } from "@guidepup/guidepup";
 import { chromium } from "playwright";
@@ -8,6 +9,16 @@ import { chromium } from "playwright";
 const [url, label = "pagina", tabsArg = "15", nextArg = "15"] = process.argv.slice(2);
 if (!url) {
   console.error("uso: node spike.mjs <url> <rotulo> [tabs] [setas]");
+  process.exit(2);
+}
+const silencio = process.env.NVDA_SILENCIO;
+// As chaves seguem o nvda.ini do Guidepup: [speech] synth e [[oneCore]] volume. O start() mistura isto na configuracao da sessao.
+const settings =
+  silencio === "volume" ? { speech: { oneCore: { volume: 0 } } }
+  : silencio === "sem-fala" ? { speech: { synth: "silence" } }
+  : undefined;
+if (silencio && !settings) {
+  console.error('NVDA_SILENCIO invalido: use "volume" ou "sem-fala"');
   process.exit(2);
 }
 const tabs = Number(tabsArg);
@@ -38,7 +49,7 @@ try {
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: "load" });
 
-  await nvda.start();
+  await nvda.start(settings ? { settings } : undefined);
   nvdaStarted = true;
   await pause(2500);
   await focarJanela(page);

@@ -342,3 +342,11 @@ Pegadinhas reais encontradas, para quem for ligar isto ao MCP:
 Pendente e não resolvido: o campo Categoria não aparece na fala do Tab em nenhuma das duas versões, embora o Playwright o alcance com Tab. Pode ser o log perdendo frases ou uma diferença real; ainda não sei, então nada é afirmado sobre isso.
 
 Limites. Cobre estreito e fundo (sozinho, cerca de 6 de 55 critérios do WCAG); só Windows e NVDA; exige sessão de desktop visível e toma o NVDA da máquina durante o teste (a fala sai nas caixas de som). Ainda não está ligado ao MCP: o passo seguinte é uma ferramenta que devolva a fala real do NVDA como evidência dos achados, no lugar da árvore simulada.
+
+### Adendo à seção 19: som, voz e por que o NVDA do usuário fecha
+
+Lido no código e no manual do Guidepup instalado. O manual (README e a documentação da classe NVDA) não diz nada sobre áudio, volume, mudo nem VM sem som; só que `spokenPhraseLog()` e `lastSpokenPhrase()` devolvem texto. O motivo de o NVDA do usuário fechar está no código: `nvda.start()` chama `quit()` (o `--quit` do NVDA portátil) antes de criar a configuração e iniciar, então qualquer NVDA aberto é fechado já na partida, não só no fim.
+
+A voz também vem do Guidepup, não do usuário: ele copia o `nvda.ini` que acompanha o NVDA portátil para uma pasta de sessão e inicia com `--config-path`. Essa configuração pede a voz OneCore "George" (inglês britânico); como o Windows desta máquina só tem Daniel e Maria (português do Brasil), o NVDA caiu na voz padrão do sistema, em português, que o usuário reconheceu como rápida e feminina (a Maria). A configuração não leva complementos, dicionário nem velocidade do usuário.
+
+Silêncio. `start({ settings })` é misturado (deep merge) no `nvda.ini` da sessão, com as chaves do próprio arquivo. Foi adicionada a `nvda/spike.mjs` a variável `NVDA_SILENCIO`: `volume` põe `speech.oneCore.volume = 0` (todo o caminho da fala continua igual, só some o áudio); `sem-fala` troca o sintetizador por `silence`. A mistura foi conferida offline com as próprias funções do Guidepup (o `.ini` resultante tem `volume = 0` ou `synth = silence`), sem ligar o NVDA. Não foi testado com o NVDA rodando: ainda não se sabe se o log de fala continua sendo capturado em cada modo, nem se o NVDA sobe numa VM sem placa de som. Isso só o teste dentro da VM responde.

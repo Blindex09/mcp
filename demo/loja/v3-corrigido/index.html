@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casa do Chá</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo">
+  <img src="logo.svg" alt="Casa do Chá" class="logo">
+  <nav class="nav" aria-label="Principal">
+    <a href="#inicio">Início</a>
+    <div class="dropdown">
+      <button type="button" class="trigger" aria-expanded="false" aria-controls="menu-produtos">Produtos <span aria-hidden="true">▾</span></button>
+      <ul class="menu" id="menu-produtos" hidden>
+        <li><a href="#chas">Chás</a></li>
+        <li><a href="#acessorios">Acessórios</a></li>
+        <li><a href="#presentes">Presentes</a></li>
+      </ul>
+    </div>
+    <a href="#faq">Dúvidas</a>
+  </nav>
+  <button type="button" class="cart" aria-label="Carrinho"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/><path d="M1 2h3l3 10h9l2-7H5"/></svg></button>
+</header>
+
+<main id="conteudo">
+  <h1>Casa do Chá</h1>
+  <p class="sub">Chás selecionados, direto do produtor.</p>
+
+  <section class="filtro">
+    <label for="cat">Categoria</label>
+    <input id="cat" type="text" role="combobox" aria-expanded="false" aria-controls="opts" aria-autocomplete="list" placeholder="Digite ou escolha" autocomplete="off">
+    <ul class="options" id="opts" role="listbox" aria-label="Categorias" hidden>
+      <li class="opt" role="option" id="opt-1">Chá verde</li>
+      <li class="opt" role="option" id="opt-2">Chá preto</li>
+      <li class="opt" role="option" id="opt-3">Chá branco</li>
+      <li class="opt" role="option" id="opt-4">Chá de ervas</li>
+      <li class="opt" role="option" id="opt-5">Chá mate</li>
+    </ul>
+  </section>
+
+  <section id="chas">
+    <h2>Nossos chás</h2>
+    <div class="cards">
+      <div class="card">
+        <img src="cha1.svg" alt="Folhas de Sencha Premium">
+        <h3>Sencha Premium</h3>
+        <p class="preco">R$ 39,90</p>
+        <button type="button" class="btn">Comprar<span class="sr-only"> Sencha Premium</span></button>
+      </div>
+      <div class="card">
+        <img src="cha2.svg" alt="Folhas de Earl Grey Imperial">
+        <h3>Earl Grey Imperial</h3>
+        <p class="preco">R$ 34,50</p>
+        <button type="button" class="btn">Comprar<span class="sr-only"> Earl Grey Imperial</span></button>
+      </div>
+      <div class="card">
+        <img src="cha3.svg" alt="Flores de Camomila da Serra">
+        <h3>Camomila da Serra</h3>
+        <p class="preco">R$ 27,00</p>
+        <button type="button" class="btn">Comprar<span class="sr-only"> Camomila da Serra</span></button>
+      </div>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </section>
+
+  <section id="faq">
+    <h2>Dúvidas frequentes</h2>
+    <div class="faq-item">
+      <h3 class="faq-h"><button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-a1">Qual o prazo de entrega?</button></h3>
+      <div class="faq-a" id="faq-a1" hidden>Entregamos em até 5 dias úteis para todo o Brasil.</div>
+    </div>
+    <div class="faq-item">
+      <h3 class="faq-h"><button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-a2">Posso trocar um chá aberto?</button></h3>
+      <div class="faq-a" id="faq-a2" hidden>Sim, em até 7 dias, se a embalagem estiver lacrada.</div>
+    </div>
+  </section>
+
+  <section class="news">
+    <h2>Receba novidades</h2>
+    <label for="email">Seu e-mail</label>
+    <div class="news-row">
+      <input id="email" type="email" autocomplete="email" placeholder="nome@exemplo.com">
+      <button type="button" class="assinar">Assinar</button>
+    </div>
+  </section>
+</main>
+<footer class="rodape">© Casa do Chá — feito com carinho</footer>
+<script src="app.js"></script>
+</body>
+</html>

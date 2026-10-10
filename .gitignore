@@ -36,3 +36,7 @@ env/
 .cursor/
 .claude/
 
+
+# Teste de fumaca do NVDA (Guidepup)
+nvda/node_modules/
+nvda/out/

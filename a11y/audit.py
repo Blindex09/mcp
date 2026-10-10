@@ -6,17 +6,17 @@ timeout agregado e roda um navegador headless descartavel por chamada.
 
 from __future__ import annotations
 
-import asyncio
-import json
 import re
 from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from .patience import patient
+from .provisioning import provisioner_for
+
 AXE_PATH = Path(__file__).parent / "vendor" / "axe.min.js"
-NAV_TIMEOUT_MS = 30_000
-TOTAL_TIMEOUT_S = 90
+NAV_TIMEOUT_MS = 30_000  # so a 1a espera; a MESMA navegacao e' tentada de novo com mais tempo (3x, 9x...), nao so o pedido inteiro
 _LEVEL_TAGS = {
     "A": ["wcag2a", "wcag21a"],
     "AA": ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"],
@@ -68,48 +68,52 @@ def validate_url(url: str) -> str:
     return url.strip()
 
 
-async def _launch(pw: Any) -> Any:
+async def _launch(pw: Any, browser: str = "chromium") -> Any:
+    kind = getattr(pw, browser)
     try:
-        return await pw.chromium.launch(headless=True)
-    except Exception as first:  # binario da versao exata ausente: tenta outro instalado
-        root = Path.home() / "AppData" / "Local" / "ms-playwright"
-        for exe in sorted(root.glob("chromium-*/chrome-win*/chrome.exe"), reverse=True):
-            try:
-                return await pw.chromium.launch(headless=True, executable_path=str(exe))
-            except Exception:  # noqa: BLE001, S112 - tenta o proximo binario
-                continue
+        return await kind.launch(headless=True)
+    except Exception as first:  # binario da versao exata ausente: no Chromium, tenta outro instalado
+        if browser == "chromium":
+            root = Path.home() / "AppData" / "Local" / "ms-playwright"
+            for exe in sorted(root.glob("chromium-*/chrome-win*/chrome.exe"), reverse=True):
+                try:
+                    return await kind.launch(headless=True, executable_path=str(exe))
+                except Exception:  # noqa: BLE001, S112 - tenta o proximo binario
+                    continue
         raise RuntimeError(
-            "Chromium do Playwright indisponivel. Rode: python -m playwright install chromium"
+            f"{browser} do Playwright indisponivel. Rode: python -m playwright install {browser}"
         ) from first
 
 
 async def _with_page(
-    url: str | None, html: str | None, fn: Callable[[Any], Awaitable[Any]]
+    url: str | None, html: str | None, fn: Callable[[Any], Awaitable[Any]], browser: str = "chromium"
 ) -> Any:
+    """Abre a pagina e roda fn(page). A navegacao (e a verificacao em si) usa tempo ADAPTATIVO: se a pagina/o site
+    demorar mais que a 1a espera, a MESMA tentativa de navegar e' refeita com mais tempo (3x, 9x, 27x...), num
+    navegador novo - nunca so um relogio unico que desiste e deixa de verificar um site so porque ele e' lento."""
     if bool(url) == bool(html):
         raise ValueError("informe exatamente um entre url e html")
     if url:
         validate_url(url)  # antes de subir o navegador
-    try:
-        from playwright.async_api import async_playwright
-    except ImportError as e:
-        raise RuntimeError("Playwright nao instalado. Rode: pip install playwright") from e
+    await provisioner_for(browser).ensure()  # instala Playwright/navegador sozinho se faltar
+    from playwright.async_api import async_playwright
 
-    async def run() -> Any:
+    async def attempt(timeout_s: float) -> Any:
+        nav_ms = int(timeout_s * 1000)
         async with async_playwright() as pw:
-            browser = await _launch(pw)
+            instance = await _launch(pw, browser)
             try:
-                page = await browser.new_page()
-                page.set_default_timeout(NAV_TIMEOUT_MS)
+                page = await instance.new_page()
+                page.set_default_timeout(nav_ms)  # piso para qualquer espera dentro de fn() sem timeout proprio
                 if url:
-                    await page.goto(url.strip(), wait_until="load")
+                    await page.goto(url.strip(), wait_until="load", timeout=nav_ms)
                 else:
-                    await page.set_content(html or "", wait_until="load")
+                    await page.set_content(html or "", wait_until="load", timeout=nav_ms)
                 return await fn(page)
             finally:
-                await browser.close()
+                await instance.close()
 
-    return await asyncio.wait_for(run(), timeout=TOTAL_TIMEOUT_S)
+    return await patient(attempt, NAV_TIMEOUT_MS / 1000)
 
 
 def summarize_axe(raw: dict[str, Any], max_nodes: int = 5) -> dict[str, Any]:
@@ -150,7 +154,9 @@ def summarize_axe(raw: dict[str, Any], max_nodes: int = 5) -> dict[str, Any]:
     }
 
 
-async def run_axe(url: str | None = None, html: str | None = None, level: str = "AA") -> dict[str, Any]:
+async def run_axe(
+    url: str | None = None, html: str | None = None, level: str = "AA", browser: str = "chromium"
+) -> dict[str, Any]:
     tags = _LEVEL_TAGS.get(level.upper())
     if tags is None:
         raise ValueError("level deve ser A, AA ou AAA")
@@ -163,56 +169,98 @@ async def run_axe(url: str | None = None, html: str | None = None, level: str = 
         )
         return summarize_axe(raw)
 
-    result: dict[str, Any] = await _with_page(url, html, fn)
+    result: dict[str, Any] = await _with_page(url, html, fn, browser)
     return result
 
 
-async def aria_snapshot(url: str | None = None, html: str | None = None) -> str:
+async def aria_snapshot(url: str | None = None, html: str | None = None, browser: str = "chromium") -> str:
     async def fn(page: Any) -> str:
         return str(await page.locator("body").aria_snapshot())
 
-    result: str = await _with_page(url, html, fn)
+    result: str = await _with_page(url, html, fn, browser)
     return result
 
 
 _TAB_PROBE = """() => {
-  const e = document.activeElement;
+  let e = document.activeElement;
+  while (e && e.shadowRoot && e.shadowRoot.activeElement) e = e.shadowRoot.activeElement;  // atravessa Shadow DOM aberto
   if (!e || e === document.body) return null;
   const r = e.getBoundingClientRect();
   const cs = getComputedStyle(e);
+  // Identidade do no (nao da descricao): dois links com o mesmo texto e sem id continuam sendo dois elementos.
+  const ids = (window.__a11yNodeIds = window.__a11yNodeIds || new WeakMap());
+  if (!ids.has(e)) ids.set(e, (window.__a11yNodeSeq = (window.__a11yNodeSeq || 0) + 1));
   return {
+    node: ids.get(e),
     tag: e.tagName.toLowerCase(),
     role: e.getAttribute('role'),
     name: (e.getAttribute('aria-label') || e.innerText || e.getAttribute('title')
            || e.getAttribute('alt') || '').trim().slice(0, 80),
     id: e.id || null,
     visible: r.width > 0 && r.height > 0,
-    focus_indicator: (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0)
-                     || cs.boxShadow !== 'none'
+    focus_style: {outline: cs.outlineStyle + ' ' + cs.outlineWidth + ' ' + cs.outlineColor + ' offset ' + cs.outlineOffset, box_shadow: cs.boxShadow}
   };
 }"""
 
 
+async def _focused_stop(page: Any) -> tuple[tuple[int, int], dict[str, Any]] | None:
+    """Quem tem o foco AGORA e a IDENTIDADE do no (indice do frame, numero do no), atravessando iframes.
+
+    A identidade vem do proprio no da pagina, nunca da descricao: dois links com o mesmo texto e o mesmo estilo
+    sao dois elementos. None: o foco saiu da pagina."""
+    info = await page.evaluate(_TAB_PROBE)
+    if info is None:
+        return None
+    frame_index = 0
+    if info["tag"] in ("iframe", "frame"):  # o foco esta dentro de um frame: pergunta a cada um quem o tem
+        inner_found: tuple[int, dict[str, Any]] | None = None
+        for i, fr in enumerate(page.frames):
+            if i == 0:
+                continue
+            try:
+                inner = await fr.evaluate(_TAB_PROBE)
+            except Exception:  # noqa: BLE001, S112 - frame fechado ou em transicao
+                continue
+            if inner is None:
+                continue
+            if inner_found is None:
+                inner_found = (i, inner)
+            if inner["tag"] not in ("iframe", "frame"):  # frame aninhado: o foco real esta no mais fundo
+                inner_found = (i, inner)
+                break
+        if inner_found is not None:
+            frame_index, info = inner_found
+    node = info.pop("node")
+    return (frame_index, node), info
+
+
+async def tab_stops(page: Any, steps: int) -> list[dict[str, Any]]:
+    """Aperta Tab ate o foco sair da pagina, dar a volta ou parar de mover; cada parada e um NO, nao uma descricao."""
+    seen: list[dict[str, Any]] = []
+    first: tuple[int, int] | None = None
+    previous: tuple[int, int] | None = None
+    for i in range(steps):
+        await page.keyboard.press("Tab")
+        got = await _focused_stop(page)
+        if got is None:
+            break  # o foco saiu da pagina (Chromium/WebKit no ultimo elemento)
+        ident, info = got
+        if first is None:
+            first = ident
+        elif ident in (first, previous):
+            break  # deu a volta no ciclo, ou o foco parou de mover (Firefox no ultimo elemento)
+        previous = ident
+        seen.append({"step": i + 1, "element": info})
+    return seen
+
+
 async def tab_order(
-    url: str | None = None, html: str | None = None, max_steps: int = 60
+    url: str | None = None, html: str | None = None, max_steps: int = 60, browser: str = "chromium"
 ) -> list[dict[str, Any]]:
     steps = max(1, min(max_steps, 200))
 
     async def fn(page: Any) -> list[dict[str, Any]]:
-        seen: list[dict[str, Any]] = []
-        first_key = ""
-        for i in range(steps):
-            await page.keyboard.press("Tab")
-            info = await page.evaluate(_TAB_PROBE)
-            if info is None:
-                break
-            key = json.dumps(info, sort_keys=True)
-            if i == 0:
-                first_key = key
-            elif key == first_key:
-                break  # deu a volta no ciclo
-            seen.append({"step": i + 1, "element": info})
-        return seen
+        return await tab_stops(page, steps)
 
-    result: list[dict[str, Any]] = await _with_page(url, html, fn)
+    result: list[dict[str, Any]] = await _with_page(url, html, fn, browser)
     return result

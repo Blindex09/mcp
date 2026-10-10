@@ -1,0 +1,11 @@
+{
+  "name": "a11y-mcp-nvda-spike",
+  "private": true,
+  "type": "module",
+  "description": "Teste de fumaca do Guidepup (NVDA real). Nao faz parte do pacote Python.",
+  "dependencies": {
+    "@guidepup/guidepup": "^0.35.0",
+    "@guidepup/setup": "^0.29.1",
+    "playwright": "^1.64.0"
+  }
+}

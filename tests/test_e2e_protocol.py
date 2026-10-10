@@ -8,6 +8,8 @@ import http.server
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 import threading
 from pathlib import Path
@@ -100,6 +102,21 @@ class FakeModel(http.server.BaseHTTPRequestHandler):
         return
 
 
+def start_vm_agent(token: str):
+    """Sobe o agente da VM (nvda/vm) com um NVDA simulado: prova o contrato Python x Node pelo protocolo. Sem Node, segue sem VM."""
+    node = shutil.which("node")
+    if not node:
+        return None, None, {}
+    proc = subprocess.Popen(
+        [node, str(ROOT / "nvda" / "vm" / "simulado.mjs")], stdout=subprocess.PIPE, text=True,
+        env={**os.environ, "NVDA_AGENT_TOKEN": token},
+    )
+    assert proc.stdout is not None
+    line = proc.stdout.readline()
+    assert line.startswith("PORTA "), line
+    return node, proc, {"A11Y_MCP_NVDA_VM": f"http://127.0.0.1:{line.split()[1]}", "A11Y_MCP_NVDA_TOKEN": token}
+
+
 def serve(handler):
     srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
@@ -120,6 +137,9 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         "A11Y_MCP_BACKEND": "openai-compatible", "A11Y_MCP_BASE_URL": f"http://127.0.0.1:{model.server_address[1]}/v1",
         "A11Y_MCP_API_KEY": "chave-de-teste", "A11Y_MCP_MODEL": "fake-principal", "A11Y_MCP_MODEL_FAST": "fake-leve",
     }
+    vm_token = "token-de-teste-com-mais-de-16"
+    node, vm, vm_env = start_vm_agent(vm_token)  # agente da VM de verdade (Node), com NVDA SIMULADO por tras
+    env.update(vm_env)
     params = StdioServerParameters(command=sys.executable, args=[str(ROOT / "mcp_server.py")], env=env)
     called: set[str] = set()
 
@@ -258,6 +278,15 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         assert js(await call("a11y_export", run_id=wt["run_id"], format="sarif"))["version"] == "2.1.0"
         assert js(await call("a11y_diff", base_run_id=wt["run_id"], head_run_id=rv["run_id"]))["counts"]["new"] >= 0
 
+        # ---------- fala real do NVDA (VM): so fatos, com a origem declarada
+        spoken = js(await call("a11y_nvda_speech", url=base + "/index.html", tabs=2, reads=1))
+        if node:
+            assert [x["fala"] for x in spoken["tab_walk"]] == ["Tab 1 em 127.0.0.1", "Tab 2 em 127.0.0.1"]
+            assert spoken["reading_mode"][0]["fala"] == "item 1" and "VM" in spoken["source"]
+            assert vm_token not in json.dumps(spoken)
+        else:
+            assert "A11Y_MCP_NVDA_VM" in spoken["error"]
+
         # ---------- diagnostico
         st = js(await call("a11y_status"))
         assert st["model"]["ready"] is True and st["model"]["model_fast"] == "fake-leve" and st["browsers"]["chromium"]["state"] == "ready"
@@ -266,6 +295,9 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
 
     site.shutdown()
     model.shutdown()
+    if vm:
+        vm.kill()
+        vm.wait()
     missing = registered - called
     assert not missing, f"ferramentas nao exercitadas pelo protocolo: {sorted(missing)}"
     assert registered == called  # a matriz fecha: nada registrado ficou sem prova pelo protocolo

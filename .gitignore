@@ -40,3 +40,4 @@ env/
 # Teste de fumaca do NVDA (Guidepup)
 nvda/node_modules/
 nvda/out/
+nvda/vm/iniciar-agente.cmd

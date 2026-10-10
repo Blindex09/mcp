@@ -359,6 +359,21 @@ def register_ux(mcp: Any) -> None:
         return await _autonomous(ctx, "review", focus, url, html, persona, max_steps, vision, browser, allow_mutations)
 
     @mcp.tool()
+    async def a11y_nvda_speech(url: str, tabs: int = 15, reads: int = 20) -> str:
+        """What the REAL NVDA screen reader SAYS on a page, as text (no verdict: you judge). Runs in a Windows virtual machine with an agent
+        (nvda/vm/), never on the person's own computer, so their NVDA, voice and add-ons are not touched. It presses Tab `tabs` times
+        (what a keyboard user hears at each stop) and then reads the page from the top `reads` items in reading mode. It only navigates:
+        it never activates buttons or submits forms. Needs A11Y_MCP_NVDA_VM and A11Y_MCP_NVDA_TOKEN (see the error text if missing).
+        Voice, speed and add-ons are the VM's, not the person's. url: http/https page reachable FROM the VM."""
+        from . import nvda_vm
+
+        try:
+            result = await nvda_vm.run(url, tabs=tabs, reads=reads)
+        except nvda_vm.NvdaVmError as e:
+            return _json({"error": str(e)})
+        return _json(nvda_vm.facts(result, url))
+
+    @mcp.tool()
     async def a11y_status() -> str:
         """Readiness check: is the browser (Playwright/Chromium) installed or being installed automatically, and is a
         model configured for the autonomous tools (a11y_find, a11y_walkthrough, a11y_review)? Never shows secrets."""

@@ -92,6 +92,7 @@ O que o axe e os scanners não enxergam aparece **agindo**: armadilha de teclado
 | Ferramenta | O que faz |
 |---|---|
 | `a11y_probe(kind, target)` | `tab_walk` (Tab do início ao fim: paradas, foco preso, foco coberto), `focus_obscured` (2.4.11), `target_size` (2.5.8), e o contrato do APG de `dialog`, `disclosure`, `menu`, `tabs`, `combobox`, mais `form_errors` (erro por campo, foco e anúncio) e `route_change` (título, foco e anúncio da nova tela). Os contratos devolvem `esperado × observado × met` (`null` = não deu para medir, não é aprovação) |
+| `a11y_nvda_speech(url, tabs, reads)` | O que o **NVDA de verdade** FALA na página, em texto (Tab e modo leitura), sem veredito. Roda numa **VM Windows** com um agente (`nvda/vm/`), nunca no seu computador, então o seu NVDA, a sua voz e os seus complementos não são tocados. Só navega: não ativa botões nem envia formulários. A voz e a velocidade são as da VM. Precisa de `A11Y_MCP_NVDA_VM` e `A11Y_MCP_NVDA_TOKEN`; passo a passo em `nvda/vm/LEIAME.md` |
 | `a11y_finding(claim, criterion, severity, target, evidence_steps)` | Registra um achado com critério WCAG 2.2 (validado: número inexistente é descartado), gravidade, elemento e passos de evidência. Sem evidência válida vira `cantTell`, nunca `failed` |
 | `a11y_trace()` | O rastro ordenado da sessão (ações, `reach`, sondas); os números são a evidência que os achados citam |
 | `a11y_report(format)` | Os achados da sessão em `json`, `earl` (W3C EARL 1.0 JSON-LD: failed / cantTell) ou `sarif` (SARIF 2.1.0, para CI) |

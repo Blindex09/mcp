@@ -58,7 +58,7 @@ async def test_server_exposes_only_accessibility_tools() -> None:
         # autonomia (o modelo opera como usuario) e diagnostico
         "a11y_walkthrough", "a11y_review", "a11y_nvda_speech", "a11y_status", "a11y_compare_browsers", "a11y_page_map", "a11y_coverage", "a11y_crawl", "a11y_approve", "a11y_learnings", "a11y_forget",
         # editor de arquivos do projeto da pessoa
-        "a11y_read_file", "a11y_edit_file", "a11y_approve_edit", "a11y_undo_edit",
+        "a11y_set_workspace", "a11y_read_file", "a11y_edit_file", "a11y_approve_edit", "a11y_undo_edit",
         # sondas de comportamento, achados com evidencia, execucoes salvas
         "a11y_probe", "a11y_finding", "a11y_trace", "a11y_report", "a11y_runs", "a11y_export", "a11y_diff",
     }

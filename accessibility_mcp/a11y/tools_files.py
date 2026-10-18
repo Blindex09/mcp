@@ -14,8 +14,18 @@ def _json(data: Any) -> str:
 
 def register_files(mcp: Any) -> None:
     @mcp.tool()
+    async def a11y_set_workspace(path: str) -> str:
+        """Choose the project folder the file editor may touch. Use ONLY the folder the person named in the conversation (ask them if you
+        do not know it); never guess. Nothing outside it can be read or edited, and the root of the disk or the whole home folder is
+        refused. Nothing to configure beforehand: this is the only setup, and it happens inside the conversation."""
+        try:
+            return _json(files.set_workspace(path))
+        except files.FileError as e:
+            return _json({"error": str(e)})
+
+    @mcp.tool()
     async def a11y_read_file(path: str, offset: int = 0, limit: int = 0) -> str:
-        """Read a text file of the person's project (inside the workspace folder A11Y_MCP_WORKSPACE) with line numbers, so you can fix
+        """Read a text file of the person's project (inside the workspace folder chosen with a11y_set_workspace) with line numbers, so you can fix
         accessibility problems in the source without a terminal. offset: lines to skip; limit: how many lines (0 = to the end). Secrets
         (.env, keys), .git and anything outside the workspace are refused with the reason."""
         try:

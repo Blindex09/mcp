@@ -22,6 +22,7 @@ from mcp.server.fastmcp import FastMCP
 from accessibility_mcp.a11y.provisioning import PROVISIONER
 from accessibility_mcp.a11y.session import SESSION
 from accessibility_mcp.a11y.tools import register as register_a11y
+from accessibility_mcp.telemetry import instrument
 
 # Logging so em stderr (stdout e' o canal do protocolo MCP)
 logging.basicConfig(
@@ -65,6 +66,7 @@ mcp = FastMCP(
     ),
 )
 
+instrument(mcp)  # cada ferramenta registrada daqui em diante vira um span (sem args nem resultados)
 register_a11y(mcp)
 
 

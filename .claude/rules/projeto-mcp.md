@@ -38,5 +38,5 @@ um guia ou de um playbook é mudança de instrução ao modelo e segue o portão
 
 ### Edição de arquivos
 
-`a11y_read_file`, `a11y_edit_file` e `a11y_undo_edit` editam só dentro da pasta de trabalho escolhida pela pessoa (`A11Y_MCP_WORKSPACE`), com cópia de
+`a11y_set_workspace`, `a11y_read_file`, `a11y_edit_file` e `a11y_undo_edit` editam só dentro da pasta de trabalho escolhida pela pessoa (escolhida pela pessoa na conversa com `a11y_set_workspace`; nada para configurar antes), com cópia de
 segurança antes de cada edição, escrita atômica, conferência de sintaxe do que foi editado e aprovação quando a aprovação está ligada.

@@ -1,7 +1,8 @@
 """Editor de arquivos do projeto da pessoa: ler, editar e desfazer sem depender de terminal.
 
 Papeis que nunca se invertem: o MODELO decide o que mudar e por que. O HARNESS (este modulo) so impoe o que e permitido:
-- pasta de trabalho escolhida pela pessoa (`A11Y_MCP_WORKSPACE`); nada fora dela, nem por link simbolico;
+- pasta de trabalho escolhida pela pessoa NA CONVERSA (`a11y_set_workspace`; nada para configurar antes, e a variavel
+  `A11Y_MCP_WORKSPACE` e so uma pre-selecao opcional); nada fora dela, nem por link simbolico;
 - arquivos de segredo e a pasta .git nunca sao lidos nem escritos;
 - a edicao e uma troca EXATA de um trecho que existe uma unica vez (ou todas, se pedido), nunca uma reescrita as cegas;
 - integridade: um arquivo JSON ou Python que era valido nao pode passar a ser invalido;
@@ -38,12 +39,34 @@ def approval_enabled() -> bool:
     return os.environ.get("A11Y_MCP_EDIT_APPROVAL", "1").strip().lower() not in ("0", "false", "no", "off")
 
 
+_CHOSEN: Path | None = None  # pasta escolhida na conversa (a pessoa nao precisa configurar nada)
+
+
+def _too_broad(root: Path) -> bool:
+    """Fato objetivo e protecao: a raiz do disco e a pasta pessoal inteira nao sao um projeto."""
+    return root == Path(root.anchor) or root == Path.home().resolve()
+
+
+def set_workspace(path: str) -> dict[str, str]:
+    """A pasta de trabalho e a que a PESSOA nomeou na conversa; o proprio cliente pede a permissao dela ao chamar a ferramenta."""
+    global _CHOSEN
+    root = Path(path).expanduser().resolve()
+    if not root.is_dir():
+        raise FileError(f"A pasta nao existe: {root}")
+    if _too_broad(root):
+        raise FileError("Essa pasta e ampla demais (a raiz do disco ou a pasta pessoal inteira). Escolha a pasta do projeto.")
+    _CHOSEN = root
+    return {"workspace": str(root)}
+
+
 def workspace() -> Path:
-    raw = os.environ.get("A11Y_MCP_WORKSPACE", "").strip()
+    if _CHOSEN is not None:
+        return _CHOSEN
+    raw = os.environ.get("A11Y_MCP_WORKSPACE", "").strip()  # opcional: pre-seleciona a pasta
     if not raw:
         raise FileError(
-            "Defina a pasta de trabalho com a variavel A11Y_MCP_WORKSPACE (a pasta do projeto que a pessoa escolheu). "
-            "O editor nunca mexe fora dela."
+            "Ainda nao ha pasta de trabalho. Pergunte a pessoa em que pasta esta o projeto e chame a11y_set_workspace com ela. "
+            "O editor nunca mexe fora dessa pasta."
         )
     root = Path(raw).expanduser().resolve()
     if not root.is_dir():

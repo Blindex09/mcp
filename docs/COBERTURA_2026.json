@@ -1,0 +1,75 @@
+{
+  "data": "2026-10-18T18:13:44+00:00",
+  "resultados": [
+    {
+      "conceito": "Regra 8: nenhum relogio fixo corta trabalho",
+      "estado": "COBERTO",
+      "evidencia": "varredura do codigo: nenhum wait_for com prazo fora dos lugares permitidos"
+    },
+    {
+      "conceito": "Agent Skills em SKILL.md (formato aberto)",
+      "estado": "COBERTO",
+      "evidencia": "cabecalho valido: nome=web-accessibility"
+    },
+    {
+      "conceito": "Carregamento progressivo (indice leve, guia sob demanda)",
+      "estado": "COBERTO",
+      "evidencia": "69 guias, 69 descricoes no catalogo; o guia so e lido por nome"
+    },
+    {
+      "conceito": "Laco agentico com ferramentas tipadas",
+      "estado": "COBERTO",
+      "evidencia": "44 de 44 ferramentas com esquema de entrada e descricao pelo protocolo MCP"
+    },
+    {
+      "conceito": "Aprovacao antes de acao com efeito (guardrail na chamada de ferramenta)",
+      "estado": "COBERTO",
+      "evidencia": "a edicao ficou retida com diff e o arquivo nao mudou ate a resposta da pessoa"
+    },
+    {
+      "conceito": "Menor privilegio: nada fora da pasta escolhida",
+      "estado": "COBERTO",
+      "evidencia": "O caminho esta fora da pasta de trabalho (C:\\Users\\olive\\AppData\\Local\\Temp\\a11y-matrix-ws"
+    },
+    {
+      "conceito": "Nenhum segredo no resultado de diagnostico",
+      "estado": "COBERTO",
+      "evidencia": "a11y_status nunca mostra chaves"
+    },
+    {
+      "conceito": "Memoria persistente visivel e editavel pela pessoa",
+      "estado": "COBERTO",
+      "evidencia": "a11y_learnings lista e a11y_forget apaga; fica fora do projeto"
+    },
+    {
+      "conceito": "Tarefa longa e retomavel: execucoes salvas, exportaveis e comparaveis",
+      "estado": "COBERTO",
+      "evidencia": "a11y_runs, a11y_export (EARL/SARIF) e a11y_diff"
+    },
+    {
+      "conceito": "Observabilidade (spans OpenTelemetry de GenAI)",
+      "estado": "COBERTO",
+      "evidencia": "tests/test_telemetry.py: span execute_tool por ferramenta, sem argumentos nem resultados (liga com OTEL_EXPORTER_OTLP_ENDPOINT)"
+    },
+    {
+      "conceito": "Evals como portao (bancada por mutacao)",
+      "estado": "PARCIAL",
+      "evidencia": "python -m accessibility_mcp.a11y.bench facts roda sem modelo e esta nos testes; o modo agent com modelo real nao foi rodado nesta maquina"
+    },
+    {
+      "conceito": "Julgamento do modelo (usuario autonomo) com modelo real",
+      "estado": "LACUNA",
+      "evidencia": "NAO PROVADO aqui: exige chave de provedor; os testes usam modelo roteirizado"
+    },
+    {
+      "conceito": "Cliente MCP e A2A",
+      "estado": "LACUNA",
+      "evidencia": "o projeto e servidor; consumir outros servidores MCP ou delegar por A2A nao foi pedido nem implementado"
+    },
+    {
+      "conceito": "Harness revisado a cada geracao de modelo",
+      "estado": "LACUNA",
+      "evidencia": "sem rodada de avaliacao sem o andaime registrada"
+    }
+  ]
+}

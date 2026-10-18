@@ -75,7 +75,9 @@ aplicadas pelo harness; verificador de achados (`a11y/verify.py`); sondas de com
 
 Lacunas registradas (nunca "fora de escopo" em silêncio):
 - A especificação MCP de 2026-07-28 descontinuou o sampling; o projeto usa provedor direto primeiro e sampling como alternativa. Revisar quando o cliente alvo mudar.
-- Não há cliente MCP para consumir ferramentas externas, nem A2A; a decisão de oferecer isso é do dono.
-- Observabilidade com spans de OpenTelemetry (`invoke_agent`, `execute_tool`) ainda não existe; as execuções ficam em `a11y/runs.py`.
-- Sandbox: o navegador roda descartável por chamada, mas comandos do host (instalações) usam o ambiente do processo; a edição de arquivos exige pasta de trabalho e aprovação.
-- A matriz de cobertura viva da regra 18 (script executável) ainda não existe neste projeto.
+- Não há cliente MCP para consumir ferramentas externas, nem A2A: o projeto é servidor. A decisão de oferecer isso é do dono.
+- Julgamento do usuário autônomo com modelo real: não provado nesta máquina (sem chave de provedor); os testes usam modelo roteirizado.
+- O modo `agent` da bancada de avaliação não foi rodado com modelo real, e não há rodada registrada do harness sem o andaime para uma geração nova de modelo.
+- Sandbox: o navegador roda descartável por chamada, mas comandos do host (instalações) usam o ambiente do processo.
+
+Fechado em 2026-10-18: observabilidade com spans `execute_tool <nome>` nas convenções de GenAI do OpenTelemetry (`accessibility_mcp/telemetry.py`, sem argumentos nem resultados no span); matriz de cobertura viva em `scripts/run_2026_coverage_matrix.py`, com o resultado real gravado em `docs/COBERTURA_2026.json` (rodar antes de dar por pronta qualquer mudança no servidor); a pessoa não configura nada: a pasta do editor é escolhida na conversa e o navegador é instalado sozinho.

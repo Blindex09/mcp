@@ -11,7 +11,9 @@ from accessibility_mcp.a11y import files
 def ambiente(tmp_path, monkeypatch):
     work = tmp_path / "projeto"
     work.mkdir()
-    monkeypatch.setenv("A11Y_MCP_WORKSPACE", str(work))
+    monkeypatch.delenv("A11Y_MCP_WORKSPACE", raising=False)
+    monkeypatch.setattr(files, "_CHOSEN", None)
+    files.set_workspace(str(work))
     monkeypatch.setenv("A11Y_MCP_HOME", str(tmp_path / "home"))
     monkeypatch.setenv("A11Y_MCP_EDIT_APPROVAL", "0")
     files.PENDING.clear()
@@ -28,10 +30,28 @@ def _write(work, name, text, newline=""):
 
 
 class TestPastaDeTrabalho:
-    def test_sem_pasta_definida_diz_o_que_fazer(self, monkeypatch):
-        monkeypatch.delenv("A11Y_MCP_WORKSPACE")
-        with pytest.raises(files.FileError, match="A11Y_MCP_WORKSPACE"):
+    def test_sem_pasta_definida_diz_o_que_fazer_sem_pedir_configuracao(self, monkeypatch):
+        monkeypatch.setattr(files, "_CHOSEN", None)
+        with pytest.raises(files.FileError, match="a11y_set_workspace"):
             files.read_file("a.html")
+
+    def test_a_pessoa_escolhe_a_pasta_na_conversa(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(files, "_CHOSEN", None)
+        outra = tmp_path / "outro"
+        outra.mkdir()
+        assert files.set_workspace(str(outra)) == {"workspace": str(outra.resolve())}
+        files.edit_file("novo.html", "", "x")
+        assert (outra / "novo.html").exists()
+
+    def test_pasta_inexistente_raiz_do_disco_e_pasta_pessoal_sao_recusadas(self, tmp_path):
+        from pathlib import Path
+
+        with pytest.raises(files.FileError, match="nao existe"):
+            files.set_workspace(str(tmp_path / "fantasma"))
+        with pytest.raises(files.FileError, match="ampla demais"):
+            files.set_workspace(Path(tmp_path.anchor).as_posix())
+        with pytest.raises(files.FileError, match="ampla demais"):
+            files.set_workspace(str(Path.home()))
 
     def test_fora_da_pasta_e_recusado(self, ambiente, tmp_path):
         outro = tmp_path / "fora.txt"
@@ -183,7 +203,7 @@ class TestFerramentasMcp:
         from accessibility_mcp.server import mcp
 
         nomes = {t.name for t in await mcp.list_tools()}
-        assert {"a11y_read_file", "a11y_edit_file", "a11y_approve_edit", "a11y_undo_edit"} <= nomes
+        assert {"a11y_set_workspace", "a11y_read_file", "a11y_edit_file", "a11y_approve_edit", "a11y_undo_edit"} <= nomes
 
     async def test_erro_volta_como_texto_com_a_razao_nunca_excecao(self, ambiente):
         from accessibility_mcp.server import mcp

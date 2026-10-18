@@ -140,7 +140,7 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
     ws_dir = tmp_path / "projeto"
     ws_dir.mkdir()
     (ws_dir / "pagina.html").write_text("<img src=a.png>\n", encoding="utf-8")
-    env.update({"A11Y_MCP_WORKSPACE": str(ws_dir), "A11Y_MCP_EDIT_APPROVAL": "1"})
+    env.update({"A11Y_MCP_EDIT_APPROVAL": "1"})  # nenhuma pasta configurada: a pessoa a escolhe na conversa
     vm_token = "token-de-teste-com-mais-de-16"
     node, vm, vm_env = start_vm_agent(vm_token)  # agente da VM de verdade (Node), com NVDA SIMULADO por tras
     env.update(vm_env)
@@ -292,6 +292,8 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
             assert "A11Y_MCP_NVDA_VM" in spoken["error"]
 
         # ---------- editor de arquivos: ler, editar (retido ate a resposta), aprovar, desfazer
+        assert "a11y_set_workspace" in js(await call("a11y_read_file", path="pagina.html"))["error"]
+        assert js(await call("a11y_set_workspace", path=str(ws_dir)))["workspace"]
         lido = js(await call("a11y_read_file", path="pagina.html"))
         assert lido["total_lines"] == 1 and "<img src=a.png>" in lido["content"]
         retido = js(await call("a11y_edit_file", path="pagina.html", old_string="<img src=a.png>", new_string='<img src=a.png alt="logo">'))

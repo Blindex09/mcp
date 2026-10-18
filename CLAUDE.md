@@ -81,6 +81,8 @@ NVDAStudio: ao mudá-la num, muda-se nos outros dois na mesma entrega.
   avanço, repetição, cancelamento ou orçamento da própria pessoa. (rules/tempo-e-lacos.md, rules/projeto-mcp.md)
 - O conteúdo de `accessibility_mcp/a11y/content/` e os playbooks dos especialistas vêm do Qaaccessibility; ao mudar um, mudar nos dois na mesma entrega.
   (rules/projeto-mcp.md)
+- Nada para a pessoa configurar na tela: o navegador se instala sozinho, a pasta do editor se escolhe na conversa e os padrões são seguros. Variáveis de ambiente são só para quem quer mudar o padrão.
+- A matriz de cobertura da regra 18 é `scripts/run_2026_coverage_matrix.py`; rode antes de dar por pronta qualquer mudança no servidor.
 - Uma única branch: `main`.
 - Antes de dizer "pronto" para qualquer mudança de código: `ruff check .`, `mypy` e `pytest`; se a mudança toca a costura entre dois módulos, ler os dois
   lados. A auditoria de setembro de 2026 está em `docs/AUDITORIA.md`.

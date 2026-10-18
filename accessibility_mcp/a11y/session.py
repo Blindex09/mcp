@@ -13,6 +13,7 @@ inatividade, nenhum JavaScript arbitrario exposto ao cliente.
 from __future__ import annotations
 
 import asyncio
+import itertools
 import json
 import re
 import time
@@ -922,13 +923,13 @@ class Session:
                 if quiet > max(QUIET_FLOOR_S, 0.5 * worked):
                     raise
 
-    async def reach(self, target: str, max_tabs: int = 100) -> dict[str, Any]:
+    async def reach(self, target: str, max_tabs: int = 0) -> dict[str, Any]:
         """Quantas vezes o usuario de teclado aperta Tab, do inicio da pagina, para chegar ao alvo."""
         result = await self._reach(target, max_tabs)
         self.log_trace("reach", target, None, {"reached": result["reached"], "tab_presses": result["tab_presses"], "reason": result.get("reason")})
         return result
 
-    async def _reach(self, target: str, max_tabs: int = 100) -> dict[str, Any]:
+    async def _reach(self, target: str, max_tabs: int = 0) -> dict[str, Any]:
         page = self._need()
         loc = self._locator(target)
         if await loc.count() == 0:
@@ -940,7 +941,9 @@ class Session:
         path: list[dict[str, Any]] = []
         first: tuple[int, int] | None = None
         previous: tuple[int, int] | None = None
-        for i in range(1, max(1, min(max_tabs, 300)) + 1):
+        for i in range(1, max_tabs + 1) if max_tabs > 0 else itertools.count(1):
+            if self.stop_requested:
+                break
             await page.keyboard.press("Tab")
             f = await self._focus_probe(with_identity=True)
             if f is None:

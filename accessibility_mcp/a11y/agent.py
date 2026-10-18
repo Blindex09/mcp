@@ -248,7 +248,7 @@ def _observation_text(
     ann = "; ".join(a["text"] for a in obs.get("recent_announcements", [])) or "(nada)"
     focus = obs.get("focus")
     return (
-        f"PASSO {step}/{max_steps}\nURL: {obs['url']}\nTitulo: {obs['title']}\n"
+        f"PASSO {step}{f'/{max_steps}' if max_steps else ''}\nURL: {obs['url']}\nTitulo: {obs['title']}\n"
         f"Foco: {focus['tag'] + ' ' + repr(focus['name']) if focus else 'nenhum'}\n"
         f"Anuncios recentes: {ann}\n\nHISTORICO:\n{hist}\n\n"
         + (f"MAPA DA PAGINA (fatos de TODO o conteudo):\n{page_map}\n\n" if page_map else "")
@@ -268,7 +268,7 @@ async def run_agent(
     persona: str = "default",
     browser: str = "chromium",
     allow_mutations: str = "auto",
-    max_steps: int = 25,
+    max_steps: int = 0,
     vision: bool = True,
     progress: ProgressFn | None = None,
 ) -> dict[str, Any]:
@@ -276,7 +276,7 @@ async def run_agent(
         raise SessionError("mode deve ser task ou review")
     if not goal.strip():
         raise SessionError("informe o objetivo (task) ou o foco da revisao")
-    max_steps = max(1, int(max_steps))  # orcamento configurado pela pessoa; nao ha teto fixo nem relogio
+    max_steps = max(0, int(max_steps))  # 0 = sem orcamento: so a pessoa escolhe um numero; nao ha teto fixo nem relogio
     started = time.monotonic()
     opened = await session.open(url, html, persona, browser=browser, allow_mutations=allow_mutations)
     see = vision and not PERSONAS[persona].get("no_visual")
@@ -304,7 +304,12 @@ async def run_agent(
     finding_notes: list[str] = []
     last_map = ""
     try:
-        for step in range(1, max_steps + 1):
+        step = 0
+        while True:
+            step += 1
+            if max_steps and step > max_steps:
+                stopped_by = "person_budget"
+                break
             if session.stop_requested:
                 stopped_by = "cancelled"
                 break
@@ -474,6 +479,7 @@ async def _write_report(
     )
     limits = {
         "step_limit": "a execucao atingiu o limite de passos antes de terminar",
+        "person_budget": "a execucao parou no numero de passos que a pessoa escolheu como orcamento",
         "stalled": "a execucao parou por falta de progresso (mesma pagina e nada novo por varios passos)",
         "repeated_action": "a execucao parou por repetir a mesma acao no mesmo estado (possivel laco)",
         "cancelled": "voce interrompeu a execucao (a11y_close)",

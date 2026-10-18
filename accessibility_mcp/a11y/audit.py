@@ -6,6 +6,7 @@ timeout agregado e roda um navegador headless descartavel por chamada.
 
 from __future__ import annotations
 
+import itertools
 import re
 from collections.abc import Awaitable, Callable
 from pathlib import Path
@@ -239,7 +240,7 @@ async def tab_stops(page: Any, steps: int) -> list[dict[str, Any]]:
     seen: list[dict[str, Any]] = []
     first: tuple[int, int] | None = None
     previous: tuple[int, int] | None = None
-    for i in range(steps):
+    for i in range(steps) if steps else itertools.count():
         await page.keyboard.press("Tab")
         got = await _focused_stop(page)
         if got is None:
@@ -255,9 +256,9 @@ async def tab_stops(page: Any, steps: int) -> list[dict[str, Any]]:
 
 
 async def tab_order(
-    url: str | None = None, html: str | None = None, max_steps: int = 60, browser: str = "chromium"
+    url: str | None = None, html: str | None = None, max_steps: int = 0, browser: str = "chromium"
 ) -> list[dict[str, Any]]:
-    steps = max(1, min(max_steps, 200))
+    steps = max(0, int(max_steps))  # 0 = ate o foco sair, dar a volta ou parar de mover
 
     async def fn(page: Any) -> list[dict[str, Any]]:
         return await tab_stops(page, steps)

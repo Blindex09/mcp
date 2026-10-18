@@ -117,7 +117,7 @@ async def test_budget_is_the_persons_no_fixed_ceiling_and_no_clock():
         return decision({"type": "press", "value": v})
 
     r = await run(Script(press("Tab"), press("Tab"), press("Tab"), "R"), persona="keyboard", max_steps=2)
-    assert r["stopped_by"] == "step_limit" and r["facts"]["steps_used"] == 2  # orcamento que a pessoa configurou
+    assert r["stopped_by"] == "person_budget" and r["facts"]["steps_used"] == 2  # orcamento que a pessoa configurou
     r = await run(Script("R"), max_steps=9999)
     assert r["facts"]["max_steps"] == 9999  # sem teto fixo do servidor
     assert not hasattr(agent, "TIME_BUDGET_S") and not hasattr(agent, "MAX_STEPS_CEILING")  # nenhum relogio fixo

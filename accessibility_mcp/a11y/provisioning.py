@@ -21,9 +21,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 BROWSERS = ("chromium", "firefox", "webkit")
-PIP_TIMEOUT_S = 300
-BROWSER_TIMEOUT_S = 900
-WAIT_FOR_INSTALL_S = 50  # abaixo do timeout tipico de ferramentas dos clientes
+WAIT_FOR_INSTALL_S = 50  # so quanto o cliente espera por UMA resposta (abaixo do limite tipico das ferramentas); a instalacao segue em segundo plano
 
 
 class ProvisioningError(RuntimeError):
@@ -44,16 +42,17 @@ def check_browser_name(browser: str) -> str:
     return browser
 
 
-async def _run(*cmd: str, timeout: float) -> tuple[int, str]:
+async def _run(*cmd: str) -> tuple[int, str]:
+    """Espera o comando terminar: instalacao lenta nao e instalacao travada. So o encerramento do servidor a interrompe."""
     proc = await asyncio.create_subprocess_exec(
         *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT
     )
     try:
-        out, _ = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-    except TimeoutError:
-        proc.kill()
-        await proc.wait()
-        return 124, f"tempo esgotado apos {timeout:.0f}s"
+        out, _ = await proc.communicate()
+    finally:
+        if proc.returncode is None:  # cancelado: o filho nao pode ficar rodando sozinho
+            proc.kill()
+            await proc.wait()
     return proc.returncode or 0, out.decode(errors="replace")[-600:]
 
 
@@ -89,7 +88,7 @@ class Provisioner:
                 self.state = "installing"
                 logger.info("Instalando o pacote playwright (pip)...")
                 code, out = await _run(
-                    sys.executable, "-m", "pip", "install", "--disable-pip-version-check", "playwright", timeout=PIP_TIMEOUT_S
+                    sys.executable, "-m", "pip", "install", "--disable-pip-version-check", "playwright"
                 )
                 importlib.invalidate_caches()
                 if code != 0 or not playwright_importable():
@@ -101,7 +100,7 @@ class Provisioner:
                     )
                 self.state = "installing"
                 logger.info("Baixando o %s do Playwright...", self.browser)
-                code, out = await _run(sys.executable, "-m", "playwright", "install", self.browser, timeout=BROWSER_TIMEOUT_S)
+                code, out = await _run(sys.executable, "-m", "playwright", "install", self.browser)
                 if code != 0 or not await browser_present(self.browser):
                     raise ProvisioningError(f"falha ao instalar o {self.browser}: {out.strip()[-200:]}")
             self.state, self.detail = "ready", ""

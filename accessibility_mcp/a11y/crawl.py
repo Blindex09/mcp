@@ -22,7 +22,6 @@ from . import page_scripts as js
 from .patience import patient
 from .provisioning import provisioner_for
 
-MAX_PAGES_CEILING = 30
 POLITE_PAUSE_S = 0.3
 PAGE_TIMEOUT_MS = 20_000  # so a 1a espera por pagina; se estourar, repete com mais tempo
 USER_AGENT = "accessibility-mcp-crawler"
@@ -91,7 +90,7 @@ async def crawl(url: str, max_pages: int = 10, level: str = "AA", browser: str =
     tags = audit._LEVEL_TAGS.get(level.upper())
     if tags is None:
         raise ValueError("level deve ser A, AA ou AAA")
-    max_pages = max(1, min(int(max_pages), MAX_PAGES_CEILING))
+    max_pages = max(1, int(max_pages))  # a pessoa escolhe quantas; a cortesia com o site e a pausa entre paginas e o robots.txt
     origin = f"{urlparse(start).scheme}://{urlparse(start).netloc}"
     await provisioner_for(browser).ensure()
     from playwright.async_api import async_playwright

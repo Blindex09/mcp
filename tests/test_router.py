@@ -307,7 +307,7 @@ async def test_pipeline_roles_bypass_the_router_only_memory_still_goes_through_i
 
     r = await agent.run_agent(session=SESSION, ask=ask, mode="task", goal="comprar", url=None, html=PAGE,
                               persona="keyboard", max_steps=2, vision=False, progress=noop)
-    assert r["stopped_by"] == "step_limit" and len(r["steps"]) == 2
+    assert r["stopped_by"] == "person_budget" and len(r["steps"]) == 2
     assert r["report"] == "RELATORIO ESCRITO PELO PAPEL WRITE"
     assert [c["role"] for c in log if c["role"] in ("decision", "write")] == ["decision", "decision", "write"]
     assert all(c["model"] == GEN_MAIN for c in log if c["role"] == "decision")  # papel main: sempre o mesmo modelo

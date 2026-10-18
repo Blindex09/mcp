@@ -13,12 +13,11 @@ Toda sonda usa so o teclado, entao vale para qualquer persona.
 
 from __future__ import annotations
 
+import itertools
 from collections.abc import Awaitable, Callable
 from typing import Any
 
 from . import page_scripts as js
-
-MAX_STOPS = 300
 
 
 def _check(name: str, expected: str, observed: str, met: bool | None, wcag: list[str] | None = None) -> dict[str, Any]:
@@ -64,7 +63,7 @@ async def _focus_target(s: Any, target: str) -> tuple[Any, Any]:
 
 
 # ------------------------------------------------------------------------------------------------ varredura de Tab
-async def tab_walk(s: Any, target: str | None = None, container: str | None = None, max_stops: int = 150) -> dict[str, Any]:
+async def tab_walk(s: Any, target: str | None = None, container: str | None = None, max_stops: int = 0) -> dict[str, Any]:
     """Aperta Tab do inicio da pagina e registra cada parada: nome, se o foco esta coberto por outro elemento, e onde o foco ficou preso."""
     page = s._need()
     await page.evaluate("() => { const b = document.body; b.setAttribute('tabindex', '-1'); b.focus(); b.removeAttribute('tabindex'); }")
@@ -72,8 +71,11 @@ async def tab_walk(s: Any, target: str | None = None, container: str | None = No
     idents: list[Any] = []
     first = None
     stuck: list[dict[str, Any]] = []
-    end = "limite de paradas atingido"
-    for i in range(1, max(1, min(int(max_stops), MAX_STOPS)) + 1):
+    end = "orcamento de paradas escolhido pela pessoa"
+    for i in range(1, int(max_stops) + 1) if int(max_stops) > 0 else itertools.count(1):
+        if s.stop_requested:
+            end = "interrompido pela pessoa"
+            break
         await page.keyboard.press("Tab")
         ident, f = await _ident(s)
         if f is None:
@@ -110,7 +112,7 @@ async def tab_walk(s: Any, target: str | None = None, container: str | None = No
     }
 
 
-async def focus_obscured(s: Any, target: str | None = None, container: str | None = None, max_stops: int = 150) -> dict[str, Any]:
+async def focus_obscured(s: Any, target: str | None = None, container: str | None = None, max_stops: int = 0) -> dict[str, Any]:
     """So os focos cobertos por outro elemento (cabecalho fixo, banner de cookies...) durante uma varredura de Tab (WCAG 2.4.11)."""
     walk = await tab_walk(s, None, None, max_stops)
     return {
@@ -121,7 +123,7 @@ async def focus_obscured(s: Any, target: str | None = None, container: str | Non
 
 
 # ------------------------------------------------------------------------------------------------ tamanho de alvo
-async def target_size(s: Any, target: str | None = None, container: str | None = None, max_stops: int = 200) -> dict[str, Any]:
+async def target_size(s: Any, target: str | None = None, container: str | None = None, max_stops: int = 0) -> dict[str, Any]:
     """WCAG 2.5.8: alvos menores que 24x24 px CSS e se escapam pela excecao de espacamento (circulo de 24 px sem tocar outro alvo)."""
     dossier = await s.dossier("", 200)
     boxes = []
@@ -185,7 +187,10 @@ async def dialog(s: Any, target: str | None, container: str | None = None, max_s
     start_ident, _ = await _ident(s)
     left_at = None
     cycled = 0
-    for i in range(1, max(2, min(int(max_stops), 80)) + 1):
+    seen_idents: set[Any] = set()
+    for i in range(1, int(max_stops) + 1) if int(max_stops) > 0 else itertools.count(1):
+        if s.stop_requested:
+            break
         await _key(s, "Tab", settle=False)
         where = await dlg.evaluate(
             "(d) => { let a = document.activeElement; while (a && a.shadowRoot && a.shadowRoot.activeElement) a = a.shadowRoot.activeElement;"
@@ -200,9 +205,12 @@ async def dialog(s: Any, target: str | None, container: str | None = None, max_s
         if ident == start_ident:
             cycled = i
             break
+        if ident in seen_idents:  # o foco voltou a um elemento ja visitado sem passar pelo inicio: nao ha mais o que descobrir
+            break
+        seen_idents.add(ident)
     checks.append(_check(
         "tab_fica_dentro", "Tab circula so entre os controles do dialogo (o foco nao vaza para a pagina)",
-        f"o foco saiu do dialogo no {left_at}o Tab" if left_at else (f"circulou dentro e voltou ao inicio em {cycled} Tab" if cycled else "sem volta completa no limite testado"),
+        f"o foco saiu do dialogo no {left_at}o Tab" if left_at else (f"circulou dentro e voltou ao inicio em {cycled} Tab" if cycled else "sem volta completa ao elemento inicial"),
         (left_at is None) if (left_at or cycled) else None, ["2.4.3", "2.1.2"],
     ))
     if left_at:  # devolve o foco para dentro para testar o Escape isoladamente
@@ -437,7 +445,7 @@ PROBES: dict[str, tuple[ProbeFn, bool, str]] = {
 }
 
 
-async def run_probe(session: Any, kind: str, target: str | None = None, container: str | None = None, max_stops: int = 150) -> dict[str, Any]:
+async def run_probe(session: Any, kind: str, target: str | None = None, container: str | None = None, max_stops: int = 0) -> dict[str, Any]:
     from .session import SessionError
 
     if kind not in PROBES:

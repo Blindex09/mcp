@@ -21,7 +21,7 @@ def fake_env(monkeypatch, *, importable, chromium):
     async def present(browser="chromium"):
         return chr_.pop(0) if len(chr_) > 1 else chr_[0]
 
-    async def run(*cmd, timeout):
+    async def run(*cmd):
         calls.append(cmd)
         return 0, "ok"
 
@@ -69,7 +69,7 @@ async def test_slow_install_answers_in_progress_and_keeps_going(prov, monkeypatc
     fake_env(monkeypatch, importable=[True], chromium=[False, True])
     gate = asyncio.Event()
 
-    async def slow(*cmd, timeout):
+    async def slow(*cmd):
         await gate.wait()
         return 0, "ok"
 
@@ -106,7 +106,7 @@ async def test_state_is_checking_while_only_verifying_and_installing_only_when_d
         seen.append(("verificando", prov.state))
         return len(seen) > 1  # a 1a checagem diz que falta; a 2a (depois de instalar) diz que ha
 
-    async def run(*cmd, timeout):
+    async def run(*cmd):
         seen.append(("baixando", prov.state))
         return 0, "ok"
 

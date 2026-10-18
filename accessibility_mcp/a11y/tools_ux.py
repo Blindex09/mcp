@@ -159,7 +159,7 @@ def register_ux(mcp: Any) -> None:
         return await _run(SESSION.act(action, target, value))
 
     @mcp.tool()
-    async def a11y_reach(target: str, max_tabs: int = 100) -> str:
+    async def a11y_reach(target: str, max_tabs: int = 0) -> str:
         """How many Tab presses a keyboard user needs, from the top of the page, to reach the target
         (id from a11y_dossier), with the focus path. Reports if the target is unreachable or the focus loops."""
         return await _run(SESSION.reach(target, max_tabs))
@@ -213,7 +213,7 @@ def register_ux(mcp: Any) -> None:
 
 
     @mcp.tool()
-    async def a11y_probe(kind: str, target: str = "", container: str = "", max_stops: int = 150) -> str:
+    async def a11y_probe(kind: str, target: str = "", container: str = "", max_stops: int = 0) -> str:
         """BEHAVIOR PROBE: acts like a person's keyboard and returns FACTS of what only shows up by doing (scanners like axe do not see these).
         kind: tab_walk (Tab from the top to the end: stops, keyboard trap, focus covered by a sticky header; WCAG 2.1.2/2.4.3/2.4.11) |
         focus_obscured | target_size (targets under 24x24 px and the spacing exception; 2.5.8) | dialog (APG modal dialog contract, target = the button that
@@ -333,7 +333,7 @@ def register_ux(mcp: Any) -> None:
 
     @mcp.tool()
     async def a11y_walkthrough(
-        ctx: Context, task: str, url: str = "", html: str = "", persona: str = "default", max_steps: int = 25, vision: bool = True,  # type: ignore[type-arg]
+        ctx: Context, task: str, url: str = "", html: str = "", persona: str = "default", max_steps: int = 0, vision: bool = True,  # type: ignore[type-arg]
         browser: str = "chromium", allow_mutations: str = "auto",
     ) -> str:
         """AUTONOMOUS user test: a model plays a real person with the given persona trying to accomplish a task on the
@@ -348,7 +348,7 @@ def register_ux(mcp: Any) -> None:
 
     @mcp.tool()
     async def a11y_review(
-        ctx: Context, focus: str = "componentes e design", url: str = "", html: str = "", persona: str = "default", max_steps: int = 30, vision: bool = True,  # type: ignore[type-arg]
+        ctx: Context, focus: str = "componentes e design", url: str = "", html: str = "", persona: str = "default", max_steps: int = 0, vision: bool = True,  # type: ignore[type-arg]
         browser: str = "chromium", allow_mutations: str = "auto",
     ) -> str:
         """AUTONOMOUS UX review: a model explores the page, PROBES each important interactive component to learn what it

@@ -14,6 +14,7 @@ from . import audit
 from .compare import compare_browsers
 from .content_index import ContentIndex
 from .crawl import crawl
+from .tools_files import register_files
 from .tools_ux import register_ux
 
 _MAX_CHARS = 40_000
@@ -44,6 +45,7 @@ def _error(e: Exception) -> str:
 def register(mcp: Any) -> None:
     """Registra as ferramentas e recursos de acessibilidade no servidor FastMCP."""
     register_ux(mcp)
+    register_files(mcp)
 
     @mcp.tool()
     async def a11y_list_content() -> str:
@@ -158,7 +160,7 @@ def register(mcp: Any) -> None:
             return _error(e)
 
     @mcp.tool()
-    async def a11y_tab_order(url: str = "", html: str = "", max_steps: int = 60, browser: str = "chromium") -> str:
+    async def a11y_tab_order(url: str = "", html: str = "", max_steps: int = 0, browser: str = "chromium") -> str:
         """Press Tab repeatedly and report the keyboard focus order: element, role, accessible
         name, visibility and whether a focus indicator is present. Provide EITHER url (http/https)
         OR html. Useful to detect keyboard traps, illogical order, and invisible focus."""

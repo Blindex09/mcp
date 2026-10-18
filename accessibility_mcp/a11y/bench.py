@@ -212,7 +212,7 @@ def score_findings(findings: list[dict[str, Any]], m: Mutation | None) -> dict[s
     }
 
 
-async def run_agent_bench(ask: Callable[..., Awaitable[str | None]], persona: str = "keyboard", only: set[str] | None = None, max_steps: int = 30, include_clean: bool = True) -> dict[str, Any]:
+async def run_agent_bench(ask: Callable[..., Awaitable[str | None]], persona: str = "keyboard", only: set[str] | None = None, max_steps: int = 0, include_clean: bool = True) -> dict[str, Any]:
     from .agent import run_agent
 
     base = base_html()

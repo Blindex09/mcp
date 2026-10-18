@@ -109,7 +109,7 @@ def main():
     print(f"Resultado: {passed}/{total} testes passaram")
     
     if passed == total:
-        print("\n Tudo pronto! Execute: python setup.py")
+        print("\n Tudo pronto! Execute: python scripts/setup.py")
         return 0
     else:
         print("\n  Resolva os erros acima antes de continuar")

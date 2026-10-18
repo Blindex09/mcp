@@ -34,7 +34,8 @@ env/
 *~
 
 .cursor/
-.claude/
+.claude/settings.local.json
+.claude/worktrees/
 
 
 # Teste de fumaca do NVDA (Guidepup)

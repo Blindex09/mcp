@@ -59,10 +59,10 @@ Write plainly, break into manageable sections, avoid jargon.
 - **3.2.3 Consistent Navigation**: nav mechanisms repeated across pages appear in the same order.
 - **3.2.4 Consistent Identification**: components with same functionality have consistent labels. A "Submit" button shouldn't become "Confirm" on the next screen.
 
-### Predictable (3.2.1, 3.2.2, 3.2.6 — A/AA)
+### Predictable (3.2.1, 3.2.2, 3.2.6 — todos nivel A)
 - **3.2.1 On Focus**: focus shouldn't trigger context change.
 - **3.2.2 On Input**: changing a setting shouldn't auto-submit without warning.
-- **3.2.6 Consistent Help** (new in 2.2, AA): help mechanisms in a consistent location across pages.
+- **3.2.6 Consistent Help** (new in 2.2, nivel A): help mechanisms in a consistent location across pages.
 
 ### Error prevention (3.3.1–3.3.4)
 | SC | Level | Requirement |

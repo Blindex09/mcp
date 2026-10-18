@@ -65,7 +65,7 @@ In modern 2026 frontend architectures (Single Page Applications, React 19, Angul
 
 ---
 
-### F. SC 3.2.6 Consistent Help (WCAG 2.2 Level A / 2.2 AA Conformance)
+### F. SC 3.2.6 Consistent Help (WCAG 2.2 Level A)
 > **Requirement:** If a Web page contains help mechanisms (human contact details, contact forms, FAQs, AI Chatbots), they occur in the same relative order relative to other page content across pages.
 
 - **MFE & Chatbot Pattern:** Instantiated at Application Shell level (global footer or persistent root container) so DOM position stays stable across microfrontend route transitions.
@@ -223,4 +223,4 @@ export function AppShellHost() {
 - [ ] **3.2.3 Consistent Navigation (AA):** Page headers, sidebars, and main navigation links maintain identical relative DOM order across all views.
 - [ ] **3.2.4 Consistent Identification (AA):** Buttons and components with identical functions share the same accessible name, icon, and role app-wide.
 - [ ] **3.2.5 Change on Request (AAA):** Automatic live data feeds, page reloads, or carousels provide user controls to pause or disable updates.
-- [ ] **3.2.6 Consistent Help (2.2 AA Conformance):** Help options (Contact details, FAQ links, AI Chatbots) occupy the same relative DOM order on every page where present.
+- [ ] **3.2.6 Consistent Help (Level A):** Help options (Contact details, FAQ links, AI Chatbots) occupy the same relative DOM order on every page where present.

@@ -137,6 +137,10 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         "A11Y_MCP_BACKEND": "openai-compatible", "A11Y_MCP_BASE_URL": f"http://127.0.0.1:{model.server_address[1]}/v1",
         "A11Y_MCP_API_KEY": "chave-de-teste", "A11Y_MCP_MODEL": "fake-principal", "A11Y_MCP_MODEL_FAST": "fake-leve",
     }
+    ws_dir = tmp_path / "projeto"
+    ws_dir.mkdir()
+    (ws_dir / "pagina.html").write_text("<img src=a.png>\n", encoding="utf-8")
+    env.update({"A11Y_MCP_WORKSPACE": str(ws_dir), "A11Y_MCP_EDIT_APPROVAL": "1"})
     vm_token = "token-de-teste-com-mais-de-16"
     node, vm, vm_env = start_vm_agent(vm_token)  # agente da VM de verdade (Node), com NVDA SIMULADO por tras
     env.update(vm_env)
@@ -286,6 +290,17 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
             assert vm_token not in json.dumps(spoken)
         else:
             assert "A11Y_MCP_NVDA_VM" in spoken["error"]
+
+        # ---------- editor de arquivos: ler, editar (retido ate a resposta), aprovar, desfazer
+        lido = js(await call("a11y_read_file", path="pagina.html"))
+        assert lido["total_lines"] == 1 and "<img src=a.png>" in lido["content"]
+        retido = js(await call("a11y_edit_file", path="pagina.html", old_string="<img src=a.png>", new_string='<img src=a.png alt="logo">'))
+        assert retido["held"] and (ws_dir / "pagina.html").read_text(encoding="utf-8") == "<img src=a.png>\n"
+        decidido = js(await call("a11y_approve_edit", decision="allow", approval_id=retido["approval_id"]))
+        assert decidido["results"][0]["applied"] and 'alt="logo"' in (ws_dir / "pagina.html").read_text(encoding="utf-8")
+        assert js(await call("a11y_undo_edit"))["restored_from_backup"] is True
+        assert (ws_dir / "pagina.html").read_text(encoding="utf-8") == "<img src=a.png>\n"
+        assert "fora da pasta" in js(await call("a11y_read_file", path="../fora.txt"))["error"]
 
         # ---------- diagnostico
         st = js(await call("a11y_status"))

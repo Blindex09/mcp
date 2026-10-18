@@ -1,0 +1,67 @@
+/* Segue o css-accessibility do MCP: foco visivel, movimento reduzido, tema claro/escuro, contraste, reflow e alvos de toque. */
+:root {
+  color-scheme: light dark;
+  --texto: light-dark(#1a1a1a, #f2f2f2);
+  --fundo: light-dark(#ffffff, #121212);
+  --suave: light-dark(#4a4a4a, #c4c4c4);
+  --link: light-dark(#0a4aad, #8ab4f8);
+  --borda: light-dark(#8a8a8a, #8a8a8a);
+  --destaque: light-dark(#eef3fb, #1c2230);
+}
+* { box-sizing: border-box; }
+html { font-size: 100%; }
+body {
+  margin: 0;
+  color: var(--texto);
+  background: var(--fundo);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+a { color: var(--link); text-underline-offset: 0.15em; }
+:focus-visible { outline: 3px solid var(--link); outline-offset: 2px; border-radius: 3px; }
+:focus:not(:focus-visible) { outline: none; }
+main:focus { outline: none; }
+
+.pular {
+  position: absolute; left: -9999px; top: 0.5rem; z-index: 10;
+  padding: 0.75rem 1rem; background: var(--link); color: var(--fundo); border-radius: 4px;
+}
+.pular:focus { left: 0.5rem; }
+
+.coluna { max-width: 46rem; margin-inline: auto; padding-inline: 1rem; }
+header { border-bottom: 1px solid var(--borda); padding-block: 0.75rem; }
+.marca { font-weight: 700; margin: 0 0 0.25rem; }
+nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 0.5rem; }
+nav a { display: inline-block; min-height: 44px; min-width: 44px; padding: 0.55rem 0.5rem; }
+nav a[aria-current="page"] { font-weight: 700; text-decoration: none; border-bottom: 3px solid currentColor; }
+main { padding-block: 1.5rem 3rem; }
+h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 1rem; }
+h2 { font-size: 1.4rem; line-height: 1.3; margin: 2.25rem 0 0.75rem; }
+p, li { max-width: 70ch; }
+li { margin-block: 0.4rem; }
+.origem { color: var(--suave); border-left: 4px solid var(--borda); padding-left: 1rem; }
+.neste-texto { background: var(--destaque); border: 1px solid var(--borda); border-radius: 6px; padding: 0.5rem 1rem 0.75rem; margin-block: 1.5rem; }
+.neste-texto h2 { font-size: 1.1rem; margin: 0.5rem 0 0.25rem; }
+.neste-texto ol { margin: 0; padding-left: 1.4rem; }
+.neste-texto a { min-height: 24px; display: inline-block; padding-block: 0.15rem; }
+.cartoes { list-style: none; padding: 0; margin: 1.5rem 0; display: grid; gap: 1rem; }
+.cartoes li { max-width: none; margin: 0; border: 1px solid var(--borda); border-radius: 8px; padding: 0.25rem 1rem 1rem; }
+.cartoes h2 { margin: 0.75rem 0 0.35rem; font-size: 1.2rem; }
+.cartoes p { margin: 0; }
+.entre { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--borda); }
+.entre a { display: inline-block; min-height: 44px; padding: 0.55rem 0; }
+footer { border-top: 1px solid var(--borda); padding-block: 1rem 2rem; color: var(--suave); font-size: 1rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+@media (prefers-contrast: more) {
+  :root { --texto: light-dark(#000000, #ffffff); --suave: light-dark(#222222, #eeeeee); }
+  a { text-decoration-thickness: 2px; }
+}
+@media (forced-colors: active) {
+  nav a[aria-current="page"] { border-bottom-color: Highlight; }
+  .neste-texto, .cartoes li { border-color: CanvasText; }
+}

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS e modos de leitura | Leitor de tela: o que a pessoa ouve</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: o que a pessoa ouve</p>
+<nav aria-label="Pesquisas">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="screen-reader-html-elements.html">Elementos HTML</a></li>
+<li><a href="screen-reader-structure-focus-navigation.html">Estrutura, foco e navegação</a></li>
+<li><a href="screen-reader-aria-patterns.html">ARIA e padrões</a></li>
+<li><a href="screen-reader-css-and-modes.html" aria-current="page">CSS e modos de leitura</a></li>
+<li><a href="screen-reader-actions-keys-events.html">Ações, teclas e eventos</a></li>
+<li><a href="screen-reader-dynamic-js-react.html">JavaScript dinâmico e React</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Leitor de tela, CSS, modos de leitura e teclas de cada leitor</h1>
+<p class="origem">Origem: Qaaccessibility (pesquisa em fontes oficiais, consultadas em 2026-10-17 e 2026-10-18; o que nao pôde ser lido está declarado no próprio texto). Ao mudar este guia, mudar também lá, na mesma entrega.</p>
+<p>Fontes: MDN (CSS e JavaScript, propriedade content, prefers-reduced-motion, forced-colors, :focus-visible), técnicas da WebAIM para conteúdo invisível, especificação CSS Flexbox, guia do usuário do NVDA, artigos da WebAIM sobre JAWS, NVDA e VoiceOver, ajuda do Google (TalkBack), WCAG 2.2 (contraste, foco, texto) e a pesquisa de usuários de leitores de tela da WebAIM (edição 10). Consultadas em 2026-10-17.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#efeitos-do-css-sobre-o-que-o-leitor-percebe">Efeitos do CSS sobre o que o leitor percebe</a></li>
+<li><a href="#modos-de-leitura-e-teclas-de-cada-leitor">Modos de leitura e teclas de cada leitor</a></li>
+<li><a href="#limites-desta-referencia">Limites desta referência</a></li>
+</ol>
+</nav>
+<section>
+<h2 id="efeitos-do-css-sobre-o-que-o-leitor-percebe">Efeitos do CSS sobre o que o leitor percebe</h2>
+<ul>
+<li>display none, visibility hidden, o atributo hidden: o conteúdo some para todos, inclusive leitores de tela. Só use quando é isso mesmo que se quer. Uma referência feita por aria-labelledby ou aria-describedby a um elemento oculto ainda calcula o nome.</li>
+<li>Esconder só visualmente (texto para leitores de tela): posicionamento fora da tela (classe sr-only com position absolute e margem negativa grande, caixa de 1 pixel e overflow hidden) ou clip e clip-path. Largura ou altura zero, font-size 0 e line-height 0 não são recomendados porque alguns leitores pulam o conteúdo. text-indent negativo move o texto para fora, mas num elemento focável deixa o teclado cair em algo invisível. Elemento focável fora da tela precisa aparecer ao receber foco. Use texto só para leitores com parcimônia, para lacunas de significado visual (rótulo de busca, &quot;Você está aqui&quot;).</li>
+<li>opacity 0 mantém o elemento na árvore e no foco; aria-hidden remove da árvore e não do foco; só inert, hidden e display none removem das duas coisas.</li>
+<li>Link para pular: primeiro focável da página, escondido fora da tela e revelado em :focus.</li>
+<li>Conteúdo gerado por ::before e ::after (content) geralmente não entra na árvore de acessibilidade, e algumas combinações de leitor e navegador não o anunciam. Informação importante precisa estar no HTML (WCAG 1.3.1, técnica de falha F87 para conteúdo não decorativo inserido por CSS). A sintaxe content com barra e texto alternativo (content: &quot;x&quot; / &quot;texto falado&quot;) define fala para saída de leitor de tela. Para ícones de fonte, confira a árvore do navegador.</li>
+<li>display: contents: alguns navegadores removem o próprio elemento da árvore de acessibilidade (o MDN diz que isso contraria a especificação do CSS), e o elemento deixa de ser falado; teste elementos com semântica, como botões e listas. Mudar uma table para display block, grid ou flex pode alterar a representação da tabela na árvore e fazê-la deixar de ser anunciada como tabela (1.3.1): se a visualização exige isso, teste com leitor de tela, ou mantenha a tabela real.</li>
+<li>content-visibility auto: o conteúdo pulado continua no DOM e na árvore de acessibilidade, na busca da página, na ordem de Tab e na seleção, sem prejuízo para o leitor. content-visibility hidden: o conteúdo não fica acessível à busca, ao Tab, à seleção nem ao foco, é parecido com display none (a página não diz explicitamente que sai da árvore).</li>
+<li>Foco coberto: o 2.4.11 (AA) exige que o componente focado não fique inteiramente escondido por conteúdo do autor, como cabeçalho ou rodapé fixos e banners de cookies; a técnica C43 usa scroll-padding para a rolagem deixar o item visível, e a falha F110 é o cabeçalho ou rodapé fixo cobrindo o foco por inteiro. Diálogo modal que toma o foco e banner dispensável com Escape passam.</li>
+<li>SVG em linha: não aceita alt; use role=&quot;img&quot; com title e, se for preciso, desc, e ligue com aria-labelledby apontando para os ids (o MDN diz que aria-labelledby com título e descrição tem mais suporte do que aria-describedby); title deve ser o primeiro filho do svg. A página do MDN não trata de aria-hidden em SVG decorativo nem do atributo focusable.</li>
+<li>Ordem: order, flex-direction com reverse e posicionamento de grade mudam a ordem visual sem mudar a ordem de leitura nem a de foco. Mantenha a ordem do código lógica; a especificação do Flexbox diz que a ordem visual pode ser independente da ordem de fala e da ordem de origem. Tabindex positivo e reordenação por CSS fazem o foco divergir do layout.</li>
+<li>list-style none em lista: há relatos de que o VoiceOver no Safari deixa de tratar o elemento como lista, mas isso não foi confirmado nas fontes lidas (a página de VoiceOver da TetraLogical não o cobre); trate como pendente manual.</li>
+<li>Foco visível: WCAG 2.4.7 (AA) exige ao menos um modo em que o foco do teclado seja visível; 2.4.13 (AAA) pede área de pelo menos o perímetro de 2 px do componente e mudança de contraste de 3:1 entre foco e sem foco; 1.4.11 pede 3:1 do indicador contra as cores vizinhas. :focus-visible mostra o foco para teclado e campos de texto e não para clique de mouse. Remover outline sem alternativa é falha. Em modo de cores forçadas (forced-colors: active, o alto contraste do Windows) box-shadow e text-shadow viram none, background-image sem url() some, e color, background-color, border-color e outline-color são trocados por cores do sistema: um anel de foco feito só com box-shadow desaparece; use outline ou borda, e cores do sistema (ButtonText, Canvas) em controles personalizados. Elementos nativos recebem as cores certas; um div com role button não.</li>
+<li>Movimento: prefers-reduced-motion: reduce pede para remover, reduzir ou trocar animações não essenciais (escala e deslocamento de objetos grandes são gatilhos vestibulares); troque por opacidade em vez de remover tudo, e mantenha indicadores essenciais como carregamento. WCAG 2.3.3 (AAA, animação por interação) e 2.2.2 (A, pausar conteúdo em movimento por mais de cinco segundos).</li>
+<li>Texto: WCAG 1.4.12 (AA) testa se nada se perde quando a pessoa define altura de linha 1,5, espaço após parágrafo 2, espaço entre letras 0,12 e entre palavras 0,16 vezes o tamanho da fonte. O autor não precisa usar esses valores; precisa não impedir a sobreposição e não ter conteúdo cortado (altura fixa, overflow hidden, !important). Altura de linha abaixo de 1,2 sozinha não é falha de 1.4.12. Contraste (1.4.3, AA): 4,5 para 1 em texto normal e 3 para 1 em texto grande (18 pontos ou 14 pontos em negrito), calculado só com a fórmula do WCAG 2; o APCA não faz parte do WCAG 2.2. Reflow (1.4.10) em 320 px.</li>
+<li>Cor não é o único meio de informação (1.4.1): campo obrigatório ou erro com asterisco, ícone ou texto além da cor.</li>
+</ul>
+</section>
+<section>
+<h2 id="modos-de-leitura-e-teclas-de-cada-leitor">Modos de leitura e teclas de cada leitor</h2>
+<ul>
+<li>NVDA (Windows, gratuito): modo de navegação (padrão para páginas) e modo de foco; troca sozinho ao dar Tab ou clicar em um controle que pede foco, e volta ao navegar para um que não pede; NVDA+Espaço alterna manualmente; Escape volta ao modo de navegação. Teclas rápidas (Shift para voltar): h título, 1 a 9 nível, l lista, i item, t tabela, k link, u não visitado, v visitado, n texto sem link, g gráfico, q citação, s separador, f campo, e edição, b botão, x caixa de seleção, c caixa de combinação, r rádio, m quadro, d ponto de referência, o objeto incorporado, a anotação, p parágrafo, w erro de ortografia. Vírgula sai do contêiner atual. NVDA+Shift+Espaço liga ou desliga as teclas rápidas. NVDA+F7 abre a lista de elementos. Células de tabela: Ctrl+Alt+setas. Alguns comandos (artigo, figura, aba) não têm tecla padrão. Opções de navegação: usar leiaute de tela, ativar modo de navegação ao carregar a página, leitura automática ao carregar, incluir tabelas de leiaute, foco automático em mudanças de foco e do cursor.</li>
+<li>JAWS (Windows): cursor virtual (padrão) e modo de formulários (entra sozinho ao dar Tab num campo; bipe agudo para formulários e grave para cursor virtual); JAWS+Z alterna. Teclas: h título (1 a 6 níveis), r ponto de referência, f formulário, t tabela, l lista, i item, b botão, g gráfico; JAWS+F6 títulos, JAWS+F7 links, JAWS+F5 campos de formulário; Ctrl+Alt+setas nas células; a WebAIM recomenda trocar a tecla Insert por Caps Lock.</li>
+<li>VoiceOver no macOS: modificador VO (Ctrl+Option); VO+A lê; VO+setas movem; rotor da web em VO+U (tabelas, quadros, imagens, títulos, links, controles de formulário, pontos de referência da web); VO+Command+H títulos, L links, J controles de formulário, T tabelas, X listas, G gráficos. Use o Safari e ative &quot;Pressionar Tab para destacar cada item&quot; nas preferências avançadas. Controles de formulário só são rotulados quando o label está associado por código; rótulo visual solto não é ligado por proximidade.</li>
+<li>VoiceOver no iOS: deslizar para a direita e a esquerda move item a item; toque duplo ativa; o rotor (girar dois dedos) escolhe o tipo (títulos, links, pontos de referência, contêineres, controles de formulário); pontos de referência, tabelas, listas e imagens precisam ser adicionados ao rotor nos ajustes para aparecerem. Contagem de links no rotor pode vir inflada (um teste mostrou 9 para 3 links).</li>
+<li>TalkBack no Android: explorar por toque e por deslizar; controles de leitura trocam o tipo de elemento (títulos, links, controles; pontos de referência só se adicionados em Personalizar controles de leitura); deslizar para cima ou para baixo percorre o tipo escolhido.</li>
+<li>Narrator: muitas informações dependem do nível de verbosidade (3 mostra todos os detalhes do controle); teclas D e F5 para pontos de referência; Ctrl+Alt+setas nas tabelas.</li>
+<li>Dados de uso (WebAIM, dezembro de 2023 a janeiro de 2024, 1539 respostas, amostra não controlada): leitor principal no desktop JAWS 40,5%, NVDA 37,7%, VoiceOver 9,7%; usado com frequência NVDA 65,6%, JAWS 60,5%, VoiceOver 43,9%, Narrator 37,3% (0,7% como principal); combinações JAWS com Chrome 24,7%, NVDA com Chrome 21,3%, JAWS com Edge 11,4%, NVDA com Firefox 10,0%, VoiceOver com Safari 7,0%. No celular, 91,3% usam leitor; principal iOS 70,6% e Android 27,6%; navegador principal Safari 58,2% e Chrome 27,9%. Use esses números só para escolher o que testar primeiro, nunca como regra de conformidade.</li>
+<li>Pareamento de teste: NVDA com Firefox ou Chrome e JAWS com Chrome ou Edge no Windows; Narrator com Edge; VoiceOver com Safari no macOS e no iOS (outros navegadores são pouco confiáveis); TalkBack com Chrome no Android.</li>
+</ul>
+</section>
+<section>
+<h2 id="limites-desta-referencia">Limites desta referência</h2>
+<ul>
+<li>Resultados de leitores mudam com cada versão; as versões de teste estão em leitor_de_tela_elementos_html.md.</li>
+<li>Nada aqui é teste automatizado de fala: a árvore de acessibilidade do navegador é um substituto para o leitor, não o leitor.</li>
+<li>Deve ser reverificada quando uma versão nova do NVDA, do JAWS ou do VoiceOver sair.</li>
+</ul>
+</section>
+<nav class="entre" aria-label="Entre as pesquisas">
+<a href="screen-reader-aria-patterns.html">Anterior: ARIA e padrões</a>
+<a href="screen-reader-actions-keys-events.html">Próxima: Ações, teclas e eventos</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Pesquisas do projeto MCP de acessibilidade (origem: Qaaccessibility, em fontes oficiais, consultadas em 17 e 18 de outubro de 2026). A fala exata varia por leitor de tela, versão, navegador e configuração; nada aqui dispensa o teste manual com o leitor de tela real.</p>
+</div>
+</footer>
+</body>
+</html>

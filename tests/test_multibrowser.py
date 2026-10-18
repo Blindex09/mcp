@@ -3,9 +3,9 @@ import json
 
 import pytest
 
-from a11y import audit
-from a11y.compare import compare_browsers
-from a11y.session import SESSION, SessionError
+from accessibility_mcp.a11y import audit
+from accessibility_mcp.a11y.compare import compare_browsers
+from accessibility_mcp.a11y.session import SESSION, SessionError
 from tests.test_session import MIXED, SITE
 
 
@@ -115,7 +115,7 @@ async def test_compare_browsers_reports_facts_and_what_differs():
 
 
 async def test_tools_expose_browser_and_comparison():
-    import mcp_server
+    from accessibility_mcp import server as mcp_server
 
     tools = mcp_server.mcp._tool_manager
     out = json.loads(await tools.get_tool("a11y_compare_browsers").fn(

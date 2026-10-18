@@ -6,8 +6,8 @@ import json
 
 import pytest
 
-from a11y import audit
-from a11y.session import SESSION, SessionError, tree_diff
+from accessibility_mcp.a11y import audit
+from accessibility_mcp.a11y.session import SESSION, SessionError, tree_diff
 
 SITE = """<!doctype html><html lang="pt"><head><title>Loja</title>
 <style>
@@ -231,7 +231,7 @@ def test_tree_diff_is_exact_about_what_changed():
 
 
 async def test_mcp_tools_registered_and_return_json():
-    import mcp_server
+    from accessibility_mcp import server as mcp_server
 
     names = {t.name for t in await mcp_server.mcp.list_tools()}
     assert {"a11y_open", "a11y_close", "a11y_dossier", "a11y_observe", "a11y_act", "a11y_reach",
@@ -356,8 +356,8 @@ async def test_tab_order_and_reach_report_raw_focus_style_not_a_verdict():
 
 
 async def test_close_interrupts_a_running_autonomous_test_and_keeps_the_partial_report():
-    import mcp_server
-    from a11y import agent
+    from accessibility_mcp import server as mcp_server
+    from accessibility_mcp.a11y import agent
 
     fin = json.dumps({"thought": "x", "friction": None, "action": {"type": "press", "value": "Tab"}})
     calls = {"n": 0}
@@ -385,7 +385,7 @@ async def test_close_interrupts_a_running_autonomous_test_and_keeps_the_partial_
 
 
 async def test_agent_can_inspect_focus_style_but_a_screen_reader_cannot():
-    from a11y import agent
+    from accessibility_mcp.a11y import agent
 
     assert "focus_style" in agent._allowed_actions("default")
     assert "focus_style" in agent._allowed_actions("keyboard")

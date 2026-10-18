@@ -3,9 +3,9 @@ import json
 
 import pytest
 
-import mcp_server
-from a11y import audit
-from a11y.content_index import ContentIndex
+from accessibility_mcp import server as mcp_server
+from accessibility_mcp.a11y import audit
+from accessibility_mcp.a11y.content_index import ContentIndex
 
 BAD_HTML = "<html><head><title>t</title></head><body><img src='x.png'><button></button></body></html>"
 GOOD_HTML = (
@@ -32,7 +32,7 @@ def test_catalog_describes_every_item_for_the_model(index):
 
 
 def test_no_keyword_ranking_left():
-    import a11y.content_index as ci
+    import accessibility_mcp.a11y.content_index as ci
 
     assert not hasattr(ci.ContentIndex, "search")
 
@@ -139,7 +139,7 @@ async def test_find_uses_model_choice_and_drops_invented_names(monkeypatch):
 
     from mcp.types import TextContent
 
-    from a11y import tools
+    from accessibility_mcp.a11y import tools
 
     async def fake_create_message(**_kw):
         return SimpleNamespace(content=TextContent(type="text", text='["modal-native-dialog", "inventado"]'))
@@ -182,7 +182,7 @@ def test_catalog_is_authored_by_ai_not_extracted_by_regex(index):
     assert all(len(c["quando_usar"]) > 30 for c in cat if c["kind"] in ("reference", "example"))
     nvda = next(c for c in cat if c["name"] == "nvda-testing-guide")
     assert "NVDA" in nvda["quando_usar"] and "Before opening NVDA" not in nvda["quando_usar"]
-    import a11y.content_index as ci
+    import accessibility_mcp.a11y.content_index as ci
 
     for gone in ("_first_paragraph", "_leading_comment", "_clip_heading"):
         assert not hasattr(ci, gone)  # sem extracao heuristica de resumo
@@ -192,7 +192,7 @@ def test_missing_or_orphan_description_is_detected(tmp_path):
     (tmp_path / "references").mkdir()
     (tmp_path / "references" / "novo.md").write_text("# Novo\n\n## A\ntexto", encoding="utf-8")
     (tmp_path / "catalog.json").write_text('{"reference": {"velho": "x"}}', encoding="utf-8")
-    from a11y.content_index import ContentIndex
+    from accessibility_mcp.a11y.content_index import ContentIndex
 
     idx = ContentIndex(tmp_path)
     assert idx.catalog_problems() == {"sem_descricao": ["reference:novo"], "descricao_orfa": ["reference:velho"]}

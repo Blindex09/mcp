@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from a11y import nvda_vm
+from accessibility_mcp.a11y import nvda_vm
 
 ROOT = Path(__file__).resolve().parent.parent
 NODE = shutil.which("node")

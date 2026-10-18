@@ -10,9 +10,9 @@ from typing import Any
 
 from mcp.server.fastmcp import Context, Image
 
-from llm import NO_MODEL_HELP, Hint, backend_status
-from router import ask_routed
-from router import stats as routing_stats
+from accessibility_mcp.llm import NO_MODEL_HELP, Hint, backend_status
+from accessibility_mcp.router import ask_routed
+from accessibility_mcp.router import stats as routing_stats
 
 from . import learn
 from .agent import run_agent

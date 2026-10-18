@@ -3,7 +3,7 @@ import asyncio
 
 import pytest
 
-from a11y import provisioning as pv
+from accessibility_mcp.a11y import provisioning as pv
 
 
 @pytest.fixture()

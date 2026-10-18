@@ -7,7 +7,7 @@ O Playwright e o Chromium são instalados sozinhos na primeira vez (alguns minut
 ```powershell
 cd "C:\projetos IA\mcp"
 python -m pip install -r requirements.txt      # ou: uv sync
-python setup.py                                # registra no Claude Desktop e Cursor
+python scripts/setup.py                                # registra no Claude Desktop e Cursor
 ```
 
 ### 2⃣ Reiniciar o Claude Desktop / Cursor
@@ -101,7 +101,7 @@ Claude: [a11y_review, depois prova o comportamento de cada componente e propõe 
 ### 🆘 Se não funcionar
 
 ```bash
-python "C:\projetos IA\mcp\test.py"          # confere dependências, conteúdo embutido e inicialização
+python "C:\projetos IA\mcp\scripts\test.py"          # confere dependências, conteúdo embutido e inicialização
 python "C:\projetos IA\mcp\mcp_server.py"    # roda o servidor e mostra o log no stderr
 ```
 

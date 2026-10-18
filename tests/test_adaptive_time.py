@@ -7,8 +7,8 @@ from typing import ClassVar
 import pytest
 from playwright.async_api import TimeoutError as PlaywrightTimeout
 
-from a11y import session as sm
-from a11y.session import SESSION
+from accessibility_mcp.a11y import session as sm
+from accessibility_mcp.a11y.session import SESSION
 
 
 class Slow(http.server.BaseHTTPRequestHandler):

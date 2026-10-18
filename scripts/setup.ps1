@@ -1,5 +1,5 @@
 # Accessibility MCP Server - Windows Setup Script
-# Execução: .\setup.ps1
+# Execução: .\scripts\setup.ps1
 
 Write-Host " Accessibility MCP Server - Setup para Windows`n" -ForegroundColor Cyan
 

@@ -20,8 +20,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT.parent.parent))
 
-from a11y import audit
-from a11y.session import SESSION
+from accessibility_mcp.a11y import audit
+from accessibility_mcp.a11y.session import SESSION
 
 VERSIONS = ["v1-original", "v2-axe-verde", "v3-corrigido"]
 OPTIONS = {"Chá verde", "Chá preto", "Chá branco", "Chá de ervas", "Chá mate"}

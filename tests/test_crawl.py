@@ -6,8 +6,8 @@ from typing import ClassVar
 
 import pytest
 
-from a11y import crawl as crawl_mod
-from a11y.crawl import crawl
+from accessibility_mcp.a11y import crawl as crawl_mod
+from accessibility_mcp.a11y.crawl import crawl
 
 PAGES = {
     "/": "<html lang='pt'><title>Home</title><body><main><h1>Home</h1><a href='/a'>A</a><a href='/b'>B</a><a href='/private/x'>Privado</a>"
@@ -99,7 +99,7 @@ async def test_crawl_validates_input():
 
 
 async def test_crawl_tool_returns_json(site):
-    import mcp_server
+    from accessibility_mcp import server as mcp_server
 
     out = json.loads(await mcp_server.mcp._tool_manager.get_tool("a11y_crawl").fn(url=site + "/", max_pages=3))
     assert out["pages_visited"] == 3 and "site_facts" in out

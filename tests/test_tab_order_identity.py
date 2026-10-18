@@ -8,9 +8,9 @@ import threading
 
 import pytest
 
-from a11y import audit
-from a11y.compare import compare_browsers
-from a11y.session import SESSION
+from accessibility_mcp.a11y import audit
+from accessibility_mcp.a11y.compare import compare_browsers
+from accessibility_mcp.a11y.session import SESSION
 
 SAME_NAMES = (
     "<html lang=pt><title>t</title><body><main>"

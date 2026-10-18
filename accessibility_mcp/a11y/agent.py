@@ -18,8 +18,8 @@ import time
 from collections.abc import Awaitable, Callable
 from typing import Any
 
-from llm import extract_json
-from router import drain_outcomes
+from accessibility_mcp.llm import extract_json
+from accessibility_mcp.router import drain_outcomes
 
 from . import findings as findings_mod
 from . import learn, runs, verify

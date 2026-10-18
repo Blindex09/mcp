@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from llm import Hint, extract_json
+from accessibility_mcp.llm import Hint, extract_json
 
 GENERAL = "geral"
 ROUTING = "roteamento"  # licoes do roteador de modelos (router.py); nao entram no prompt do agente

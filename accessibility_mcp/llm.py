@@ -38,7 +38,7 @@ from typing import Any
 
 import httpx
 
-from a11y.patience import patient
+from accessibility_mcp.a11y.patience import patient
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +112,7 @@ def backend_status() -> dict[str, Any]:
     model = os.environ.get("A11Y_MCP_MODEL")
     source = "pessoa" if model else None
     if not model and backend:
-        import models
+        from accessibility_mcp import models
 
         base_url = _base_url(os.environ.get("A11Y_MCP_BASE_URL", "")) if backend == "openai-compatible" else None
         if (learned := models.persisted(backend)) is not None:
@@ -169,12 +169,16 @@ async def _resolve_model(ctx: Any, tier: str, backend: str) -> str | None:
     if explicit:
         return explicit
     if tier != "main":
-        import models  # import tardio: so models.py precisa de llm.py, nao o contrario
+        from accessibility_mcp import (
+            models,  # import tardio: so models.py precisa de llm.py, nao o contrario
+        )
 
         if (choice := models.persisted(backend, tier)) is not None:
             return choice
         return await _resolve_model(ctx, "main", backend)  # sem escolha propria para este papel: usa a do principal
-    import models  # import tardio: so models.py precisa de llm.py, nao o contrario
+    from accessibility_mcp import (
+        models,  # import tardio: so models.py precisa de llm.py, nao o contrario
+    )
 
     base_url = _base_url(os.environ.get("A11Y_MCP_BASE_URL", "")) if backend == "openai-compatible" else None
     key_env = {

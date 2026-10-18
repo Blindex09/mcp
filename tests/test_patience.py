@@ -4,10 +4,10 @@ import asyncio
 import httpx
 import pytest
 
-import llm
-from a11y import audit
-from a11y.patience import patient, with_patience
-from a11y.session import SESSION
+from accessibility_mcp import llm
+from accessibility_mcp.a11y import audit
+from accessibility_mcp.a11y.patience import patient, with_patience
+from accessibility_mcp.a11y.session import SESSION
 
 
 async def test_patient_retries_with_growing_timeout_and_only_the_last_failure_surfaces():
@@ -134,7 +134,7 @@ async def test_a_slow_real_page_load_still_succeeds_because_the_navigation_timeo
 
 
 async def test_slow_action_is_retried_with_more_time_not_failed(monkeypatch):
-    from a11y import session as sm
+    from accessibility_mcp.a11y import session as sm
 
     monkeypatch.setattr(sm, "ACTION_TIMEOUT_MS", 60)
     page = """<!doctype html><html lang="pt"><title>l</title><body><div id="host"></div>
@@ -149,7 +149,7 @@ async def test_slow_action_is_retried_with_more_time_not_failed(monkeypatch):
 
 async def test_an_action_with_effect_runs_exactly_once_even_when_the_wait_is_slow(monkeypatch):
     """Regressao: a paciencia repetia o CLIQUE a cada estouro de tempo; repetir uma acao com efeito (comprar, enviar) e' perigoso."""
-    from a11y import session as sm
+    from accessibility_mcp.a11y import session as sm
 
     monkeypatch.setattr(sm, "ACTION_TIMEOUT_MS", 60)
     page = """<!doctype html><html lang="pt"><title>u</title><body><div id="host"></div><div id="n">0</div>

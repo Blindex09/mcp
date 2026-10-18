@@ -2,8 +2,8 @@
 o par prova que ela distingue o componente correto do defeituoso, em vez de aprovar tudo ou reprovar tudo."""
 import pytest
 
-from a11y.probes import PROBES, run_probe
-from a11y.session import SESSION, SessionError
+from accessibility_mcp.a11y.probes import PROBES, run_probe
+from accessibility_mcp.a11y.session import SESSION, SessionError
 
 HEAD = '<!doctype html><html lang="pt"><head><title>Teste</title></head><body>'
 

@@ -1,8 +1,8 @@
 """Achados com evidencia: validacao de fatos, verificador, exportacao (EARL/SARIF), execucoes salvas e comparacao."""
 import json
 
-from a11y import findings, runs, wcag
-from a11y.session import SESSION
+from accessibility_mcp.a11y import findings, runs, wcag
+from accessibility_mcp.a11y.session import SESSION
 from tests.test_agent import FINISH, Script, decision, run
 from tests.test_probes import BAD_DIALOG, HEAD
 
@@ -155,7 +155,7 @@ async def test_probe_action_runs_in_the_agent_and_its_facts_become_evidence():
 
 # --------------------------------------------------------------------------- ferramentas MCP
 async def test_manual_tools_probe_finding_trace_and_report_formats():
-    import mcp_server
+    from accessibility_mcp import server as mcp_server
 
     tools = mcp_server.mcp._tool_manager
     call = lambda name, **kw: tools.get_tool(name).fn(**kw)
@@ -189,7 +189,7 @@ async def test_manual_tools_probe_finding_trace_and_report_formats():
 
 
 async def test_saved_runs_can_be_listed_exported_and_diffed():
-    import mcp_server
+    from accessibility_mcp import server as mcp_server
 
     tools = mcp_server.mcp._tool_manager
     call = lambda name, **kw: tools.get_tool(name).fn(**kw)

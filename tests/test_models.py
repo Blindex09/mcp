@@ -3,9 +3,8 @@
 import httpx
 import pytest
 
-import llm
-import models
-from a11y import learn
+from accessibility_mcp import llm, models
+from accessibility_mcp.a11y import learn
 
 
 def test_native_auto_is_a_fact_about_the_provider_not_our_opinion():

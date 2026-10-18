@@ -9,8 +9,8 @@ sys.path.insert(0, str(DEMO))
 
 import verificar as v
 
-from a11y import audit
-from a11y.session import SESSION
+from accessibility_mcp.a11y import audit
+from accessibility_mcp.a11y.session import SESSION
 
 
 @pytest.fixture(scope="module")

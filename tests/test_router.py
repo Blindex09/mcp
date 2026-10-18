@@ -8,10 +8,9 @@ import json
 
 import pytest
 
-import llm
-import router
-from a11y import learn
-from router import Hint
+from accessibility_mcp import llm, router
+from accessibility_mcp.a11y import learn
+from accessibility_mcp.router import Hint
 
 GEN_FAST, GEN_MAIN = "modelo-pequeno", "modelo-grande"
 
@@ -257,7 +256,7 @@ PAGE = '<!doctype html><html lang="pt"><title>t</title><body><main><h1>Loja</h1>
 
 
 async def test_find_tool_is_routed_and_a_made_up_name_makes_the_cheap_answer_climb(world):
-    import mcp_server
+    from accessibility_mcp import server as mcp_server
 
     log, script = world
     script["fast"] = '["nome-inventado"]'  # fato objetivo: nao existe no catalogo -> sobe de camada
@@ -273,8 +272,8 @@ async def test_find_tool_is_routed_and_a_made_up_name_makes_the_cheap_answer_cli
 async def test_pipeline_roles_bypass_the_router_only_memory_still_goes_through_it(monkeypatch, world):
     """Passo (papel main) e relatorio (papel write, com o proprio modelo da pessoa) nunca passam pelo classificador -
     sao papel fixo, fato tecnico ou preferencia configurada. So a atualizacao de memoria continua roteada."""
-    from a11y import agent
-    from a11y.session import SESSION
+    from accessibility_mcp.a11y import agent
+    from accessibility_mcp.a11y.session import SESSION
 
     log, script = world
     GEN_WRITE = "modelo-que-escreve-relatorio"

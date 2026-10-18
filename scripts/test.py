@@ -35,10 +35,10 @@ def test_dependencies():
 
 def test_a11y_content():
     """Verifica se os guias e exemplos de acessibilidade embutidos estao presentes"""
-    content = Path(__file__).parent / "a11y" / "content"
+    content = Path(__file__).resolve().parent.parent / "accessibility_mcp" / "a11y" / "content"
     refs = list((content / "references").glob("*.md"))
     examples = [p for p in (content / "examples").glob("*") if p.is_file()]
-    axe = Path(__file__).parent / "a11y" / "vendor" / "axe.min.js"
+    axe = Path(__file__).resolve().parent.parent / "accessibility_mcp" / "a11y" / "vendor" / "axe.min.js"
 
     print(f" {len(refs)} guias de referencia" if refs else " Nenhum guia em a11y/content/references")
     print(f" {len(examples)} exemplos de componentes" if examples else " Nenhum exemplo em a11y/content/examples")
@@ -63,7 +63,7 @@ def test_server_startup():
     try:
         import time
         pr = subprocess.Popen(
-            [sys.executable, str(Path(__file__).resolve().parent / "mcp_server.py")],
+            [sys.executable, str(Path(__file__).resolve().parent.parent / "mcp_server.py")],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )

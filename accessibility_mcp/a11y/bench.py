@@ -9,7 +9,7 @@ gabarito do criterio WCAG que ele viola. Dois modos:
   positivo (achados `failed` na pagina boa) por modelo, para saber se uma mudanca de prompt ou de modelo melhorou de verdade.
 
 O gabarito e' MEU (de quem escreveu a mutacao): a bancada mede contra defeitos plantados, nao contra todos os defeitos possiveis de um site real.
-Uso: `python -m a11y.bench facts` | `python -m a11y.bench agent [--persona keyboard] [--only sem_alt,sem_lang] [--json saida.json]`.
+Uso: `python -m accessibility_mcp.a11y.bench facts` | `python -m accessibility_mcp.a11y.bench agent [--persona keyboard] [--only sem_alt,sem_lang] [--json saida.json]`.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from typing import Any
 from . import audit, wcag
 from .session import SESSION, Session
 
-BASE_PATH = Path(__file__).parent.parent / "evals" / "boa.html"
+BASE_PATH = Path(__file__).resolve().parents[2] / "evals" / "boa.html"
 Detector = Callable[[Session], Awaitable[bool]]
 
 
@@ -249,7 +249,7 @@ def _print(report: dict[str, Any]) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="python -m a11y.bench", description=__doc__.split("\n")[0])
+    ap = argparse.ArgumentParser(prog="python -m accessibility_mcp.a11y.bench", description=__doc__.split("\n")[0])
     ap.add_argument("mode", choices=["facts", "agent"])
     ap.add_argument("--persona", default="keyboard")
     ap.add_argument("--only", default="", help="nomes de mutacoes separados por virgula")
@@ -261,7 +261,7 @@ def main(argv: list[str] | None = None) -> int:
     async def go() -> dict[str, Any]:
         if args.mode == "facts":
             return await run_facts(only)
-        from router import ask_routed
+        from accessibility_mcp.router import ask_routed
 
         async def ask(prompt: str, images: list[bytes] | None, max_tokens: int, hint: Any = None, tier: str | None = None) -> str | None:
             return await ask_routed(None, prompt, images=images, max_tokens=max_tokens, hint=hint, tier=tier)

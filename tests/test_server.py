@@ -12,7 +12,8 @@ import pytest
 # Helpers
 # ---------------------------------------------------------------------------
 
-SERVER_PATH = Path(__file__).resolve().parent.parent / "mcp_server.py"
+LAUNCHER_PATH = Path(__file__).resolve().parent.parent / "mcp_server.py"  # ponto de entrada do cliente
+SERVER_PATH = Path(__file__).resolve().parent.parent / "accessibility_mcp" / "server.py"
 
 
 def _load_module() -> ModuleType:
@@ -75,7 +76,7 @@ def test_server_starts_and_does_not_crash() -> None:
     waiting for input and must NOT exit immediately.
     """
     proc = subprocess.Popen(
-        [sys.executable, str(SERVER_PATH)],
+        [sys.executable, str(LAUNCHER_PATH)],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

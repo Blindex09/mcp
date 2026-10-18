@@ -3,12 +3,12 @@ import json
 
 import pytest
 
-from a11y import bench
+from accessibility_mcp.a11y import bench
 from tests.test_agent import FINISH, Script, decision
 
 
 def test_every_mutation_changes_exactly_the_page_it_claims_and_names_real_wcag_criteria():
-    from a11y import wcag
+    from accessibility_mcp.a11y import wcag
 
     base = bench.base_html()
     names = [m.name for m in bench.MUTATIONS]

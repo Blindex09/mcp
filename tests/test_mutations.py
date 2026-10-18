@@ -5,7 +5,7 @@ from typing import ClassVar
 
 import pytest
 
-from a11y.session import SESSION, SessionError, is_local_dev
+from accessibility_mcp.a11y.session import SESSION, SessionError, is_local_dev
 
 
 class Recorder(http.server.BaseHTTPRequestHandler):
@@ -109,7 +109,7 @@ async def test_invalid_mode_is_a_usage_error():
 async def test_agent_and_tools_carry_the_policy(api):
     import json
 
-    import mcp_server
+    from accessibility_mcp import server as mcp_server
 
     tools = mcp_server.mcp._tool_manager
     out = json.loads(await tools.get_tool("a11y_open").fn(html=page(api), allow_mutations="block"))
@@ -131,7 +131,7 @@ def form_page(api_url: str) -> str:
 
 
 def test_policy_resolution_and_payload_summary_never_leaks_values():
-    from a11y.session import effective_policy, payload_summary
+    from accessibility_mcp.a11y.session import effective_policy, payload_summary
 
     assert effective_policy("auto", "http://localhost:3000") == "allow"
     assert effective_policy("auto", "https://loja-real.com.br/") == "ask"  # aprovacao ligada onde ha risco real
@@ -207,7 +207,7 @@ async def test_closing_with_pending_requests_never_leaves_anything_stuck_or_sent
 async def test_decide_validates_and_the_tool_reports_errors(api):
     import json
 
-    import mcp_server
+    from accessibility_mcp import server as mcp_server
 
     with pytest.raises(SessionError):
         await SESSION.decide("allow")  # sem sessao

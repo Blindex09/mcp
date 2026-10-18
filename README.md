@@ -102,7 +102,7 @@ No teste autônomo, o agente tem a ação `probe` e o campo `finding`. Antes do 
 
 ### Bancada de avaliação
 
-`python -m a11y.bench facts` parte de uma página correta (`evals/boa.html`) e injeta um defeito conhecido por vez (13 mutações, cada uma com o critério WCAG que viola). Compara o axe sozinho com o conjunto de ferramentas e confere que a página boa não dispara alarme. Roda sem modelo e está nos testes. `python -m a11y.bench agent` roda o agente de verdade (com o modelo configurado) e mede recall e falsos positivos por modelo, para saber se uma mudança melhorou ou piorou. O gabarito é dos defeitos plantados, não de todos os defeitos de um site real.
+`python -m accessibility_mcp.a11y.bench facts` parte de uma página correta (`evals/boa.html`) e injeta um defeito conhecido por vez (13 mutações, cada uma com o critério WCAG que viola). Compara o axe sozinho com o conjunto de ferramentas e confere que a página boa não dispara alarme. Roda sem modelo e está nos testes. `python -m accessibility_mcp.a11y.bench agent` roda o agente de verdade (com o modelo configurado) e mede recall e falsos positivos por modelo, para saber se uma mudança melhorou ou piorou. O gabarito é dos defeitos plantados, não de todos os defeitos de um site real.
 
 ### Vários navegadores
 
@@ -183,13 +183,13 @@ A auditoria completa (pesquisa, o que foi removido por ser heurística e o que f
 ```bash
 cd "C:\projetos IA\mcp"
 pip install -r requirements.txt            # ou: uv sync
-python setup.py                            # registra no Claude Desktop e Cursor (entrada "accessibility")
+python scripts/setup.py                    # registra no Claude Desktop e Cursor (entrada "accessibility")
 ```
 
 O Playwright e o navegador pedido (Chromium por padrão; Firefox/WebKit na primeira vez que forem usados) são instalados sozinhos em segundo plano na primeira vez que o servidor sobe (leva alguns minutos e ~150 MB;
 `a11y_status` mostra o andamento). Para desligar: `A11Y_MCP_AUTO_INSTALL=0` (aí rode `python -m playwright install chromium`).
 
-Reinicie o Claude Desktop / Cursor. Para VS Code, o `setup.py` imprime o trecho para o `settings.json`. O `setup.ps1` faz tudo isso no Windows.
+Reinicie o Claude Desktop / Cursor. Para VS Code, o `setup.py` imprime o trecho para o `settings.json`. O `scripts/setup.ps1` faz tudo isso no Windows.
 Dependências: `mcp>=1.2,<2` (o mcp 2.x renomeou o `FastMCP`), `playwright`. O `httpx` já vem com o `mcp`.
 
 ## Demonstração: "axe verde" não é acessível
@@ -216,37 +216,45 @@ python demo/loja/verificar.py
 
 ```
 C:\projetos IA\mcp\
-├── mcp_server.py        ← servidor FastMCP (entrada)
-├── llm.py               ← acesso ao modelo: provedores diretos (com visão) e sampling do cliente
-├── a11y/
-│   ├── tools.py         ← ferramentas de conhecimento/medição e os recursos MCP
-│   ├── tools_ux.py      ← ferramentas de sessão: dossiê, ações, personas, design
-│   ├── session.py       ← sessão de navegador persistente (personas impostas, descoberta pelo Chromium, efeitos, estresse)
-│   ├── agent.py         ← usuário autônomo: o modelo decide, o harness impõe limites
-│   ├── probes.py        ← sondas de comportamento (Tab, contratos APG, formulários, troca de tela) + js/probe_*.js
-│   ├── findings.py + wcag.py + verify.py + runs.py ← achados com evidência, EARL/SARIF, verificador, execuções salvas e diff
-│   ├── bench.py         ← bancada de avaliação por mutação (evals/boa.html)
-│   ├── provisioning.py  ← instala Playwright e Chromium/Firefox/WebKit sozinho
-│   ├── compare.py       ← mesma página em vários navegadores (fatos lado a lado)
-│   ├── page_scripts.py + js/ ← scripts que coletam FATOS dentro da página (nunca classificam)
-│   ├── audit.py         ← contraste, axe-core, árvore de acessibilidade, ordem de foco
-│   ├── content_index.py ← catálogo dos guias/exemplos (leitura só por nome)
-│   ├── content/         ← guias, exemplos, template React (origem: repo web-accessibility) + catalog.json (descrições escritas por IA)
-│   └── vendor/          ← axe-core 4.12.1 (MPL-2.0)
-├── docs/AUDITORIA.md    ← pesquisa, auditoria e próximos passos
-├── tests/               ← testes com Chromium real (auditoria, sessão, agente, provedores)
-├── setup.py / setup.ps1 / mcp.json / test.py
-└── requirements.txt / pyproject.toml
+├── mcp_server.py            ← ponto de entrada fino (a configuração do cliente continua apontando para ele)
+├── accessibility_mcp/       ← o pacote do servidor
+│   ├── server.py            ← servidor FastMCP
+│   ├── llm.py               ← acesso ao modelo: provedores diretos (com visão) e sampling do cliente
+│   ├── router.py + models.py ← escolha e confiabilidade dos modelos
+│   └── a11y/
+│       ├── tools.py         ← ferramentas de conhecimento/medição e os recursos MCP
+│       ├── tools_ux.py      ← ferramentas de sessão: dossiê, ações, personas, design
+│       ├── session.py       ← sessão de navegador persistente (personas impostas, descoberta pelo Chromium, efeitos, estresse)
+│       ├── agent.py         ← usuário autônomo: o modelo decide, o harness impõe limites
+│       ├── probes.py        ← sondas de comportamento (Tab, contratos APG, formulários, troca de tela) + js/probe_*.js
+│       ├── findings.py + wcag.py + verify.py + runs.py ← achados com evidência, EARL/SARIF, verificador, execuções salvas e diff
+│       ├── bench.py         ← bancada de avaliação por mutação (evals/boa.html)
+│       ├── provisioning.py  ← instala Playwright e Chromium/Firefox/WebKit sozinho
+│       ├── compare.py       ← mesma página em vários navegadores (fatos lado a lado)
+│       ├── page_scripts.py + js/ ← scripts que coletam FATOS dentro da página (nunca classificam)
+│       ├── audit.py         ← contraste, axe-core, árvore de acessibilidade, ordem de foco
+│       ├── content_index.py ← catálogo dos guias/exemplos (leitura só por nome)
+│       ├── content/         ← guias, exemplos, template React + catalog.json (descrições escritas por IA)
+│       └── vendor/          ← axe-core 4.12.1 (MPL-2.0)
+├── tests/                   ← testes com Chromium real (auditoria, sessão, agente, provedores)
+├── evals/                   ← páginas de referência da bancada de avaliação
+├── demo/                    ← loja de demonstração com defeitos conhecidos
+├── nvda/                    ← fala real do NVDA numa VM (Guidepup)
+├── scripts/                 ← setup.py, setup.ps1 e test.py (instalação e checagem)
+├── docs/                    ← AUDITORIA.md e QUICK_START.md
+├── CLAUDE.md + .claude/rules/ ← regras obrigatórias do projeto
+├── mcp.json / requirements.txt / pyproject.toml
+└── .github/workflows/       ← CI
 ```
 
-Os guias e exemplos são editáveis em `a11y/content/`; o `SKILL.md` de lá explica como usar cada ferramenta.
+Os guias e exemplos são editáveis em `accessibility_mcp/a11y/content/`; o `SKILL.md` de lá explica como usar cada ferramenta.
 
 ## Desenvolvimento
 
 ```bash
 python -m pytest -q          # inclui testes com navegador real (~1 min)
-ruff check a11y llm.py mcp_server.py tests
-mypy a11y llm.py mcp_server.py --ignore-missing-imports
+ruff check .
+mypy
 ```
 
 Os testes nunca chamam modelo real: interceptam o HTTP e usam um cliente simulado.

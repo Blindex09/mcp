@@ -15,7 +15,7 @@ import json
 from collections.abc import Awaitable, Callable
 from typing import Any
 
-from llm import extract_json
+from accessibility_mcp.llm import extract_json
 
 AskFn = Callable[..., Awaitable[str | None]]
 VERDICTS = ("supported", "unsupported", "cantTell")

@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from a11y.session import SESSION
+from accessibility_mcp.a11y.session import SESSION
 
 IFRAME_DOC = (
     "<html><body><h1>Dentro</h1><button id='ib'>Botao do iframe</button><div id='idiv'>div do iframe</div>"
@@ -159,7 +159,7 @@ async def test_shadow_and_iframe_also_work_without_cdp():
 
 
 async def test_tools_registered_and_json():
-    import mcp_server
+    from accessibility_mcp import server as mcp_server
 
     tools = mcp_server.mcp._tool_manager
     assert "nenhuma sessao" in json.loads(await tools.get_tool("a11y_page_map").fn())["error"]

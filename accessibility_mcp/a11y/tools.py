@@ -7,8 +7,8 @@ from typing import Any
 
 from mcp.server.fastmcp import Context
 
-from llm import NO_MODEL_HELP, Hint, extract_json
-from router import ask_routed
+from accessibility_mcp.llm import NO_MODEL_HELP, Hint, extract_json
+from accessibility_mcp.router import ask_routed
 
 from . import audit
 from .compare import compare_browsers

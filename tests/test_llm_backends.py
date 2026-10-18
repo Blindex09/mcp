@@ -4,8 +4,8 @@ import json
 import httpx
 import pytest
 
-import llm
-import mcp_server
+from accessibility_mcp import llm
+from accessibility_mcp import server as mcp_server
 
 
 async def _no_catalog(*_a, **_k):
@@ -58,7 +58,7 @@ def test_status_never_leaks_the_key(monkeypatch):
 async def test_no_hardcoded_default_falls_back_to_auto_resolution_and_gives_up_without_a_catalog(monkeypatch, calls):
     """Sem A11Y_MCP_MODEL o codigo nao tem opiniao propria sobre qual modelo usar: tenta resolver sozinho
     (models.resolve), e sem catalogo nem cliente que julgue, desiste sem chamar o provedor de chat."""
-    import models
+    from accessibility_mcp import models
 
     log, _ = calls
     monkeypatch.setenv("ANTHROPIC_API_KEY", "k")  # chave sem modelo escolhido

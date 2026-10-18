@@ -23,9 +23,9 @@ from __future__ import annotations
 from collections import Counter, deque
 from typing import Any
 
-import llm
-from a11y import learn
-from llm import Hint
+from accessibility_mcp import llm
+from accessibility_mcp.a11y import learn
+from accessibility_mcp.llm import Hint
 
 __all__ = ["ROUTING_SCOPE", "Hint", "ask_routed", "drain_outcomes", "reset", "stats"]
 

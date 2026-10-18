@@ -3,8 +3,8 @@ import json
 
 import pytest
 
-from a11y import agent
-from a11y.session import SESSION, SessionError
+from accessibility_mcp.a11y import agent
+from accessibility_mcp.a11y.session import SESSION, SessionError
 from tests.test_session import SITE
 
 
@@ -201,8 +201,8 @@ async def test_compact_element_and_effect_summary_are_facts_only():
 
 
 async def test_tools_fail_clearly_without_any_model_and_work_with_a_provider(monkeypatch, fake_ctx):
-    import llm
-    import mcp_server
+    from accessibility_mcp import llm
+    from accessibility_mcp import server as mcp_server
 
     tools = mcp_server.mcp._tool_manager
     ctx, _ = fake_ctx(None, None)
@@ -290,7 +290,7 @@ async def test_prompts_ask_for_plain_text_without_markdown():
 
 
 async def test_fast_tier_uses_the_cheaper_model_only_for_light_calls(monkeypatch, fake_ctx):
-    import llm
+    from accessibility_mcp import llm
 
     monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
     monkeypatch.setenv("A11Y_MCP_MODEL", "modelo-grande")

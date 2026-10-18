@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from a11y import learn
+from accessibility_mcp.a11y import learn
 from tests.test_agent import FINISH, Script, run
 
 
@@ -100,7 +100,7 @@ async def test_pipeline_steps_have_a_fixed_role_only_the_memory_update_still_ask
 
 
 async def test_tools_list_and_forget():
-    import mcp_server
+    from accessibility_mcp import server as mcp_server
 
     tools = mcp_server.mcp._tool_manager
     await learn.learn_from_run(Script(entries_json(("x", "y", learn.GENERAL))), "s.com", "r")
@@ -112,6 +112,6 @@ async def test_tools_list_and_forget():
 
 @pytest.mark.parametrize("name", ["a11y_learnings", "a11y_forget"])
 async def test_learning_tools_registered(name):
-    import mcp_server
+    from accessibility_mcp import server as mcp_server
 
     assert name in {t.name for t in await mcp_server.mcp.list_tools()}

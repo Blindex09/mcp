@@ -23,8 +23,8 @@ from urllib.parse import urlparse
 
 import httpx
 
-from a11y import learn
-from a11y.patience import patient
+from accessibility_mcp.a11y import learn
+from accessibility_mcp.a11y.patience import patient
 
 MODEL_SCOPE = "modelo"  # escopo de aprendizado (a11y/learn.py) reservado para a escolha de modelo por provedor
 CATALOG_TIMEOUT_S = 20.0
@@ -121,7 +121,7 @@ async def fetch_catalog(backend: str, base_url: str | None, key_env: dict[str, s
 
 
 async def _ask_client_to_pick(ctx: Any, catalog: list[str]) -> str | None:
-    from llm import ask_client, extract_json
+    from accessibility_mcp.llm import ask_client, extract_json
 
     prompt = (
         "Isto escolhe, uma unica vez, qual modelo desta lista o servidor MCP de acessibilidade vai usar para testar "

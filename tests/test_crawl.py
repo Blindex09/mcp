@@ -15,6 +15,8 @@ PAGES = {
     "/a": "<html lang='pt'><title>Pagina</title><body><main><h1>A</h1><h3>pulou</h3><a href='/c'>C</a><input name='q'></main></body></html>",
     "/b": "<html><title>Pagina</title><body><main><h1>B</h1><h1>B de novo</h1><button></button></main></body></html>",
     "/c": "<html lang='pt'><title>C</title><body><main><p>sem h1</p></main></body></html>",
+    "/escuro": "<html lang='pt'><head><title>Escuro</title><style>body{background:#fff;color:#111}@media (prefers-color-scheme: dark){body{background:#222;color:#333}}</style></head>"
+               "<body><main><h1>Escuro</h1><p>Texto</p></main></body></html>",
     "/d": "<html lang='pt'><title>So no sitemap</title><body><main><h1>D</h1></main></body></html>",
     "/private/x": "<html lang='pt'><title>Privado</title><body><h1>NAO DEVE SER VISITADO</h1></body></html>",
 }
@@ -68,6 +70,15 @@ async def test_crawl_discovers_by_links_and_sitemap_respects_robots_and_stays_on
     assert [u.replace(site, "") for u in r["skipped"]["not_html"]] == ["/arquivo.pdf"]
     assert all("outro-site" not in p["url"] for p in r["pages"])  # nunca sai do site
     assert {m for m, _ in Site.hits} <= {"GET", "HEAD"}  # so leitura (HEAD so verifica o tipo de conteudo)
+
+
+async def test_crawl_can_audit_the_dark_theme(site):
+    claro = await crawl(site + "/escuro", max_pages=1)
+    assert claro["pages"][0]["axe_violations"] == []
+    escuro = await crawl(site + "/escuro", max_pages=1, color_scheme="dark")
+    assert {v["id"] for v in escuro["pages"][0]["axe_violations"]} == {"color-contrast"}
+    with pytest.raises(ValueError):
+        await crawl(site + "/escuro", max_pages=1, color_scheme="sepia")
 
 
 async def test_crawl_consolidates_facts_without_judgment(site):

@@ -77,6 +77,41 @@ async def test_audit_rejects_bad_level():
         await audit.run_axe(None, GOOD_HTML, "ZZ")
 
 
+async def test_list_content_can_return_only_one_kind_to_spare_the_context():
+    """Regressao real (achada usando o MCP para montar o site de pesquisas): o catalogo inteiro vinha sempre (~25 KB) mesmo quando so
+    interessavam os exemplos de componente. O filtro e' por tipo (fato do catalogo), nunca por palavra-chave."""
+    tool = mcp_server.mcp._tool_manager.get_tool("a11y_list_content")
+    todos = json.loads(await tool.fn())
+    exemplos = json.loads(await tool.fn(kind="example"))
+    assert exemplos and {i["kind"] for i in exemplos} == {"example"} and len(exemplos) < len(todos)
+    assert {i["kind"] for i in todos} >= {"reference", "example", "template", "script"}
+    assert len(json.dumps(exemplos)) < len(json.dumps(todos)) / 2
+    ruim = json.loads(await tool.fn(kind="receita"))
+    assert "kind invalido" in ruim["error"] and "reference" in ruim["available"]
+
+
+DARK_ONLY_BAD = ("<!doctype html><html lang='pt'><head><title>t</title><style>body{background:#fff;color:#111}"
+                 "@media (prefers-color-scheme: dark){body{background:#222;color:#333}}</style></head><body><main><h1>Oi</h1><p>Texto comum</p></main></body></html>")
+
+
+async def test_audit_rejects_unknown_color_scheme():
+    with pytest.raises(ValueError):
+        await audit.run_axe(None, GOOD_HTML, "AA", "chromium", "sepia")
+    assert audit.check_color_scheme("") is None and audit.check_color_scheme(" Dark ") == "dark"
+
+
+@pytest.mark.slow
+async def test_audit_can_look_at_the_dark_theme_where_the_contrast_breaks():
+    """Regressao real (achada testando o site de pesquisas): a auditoria so olhava o tema padrao, entao um contraste ruim so no escuro passava
+    em branco e o escuro tinha que ser conferido na mao, cor por cor."""
+    claro = await audit.run_axe(html=DARK_ONLY_BAD)
+    assert claro["violations"] == []
+    escuro = await audit.run_axe(html=DARK_ONLY_BAD, color_scheme="dark")
+    assert "color-contrast" in {v["id"] for v in escuro["violations"]}
+    explicit_light = await audit.run_axe(html=DARK_ONLY_BAD, color_scheme="light")
+    assert explicit_light["violations"] == []
+
+
 def test_summarize_axe_orders_by_impact():
     raw = {
         "violations": [

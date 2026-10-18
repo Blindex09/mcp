@@ -181,3 +181,22 @@ async def test_focus_style_works_for_elements_inside_shadow_dom_and_iframes(rich
     for text in ("Botao no shadow", "Botao do iframe", "Principal"):
         fs = await rich.focus_style(by_text[text]["id"])
         assert "changed_on_focus" in fs and "outline_when_focused" in fs, text
+
+
+async def test_reading_an_element_does_not_count_as_probing_its_behavior(rich):
+    """Regressao real (achada varrendo o site de pesquisas com todas as ferramentas): announce, screenshot, focus_style e preview_css
+    marcavam o elemento como 'sondado por comportamento', e o relatorio dizia ao mesmo tempo 'nenhuma acao foi executada'. Ler a arvore
+    de um elemento nao e provar como ele se comporta; o relatorio existe para impedir confianca falsa."""
+    d = await rich.dossier("", 100)
+    alvo = next(e["id"] for e in d["elements"] if e["actionable"] and e["focusable"])
+    await rich.announce(alvo)
+    await rich.focus_style(alvo)
+    await rich.screenshot(alvo)
+    lido = rich.coverage_report()
+    assert lido["interactive"]["probed_by_behavior"] == 0
+    assert any("nenhuma acao, sonda ou alcance" in g for g in lido["gaps"])
+
+    await rich.reach(alvo)  # Tab ate o alvo e' comportamento de teclado
+    alcancado = rich.coverage_report()
+    assert alcancado["interactive"]["probed_by_behavior"] == 1 and "reach" in alcancado["probes_run"]
+    assert not any("nenhuma acao" in g for g in alcancado["gaps"])  # ja houve prova por comportamento, mesmo sem a11y_act

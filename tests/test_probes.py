@@ -176,6 +176,21 @@ ROUTE_BAD = """<nav><a href="#/sobre" id="lnk">Sobre</a></nav><h1>Inicio</h1>
 <script>document.getElementById('lnk').addEventListener('click',(e)=>{e.preventDefault();history.pushState({},'','#/sobre');document.body.innerHTML='<h1>Sobre</h1>';});</script>"""
 
 
+SKIP_LINK = """<a href="#conteudo" id="pular">Pular para o conteudo</a><nav><a href="/x">Menu</a></nav>
+<main id="conteudo" tabindex="-1"><h1>Pagina</h1><p>Texto</p></main>"""
+
+
+async def test_route_change_on_an_in_page_jump_does_not_accuse_the_title_of_not_changing():
+    """Regressao real (achada testando o site de pesquisas com o MCP): o link de pular muda so o fragmento da URL, com o mesmo h1;
+    cobrar que o titulo da aba mude num salto de ancora e' falso alarme. O resto do contrato (foco, percepcao) continua medido."""
+    r = await probe(SKIP_LINK, "route_change", "css:#pular")
+    m = met(r)
+    assert r["facts"]["fragment_jump"] is True
+    assert m["titulo_muda"] is None  # nao se aplica a um salto de ancora: nao e' aprovacao nem falha
+    assert m["foco_nao_se_perde"] is True and m["troca_perceptivel"] is True
+    assert r["unmet"] == [], r["checks"]
+
+
 async def test_route_change_good_vs_silent_spa_navigation():
     good = await probe(ROUTE_GOOD, "route_change", "css:#lnk")
     assert good["unmet"] == [], good["checks"]

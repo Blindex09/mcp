@@ -450,11 +450,13 @@ class Session:
         self.last_used = now
         return self.page
 
-    def _locator(self, target: str) -> Any:
+    def _locator(self, target: str, *, behavior: bool = False) -> Any:
+        """behavior=True so quando o elemento e' EXERCITADO (acao, Tab ate ele, sonda); ler (announce, captura, estilo) nao conta como sondar."""
         page = self._need()
         t = (target or "").strip()
         if _ID_RE.fullmatch(t):
-            self.coverage.probed.add(t)
+            if behavior:
+                self.coverage.probed.add(t)
             frames = page.frames
             idx = self._frame_of.get(t, 0)
             scope = frames[idx] if idx < len(frames) else page
@@ -778,8 +780,8 @@ class Session:
                 "a pagina trata acoes em ancestrais (document/window): elementos clicaveis por delegacao podem faltar no "
                 "dossie (alvo real desconhecido); nao ha fato de quais sao, entao confira pela captura de tela e agindo"
             )
-        if c.actions == 0:
-            gaps.append("nenhuma acao foi executada: nada foi provado por comportamento")
+        if c.actions == 0 and not c.probes:
+            gaps.append("nenhuma acao, sonda ou alcance por Tab foi executado: nada foi provado por comportamento")
         if "tab_walk" not in c.probes:
             gaps.append("a varredura de Tab (sonda tab_walk) nao rodou: armadilha de teclado, foco coberto e ordem de foco sem fatos")
         if self.blocked:
@@ -816,7 +818,7 @@ class Session:
         free = not PERSONAS[self.persona].get("no_pointer")
         self._last = {"action": action, "target": target or None, "value": value}
         if action in _POINTER_ACTIONS:
-            loc = self._locator(target)
+            loc = self._locator(target, behavior=True)
             # A espera paciente vale so para o elemento ficar pronto (mais tempo a cada tentativa). A ACAO roda UMA vez:
             # repetir um clique com efeito (enviar, comprar) por causa de um estouro de tempo seria perigoso.
             await self._wait_ready(loc)
@@ -831,11 +833,11 @@ class Session:
                 await loc.select_option(value, timeout=once)
         elif action == "press":
             if target and free:
-                await self._locator(target).focus()
+                await self._locator(target, behavior=True).focus()
             await page.keyboard.press(value)
         elif action == "type":
             if target and free:
-                await self._locator(target).click()
+                await self._locator(target, behavior=True).click()
             await page.keyboard.type(value, delay=20)
         elif action == "wait":
             await page.wait_for_timeout(max(0, min(int(value or 500), 3000)))
@@ -926,12 +928,13 @@ class Session:
     async def reach(self, target: str, max_tabs: int = 0) -> dict[str, Any]:
         """Quantas vezes o usuario de teclado aperta Tab, do inicio da pagina, para chegar ao alvo."""
         result = await self._reach(target, max_tabs)
+        self.coverage.probes.add("reach")
         self.log_trace("reach", target, None, {"reached": result["reached"], "tab_presses": result["tab_presses"], "reason": result.get("reason")})
         return result
 
     async def _reach(self, target: str, max_tabs: int = 0) -> dict[str, Any]:
         page = self._need()
-        loc = self._locator(target)
+        loc = self._locator(target, behavior=True)
         if await loc.count() == 0:
             raise SessionError("elemento nao encontrado (rode a11y_dossier de novo depois de navegar)")
         want = await loc.get_attribute("data-a11y-id")

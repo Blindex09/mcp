@@ -48,14 +48,23 @@ def register(mcp: Any) -> None:
     register_files(mcp)
 
     @mcp.tool()
-    async def a11y_list_content() -> str:
+    async def a11y_list_content(kind: str = "") -> str:
         """Catalog of the built-in accessibility knowledge base. Each item has a name, kind
         (reference guide, component example, template file or script), a plain-language "quando_usar" description and, for guides, its section headings.
         Read the catalog and CHOOSE what fits the task, then open it with a11y_get_reference
         a11y_get_example or a11y_get_template. Covers ARIA, WCAG audit checklists, NVDA/VoiceOver testing,
         AI-chat/agent UI accessibility, mobile, frameworks, and ready-made accessible
-        components (modal, tabs, combobox, treegrid, ...)."""
-        return _json(get_index().catalog())
+        components (modal, tabs, combobox, treegrid, ...).
+        kind: optional, reference | example | template | script. The full catalog is large (~25 KB); ask for one kind when you already
+        know whether you need a guide or a ready-made component."""
+        items = get_index().catalog()
+        wanted = kind.strip().lower()
+        if wanted:
+            kinds = sorted({i["kind"] for i in items})
+            if wanted not in kinds:
+                return _json({"error": f"kind invalido: {kind}", "available": kinds})
+            items = [i for i in items if i["kind"] == wanted]
+        return _json(items)
 
     @mcp.tool()
     async def a11y_find(task: str, ctx: Context) -> str:  # type: ignore[type-arg]
@@ -138,14 +147,15 @@ def register(mcp: Any) -> None:
             return _error(e)
 
     @mcp.tool()
-    async def a11y_audit(url: str = "", html: str = "", level: str = "AA", browser: str = "chromium") -> str:
+    async def a11y_audit(url: str = "", html: str = "", level: str = "AA", browser: str = "chromium", color_scheme: str = "") -> str:
         """Run an automated axe-core WCAG audit in headless Chromium. Provide EITHER url
         (http/https only) OR html (a full HTML string). level: A | AA | AAA. browser: chromium | firefox | webkit (installed automatically on first use).
+        color_scheme: light | dark (optional; emulates prefers-color-scheme, so contrast in the dark theme is audited too).
         Returns violations sorted by impact, items needing manual review, and pass count.
         Automated checks catch only part of WCAG - always follow up with keyboard and
         screen-reader testing (see a11y_get_reference "audit-checklist")."""
         try:
-            return _json(await audit.run_axe(url or None, html or None, level, browser))
+            return _json(await audit.run_axe(url or None, html or None, level, browser, color_scheme or None))
         except Exception as e:  # noqa: BLE001 - fronteira da ferramenta: devolve erro ao cliente
             return _error(e)
 
@@ -183,14 +193,15 @@ def register(mcp: Any) -> None:
             return _error(e)
 
     @mcp.tool()
-    async def a11y_crawl(url: str, max_pages: int = 10, level: str = "AA", browser: str = "chromium") -> str:
+    async def a11y_crawl(url: str, max_pages: int = 10, level: str = "AA", browser: str = "chromium", color_scheme: str = "") -> str:
         """Scan SEVERAL pages of the same site and return consolidated FACTS (no judgment): axe violations per page and per
         rule, page-map summaries (lang, title, h1 count, heading jumps, images without alt, links without text, unnamed fields,
         landmarks, reading order), duplicate titles, pages missing lang/title/h1. Discovers URLs from sitemap.xml plus
         same-site links; respects robots.txt; GET only (anything that would change data is blocked); polite pause; max 30 pages.
-        A sample, not a substitute for testing important flows like a user (a11y_open / a11y_walkthrough). url: http/https start page."""
+        A sample, not a substitute for testing important flows like a user (a11y_open / a11y_walkthrough). url: http/https start page.
+        color_scheme: light | dark (optional; audits the dark theme too)."""
         try:
-            return _json(await crawl(url, max_pages, level, browser))
+            return _json(await crawl(url, max_pages, level, browser, color_scheme or None))
         except Exception as e:  # noqa: BLE001 - fronteira da ferramenta: devolve erro ao cliente
             return _error(e)
 

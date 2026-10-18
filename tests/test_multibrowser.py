@@ -155,3 +155,17 @@ async def test_reach_reports_end_of_page_when_focus_stops_moving_in_firefox():
         assert "fim da pagina" in r["reason"] or "saiu" in r["reason"]
     finally:
         await SESSION.close()
+
+
+def test_tab_that_skips_only_links_is_reported_as_a_browser_fact_not_a_page_defect():
+    """Regressao real (achada comparando o site de pesquisas em tres navegadores): o WebKit deu 0 paradas de Tab contra 13 no Chromium numa
+    pagina so de links. Causa provada isolando o WebKit: Tab alcanca botao e campo, nao links. O relatorio nao dizia nada e parecia defeito."""
+    from accessibility_mcp.a11y.compare import tab_skips_links
+
+    ref = ["a:Pular", "a:Inicio", "button:Enviar", "input:Nome"]
+    assert tab_skips_links(ref, ["button:Enviar", "input:Nome"]) and "2 link(s)" in tab_skips_links(ref, ["button:Enviar", "input:Nome"])  # type: ignore[operator]
+    assert tab_skips_links(["a:Pular", "a:Inicio"], []) is not None  # pagina so de links: nenhuma parada (o caso real do WebKit)
+    assert tab_skips_links(ref, []) is None  # com botao e campo na referencia, "nenhuma parada" nao e' so links: nao se explica sozinho
+    assert tab_skips_links(ref, ref) is None  # ordem igual: nada a dizer
+    assert tab_skips_links(ref, ["a:Pular", "a:Inicio", "input:Nome"]) is None  # faltou um BOTAO: nao e' o caso dos links
+    assert tab_skips_links(["button:A"], []) is None  # sem links na referencia

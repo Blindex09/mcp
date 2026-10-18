@@ -16,6 +16,7 @@ from __future__ import annotations
 import itertools
 from collections.abc import Awaitable, Callable
 from typing import Any
+from urllib.parse import urldefrag
 
 from . import page_scripts as js
 
@@ -51,7 +52,7 @@ def _where(f: dict[str, Any] | None) -> str:
 
 
 async def _focus_target(s: Any, target: str) -> tuple[Any, Any]:
-    loc = s._locator(target)
+    loc = s._locator(target, behavior=True)
     if await loc.count() == 0:
         from .session import SessionError
 
@@ -416,11 +417,16 @@ async def route_change(s: Any, target: str | None, container: str | None = None,
     live = await s._live_new()
     spa = bool(await page.evaluate("() => window.__a11yRouteMarker === true"))
     moved_url = page.url != url0
+    # Salto para ancora na mesma pagina (link de pular, indice): so o fragmento da URL mudou e o h1 e' o mesmo. E' fato de URL, nao de intencao.
+    jump = moved_url and before["h1"] == after["h1"] and urldefrag(url0)[0] == urldefrag(page.url)[0]
     facts = {"url": [url0, page.url], "title": [before["title"], after["title"]], "h1": [before["h1"], after["h1"]], "focus_before": _where(f0), "focus_after": _where(f1),
-             "announced": [a["text"][:60] for a in live][:3], "same_document_navigation": spa}
+             "announced": [a["text"][:60] for a in live][:3], "same_document_navigation": spa, "fragment_jump": jump}
     checks: list[dict[str, Any]] = []
     if moved_url or before["h1"] != after["h1"]:
-        checks.append(_check("titulo_muda", "o titulo da pagina muda com a nova tela", f"{before['title']!r} -> {after['title']!r}", before["title"] != after["title"], ["2.4.2"]))
+        if jump:
+            checks.append(_check("titulo_muda", "o titulo da pagina muda com a nova tela", "salto para ancora na mesma pagina (so o fragmento da URL mudou e o h1 e' o mesmo): o titulo nao deve mudar", None, ["2.4.2"]))
+        else:
+            checks.append(_check("titulo_muda", "o titulo da pagina muda com a nova tela", f"{before['title']!r} -> {after['title']!r}", before["title"] != after["title"], ["2.4.2"]))
         checks.append(_check("foco_nao_se_perde", "o foco nao fica perdido no corpo da pagina", _where(f1), f1 is not None, ["2.4.3"]))
         checks.append(_check("troca_perceptivel", "a troca e' perceptivel sem ver a tela: anuncio, foco movido para o novo conteudo ou carga de pagina nova", f"anuncio={bool(live)}; foco mudou={ident1 != ident0}; mesmo documento={spa}", (not spa) or bool(live) or (f1 is not None and ident1 != ident0), ["4.1.3", "2.4.3"]))
     else:

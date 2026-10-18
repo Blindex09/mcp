@@ -86,8 +86,21 @@ async def _launch(pw: Any, browser: str = "chromium") -> Any:
         ) from first
 
 
+COLOR_SCHEMES = ("light", "dark")
+
+
+def check_color_scheme(value: str | None) -> str | None:
+    """'' ou None = o padrao do navegador; so 'light' e 'dark' existem como emulacao (prefers-color-scheme)."""
+    scheme = (value or "").strip().lower()
+    if not scheme:
+        return None
+    if scheme not in COLOR_SCHEMES:
+        raise ValueError("color_scheme deve ser light ou dark")
+    return scheme
+
+
 async def _with_page(
-    url: str | None, html: str | None, fn: Callable[[Any], Awaitable[Any]], browser: str = "chromium"
+    url: str | None, html: str | None, fn: Callable[[Any], Awaitable[Any]], browser: str = "chromium", color_scheme: str | None = None
 ) -> Any:
     """Abre a pagina e roda fn(page). A navegacao (e a verificacao em si) usa tempo ADAPTATIVO: se a pagina/o site
     demorar mais que a 1a espera, a MESMA tentativa de navegar e' refeita com mais tempo (3x, 9x, 27x...), num
@@ -96,6 +109,7 @@ async def _with_page(
         raise ValueError("informe exatamente um entre url e html")
     if url:
         validate_url(url)  # antes de subir o navegador
+    scheme = check_color_scheme(color_scheme)
     await provisioner_for(browser).ensure()  # instala Playwright/navegador sozinho se faltar
     from playwright.async_api import async_playwright
 
@@ -104,7 +118,7 @@ async def _with_page(
         async with async_playwright() as pw:
             instance = await _launch(pw, browser)
             try:
-                page = await instance.new_page()
+                page = await instance.new_page(color_scheme=scheme) if scheme else await instance.new_page()  # type: ignore[arg-type]
                 page.set_default_timeout(nav_ms)  # piso para qualquer espera dentro de fn() sem timeout proprio
                 if url:
                     await page.goto(url.strip(), wait_until="load", timeout=nav_ms)
@@ -156,7 +170,7 @@ def summarize_axe(raw: dict[str, Any], max_nodes: int = 5) -> dict[str, Any]:
 
 
 async def run_axe(
-    url: str | None = None, html: str | None = None, level: str = "AA", browser: str = "chromium"
+    url: str | None = None, html: str | None = None, level: str = "AA", browser: str = "chromium", color_scheme: str | None = None
 ) -> dict[str, Any]:
     tags = _LEVEL_TAGS.get(level.upper())
     if tags is None:
@@ -170,7 +184,7 @@ async def run_axe(
         )
         return summarize_axe(raw)
 
-    result: dict[str, Any] = await _with_page(url, html, fn, browser)
+    result: dict[str, Any] = await _with_page(url, html, fn, browser, color_scheme)
     return result
 
 

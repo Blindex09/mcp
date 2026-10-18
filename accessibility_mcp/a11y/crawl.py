@@ -85,8 +85,11 @@ def _summarize_map(m: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-async def crawl(url: str, max_pages: int = 10, level: str = "AA", browser: str = "chromium") -> dict[str, Any]:
+async def crawl(
+    url: str, max_pages: int = 10, level: str = "AA", browser: str = "chromium", color_scheme: str | None = None
+) -> dict[str, Any]:
     start = audit.validate_url(url)
+    scheme = audit.check_color_scheme(color_scheme)
     tags = audit._LEVEL_TAGS.get(level.upper())
     if tags is None:
         raise ValueError("level deve ser A, AA ou AAA")
@@ -108,7 +111,7 @@ async def crawl(url: str, max_pages: int = 10, level: str = "AA", browser: str =
     async with async_playwright() as pw:
         inst = await audit._launch(pw, browser)
         try:
-            ctx = await inst.new_context(accept_downloads=False)
+            ctx = await (inst.new_context(accept_downloads=False, color_scheme=scheme) if scheme else inst.new_context(accept_downloads=False))  # type: ignore[arg-type]
 
             async def route(r: Any) -> None:  # so leitura: nada que altere dados
                 await (r.continue_() if r.request.method.upper() in ("GET", "HEAD", "OPTIONS") else r.abort())

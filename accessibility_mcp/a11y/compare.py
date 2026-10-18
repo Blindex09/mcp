@@ -15,6 +15,22 @@ from .provisioning import BROWSERS, check_browser_name
 MAX_DIFF_LINES = 60
 
 
+def tab_skips_links(reference: list[str], other: list[str]) -> str | None:
+    """Fato de Tab entre dois navegadores: tudo o que o de referencia alcancou e este nao foi LINK (parada 'a:nome').
+
+    Foi o que o WebKit mostrou numa pagina so com links (0 paradas contra 13 no Chromium e no Firefox): Tab chega a botoes e campos
+    mas nao a links. Sem esta nota, 'ordem de foco diferente' parece defeito da pagina; e' o modo do navegador expor o teclado.
+    """
+    missing = [stop for stop in reference if stop not in other]
+    if not missing or not all(stop.startswith("a:") for stop in missing):
+        return None
+    return (
+        f"neste navegador o Tab nao parou em {len(missing)} link(s) que o navegador de referencia alcancou, e so deixou de alcancar links: "
+        "provavelmente e' a configuracao padrao do navegador (no Safari, 'Pressionar Tab para destacar cada item da pagina' vem desligada), "
+        "nao defeito da pagina; confirme a ordem de foco por links com outro navegador ou com o leitor de tela"
+    )
+
+
 async def _one(url: str | None, html: str | None, level: str, browser: str) -> dict[str, Any]:
     tags = audit._LEVEL_TAGS.get(level.upper())
     if tags is None:
@@ -66,6 +82,9 @@ async def compare_browsers(
             "axe_only_here": sorted(ids_b - ids_a),
             "tab_order": "identica" if tabs_a == tabs_b else {base: tabs_a, b: tabs_b},
         }
+        note = tab_skips_links(tabs_a, tabs_b)
+        if note:
+            out["differences"][b]["tab_skips_links"] = note
     out["note"] = (
         "So fatos. Diferencas podem ser bug da pagina ou modo diferente de cada navegador expor a acessibilidade; "
         "decida com o guia cross-browser-a11y. Nao e leitor de tela real."

@@ -464,3 +464,27 @@ Não feito, declarado:
 - Vue e iOS: fontes oficiais não puderam ser lidas; pontos marcados como indicações a confirmar.
 - Não há executor Android nem iOS; o Safari com VoiceOver (macOS) não é medido em nenhum ponto.
 - Espelho no Qaaccessibility continua pendente de decisão (formato diferente).
+
+## 25. O servidor deixa de chamar modelo (outubro de 2026)
+
+Decisão do dono em 19/out/2026: o modelo é o do cliente que usa o servidor (Claude Code, Codex, VS Code, Cursor, Claude Desktop). O servidor não precisa chamar modelo nem de chave. Isto reverte o desenho das seções 1 a 13, em que o servidor chamava um provedor (ou o sampling do cliente) para escolher guias, operar um "usuário autônomo", verificar achados e aprender.
+
+Removido: `llm.py` (provedores e sampling), `models.py` (resolução de modelo), `router.py` (roteador de camadas), `agent.py` (usuário autônomo) e os testes deles; as ferramentas `a11y_find`, `a11y_walkthrough` e `a11y_review`; o modo `agent` da bancada de avaliação; o verificador por modelo; o aprendizado por modelo; as variáveis de ambiente de provedor e de modelo; os textos de configuração de chave no README e no QUICK_START.
+
+O que entrou no lugar (para o modelo do cliente fazer o que o servidor fazia sozinho):
+- Seis fluxos prontos como prompts do MCP (`a11y_review`, `a11y_walkthrough`, `a11y_component`, `a11y_site_scan`, `a11y_compare_runs`, `a11y_write_accessible_code`) e a ferramenta `a11y_workflow(name, ...)`, que devolve o mesmo texto aos clientes que não mostram prompts (paridade, regra 14; teste `test_the_same_workflows_are_also_a_tool_for_clients_without_mcp_prompts`). Cada fluxo leva as regras do que pode e do que não pode afirmar.
+- A escolha de guias é do modelo do cliente, lendo o catálogo de `a11y_list_content`.
+- Achados: `a11y_finding` já era do operador; o servidor só confere fatos (passos citados, elemento visto, critério real). `a11y_report` agora guarda a execução (`run_id`) para `a11y_runs`, `a11y_export` e `a11y_diff` continuarem funcionando sem o usuário autônomo.
+- Aprendizado: `a11y_learn` (o modelo do cliente grava; mesmo assunto atualiza; marcado com a origem `cliente`), com `a11y_learnings` e `a11y_forget`.
+- `a11y_status` mostra só o navegador. O servidor passou a ter 43 ferramentas e 6 prompts.
+- `scripts/setup.py` cadastra o servidor no Claude Desktop, Claude Code, Codex e Cursor e mostra o VS Code; README e QUICK_START trazem o cadastro manual de cada cliente. Formatos conferidos nas páginas oficiais em 19/out/2026 (Claude Code: `claude mcp add` e prompts como `/mcp__servidor__prompt`; Codex: `codex mcp add` e `[mcp_servers.nome]` em `config.toml`; VS Code: `MCP: Add Server`, chave `servers`, prompts como `/servidor.prompt`). O suporte a prompts do Codex não foi confirmado, por isso a ferramenta `a11y_workflow`. O `AGENTS.md`, lido pelo Codex, estava desatualizado e apontava para uma pasta `.Codex/rules` que não existe: passou a ser uma cópia do `CLAUDE.md`.
+- Regras do projeto atualizadas (`CLAUDE.md`, `AGENTS.md`, `.claude/rules/projeto-mcp.md`, `conceitos-agenticos-2026.md`, `economia-e-roteamento.md`) e a matriz de cobertura: 11 de 14 conceitos cobertos (antes 10); o portão da regra 15 passou a ser declarado como lacuna do lado do cliente, porque medir uma instrução ao modelo exige um modelo.
+
+Também nesta rodada, o que estava "não confirmado" e foi conferido: a página oficial do Vue (link para pular, foco devolvido ao início da página depois da troca de rota, `useId`; ela não trata de título nem de regiões vivas) e a documentação do Safari/VoiceOver com `list-style:none` (Scott O'Hara, publicado em 2019-01-12 e atualizado em 2023-01-30; WebKit chamou de mudança proposital; uma lista aninhada dentro de `nav` continua sendo lista). A navegação do site de exemplos, que tinha 31 links antes do conteúdo, agora tem grupos recolhíveis (teste: no máximo 16 itens visíveis).
+
+Não confirmado ou não feito, declarado:
+- Apple: a página oficial de `UIAccessibility.post` não renderiza para leitura; as APIs de iOS seguem como indicação a confirmar.
+- Espelho no Qaaccessibility: aquele projeto registra cada guia em listas e testes próprios (`a11y_knowledge.py`, `test_leitor_de_tela_conhecimento.py`); espelhar a matriz e o roteiro é uma entrega própria dele, com a suíte dele. Pendente.
+- Portão da regra 15 (guias e textos dos fluxos): sem modelo no servidor, só pode ser medido no cliente. Pendente.
+- NVDA real e a VM: dependem do dono (fone fora e VM pronta).
+- Prompts no Codex: suporte não confirmado nas páginas oficiais.

@@ -7,7 +7,7 @@ cannot support is reported as "can't tell", never as a failure.
 
 ## 1. How to file a finding
 
-In the autonomous run, put a `finding` object in the step where you notice it:
+When you notice a problem, record it with `a11y_finding`, with these fields:
 
 - `criterion`: the WCAG 2.2 success criterion number (e.g. `2.1.2`). If you are unsure which one, leave it empty. Never invent one.
 - `severity`: `blocker` (the task cannot be done), `serious` (done only with great effort or help), `moderate`, `minor`.

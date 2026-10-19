@@ -1,15 +1,11 @@
-"""Bancada de avaliacao: mede o quanto as ferramentas (e o agente) realmente acham, em vez de supor.
+"""Bancada de avaliacao: mede o quanto as ferramentas realmente acham, em vez de supor.
 
 Parte de uma pagina CORRETA (`evals/boa.html`) e injeta UM defeito conhecido por vez (mutacao, como o Ma11y propoe), cada um com o
-gabarito do criterio WCAG que ele viola. Dois modos:
+gabarito do criterio WCAG que ele viola. Sem modelo e determinista: o defeito aparece nos FATOS das ferramentas? Compara o axe sozinho com o
+conjunto (axe + mapa da pagina + dossie + sondas de comportamento) e confere que a pagina boa NAO dispara alarme. Roda na integracao continua.
 
-- `facts` (sem modelo, determinista): o defeito aparece nos FATOS das ferramentas? Compara o axe sozinho com o conjunto (axe + mapa da
-  pagina + dossie + sondas de comportamento) e confere que a pagina boa NAO dispara alarme. Roda na integracao continua.
-- `agent` (precisa de um modelo configurado): o agente autonomo acha o defeito e o escreve como achado verificado? Mede recall e falso
-  positivo (achados `failed` na pagina boa) por modelo, para saber se uma mudanca de prompt ou de modelo melhorou de verdade.
-
-O gabarito e' MEU (de quem escreveu a mutacao): a bancada mede contra defeitos plantados, nao contra todos os defeitos possiveis de um site real.
-Uso: `python -m accessibility_mcp.a11y.bench facts` | `python -m accessibility_mcp.a11y.bench agent [--persona keyboard] [--only sem_alt,sem_lang] [--json saida.json]`.
+O gabarito e' de quem escreveu a mutacao: a bancada mede contra defeitos plantados, nao contra todos os defeitos possiveis de um site real.
+Uso: `python -m accessibility_mcp.a11y.bench facts [--only sem_alt,sem_lang] [--json saida.json]`.
 """
 
 from __future__ import annotations
@@ -195,53 +191,6 @@ async def run_facts(only: set[str] | None = None) -> dict[str, Any]:
     }
 
 
-# ----------------------------------------------------------------------------- modo agent (com modelo)
-def score_findings(findings: list[dict[str, Any]], m: Mutation | None) -> dict[str, Any]:
-    """Pontua os achados do agente numa pagina com UM defeito plantado (m) ou na pagina boa (m=None).
-
-    lenient: algum achado `failed` cita um criterio do gabarito. strict: alem disso o texto cita uma das palavras do defeito.
-    Qualquer achado `failed` fora do gabarito (ou qualquer um na pagina boa) e' falso positivo."""
-    failed = [f for f in findings if f.get("outcome") == "failed"]
-    if m is None:
-        return {"hit_lenient": None, "hit_strict": None, "false_positives": len(failed), "failed": len(failed), "cantTell": sum(f.get("outcome") == "cantTell" for f in findings)}
-    on_target = [f for f in failed if f.get("criterion") in m.criteria]
-    strict = [f for f in on_target if any(h in f"{f.get('claim', '')} {(f.get('element') or {}).get('name') or ''}".lower() for h in m.hints)]
-    return {
-        "hit_lenient": bool(on_target), "hit_strict": bool(strict), "false_positives": len(failed) - len(on_target), "failed": len(failed),
-        "cantTell": sum(f.get("outcome") == "cantTell" for f in findings),
-    }
-
-
-async def run_agent_bench(ask: Callable[..., Awaitable[str | None]], persona: str = "keyboard", only: set[str] | None = None, max_steps: int = 0, include_clean: bool = True) -> dict[str, Any]:
-    from .agent import run_agent
-
-    base = base_html()
-    cases: list[tuple[Mutation | None, str]] = [(m, m.apply(base)) for m in MUTATIONS if not only or m.name in only]
-    if include_clean:
-        cases.append((None, base))
-    rows: list[dict[str, Any]] = []
-    for m, html in cases:
-        result = await run_agent(
-            session=SESSION, ask=ask, mode="review", goal="acessibilidade completa por teclado e leitor de tela: varra a pagina com tab_walk e prove cada componente importante agindo",
-            url=None, html=html, persona=persona, max_steps=max_steps, vision=False,
-        )
-        rows.append({"case": m.name if m else "pagina_boa", "stopped_by": result["stopped_by"], "model_calls": result["facts"]["model_calls"],
-                     "rejected_by_verifier": len(result["rejected_findings"]), **score_findings(result["findings"], m)})
-    planted = [r for r in rows if r["case"] != "pagina_boa"]
-    clean = next((r for r in rows if r["case"] == "pagina_boa"), None)
-    n = len(planted)
-    return {
-        "persona": persona, "rows": rows,
-        "summary": {
-            "defects": n, "recall_lenient": round(sum(bool(r["hit_lenient"]) for r in planted) / n, 2) if n else None,
-            "recall_strict": round(sum(bool(r["hit_strict"]) for r in planted) / n, 2) if n else None,
-            "false_positives_planted_pages": sum(r["false_positives"] for r in planted),
-            "false_positives_clean_page": clean["false_positives"] if clean else None,
-            "refuted_by_verifier": sum(r["rejected_by_verifier"] for r in rows),
-        },
-    }
-
-
 def _print(report: dict[str, Any]) -> None:
     print(json.dumps(report["summary"], ensure_ascii=False, indent=1))
     for r in report["rows"]:
@@ -249,26 +198,13 @@ def _print(report: dict[str, Any]) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="python -m accessibility_mcp.a11y.bench", description=__doc__.split("\n")[0])
-    ap.add_argument("mode", choices=["facts", "agent"])
-    ap.add_argument("--persona", default="keyboard")
+    ap = argparse.ArgumentParser(prog="python -m accessibility_mcp.a11y.bench", description=(__doc__ or "").split(chr(10))[0])
+    ap.add_argument("mode", choices=["facts"])
     ap.add_argument("--only", default="", help="nomes de mutacoes separados por virgula")
-    ap.add_argument("--max-steps", type=int, default=30)
     ap.add_argument("--json", default="", help="grava o relatorio neste arquivo")
     args = ap.parse_args(argv)
     only = {x.strip() for x in args.only.split(",") if x.strip()} or None
-
-    async def go() -> dict[str, Any]:
-        if args.mode == "facts":
-            return await run_facts(only)
-        from accessibility_mcp.router import ask_routed
-
-        async def ask(prompt: str, images: list[bytes] | None, max_tokens: int, hint: Any = None, tier: str | None = None) -> str | None:
-            return await ask_routed(None, prompt, images=images, max_tokens=max_tokens, hint=hint, tier=tier)
-
-        return await run_agent_bench(ask, args.persona, only, args.max_steps)
-
-    report = asyncio.run(go())
+    report = asyncio.run(run_facts(only))
     _print(report)
     if args.json:
         Path(args.json).write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")

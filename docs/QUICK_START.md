@@ -1,104 +1,65 @@
 ## Quick Start - Accessibility MCP em 5 minutos
 
-### 1⃣ Instalar
+O servidor **não chama modelo e não precisa de chave**: o modelo é o do cliente que você usa (Claude Code, Codex, VS Code, Cursor, Claude Desktop…).
+
+### 1. Instalar
 
 O Playwright e o Chromium são instalados sozinhos na primeira vez (alguns minutos; `a11y_status` mostra o andamento).
 
 ```powershell
 cd "C:\projetos IA\mcp"
 python -m pip install -r requirements.txt      # ou: uv sync
-python scripts/setup.py                                # registra no Claude Desktop e Cursor
+python scripts/setup.py                        # cadastra no Claude Desktop, Claude Code, Codex e Cursor (e mostra o VS Code)
 ```
 
-### 2⃣ Reiniciar o Claude Desktop / Cursor
+### 2. Reiniciar o cliente
 
-Feche por completo e abra de novo. O servidor aparece como accessibility.
+Feche por completo e abra de novo. O servidor aparece como `accessibility`. Conferir: no Claude Code, `/mcp`; no Codex, `codex mcp list`; no VS Code, `MCP: List Servers`.
 
-### 3⃣ Usar
+Cadastro manual, se preferir:
+
+| Cliente | Comando ou arquivo |
+|---|---|
+| Claude Code | `claude mcp add --transport stdio --scope user accessibility -- uv --directory "C:\projetos IA\mcp" run mcp_server.py` |
+| Codex | `codex mcp add accessibility -- uv --directory "C:\projetos IA\mcp" run mcp_server.py` |
+| VS Code | `MCP: Add Server`, `Command (stdio)`, o mesmo comando, nome `accessibility` (ou `mcp.json` com a chave `servers`) |
+| Cursor / Claude Desktop | JSON com a chave `mcpServers`: `{"accessibility": {"command": "uv", "args": ["--directory", "C:\\projetos IA\\mcp", "run", "mcp_server.py"]}}` |
+
+### 3. Usar
 
 ```
 Você:   como faço um modal acessível?
-Claude: [a11y_find escolhe os guias/exemplos, depois a11y_get_example traz o código]
+Claude: [a11y_list_content, escolhe pelo sentido, depois a11y_get_example traz o código]
 
 Você:   audita https://meusite.com em WCAG AA
 Claude: [a11y_audit, depois violações por impacto, com o trecho de HTML e a correção]
 
-Você:   o foco do teclado nessa página está certo?
-Claude: [a11y_tab_order, depois ordem, nomes e indicador de foco de cada parada]
-
 Você:   testa o cadastro como um usuário só de teclado
-Claude: [a11y_open persona=keyboard, depois a11y_dossier, depois a11y_reach/a11y_act press Tab/Enter…
-         relata onde travou, quantos Tab foram, o que foi anunciado — e o que NÃO conseguiu verificar]
+Claude: [a11y_open persona=keyboard, depois a11y_dossier, a11y_reach/a11y_act, a11y_probe…
+         relata onde travou, quantos Tab foram, o que foi anunciado, e o que NÃO conseguiu verificar]
 
 Você:   esse campo com várias opções é o quê? e esse "dropdown" do menu?
-Claude: [a11y_dossier + a11y_act: decide pelo comportamento e pelo contexto do site
-         (combobox? lista de seleção? menu de navegação?) e propõe a correção sem mudar o visual]
+Claude: [a11y_dossier + a11y_act + a11y_probe: decide pelo comportamento e pelo contexto do site, e propõe a correção sem mudar o visual]
 
-Você:   essa fonte e esse espaçamento estão bons?
-Claude: [a11y_design_tokens mede a escala do site, depois propõe dentro dela, depois a11y_preview_css + a11y_screenshot
-         para mostrar antes/depois, sem tocar no site]
-
-Você:   revisa a estrutura da página inteira (títulos, imagens, links, formulários, ordem de leitura)
+Você:   revisa a estrutura da página inteira
 Claude: [a11y_page_map, depois fatos de todo o conteúdo, depois julga com o guia page-structure-review, depois a11y_coverage mostra o que ficou de fora]
 
 Você:   varre o site todo (até 20 páginas)
-Claude: [a11y_crawl, depois axe por página e por regra, títulos repetidos, páginas sem h1/lang — só fatos, respeitando o robots.txt]
+Claude: [a11y_crawl: só fatos, respeitando o robots.txt; depois revisa as páginas mais importantes]
 
-Você:   compara essa página no Chrome e no Firefox
-Claude: [a11y_compare_browsers, depois o que a árvore, o axe e o foco têm de diferente em cada navegador]
-
-Você:   #767676 sobre #ffffff passa no AA?
-Claude: [a11y_contrast, depois razão e aprovação para texto normal/grande e componentes]
+Você:   compara essa página no Chrome, no Firefox e no WebKit
+Claude: [a11y_compare_browsers: o que a árvore, o axe e o foco têm de diferente em cada navegador]
 ```
 
-O que o automático não cobre (teclado de ponta a ponta, leitor de tela, toque) o Claude lembra de testar à mão, seguindo o guia `nvda-testing-guide`.
+O que o automático não cobre (leitor de tela de verdade, toque em aparelho) o Claude diz que não foi verificado e orienta a testar à mão, seguindo o guia `nvda-testing-guide`.
 
-### Dê uma chave ao servidor (para o usuário autônomo e o `a11y_find`)
+### Fluxos prontos
 
-A especificação MCP de 2026 descontinuou o sampling, então o servidor chama o provedor direto. Na entrada do servidor no JSON, em `"env"`,
-só a chave já basta — o servidor resolve sozinho qual modelo usar:
+Para não precisar explicar o método toda vez, o servidor traz fluxos prontos. No Claude Code, digite `/mcp__accessibility__a11y_review` (ou `a11y_walkthrough`, `a11y_component`, `a11y_site_scan`, `a11y_compare_runs`, `a11y_write_accessible_code`); no VS Code, `/accessibility.a11y_review`. Em qualquer cliente, peça "use a ferramenta a11y_workflow com name a11y_review e url https://meusite.com". O fluxo diz ao modelo do cliente quais guias ler, quais ferramentas e sondas usar, o que pode e não pode afirmar e como entregar o relatório.
 
-```json
-"env": { "ANTHROPIC_API_KEY": "sk-ant-..." }
-```
+`a11y_report` guarda a execução; `a11y_runs`, `a11y_export` e `a11y_diff` listam, exportam (EARL, SARIF) e comparam execuções para ver se uma correção funcionou. `a11y_learn` guarda uma lição para as próximas sessões.
 
-Não há modelo padrão embutido no código, mas também não é preciso escolher um: sem `A11Y_MCP_MODEL`, o servidor usa o roteador nativo do
-provedor quando existe, ou pede ao modelo do cliente que escolha pelo catálogo real da conta (uma vez; a escolha fica guardada). Se quiser
-fixar você mesmo, `A11Y_MCP_MODEL` continua funcionando. Outros provedores (OpenAI, OpenRouter/xAI/LM Studio via `A11Y_MCP_BASE_URL`, Ollama)
-estão no `README.md`. Confira com `a11y_status`. Sem chave nenhuma, as ferramentas de sessão (`a11y_open`, `a11y_dossier`, `a11y_act`…) continuam
-funcionando com o modelo do próprio cliente; só `a11y_walkthrough`/`a11y_review` e a escolha automática do `a11y_find` precisam de um modelo.
-
-O `a11y_walkthrough`/`a11y_review` usa 3 papéis fixos (visão descreve a tela, raciocínio decide o passo, relatório escreve o resultado final),
-cada um com sua env var opcional (`A11Y_MCP_MODEL_VISION`, `A11Y_MCP_MODEL_WRITE`); sem ela, herda a resolução automática do papel principal.
-Detalhe em `README.md`.
-
-### Deixe o servidor testar sozinho
-
-```
-Você:   simula uma pessoa só de teclado tentando se cadastrar em https://meusite.com
-Claude: [a11y_walkthrough persona=keyboard, depois relatório com atritos, gravidade, correções e o que NÃO foi verificado]
-
-Você:   revisa os componentes e o design dessa página
-Claude: [a11y_review, depois prova o comportamento de cada componente e propõe dentro do design do site]
-```
-
-`a11y_close` interrompe um teste em andamento e devolve o relatório parcial.
-
-### Configuração manual
-
-```json
-// %APPDATA%\Claude\claude_desktop_config.json  (ou ~/.cursor/mcp.json)
-{
-  "mcpServers": {
-    "accessibility": {
-      "command": "uv",
-      "args": ["--directory", "C:\\projetos IA\\mcp", "run", "mcp_server.py"]
-    }
-  }
-}
-```
-
-### 🆘 Se não funcionar
+### Se não funcionar
 
 ```bash
 python "C:\projetos IA\mcp\scripts\test.py"          # confere dependências, conteúdo embutido e inicialização

@@ -130,7 +130,7 @@ def test_summarize_axe_orders_by_impact():
 async def test_tools_registered_on_server():
     names = {t.name for t in await mcp_server.mcp.list_tools()}
     assert {
-        "a11y_list_content", "a11y_find", "a11y_get_reference", "a11y_get_example", "a11y_get_template",
+        "a11y_list_content", "a11y_get_reference", "a11y_get_example", "a11y_get_template",
         "a11y_contrast", "a11y_audit", "a11y_aria_snapshot", "a11y_tab_order",
     } <= names
 
@@ -162,32 +162,12 @@ async def test_tab_order_and_aria_snapshot_real_browser():
     assert "button" in tree and "Enviar" in tree
 
 
-async def test_find_falls_back_to_catalog_without_sampling():
-    """Sem sampling no cliente, nada de palavra-chave: devolve o catalogo pro modelo escolher."""
-    out = await mcp_server.mcp.call_tool("a11y_find", {"task": "preciso de um modal acessivel"})
-    text = json.dumps(out, default=str)
-    assert "unavailable" in text and "audit-checklist" in text
-
-
-async def test_find_uses_model_choice_and_drops_invented_names(monkeypatch):
-    from types import SimpleNamespace
-
-    from mcp.types import TextContent
-
-    from accessibility_mcp.a11y import tools
-
-    async def fake_create_message(**_kw):
-        return SimpleNamespace(content=TextContent(type="text", text='["modal-native-dialog", "inventado"]'))
-
-    fake_ctx = SimpleNamespace(session=SimpleNamespace(create_message=fake_create_message))
-    fn = next(t for t in await mcp_server.mcp.list_tools() if t.name == "a11y_find")
-    assert fn  # registrado
-    tool = mcp_server.mcp._tool_manager.get_tool("a11y_find")
-    out = await tool.fn(task="dialogo modal", ctx=fake_ctx)
-    data = json.loads(out)
-    assert data["selection"] == "model"
-    assert [i["name"] for i in data["items"]] == ["modal-native-dialog"]
-    assert tools.get_index().read("example", "modal-native-dialog")
+async def test_the_server_never_asks_a_model_to_choose_guides():
+    """O servidor nao chama modelo: a escolha de guias e' do modelo do cliente, que le o catalogo de a11y_list_content."""
+    nomes = {t.name for t in await mcp_server.mcp.list_tools()}
+    assert "a11y_find" not in nomes
+    out = json.dumps(await mcp_server.mcp.call_tool("a11y_list_content", {"kind": "reference"}), default=str)
+    assert "audit-checklist" in out and "quando_usar" in out
 
 
 def test_every_original_file_is_served(index):

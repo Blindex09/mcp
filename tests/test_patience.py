@@ -1,10 +1,8 @@
 """Regra: nenhum relogio fixo mata trabalho em andamento; o que demora e' tentado de novo com mais tempo."""
 import asyncio
 
-import httpx
 import pytest
 
-from accessibility_mcp import llm
 from accessibility_mcp.a11y import audit
 from accessibility_mcp.a11y.patience import patient, with_patience
 from accessibility_mcp.a11y.session import SESSION
@@ -51,30 +49,6 @@ async def test_with_patience_wraps_work_that_takes_no_timeout_argument():
 
     assert await with_patience(work, 0.1) == "pronto"  # 0.1s estoura, 0.3s basta
     assert state["n"] == 2
-
-
-async def test_model_call_repeats_the_same_request_with_more_time(monkeypatch):
-    timeouts: list[float] = []
-
-    class FakeClient:
-        def __init__(self, timeout):
-            timeouts.append(timeout)
-            self.timeout = timeout
-
-        async def __aenter__(self):
-            return self
-
-        async def __aexit__(self, *a):
-            return False
-
-        async def post(self, url, headers=None, json=None):
-            if self.timeout < 300:
-                raise httpx.ReadTimeout("modelo lento")
-            return httpx.Response(200, json={"ok": True}, request=httpx.Request("POST", url))
-
-    monkeypatch.setattr(llm.httpx, "AsyncClient", FakeClient)
-    assert await llm._http_post("http://x/y", {}, {"a": 1}) == {"ok": True}
-    assert timeouts == [120.0, 360.0]  # o pedido nao foi abandonado: recebeu mais tempo
 
 
 async def test_audit_uses_patience_on_the_navigation_itself_not_just_the_whole_call(monkeypatch):

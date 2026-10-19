@@ -61,7 +61,7 @@ NOTAS: dict[str, dict[str, str]] = {
         "dialogo": "O v-if cria e destrói a caixa; o dialog nativo existe sempre e o showModal() só o abre.",
         "erro": "No bom, useId (Vue 3.5) liga a mensagem ao campo, e nextTick garante que o DOM novo existe antes do focus().",
         "status": "O v-if cria a região junto com o texto; o bom usa a região sempre presente.",
-        "rota": "O Vue Router não move o foco nem muda o título sozinho: no bom, nextTick espera o DOM novo e depois cuida do foco e do título.",
+        "rota": "O guia oficial do Vue manda devolver o foco ao início da página depois da troca de rota (um span com tabindex -1 antes do link de pular) e não fala de título nem de aviso: no bom, nextTick espera o DOM novo e o componente cuida do foco no novo título, do título da aba e do aviso.",
     },
     "svelte": {
         "acordeao": "Aqui o compilador do Svelte avisa de verdade (veja os avisos medidos abaixo): uma div com clique, sem papel e sem teclado. Não esconda o aviso com svelte-ignore; troque pelo button.",

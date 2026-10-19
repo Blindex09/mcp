@@ -2,7 +2,7 @@
 
 Este arquivo é lido no começo de toda sessão. Todas as regras são obrigatórias, sem exceção: nenhuma é sugestão e nenhuma se dispensa por
 conveniência, por tamanho da tarefa ou para um teste passar. Se duas regras parecerem conflitar, aplica-se a que protege mais e avisa-se a
-pessoa. O texto integral de cada regra, com o porquê e a história, está em `.Codex/rules/`, em arquivos por tema que carregam quando a
+pessoa. O texto integral de cada regra, com o porquê e a história, está em `.claude/rules/`, em arquivos por tema que carregam quando a
 tarefa toca os arquivos daquele tema. O núcleo abaixo diz o que vale sempre. Quando uma regra puder ser verificada por código, ela também
 vive como teste ou verificação automática, porque este arquivo é orientação e não trava.
 
@@ -75,12 +75,15 @@ NVDAStudio: ao mudá-la num, muda-se nos outros dois na mesma entrega.
 
 - Nicho: acessibilidade digital. Um pedido fora dela é recusado com educação, como diz a regra 5; a recusa vem do modelo, nunca de texto pronto no
   código. (rules/projeto-mcp.md)
-- É um servidor MCP: o modelo julga, o servidor mede fatos e impõe limites. Escolha de guia, intenção e qualidade nunca por palavra-chave, regex ou
-  ranking lexical (regra 2). (rules/projeto-mcp.md)
-- Nenhum prazo fixo corta o trabalho (regra 8): a sessão, o usuário autônomo, as instalações e o rastreamento terminam por convergência, parada de
+- É um servidor MCP que NÃO chama modelo e não precisa de chave (decisão do dono de 19/out/2026): o modelo é o do cliente que o usa (Claude Code, Codex,
+  VS Code, Cursor, Claude Desktop). O modelo do cliente julga; o servidor mede fatos e impõe limites. Escolha de guia, intenção e qualidade nunca por
+  palavra-chave, regex ou ranking lexical (regra 2). Os fluxos de trabalho são prompts do MCP e a ferramenta `a11y_workflow`. (rules/projeto-mcp.md)
+- Nenhum prazo fixo corta o trabalho (regra 8): a sessão, as operações longas, as instalações e o rastreamento terminam por convergência, parada de
   avanço, repetição, cancelamento ou orçamento da própria pessoa. (rules/tempo-e-lacos.md, rules/projeto-mcp.md)
 - O conteúdo de `accessibility_mcp/a11y/content/` e os playbooks dos especialistas vêm do Qaaccessibility; ao mudar um, mudar nos dois na mesma entrega.
   (rules/projeto-mcp.md)
+- Nada para a pessoa configurar na tela: o navegador se instala sozinho, a pasta do editor se escolhe na conversa e os padrões são seguros. Variáveis de ambiente são só para quem quer mudar o padrão.
+- A matriz de cobertura da regra 18 é `scripts/run_2026_coverage_matrix.py`; rode antes de dar por pronta qualquer mudança no servidor.
 - Uma única branch: `main`.
 - Antes de dizer "pronto" para qualquer mudança de código: `ruff check .`, `mypy` e `pytest`; se a mudança toca a costura entre dois módulos, ler os dois
   lados. A auditoria de setembro de 2026 está em `docs/AUDITORIA.md`.

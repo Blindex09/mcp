@@ -21,7 +21,7 @@ for `a11y_get_reference`, and every `examples/y.ext` is the example named `y` fo
 | Need | Tool |
 |---|---|
 | See what exists (summary + sections of every guide/example) | `a11y_list_content` |
-| Let the model pick the right guides/examples for a task described in plain language | `a11y_find(task)` |
+| Ready-made workflow to follow (review a page, do a task as a persona, check one component, scan a site, compare runs, write accessible code) | MCP prompts `a11y_review`, `a11y_walkthrough`, `a11y_component`, `a11y_site_scan`, `a11y_compare_runs`, `a11y_write_accessible_code`, or the tool `a11y_workflow(name, ...)` |
 | Read a guide (or one section of it) / get component source | `a11y_get_reference(name, section)` / `a11y_get_example(name)` |
 | Get a file of the accessible AI React template or an audit script (`assets/...`, `scripts/...`) | `a11y_get_template(path)` |
 | WCAG contrast ratio between two colors | `a11y_contrast` |
@@ -29,7 +29,7 @@ for `a11y_get_reference`, and every `examples/y.ext` is the example named `y` fo
 | Accessibility tree, i.e. what a screen reader receives | `a11y_aria_snapshot` |
 | Keyboard focus order, names, focus indicators | `a11y_tab_order` |
 
-Selection of what to read is done by a model, never by keyword. The measurement tools (`a11y_contrast`, `a11y_audit`,
+Selection of what to read is done by YOU (the client model), never by keyword: read the descriptions in `a11y_list_content` and choose by meaning. This server never calls a model. The measurement tools (`a11y_contrast`, `a11y_audit`,
 `a11y_aria_snapshot`, `a11y_tab_order`) report facts; interpreting them and deciding the fix stays with you.
 They cover only part of WCAG: keyboard, screen-reader and touch checks remain manual (section 5).
 Browser-based tools need `python -m playwright install chromium` once.
@@ -55,12 +55,12 @@ in every report); `a11y_crawl` scans several pages (facts only; robots.txt; GET 
 Start every test with [references/testing-playbook-for-ai.md](references/testing-playbook-for-ai.md) (order of tools, what you may and may not claim, mistakes already made) and judge each component against [references/component-behavior-matrix.md](references/component-behavior-matrix.md) (must, must not, what the screen reader receives, which probe measures it). Judge the content with [references/page-structure-review.md](references/page-structure-review.md) and widgets beyond the classic eleven with
 [references/more-component-patterns.md](references/more-component-patterns.md).
 
-Browsers: `a11y_open`, `a11y_audit`, `a11y_aria_snapshot`, `a11y_tab_order`, `a11y_walkthrough` and `a11y_review` take `browser` (chromium default, firefox, webkit;
+Browsers: `a11y_open`, `a11y_audit`, `a11y_aria_snapshot`, `a11y_tab_order` and `a11y_crawl` take `browser` (chromium default, firefox, webkit;
 installed automatically). Chromium is the most precise; Firefox/WebKit results list their limits. `a11y_compare_browsers` shows the same page side by side
 (facts only); see [references/cross-browser-a11y.md](references/cross-browser-a11y.md).
 
-Autonomous user: `a11y_walkthrough(task, persona)` and `a11y_review(focus)` run a model as the person (with screenshots and the accessibility
-tree) and return a plain-language report; `a11y_close` interrupts them; `a11y_status` shows readiness. `a11y_focus_style` gives the facts of what :focus changes.
+There is no autonomous user inside the server: you drive the session tools yourself, following the workflows above. `a11y_close` also interrupts a long
+operation; `a11y_status` shows browser readiness. Save a lesson for future sessions with `a11y_learn`. `a11y_focus_style` gives the facts of what :focus changes.
 `a11y_dossier` reports role/name **as computed by the browser** and whether each element is focusable/clickable (an element that is clickable but not
 focusable, with no role, is a mouse-only control).
 

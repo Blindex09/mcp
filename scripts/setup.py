@@ -1,134 +1,120 @@
 #!/usr/bin/env python3
+"""Registra o Accessibility MCP Server nos clientes MCP: Claude Desktop, Claude Code, Codex, Cursor e VS Code.
+
+O servidor nao chama modelo e nao precisa de chave: o modelo e' o do cliente. Formatos conferidos nas paginas oficiais em 2026-10-19:
+- Claude Code: `claude mcp add --transport stdio --scope user <nome> -- <comando> [args]` (code.claude.com/docs/en/mcp);
+- Codex: `codex mcp add <nome> -- <comando> [args]`, que grava [mcp_servers.<nome>] em ~/.codex/config.toml (learn.chatgpt.com/docs/extend/mcp);
+- VS Code: "MCP: Add Server" > Command (stdio), ou um mcp.json com a chave "servers" (code.visualstudio.com/docs/copilot/customization/mcp-servers).
 """
-Setup script para registrar o Accessibility MCP Server em Claude Desktop, VSCode e Cursor
-"""
+
+from __future__ import annotations
 
 import json
 import os
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+NOME = "accessibility"
+LAUNCH = ["uv", "--directory", str(ROOT), "run", "mcp_server.py"]
 
 
-def setup_claude_desktop():
-    """Configura MCP Server para Claude Desktop"""
-    
-    # Caminho do config do Claude Desktop
-    if os.name == 'nt':  # Windows
-        config_path = Path(os.getenv('APPDATA')) / 'Claude' / 'claude_desktop_config.json'
-    else:  # macOS/Linux
-        config_path = Path.home() / 'Library' / 'Application Support' / 'Claude' / 'claude_desktop_config.json'
-    
-    # Garante que o diretório existe
+def cli_add_command(cliente: str) -> list[str]:
+    """O comando que cadastra o servidor num cliente de linha de comando (claude ou codex)."""
+    if cliente == "claude":
+        return ["claude", "mcp", "add", "--transport", "stdio", "--scope", "user", NOME, "--", *LAUNCH]
+    if cliente == "codex":
+        return ["codex", "mcp", "add", NOME, "--", *LAUNCH]
+    raise ValueError(f"cliente desconhecido: {cliente}")
+
+
+def vscode_json() -> str:
+    """O trecho de mcp.json do VS Code (chave 'servers')."""
+    return json.dumps({"servers": {NOME: {"type": "stdio", "command": LAUNCH[0], "args": LAUNCH[1:]}}}, indent=2, ensure_ascii=False)
+
+
+def _merge_mcp_servers(config_path: Path, label: str) -> None:
+    """Claude Desktop e Cursor usam a chave mcpServers num JSON: acrescenta/atualiza a entrada sem apagar as outras."""
     config_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    # Carrega config existente
     config: dict = {}
     if config_path.exists():
         try:
-            with open(config_path, encoding="utf-8") as f:
-                config = json.load(f)
+            config = json.loads(config_path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
-            print(f"    Config existente mal-formado em {config_path} — sobrescrevendo.")
-    
-    # Garante mcpServers existe
-    if 'mcpServers' not in config:
-        config['mcpServers'] = {}
-    
-    # Adiciona/atualiza o servidor de acessibilidade
-    # Remove a entrada do servidor antigo de skills (mesmo diretorio), agora substituido por este
-    legacy = config['mcpServers'].get('skills')
-    if legacy and 'mcp' in json.dumps(legacy).lower():
-        del config['mcpServers']['skills']
-
-    config['mcpServers']['accessibility'] = {
-        "command": "uv",
-        "args": ["--directory", str(ROOT), "run", "mcp_server.py"]
-    }
-    
-    # Salva
-    with open(config_path, 'w') as f:
-        json.dump(config, f, indent=2)
-    
-    print(f" Claude Desktop configurado em: {config_path}")
+            print(f"    Config existente mal-formado em {config_path}: sobrescrevendo.")
+    servers = config.setdefault("mcpServers", {})
+    legacy = servers.get("skills")  # servidor antigo de skills do mesmo diretorio, substituido por este
+    if legacy and "mcp" in json.dumps(legacy).lower():
+        del servers["skills"]
+    servers[NOME] = {"command": LAUNCH[0], "args": LAUNCH[1:]}
+    config_path.write_text(json.dumps(config, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f" {label} configurado em: {config_path}")
 
 
-def setup_cursor():
-    """Configura MCP Server para Cursor (global)"""
-    
-    config_path = Path.home() / '.cursor' / 'mcp.json'
-    
-    # Garante que o diretório existe
-    config_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    # Carrega config existente
-    config: dict = {}
-    if config_path.exists():
-        try:
-            with open(config_path, encoding="utf-8") as f:
-                config = json.load(f)
-        except json.JSONDecodeError:
-            print(f"    Config existente mal-formado em {config_path} — sobrescrevendo.")
-    
-    # Garante mcpServers existe
-    if 'mcpServers' not in config:
-        config['mcpServers'] = {}
-    
-    # Adiciona/atualiza o servidor de acessibilidade
-    # Remove a entrada do servidor antigo de skills (mesmo diretorio), agora substituido por este
-    legacy = config['mcpServers'].get('skills')
-    if legacy and 'mcp' in json.dumps(legacy).lower():
-        del config['mcpServers']['skills']
-
-    config['mcpServers']['accessibility'] = {
-        "command": "uv",
-        "args": ["--directory", "C:\\projetos IA\\mcp", "run", "mcp_server.py"]
-    }
-    
-    # Salva
-    with open(config_path, 'w') as f:
-        json.dump(config, f, indent=2)
-    
-    print(f" Cursor configurado em: {config_path}")
+def setup_claude_desktop() -> None:
+    if os.name == "nt":
+        # o app instalado pela loja guarda a configuracao em LOCALAPPDATA\Claude-Data\<pasta do pacote>; o instalador comum, em APPDATA\Claude
+        achados = sorted((Path(os.getenv("LOCALAPPDATA", "")) / "Claude-Data").glob("*/claude_desktop_config.json"))
+        comum = Path(os.getenv("APPDATA", "")) / "Claude" / "claude_desktop_config.json"
+        if comum.exists() or not achados:
+            achados.append(comum)
+        for arquivo in achados:
+            _merge_mcp_servers(arquivo, "Claude Desktop")
+        return
+    base = Path.home() / "Library" / "Application Support" / "Claude" if sys.platform == "darwin" else Path.home() / ".config" / "Claude"
+    _merge_mcp_servers(base / "claude_desktop_config.json", "Claude Desktop")
 
 
-def setup_vscode():
-    """Instruções para VSCode (configuração manual via settings.json)"""
-    
-    print("\n Para VSCode, adicione à settings.json:")
-    print(f"""
-{{
-  "mcp.servers": {{
-    "accessibility": {{
-      "command": "uv",
-      "args": ["--directory", {json.dumps(str(ROOT))}, "run", "mcp_server.py"]
-    }}
-  }}
-}}
-    """)
+def setup_cursor() -> None:
+    _merge_mcp_servers(Path.home() / ".cursor" / "mcp.json", "Cursor")
 
 
-def main():
-    print(" Accessibility MCP Server - Setup Script\n")
-    print("Registrando servidor MCP em todas as plataformas...\n")
-    
+def _already_registered(cliente: str) -> bool:
+    try:
+        out = subprocess.run([cliente, "mcp", "list"], capture_output=True, text=True, check=False, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return NOME in (out.stdout or "")
+
+
+def setup_cli(cliente: str, nome_humano: str) -> None:
+    """Claude Code e Codex: usa o proprio comando do cliente (escreve no arquivo certo, na versao certa)."""
+    if not shutil.which(cliente):
+        print(f" {nome_humano}: o comando `{cliente}` nao esta no PATH; para cadastrar depois, rode:\n    {' '.join(cli_add_command(cliente))}")
+        return
+    if _already_registered(cliente):
+        print(f" {nome_humano}: a entrada '{NOME}' ja existe (nada a fazer).")
+        return
+    r = subprocess.run(cli_add_command(cliente), capture_output=True, text=True, check=False)
+    if r.returncode == 0:
+        print(f" {nome_humano} configurado (entrada '{NOME}').")
+    else:
+        print(f" {nome_humano}: nao deu para cadastrar sozinho ({(r.stderr or r.stdout).strip()[:200]}). Rode:\n    {' '.join(cli_add_command(cliente))}")
+
+
+def setup_vscode() -> None:
+    print(
+        "\n VS Code: abra a paleta de comandos, rode `MCP: Add Server`, escolha `Command (stdio)`, digite o comando abaixo e o nome `accessibility`.\n"
+        f"    {' '.join(LAUNCH)}\n"
+        " Ou, num arquivo mcp.json (chave `servers`):\n" + "\n".join("    " + linha for linha in vscode_json().splitlines())
+    )
+
+
+def main() -> int:
+    print(" Accessibility MCP Server - cadastro nos clientes (o servidor nao chama modelo: o modelo e' o do seu cliente)\n")
     try:
         setup_claude_desktop()
+        setup_cli("claude", "Claude Code")
+        setup_cli("codex", "Codex")
         setup_cursor()
         setup_vscode()
-        
-        print("\n Setup concluído!")
-        print("\n  Próximos passos:")
-        print("1. Reinicie Claude Desktop")
-        print("2. Reinicie Cursor")
-        print("3. Reinicie VSCode")
-        print("4. As ferramentas a11y_* estarão disponíveis")
-        
     except (OSError, ValueError) as e:
         print(f" Erro: {e}")
         return 1
-    
+    print("\n Proximos passos: reinicie o cliente que voce usa. No Claude Code, os fluxos prontos aparecem como /mcp__accessibility__a11y_review etc.;")
+    print(" no VS Code como /accessibility.a11y_review; em qualquer cliente, a ferramenta a11y_workflow entrega o mesmo texto.")
     return 0
 
 

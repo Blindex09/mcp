@@ -16,7 +16,7 @@ from . import wcag
 SEVERITIES = ("blocker", "serious", "moderate", "minor")
 OUTCOMES = ("failed", "cantTell", "passed", "unsupported")  # unsupported: o verificador refutou; sai do relatorio, fica registrado
 _TARGET = re.compile(r"e\d+|css:.{1,300}")
-ASSERTOR = {"name": "a11y-mcp", "about": "agente autonomo (modelo + harness) de teste de acessibilidade como usuario"}
+ASSERTOR = {"name": "a11y-mcp", "about": "servidor MCP de teste de acessibilidade como usuario (fatos medidos; quem julga e o modelo do cliente)"}
 
 
 def _clean(text: object, limit: int) -> str:

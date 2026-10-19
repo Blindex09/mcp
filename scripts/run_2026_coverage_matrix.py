@@ -91,10 +91,10 @@ async def _live_checks() -> None:
 
 def _declared_gaps() -> None:
     record("Observabilidade (spans OpenTelemetry de GenAI)", COVERED, "tests/test_telemetry.py: span execute_tool por ferramenta, sem argumentos nem resultados (liga com OTEL_EXPORTER_OTLP_ENDPOINT)")
-    record("Evals como portao (bancada por mutacao)", PARTIAL, "python -m accessibility_mcp.a11y.bench facts roda sem modelo e esta nos testes; o modo agent com modelo real nao foi rodado nesta maquina")
-    record("Julgamento do modelo (usuario autonomo) com modelo real", GAP, "NAO PROVADO aqui: exige chave de provedor; os testes usam modelo roteirizado")
+    record("Evals como portao (bancada por mutacao)", COVERED, "python -m accessibility_mcp.a11y.bench facts roda sem modelo e esta nos testes (o servidor nao chama modelo)")
+    record("Portao da regra 15 para os guias e fluxos (instrucoes ao modelo do cliente)", GAP, "NAO RODADO: a avaliacao ampla com tentativas repetidas e ablacao exige um modelo, que o servidor nao tem")
     record("Cliente MCP e A2A", GAP, "o projeto e servidor; consumir outros servidores MCP ou delegar por A2A nao foi pedido nem implementado")
-    record("Harness revisado a cada geracao de modelo", GAP, "sem rodada de avaliacao sem o andaime registrada")
+    record("Harness revisado a cada geracao de modelo", GAP, "o servidor nao escolhe modelo; falta a rodada dos guias e fluxos sem o andaime em um modelo novo do cliente")
 
 
 def main() -> int:

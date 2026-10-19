@@ -18,23 +18,31 @@ Acessibilidade digital (web, mobile, interfaces de IA e agentes). Um pedido fora
 
 As ferramentas do servidor MCP. Toda funcionalidade de comportamento vale em todas elas, na mesma entrega, qualquer que seja o cliente.
 
+### O servidor não chama modelo (decisão do dono de 19/out/2026)
+
+O modelo é o do cliente que usa o servidor (Claude Code, Codex, VS Code, Cursor, Claude Desktop). O servidor não tem provedor, chave, roteador, sampling nem
+"usuário autônomo". Os fluxos de trabalho (revisão, tarefa como persona, componente, varredura, comparação, código acessível) são prompts do MCP e a
+ferramenta `a11y_workflow`, que entrega o mesmo texto aos clientes que não mostram prompts (paridade, regra 14). O aprendizado é gravado pelo modelo do
+cliente com `a11y_learn`, e os achados são registrados por ele com `a11y_finding`; o servidor só confere fatos (passos citados, elemento visto, critério real).
+Qualquer ferramenta nova que precise de julgamento devolve fatos ou instruções e deixa o julgamento para o cliente.
+
 ### Julgamento é do modelo, medição é do servidor (regras 1 e 2)
 
 O servidor mede fatos (árvore de acessibilidade, foco, contraste, axe-core) e impõe limites (persona sem mouse, aprovação de mutações, segurança,
-fechamento da sessão). O que cada elemento é, onde a pessoa trava e o que melhorar são do modelo. Nada de palavra-chave, regex ou ranking lexical
+fechamento da sessão). O que cada elemento é, onde a pessoa trava e o que melhorar são do modelo do cliente. Nada de palavra-chave, regex ou ranking lexical
 para escolher guia ou decidir intenção; as descrições do `catalog.json` são escritas por IA e um teste falha se faltar ou sobrar entrada.
 
 ### Tempo e laços (regra 8)
 
-Nenhum prazo fixo corta uma sessão, um passo do usuário autônomo, uma instalação ou um rastreamento que continua avançando. O que encerra é:
-parar de avançar (`STALL_STEPS`), repetir a mesma ação no mesmo estado (`REPEAT_LIMIT`), o cancelamento por `a11y_close` ou um orçamento que a
-própria pessoa configurou. O limite de ociosidade da sessão cresce com o ritmo da conversa e só libera um navegador abandonado.
+Nenhum prazo fixo corta uma sessão, uma operação longa, uma instalação ou um rastreamento que continua avançando. O que encerra é: parar de avançar, o
+cancelamento por `a11y_close` ou um orçamento que a própria pessoa configurou. O limite de ociosidade da sessão cresce com o ritmo da conversa e só
+libera um navegador abandonado.
 
 ### Conhecimento (regra 10 e 18)
 
 O conteúdo de `accessibility_mcp/a11y/content/` vem de fontes oficiais, com a data da consulta e o que não pôde ser lido declarado. Os guias de leitor de tela, ARIA,
 frameworks, mobile, documentos e conformidade vieram do Qaaccessibility (mesma pesquisa), e os playbooks dos especialistas também. Mudança de
-um guia ou de um playbook é mudança de instrução ao modelo e segue o portão da regra 15.
+um guia, de um playbook ou do texto de um fluxo (`prompts.py`) é mudança de instrução ao modelo do cliente e segue o portão da regra 15; sem crédito de modelo para a avaliação ampla, ela é registrada como pendência.
 
 ### Edição de arquivos
 

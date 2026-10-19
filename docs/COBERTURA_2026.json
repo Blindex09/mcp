@@ -1,5 +1,5 @@
 {
-  "data": "2026-10-19T05:48:49+00:00",
+  "data": "2026-10-19T16:05:44+00:00",
   "resultados": [
     {
       "conceito": "Regra 8: nenhum relogio fixo corta trabalho",
@@ -19,7 +19,7 @@
     {
       "conceito": "Laco agentico com ferramentas tipadas",
       "estado": "COBERTO",
-      "evidencia": "44 de 44 ferramentas com esquema de entrada e descricao pelo protocolo MCP"
+      "evidencia": "43 de 43 ferramentas com esquema de entrada e descricao pelo protocolo MCP"
     },
     {
       "conceito": "Aprovacao antes de acao com efeito (guardrail na chamada de ferramenta)",
@@ -53,13 +53,13 @@
     },
     {
       "conceito": "Evals como portao (bancada por mutacao)",
-      "estado": "PARCIAL",
-      "evidencia": "python -m accessibility_mcp.a11y.bench facts roda sem modelo e esta nos testes; o modo agent com modelo real nao foi rodado nesta maquina"
+      "estado": "COBERTO",
+      "evidencia": "python -m accessibility_mcp.a11y.bench facts roda sem modelo e esta nos testes (o servidor nao chama modelo)"
     },
     {
-      "conceito": "Julgamento do modelo (usuario autonomo) com modelo real",
+      "conceito": "Portao da regra 15 para os guias e fluxos (instrucoes ao modelo do cliente)",
       "estado": "LACUNA",
-      "evidencia": "NAO PROVADO aqui: exige chave de provedor; os testes usam modelo roteirizado"
+      "evidencia": "NAO RODADO: a avaliacao ampla com tentativas repetidas e ablacao exige um modelo, que o servidor nao tem"
     },
     {
       "conceito": "Cliente MCP e A2A",
@@ -69,7 +69,7 @@
     {
       "conceito": "Harness revisado a cada geracao de modelo",
       "estado": "LACUNA",
-      "evidencia": "sem rodada de avaliacao sem o andaime registrada"
+      "evidencia": "o servidor nao escolhe modelo; falta a rodada dos guias e fluxos sem o andaime em um modelo novo do cliente"
     }
   ]
 }

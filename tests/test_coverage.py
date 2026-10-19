@@ -219,10 +219,6 @@ async def test_page_map_tells_what_lives_inside_list_items_and_whether_the_marke
         assert cartoes["items"] == 2 and cartoes["items_with_heading"] == 2 and cartoes["marker_removed"] is True
         assert [h["level"] for h in cartoes["headings_in_items"]] == [2, 2] and cartoes["headings_in_items"][0]["text"] == "Um"
         assert passos["items"] == 3 and passos["items_with_heading"] == 0 and passos["marker_removed"] is False
-        from accessibility_mcp.a11y.agent import page_map_text
-
-        texto = page_map_text(await SESSION.page_map())
-        assert "ul[2 itens, titulos nos itens=['h2', 'h2'], marcador removido]" in texto and "ol[3 itens]" in texto
     finally:
         await SESSION.close()
 

@@ -62,22 +62,21 @@ fixo de trabalho (regra 8).
 
 ### Conceitos agênticos de 2026 neste projeto (regra 18)
 
-Última revisão contra fontes primárias e contra o código: 2026-10-18 (MCP 2026-07-28, Agent Skills, A2A 1.0.0, convenções GenAI do OpenTelemetry).
+Última revisão contra fontes primárias e contra o código: 2026-10-19 (MCP 2026-07-28, Agent Skills, A2A 1.0.0, convenções GenAI do OpenTelemetry; formatos de cadastro do Claude Code, Codex e VS Code lidos nas páginas oficiais).
 
-O que o projeto entrega: um servidor MCP de acessibilidade digital (conhecimento embutido em `a11y/content/`, medição de fatos em um navegador real,
-teste como usuário em sessão persistente, usuário autônomo operado por um modelo, achados por critério WCAG com evidência, fala real do NVDA numa VM).
-Ele é o lado servidor do MCP e, para julgar, chama um modelo (provedor direto ou, quando houver, sampling do cliente).
+O que o projeto entrega: um servidor MCP de acessibilidade digital (conhecimento embutido em `a11y/content/`, medição de fatos em um navegador real, teste como usuário em sessão persistente que o modelo do cliente opera, achados por critério WCAG com evidência, fluxos prontos como prompts do MCP, fala real do NVDA numa VM).
+Ele é o lado servidor do MCP e NÃO chama modelo (decisão do dono de 19/out/2026): o modelo é o do cliente (Claude Code, Codex, VS Code, Cursor, Claude Desktop). Por isso o laço agêntico, o roteamento por camada e custo e a escolha de modelo pertencem ao cliente; o servidor entrega ferramentas tipadas, fatos e instruções.
 
 Presente: servidor MCP (`mcp_server.py`); skill no formato aberto SKILL.md com carregamento progressivo (`a11y/content/SKILL.md`, índice leve em
-`catalog.json`, guias lidos sob demanda); aprendizado persistente fora do projeto (`accessibility_mcp/a11y/learn.py`, `accessibility_mcp/a11y/runs.py`); sessão persistente com personas
-aplicadas pelo harness; verificador de achados (`a11y/verify.py`); sondas de comportamento (`a11y/probes.py`); bancada de avaliação (`a11y/bench.py`,
+`catalog.json`, guias lidos sob demanda); prompts do MCP e a ferramenta `a11y_workflow` (`a11y/prompts.py`); aprendizado persistente fora do projeto, gravado pelo modelo do cliente e marcado com a origem (`a11y/learn.py`, `a11y/runs.py`); sessão persistente com personas
+aplicadas pelo harness; conferência objetiva da evidência dos achados (`a11y/verify.py`); sondas de comportamento (`a11y/probes.py`); bancada de avaliação sem modelo (`a11y/bench.py`,
 `evals/`); espera adaptativa (`a11y/patience.py`); provisionamento autônomo do navegador (`a11y/provisioning.py`).
 
 Lacunas registradas (nunca "fora de escopo" em silêncio):
-- A especificação MCP de 2026-07-28 descontinuou o sampling; o projeto usa provedor direto primeiro e sampling como alternativa. Revisar quando o cliente alvo mudar.
 - Não há cliente MCP para consumir ferramentas externas, nem A2A: o projeto é servidor. A decisão de oferecer isso é do dono.
-- Julgamento do usuário autônomo com modelo real: não provado nesta máquina (sem chave de provedor); os testes usam modelo roteirizado.
-- O modo `agent` da bancada de avaliação não foi rodado com modelo real, e não há rodada registrada do harness sem o andaime para uma geração nova de modelo.
+- Os guias e os textos dos fluxos são instruções para o modelo do cliente, e o portão da regra 15 (conjunto amplo de avaliações, tentativas repetidas, ablação) não foi rodado: exige um modelo, que o servidor não tem. Pendente, medido só do lado do cliente.
+- Não há rodada registrada do harness sem o andaime para uma geração nova de modelo (o servidor não escolhe modelo; o andaime que resta são os guias e os fluxos).
 - Sandbox: o navegador roda descartável por chamada, mas comandos do host (instalações) usam o ambiente do processo.
+- Prompts do MCP: o Claude Code e o VS Code os mostram como comandos; o suporte do Codex não foi confirmado nas páginas oficiais, por isso o mesmo conteúdo também sai pela ferramenta `a11y_workflow`.
 
 Fechado em 2026-10-18: observabilidade com spans `execute_tool <nome>` nas convenções de GenAI do OpenTelemetry (`accessibility_mcp/telemetry.py`, sem argumentos nem resultados no span); matriz de cobertura viva em `scripts/run_2026_coverage_matrix.py`, com o resultado real gravado em `docs/COBERTURA_2026.json` (rodar antes de dar por pronta qualquer mudança no servidor); a pessoa não configura nada: a pasta do editor é escolhida na conversa e o navegador é instalado sozinho.

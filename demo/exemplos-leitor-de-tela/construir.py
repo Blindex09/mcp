@@ -57,6 +57,8 @@ main:focus { outline: none; }
 header { border-bottom: 1px solid var(--borda); padding-block: 0.75rem; }
 .marca { font-weight: 700; margin: 0 0 0.25rem; }
 nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 0.5rem; }
+nav details ul { display: block; padding-left: 1rem; }
+nav summary { cursor: pointer; min-height: 44px; min-width: 44px; padding: 0.55rem 0.5rem; font-weight: 600; }
 nav a { display: inline-block; min-height: 44px; min-width: 44px; padding: 0.55rem 0.5rem; }
 nav a[aria-current="page"] { font-weight: 700; text-decoration: none; border-bottom: 3px solid currentColor; }
 main { padding-block: 1.5rem 3rem; }
@@ -261,12 +263,29 @@ async def medir_todos() -> dict[tuple[str, int], dict[str, Any]]:
     return medidas
 
 
+GRUPOS: list[tuple[str, tuple[str, ...]]] = [
+    ("Estrutura", ("titulos", "listas", "links", "botoes", "campos", "imagens", "tabelas", "avisos")),
+    ("CSS e AJAX", ("css", "ajax")),
+    ("Comportamento", ("dialogo", "acordeao", "abas", "menu", "combobox", "erros-de-formulario", "mudanca-de-tela")),
+    ("Componentes", ("carrossel", "dica", "lista-de-opcoes", "arvore", "tabela-ordenavel", "web-components", "chat-ia")),
+    ("Frameworks", ("pilha-react", "pilha-vue", "pilha-svelte", "pilha-angular")),
+    ("Mobile (só código)", ("android", "ios")),
+]
+
+
 def cabecalho(titulo: str, atual: str | None) -> str:
-    itens = ['<li><a href="index.html"' + (' aria-current="page"' if atual is None else "") + ">Início</a></li>"]
-    for c in CENARIOS:
-        corrente = ' aria-current="page"' if c["slug"] == atual else ""
-        itens.append(f'<li><a href="{c["slug"]}.html"{corrente}>{esc(c["nome"])}</a></li>')
-    lista = "\n".join(itens)
+    """Navegacao em grupos recolhiveis: so o grupo da pagina atual abre, para o teclado nao passar por 31 links antes do conteudo."""
+    por_slug = {c["slug"]: c for c in CENARIOS}
+    grupos = ['<li><a href="index.html"' + (' aria-current="page"' if atual is None else "") + ">Início</a></li>"]
+    for nome, slugs in GRUPOS:
+        links = []
+        for slug in slugs:
+            c = por_slug[slug]
+            corrente = ' aria-current="page"' if slug == atual else ""
+            links.append(f'<li><a href="{slug}.html"{corrente}>{esc(c["nome"])}</a></li>')
+        aberto = " open" if atual in slugs else ""
+        grupos.append(f'<li><details{aberto}><summary>{esc(nome)}</summary><ul>' + "".join(links) + "</ul></details></li>")
+    lista = NL.join(grupos)
     return f"""<!DOCTYPE html>
 <html lang="pt-BR">
 <head>

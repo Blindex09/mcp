@@ -155,7 +155,7 @@ class Session:
         self._approval_seq = 0
         self._allow_once: set[tuple[str, str]] = set()  # (metodo, url) aprovados: passam UMA vez
         self._last: dict[str, Any] = {}  # ultima acao da pessoa (para refazer apos aprovar uma navegacao)
-        self.stop_requested = False  # pedido de cancelamento de um teste autonomo em andamento
+        self.stop_requested = False  # pedido de cancelamento de uma operacao longa em andamento (a11y_close)
         self._inflight: set[Any] = set()  # requisicoes em andamento (sinal de que a pagina ainda esta reagindo)
         self._req_t0: dict[Any, float] = {}
         self._req_durations: list[float] = []  # quanto o site demorou para responder: adapta as esperas

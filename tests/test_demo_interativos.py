@@ -178,3 +178,19 @@ def test_mobile_examples_say_they_were_not_run_and_carry_code(site):
         for ex in cenario["exemplos"]:
             assert ex["nao_executado"].startswith("Não executado aqui") and ex["codigo"].strip()
             assert "Não executado aqui" in mod.bloco_nao_executado(ex, 0)
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("pagina", ["index", "titulos", "dialogo", "pilha-react"])
+async def test_the_site_navigation_is_grouped_so_the_keyboard_does_not_cross_31_links(pagina):
+    """Achado da rodada ao vivo: a navegacao tinha 31 links antes do conteudo. Agora so o grupo da pagina atual abre."""
+    from accessibility_mcp.a11y.session import SESSION
+
+    html = (DEMO / f"{pagina}.html").read_text(encoding="utf-8").replace('<link rel="stylesheet" href="estilo.css">', "")
+    await SESSION.open(None, html)
+    try:
+        visiveis = await SESSION.page.evaluate("() => Array.from(document.querySelectorAll('nav[aria-label=\"Cenários\"] a, nav[aria-label=\"Cenários\"] summary')).filter((e) => e.checkVisibility()).length")
+        total = await SESSION.page.evaluate("() => document.querySelectorAll('nav[aria-label=\"Cenários\"] a').length")
+    finally:
+        await SESSION.close()
+    assert total >= 31 and visiveis <= 16, (pagina, visiveis, total)

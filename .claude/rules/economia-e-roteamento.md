@@ -1,11 +1,11 @@
 ---
 paths:
-  - "accessibility_mcp/llm.py"
-  - "accessibility_mcp/router.py"
-  - "accessibility_mcp/models.py"
-  - "accessibility_mcp/a11y/agent.py"
   - "accessibility_mcp/a11y/content_index.py"
+  - "accessibility_mcp/a11y/prompts.py"
 ---
+
+> Neste projeto o servidor não chama modelo (19/out/2026): roteamento de modelo, camadas e custo de chamada não se aplicam a ele. Vale a engenharia de contexto:
+> o que o servidor devolve ao modelo do cliente é enxuto, sem repetição, e o que é grande volta por nome (catálogo, guia por seção, exemplo por nome).
 
 # Economia, qualidade, roteamento e engenharia de contexto (regra 9)
 

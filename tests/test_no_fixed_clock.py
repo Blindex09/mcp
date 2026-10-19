@@ -8,7 +8,6 @@ import inspect
 from pathlib import Path
 
 from accessibility_mcp.a11y import (
-    agent,
     audit,
     crawl,
     probes,
@@ -50,9 +49,6 @@ def test_installs_wait_for_the_command_instead_of_killing_it_on_a_clock():
 
 def test_steps_stops_pages_and_tabs_have_no_ceiling_in_the_code():
     assert not hasattr(probes, "MAX_STOPS") and not hasattr(crawl, "MAX_PAGES_CEILING")
-    for fn, name in ((agent.run_autonomous if hasattr(agent, "run_autonomous") else None, "max_steps"),):
-        if fn is not None:
-            assert inspect.signature(fn).parameters[name].default == 0
     assert inspect.signature(audit.tab_order).parameters["max_steps"].default == 0
     assert inspect.signature(session.Session.reach).parameters["max_tabs"].default == 0
     assert inspect.signature(probes.tab_walk).parameters["max_stops"].default == 0

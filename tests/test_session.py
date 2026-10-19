@@ -355,41 +355,14 @@ async def test_tab_order_and_reach_report_raw_focus_style_not_a_verdict():
     assert "3px" in order[0]["element"]["focus_style"]["outline"]
 
 
-async def test_close_interrupts_a_running_autonomous_test_and_keeps_the_partial_report():
+async def test_close_asks_a_long_running_operation_to_stop_instead_of_closing_under_it():
     from accessibility_mcp import server as mcp_server
-    from accessibility_mcp.a11y import agent
-
-    fin = json.dumps({"thought": "x", "friction": None, "action": {"type": "press", "value": "Tab"}})
-    calls = {"n": 0}
-
-    async def ask(prompt, images, max_tokens, hint=None, tier=None):
-        if tier == "vision":
-            return "descricao da tela"
-        calls["n"] += 1
-        if calls["n"] == 1:
-            return fin
-        return "RELATORIO PARCIAL"
-
-    async def stop_after_first_step(*a, **k):
-        SESSION.stop_requested = True  # o que a11y_close faz quando ha um teste em andamento
-
-    r = await agent.run_agent(session=SESSION, ask=ask, mode="task", goal="g", url=None, html=SITE,
-                              persona="keyboard", progress=stop_after_first_step)
-    assert r["stopped_by"] == "cancelled" and r["report"] == "RELATORIO PARCIAL" and len(r["steps"]) == 1
 
     close = mcp_server.mcp._tool_manager.get_tool("a11y_close")
-    async with SESSION.lock:  # simula um teste autonomo segurando a sessao
+    async with SESSION.lock:  # simula uma operacao longa (varredura de Tab, sonda...) segurando a sessao
         out = json.loads(await close.fn())
     assert out["cancel_requested"] is True and SESSION.stop_requested is True
     SESSION.stop_requested = False
-
-
-async def test_agent_can_inspect_focus_style_but_a_screen_reader_cannot():
-    from accessibility_mcp.a11y import agent
-
-    assert "focus_style" in agent._allowed_actions("default")
-    assert "focus_style" in agent._allowed_actions("keyboard")
-    assert "focus_style" not in agent._allowed_actions("screen_reader")
 
 
 async def test_live_region_change_is_recorded_once_not_once_per_mutation_record():

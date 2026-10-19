@@ -14,36 +14,12 @@
 <nav aria-label="Cenários">
 <ul>
 <li><a href="index.html">Início</a></li>
-<li><a href="titulos.html">Títulos</a></li>
-<li><a href="listas.html">Listas</a></li>
-<li><a href="links.html">Links</a></li>
-<li><a href="botoes.html">Botões</a></li>
-<li><a href="campos.html">Campos de formulário</a></li>
-<li><a href="imagens.html">Imagens</a></li>
-<li><a href="tabelas.html">Tabelas</a></li>
-<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
-<li><a href="css.html" aria-current="page">CSS</a></li>
-<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
-<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
-<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
-<li><a href="abas.html">Abas</a></li>
-<li><a href="menu.html">Menu de ações</a></li>
-<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
-<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
-<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
-<li><a href="carrossel.html">Carrossel</a></li>
-<li><a href="dica.html">Dica (tooltip)</a></li>
-<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
-<li><a href="arvore.html">Árvore (tree view)</a></li>
-<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
-<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
-<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
-<li><a href="pilha-react.html">React</a></li>
-<li><a href="pilha-vue.html">Vue</a></li>
-<li><a href="pilha-svelte.html">Svelte</a></li>
-<li><a href="pilha-angular.html">Angular</a></li>
-<li><a href="android.html">Android (Jetpack Compose)</a></li>
-<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
+<li><details><summary>Estrutura</summary><ul><li><a href="titulos.html">Títulos</a></li><li><a href="listas.html">Listas</a></li><li><a href="links.html">Links</a></li><li><a href="botoes.html">Botões</a></li><li><a href="campos.html">Campos de formulário</a></li><li><a href="imagens.html">Imagens</a></li><li><a href="tabelas.html">Tabelas</a></li><li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li></ul></details></li>
+<li><details open><summary>CSS e AJAX</summary><ul><li><a href="css.html" aria-current="page">CSS</a></li><li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li></ul></details></li>
+<li><details><summary>Comportamento</summary><ul><li><a href="dialogo.html">Diálogo (janela modal)</a></li><li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li><li><a href="abas.html">Abas</a></li><li><a href="menu.html">Menu de ações</a></li><li><a href="combobox.html">Campo com lista de opções (combobox)</a></li><li><a href="erros-de-formulario.html">Erro de formulário</a></li><li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li></ul></details></li>
+<li><details><summary>Componentes</summary><ul><li><a href="carrossel.html">Carrossel</a></li><li><a href="dica.html">Dica (tooltip)</a></li><li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li><li><a href="arvore.html">Árvore (tree view)</a></li><li><a href="tabela-ordenavel.html">Tabela ordenável</a></li><li><a href="web-components.html">Web Components (elemento personalizado)</a></li><li><a href="chat-ia.html">Resposta de IA em streaming</a></li></ul></details></li>
+<li><details><summary>Frameworks</summary><ul><li><a href="pilha-react.html">React</a></li><li><a href="pilha-vue.html">Vue</a></li><li><a href="pilha-svelte.html">Svelte</a></li><li><a href="pilha-angular.html">Angular</a></li></ul></details></li>
+<li><details><summary>Mobile (só código)</summary><ul><li><a href="android.html">Android (Jetpack Compose)</a></li><li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li></ul></details></li>
 </ul>
 </nav>
 </div>
@@ -129,7 +105,7 @@
 <h2 id="ex-5"><span class="etiqueta t-incerto">Depende do navegador, não medido aqui:</span> Lista sem marcador e sem role</h2>
 <div class="exemplo exemplo-incerto" role="group" aria-label="Exemplo ao vivo, depende do navegador, não medido aqui: Lista sem marcador e sem role"><ul style="list-style:none;padding:0;margin:0"><li>Sencha</li><li>Matcha</li><li>Gyokuro</li></ul></div>
 <h3>Por quê</h3>
-<p>O guia do MCP registra que o Safari com VoiceOver já deixou de anunciar como lista a ul com list-style:none. Esta medida não consegue provar isso: no Chromium e no WebKit do Playwright a lista continua sendo lista (veja as duas árvores abaixo). Quem tem um Mac deve ouvir no Safari.</p>
+<p>Segundo Scott O&#x27;Hara (artigo de 2019-01-12, atualizado em 2023-01-30), o Safari com VoiceOver deixa de anunciar como lista a ul com list-style:none, e o WebKit disse que a mudança é proposital. Esta medida não consegue reproduzir isso: no Chromium e no WebKit do Playwright a lista continua sendo lista (veja as duas árvores abaixo). Quem tem um Mac deve ouvir no Safari.</p>
 <h3>O que corrigir</h3>
 <p>Por precaução, acrescente role=&quot;list&quot; na ul sem marcador. Não custa nada e vale em todos os navegadores.</p>
 <h3>O que o navegador entrega ao leitor de tela (medido)</h3>

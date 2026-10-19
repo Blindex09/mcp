@@ -1,13 +1,12 @@
 """Ponta a ponta PELO PROTOCOLO MCP: o servidor roda como processo separado (como no Claude) e TODAS as ferramentas sao chamadas.
 
 - um mini-site de varias paginas (tests/fixtures/mini_site) com defeitos de todo tipo, servido localmente;
-- um servidor de modelo FALSO compativel com OpenAI, para o usuario autonomo, a escolha de guias e o aprendizado passarem por HTTP de verdade;
+- o servidor NAO chama modelo: nenhum modelo e' configurado aqui, e o fluxo de achados, execucoes salvas e aprendizado e' conduzido pelo cliente;
 - no fim, a matriz: toda ferramenta registrada precisa ter sido exercitada.
 """
 import http.server
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -54,54 +53,6 @@ class SiteHandler(http.server.SimpleHTTPRequestHandler):
         return
 
 
-# ------------------------------------------------------------------ modelo falso (OpenAI-compativel)
-class FakeModel(http.server.BaseHTTPRequestHandler):
-    requests: ClassVar[list[dict]] = []
-
-    def do_POST(self):
-        body = json.loads(self.rfile.read(int(self.headers["content-length"])))
-        content = body["messages"][0]["content"]
-        text = content if isinstance(content, str) else " ".join(p.get("text", "") for p in content if p.get("type") == "text")
-        has_image = isinstance(content, list) and any(p.get("type") == "image_url" for p in content)
-        kind = "router" if "ROTEADOR" in text else "verifier" if "VERIFICADOR" in text else "learn" if "Voce mantem a memoria" in text else "report" if "RELATORIO desta sessao" in text else "find" if "You route accessibility work" in text else "vision" if "FATOS visiveis nesta captura" in text else "step"
-        FakeModel.requests.append({"model": body["model"], "kind": kind, "image": has_image, "auth": self.headers.get("authorization")})
-        reply = self._reply(kind, text)
-        data = json.dumps({"choices": [{"message": {"content": reply}}]}).encode()
-        self.send_response(200)
-        self.send_header("content-type", "application/json")
-        self.send_header("content-length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
-
-    def _reply(self, kind: str, text: str) -> str:
-        if kind == "router":  # o modelo falso faz o papel do julgamento semantico: julgamento pesado na camada forte, o resto na barata
-            purpose = text.split("FINALIDADE:", 1)[1].splitlines()[0]
-            heavy = "proximo passo" in purpose or "relatorio final" in purpose
-            return json.dumps({"tier": "main" if heavy else "fast", "verify": False, "reason": "julgamento pesado" if heavy else "tarefa leve"})
-        if kind == "learn":
-            return json.dumps([{"topic": "botao so de mouse", "learning": "div clicavel sem foco e sem papel indica controle so de mouse; sondar com teclado", "scope": "geral"}])
-        if kind == "report":
-            return "Relatorio: o usuario conseguiu ler a pagina, mas o botao Comprar nao recebe foco e o aviso de compra nao e anunciado. Nao foi verificado com leitor de tela real."
-        if kind == "find":
-            return json.dumps(["component-identity-guide", "nome-que-nao-existe"])
-        if kind == "vision":
-            return "A tela mostra o titulo da pagina no topo e um botao no centro."
-        step = int(re.search(r"PASSO (\d+)/", text).group(1))
-        buy = re.search(r"^(e\d+) <div> .*nome='Comprar'.*$", text, re.MULTILINE)
-        if step == 1:
-            action = {"type": "page_map"}
-        elif step == 2 and buy and "Acoes permitidas AGORA: announce, click" in text.replace("\n", " "):
-            action = {"type": "click", "target": buy.group(1)}
-        elif step == 2:
-            action = {"type": "press", "value": "Tab"}
-        else:
-            action = {"type": "finish", "outcome": "completed_with_friction", "summary": "vi os problemas"}
-        return json.dumps({"thought": f"passo {step}: olho a pagina", "friction": "controle so de mouse" if step == 2 else None, "look_next": False, "action": action})
-
-    def log_message(self, *args, **kwargs):
-        return
-
-
 def start_vm_agent(token: str):
     """Sobe o agente da VM (nvda/vm) com um NVDA simulado: prova o contrato Python x Node pelo protocolo. Sem Node, segue sem VM."""
     node = shutil.which("node")
@@ -129,14 +80,14 @@ def js(result):
 
 @pytest.mark.slow
 async def test_every_tool_over_the_real_protocol(tmp_path):
-    site, model = serve(SiteHandler), serve(FakeModel)
+    site = serve(SiteHandler)
     base = f"http://127.0.0.1:{site.server_address[1]}"
-    SiteHandler.posts, FakeModel.requests = [], []
+    SiteHandler.posts = []
     env = {
         **os.environ, "PYTHONIOENCODING": "utf-8", "A11Y_MCP_HOME": str(tmp_path / "home"),
-        "A11Y_MCP_BACKEND": "openai-compatible", "A11Y_MCP_BASE_URL": f"http://127.0.0.1:{model.server_address[1]}/v1",
-        "A11Y_MCP_API_KEY": "chave-de-teste", "A11Y_MCP_MODEL": "fake-principal", "A11Y_MCP_MODEL_FAST": "fake-leve",
     }
+    for chave in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "OLLAMA_API_KEY"):
+        env.pop(chave, None)  # prova: nada de provedor de modelo no ambiente, e o servidor funciona do mesmo jeito
     ws_dir = tmp_path / "projeto"
     ws_dir.mkdir()
     (ws_dir / "pagina.html").write_text("<img src=a.png>\n", encoding="utf-8")
@@ -158,8 +109,12 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         # ---------- conhecimento e escolha
         cat = js(await call("a11y_list_content"))
         assert any(c["name"] == "page-structure-review" for c in cat) and all(c["quando_usar"] for c in cat)
-        found = js(await call("a11y_find", task="preciso julgar o que cada componente e"))
-        assert found["selection"] == "model" and [i["name"] for i in found["items"]] == ["component-identity-guide"]  # nome inventado descartado
+        assert "a11y_find" not in registered and "a11y_walkthrough" not in registered and "a11y_review" not in registered  # nada depende de modelo
+        prompts = {p.name for p in (await s.list_prompts()).prompts}
+        assert prompts == {"a11y_review", "a11y_walkthrough", "a11y_component", "a11y_site_scan", "a11y_compare_runs", "a11y_write_accessible_code"}
+        guided = (await s.get_prompt("a11y_review", {"url": f"{base}/index.html"})).messages[0].content.text
+        assert "testing-playbook-for-ai" in guided and "NOT verified" in guided and "a11y_probe" in guided
+        assert (await call("a11y_workflow", name="a11y_review", url=f"{base}/index.html")).content[0].text == guided  # a mesma coisa por ferramenta (clientes sem prompts)
         assert "Component Identity Guide" in (await call("a11y_get_reference", name="component-identity-guide")).content[0].text
         assert "modal" in (await call("a11y_get_example", name="modal-native-dialog")).content[0].text.lower()
         assert "conversationReducer" in (await call("a11y_get_template", name="assets/accessible-ai-react/src/ai/turnReducer.js")).content[0].text
@@ -230,9 +185,10 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         assert trace["steps"][-1]["kind"] == "probe:tab_walk"
         rec = js(await call("a11y_finding", claim="o botao Comprar so funciona com mouse", criterion="2.1.1", severity="blocker", target=by_text["Comprar"]["id"], evidence_steps=str(n_probe)))
         assert rec["recorded"]["outcome"] == "failed" and rec["recorded"]["element"]["name"] == "Comprar"
-        earl = js(await call("a11y_report", format="earl"))
-        assert earl["@graph"][0]["earl:result"]["earl:outcome"] == {"@id": "earl:failed"}
-        assert js(await call("a11y_report", format="sarif"))["runs"][0]["results"][0]["ruleId"] == "WCAG-2.1.1"
+        earl = js(await call("a11y_report", format="earl", save=False))
+        assert earl["@graph"][0]["earl:result"]["earl:outcome"] == {"@id": "earl:failed"} and "run_id" not in earl
+        assert js(await call("a11y_report", format="sarif", save=False))["runs"][0]["results"][0]["ruleId"] == "WCAG-2.1.1"
+        first_run = js(await call("a11y_report", format="json", goal="comprar um item"))["run_id"]  # guarda a execucao para exportar e comparar
         assert js(await call("a11y_close"))["closed"] is True
 
         # ---------- persona imposta pelo servidor (sem mouse)
@@ -256,31 +212,25 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         assert approved["decided"][0]["decision"] == "allow" and SiteHandler.posts == ["/enviar"]  # so depois da aprovacao
         await call("a11y_close")
 
-        # ---------- usuario autonomo (modelo falso por HTTP) + aprendizado
-        FakeModel.requests.clear()
-        wt = js(await call("a11y_walkthrough", task="comprar um item", url=index, persona="default", max_steps=6))
-        assert wt["outcome"] == "completed_with_friction" and wt["report"].startswith("Relatorio:") and wt["stopped_by"] == "finished"
-        assert wt["coverage"]["page_map"] is True and wt["learned_topics"] == ["botao so de mouse"]
-        assert "*" not in wt["report"]
-        kinds = [(q["kind"], q["model"], q["image"]) for q in FakeModel.requests]
-        routers = [k for k in kinds if k[0] == "router"]
-        work = [k for k in kinds if k[0] != "router"]
-        assert routers and all(model == "fake-leve" and not image for _, model, image in routers)  # o roteador e barato e so le texto
-        assert len(routers) == 1 and ("learn", "fake-leve", False) in work  # so a memoria e' decisao de custo/qualidade; o resto do pipeline tem papel fixo
-        assert work[0] == ("vision", "fake-principal", True)  # 1o passo com pagina nova: a visao descreve a captura de tela antes do raciocinio
-        assert all(model == "fake-principal" for kind, model, _ in work if kind in ("vision", "step", "report"))  # papel fixo, nao decisao do roteador
-        assert not any(image for kind, _, image in work[1:] if kind == "step")  # a captura vai para a visao, nao para o passo de raciocinio
-        rv = js(await call("a11y_review", focus="componentes e estrutura", url=index, max_steps=4))
-        assert rv["report"].startswith("Relatorio:") and rv["facts"]["mode"] == "review"
-        learned = js(await call("a11y_learnings"))
-        assert [e["topic"] for e in learned["entries"]] == ["botao so de mouse"] and str(tmp_path / "home") in learned["folder"]
-        assert js(await call("a11y_forget", topic="botao so de mouse"))["removed"] == 1
-        # ---------- execucoes salvas: listar, exportar, comparar
-        assert wt["run_id"] and rv["run_id"] and wt["run_id"] != rv["run_id"]
+        # ---------- segunda execucao conduzida pelo cliente, execucoes salvas e aprendizado (sem modelo no servidor)
+        js(await call("a11y_open", url=index, persona="keyboard"))
+        js(await call("a11y_probe", kind="tab_walk"))
+        weak = js(await call("a11y_finding", claim="a ordem de Tab parece estranha"))
+        assert weak["recorded"]["outcome"] == "cantTell"  # sem evidencia valida nunca vira failed
+        second_run = js(await call("a11y_report", format="json"))["run_id"]
+        await call("a11y_close")
+        assert first_run and second_run and first_run != second_run
         listing = js(await call("a11y_runs"))
-        assert {r["run_id"] for r in listing["runs"]} >= {wt["run_id"], rv["run_id"]} and listing["enabled"] is True
-        assert js(await call("a11y_export", run_id=wt["run_id"], format="sarif"))["version"] == "2.1.0"
-        assert js(await call("a11y_diff", base_run_id=wt["run_id"], head_run_id=rv["run_id"]))["counts"]["new"] >= 0
+        assert {r["run_id"] for r in listing["runs"]} >= {first_run, second_run} and listing["enabled"] is True
+        assert js(await call("a11y_export", run_id=first_run, format="sarif"))["version"] == "2.1.0"
+        assert js(await call("a11y_diff", base_run_id=first_run, head_run_id=second_run))["counts"]["fixed"] >= 1  # o achado do 1o nao esta no 2o
+        saved = js(await call("a11y_learn", topic="botao so de mouse", learning="div clicavel sem foco e sem papel indica controle so de mouse; sondar com teclado"))
+        assert saved["saved"]["origin"] == "cliente" and saved["saved"]["scope"] == "geral"
+        again = js(await call("a11y_learn", topic="Botao  SO de mouse", learning="versao 2"))  # mesmo assunto: atualiza, nunca duplica
+        assert again["saved"]["learning"] == "versao 2"
+        learned = js(await call("a11y_learnings"))
+        assert [e["topic"] for e in learned["entries"]] == ["Botao  SO de mouse"] and str(tmp_path / "home") in learned["folder"]
+        assert js(await call("a11y_forget", topic="botao so de mouse"))["removed"] == 1
 
         # ---------- fala real do NVDA (VM): so fatos, com a origem declarada
         spoken = js(await call("a11y_nvda_speech", url=base + "/index.html", tabs=2, reads=1))
@@ -306,12 +256,9 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
 
         # ---------- diagnostico
         st = js(await call("a11y_status"))
-        assert st["model"]["ready"] is True and st["model"]["model_fast"] == "fake-leve" and st["browsers"]["chromium"]["state"] == "ready"
-        assert st["routing"]["active"] is True and st["routing"]["router_calls"] >= len(routers) and st["routing"]["to_fast"] >= 1
-        assert "A11Y_MCP_API_KEY" not in json.dumps(st) and "chave-de-teste" not in json.dumps(st)  # nunca mostra segredos
+        assert st["browsers"]["chromium"]["state"] == "ready" and "nao chama modelo" in st["model"]
 
     site.shutdown()
-    model.shutdown()
     if vm:
         vm.kill()
         vm.wait()

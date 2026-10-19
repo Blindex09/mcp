@@ -46,7 +46,7 @@ CSS_AJAX: list[dict[str, Any]] = [
                 "tipo": "incerto", "titulo": "Lista sem marcador e sem role",
                 "extra": ("webkit_tree", None),
                 "html": '<ul style="list-style:none;padding:0;margin:0"><li>Sencha</li><li>Matcha</li><li>Gyokuro</li></ul>',
-                "porque": "O guia do MCP registra que o Safari com VoiceOver já deixou de anunciar como lista a ul com list-style:none. Esta medida não consegue provar isso: no Chromium e no WebKit do Playwright a lista continua sendo lista (veja as duas árvores abaixo). Quem tem um Mac deve ouvir no Safari.",
+                "porque": "Segundo Scott O'Hara (artigo de 2019-01-12, atualizado em 2023-01-30), o Safari com VoiceOver deixa de anunciar como lista a ul com list-style:none, e o WebKit disse que a mudança é proposital. Esta medida não consegue reproduzir isso: no Chromium e no WebKit do Playwright a lista continua sendo lista (veja as duas árvores abaixo). Quem tem um Mac deve ouvir no Safari.",
                 "corrigir": "Por precaução, acrescente role=\"list\" na ul sem marcador. Não custa nada e vale em todos os navegadores.",
             },
             {

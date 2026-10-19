@@ -1,23 +1,23 @@
 # Accessibility MCP Server
 
-Servidor MCP somente de acessibilidade (web, mobile e interfaces de IA/agentes) para Claude Desktop, VS Code, Cursor e qualquer cliente MCP.
+Servidor MCP somente de acessibilidade (web, mobile e interfaces de IA/agentes) para Claude Code, Codex, VS Code, Cursor, Claude Desktop e qualquer cliente MCP.
 
-Ele dá à IA quatro coisas: conhecimento (guias e exemplos de acessibilidade), escolha inteligente do que ler para cada tarefa, medição de uma página (axe-core, foco, contraste) e — o mais importante — teste como usuário de verdade: uma sessão de navegador que a IA opera (só teclado, leitor de tela, zoom, celular…) para descobrir o que o site realmente faz, porque verde no audit não significa acessível.
+**O servidor não chama modelo e não precisa de chave de API.** O modelo é o do cliente que você usa; o servidor dá a ele quatro coisas: conhecimento (guias e exemplos de acessibilidade), medição de uma página (axe-core, foco, contraste), teste como usuário de verdade (uma sessão de navegador que o modelo do cliente opera: só teclado, leitor de tela, zoom, celular…) e fluxos prontos de trabalho (prompts do MCP). Verde no audit não significa acessível.
 
 ## O que faz
 
 -  Base de conhecimento embutida (`accessibility_mcp/a11y/content/`): 69 guias (WCAG 2.2, ARIA, NVDA/VoiceOver/TalkBack, o que o leitor de tela fala por elemento, tecla e evento, ordem de foco, títulos, listas e tabelas, checklist de auditoria, IA conversacional acessível, mobile, frameworks, XR, conformidade, e 28 playbooks de especialistas trazidos do Qaaccessibility), 42 exemplos de componentes acessíveis (modal, abas, combobox, treegrid, chat de IA…) e o template React (10 arquivos) de chat/agente acessível.
--  Escolha pelo modelo: `a11y_find` recebe a tarefa em linguagem natural, em qualquer idioma, e o modelo escolhe os guias e exemplos certos pelo sentido. Nada de palavra-chave, regex ou ranking lexical.
+-  Escolha pelo modelo do cliente: `a11y_list_content` devolve o catálogo (cada item com a descrição de quando usar) e o modelo escolhe pelo sentido. Nada de palavra-chave, regex ou ranking lexical, e nenhuma chamada de modelo dentro do servidor.
 -  Medição de fatos: contraste WCAG, auditoria axe-core num navegador real, árvore de acessibilidade e ordem de foco por teclado.
 
-## Ferramentas (43)
+## Ferramentas (43) e fluxos prontos
 
 ### Conhecimento e escolha
 
 | Ferramenta | O que faz |
 |---|---|
 | `a11y_list_content` | Catálogo compacto (resumo + seções) de todos os guias, exemplos, arquivos do template e scripts |
-| `a11y_find(task)` | O modelo escolhe guias/exemplos para a tarefa |
+| `a11y_workflow(name, ...)` | Devolve um fluxo pronto de trabalho para o modelo do cliente seguir (o mesmo texto dos prompts do MCP, para clientes que não mostram prompts) |
 | `a11y_get_reference(name, section)` | Lê um guia inteiro ou só uma seção |
 | `a11y_get_example(name)` | Devolve o código de um exemplo de componente |
 | `a11y_get_template(name)` | Arquivo do template React de chat/agente acessível (`assets/…`) ou dos scripts (`scripts/…`) |
@@ -40,23 +40,26 @@ O modelo do cliente é quem julga; estas ferramentas agem e devolvem fatos. Guia
 | `a11y_design_tokens()` | A linguagem de design real do site: estilos de texto em uso, escala de tamanhos, cores, espaçamentos, raios, variáveis `:root` |
 | `a11y_screenshot(target, full_page)` | Captura JPEG da página ou de um elemento (recusada para `screen_reader`) |
 | `a11y_preview_css(target, css, revert)` | Testa uma mudança de design temporariamente (só na sessão; o site não é alterado) |
-| `a11y_close()` | Encerra a sessão; se um teste autônomo está rodando, o interrompe e devolve o relatório parcial. Expira após 10 min parada |
+| `a11y_close()` | Encerra a sessão; se uma operação longa está rodando (varredura de Tab, sonda…), a interrompe e devolve o que mediu. Expira após 10 min parada |
 
 Fluxo: `a11y_open`, depois `a11y_dossier`, depois `a11y_act`/`a11y_reach` para provar o comportamento, depois julgar (o que é, onde o
 usuário trava, o que melhorar mantendo o design), depois `a11y_preview_css` + `a11y_screenshot` para testar a proposta.
 O relatório deve listar o que não foi verificado (leitores de tela reais, dispositivos reais, fluxos não testados).
 
-### Usuário autônomo (o modelo opera a página sozinho)
+### Fluxos prontos (prompts do MCP)
 
-| Ferramenta | O que faz |
+O servidor não roda um "usuário autônomo": quem conduz é o modelo do seu cliente, e os fluxos abaixo dizem a ordem do trabalho, o que se pode e não se pode afirmar e como entregar. Cada um existe como **prompt do MCP** e também como a ferramenta `a11y_workflow(name, ...)` (para clientes que não mostram prompts).
+
+| Fluxo | Para que serve |
 |---|---|
-| `a11y_walkthrough(task, url \| html, persona, max_steps, vision)` | Um modelo faz o papel de uma pessoa da persona tentando cumprir a tarefa, passo a passo, vendo a tela (screenshot) e a árvore de acessibilidade, e escreve um relatório em texto corrido: o que aconteceu, onde travou, achados por gravidade com a correção que mantém o design e o que não foi verificado |
-| `a11y_review(focus, url \| html, persona, max_steps, vision)` | Revisão de UX: o modelo explora, prova o comportamento de cada componente importante, decide o que ele realmente é naquele site e revisa tipografia/espaçamento contra a linguagem de design do próprio site |
-| `a11y_status()` | Prontidão: navegador instalado/instalando e modelo configurado (nunca mostra chaves) |
+| `a11y_review(url, focus)` | Revisão completa de uma página: mapa, dossiê, sondas, estresse, personas, achados com evidência e relatório |
+| `a11y_walkthrough(url, task, persona)` | Cumprir uma tarefa como uma pessoa da persona e dizer onde foi difícil |
+| `a11y_component(url, selector)` | Identificar um componente e conferir o contrato dele (o que deve e não deve fazer) |
+| `a11y_site_scan(url, max_pages)` | Varrer várias páginas por fatos e revisar as que mais importam |
+| `a11y_compare_runs(base_run_id, head_run_id)` | Conferir que uma correção funcionou e nada piorou |
+| `a11y_write_accessible_code(task, stack)` | Escrever ou corrigir código acessível desde o começo e provar com as sondas |
 
-O modelo decide tudo que é julgamento; o servidor só impõe limites: persona (teclado e leitor de tela sem mouse), formato da
-ação, no máximo 60 passos, tempo, parada se repetir a mesma ação no mesmo estado, e fechamento da sessão. Precisa do modelo do servidor
-(veja abaixo) ou de um cliente com sampling. Cada passo é narrado; `a11y_close` interrompe sem perder o progresso.
+Como chamar: no Claude Code, `/mcp__accessibility__a11y_review`; no VS Code, `/accessibility.a11y_review`; em qualquer cliente, peça "use a ferramenta a11y_workflow com name a11y_review". `a11y_status()` mostra a prontidão do navegador.
 
 ### Cobertura total (todo o conteúdo, Shadow DOM, iframes, vários navegadores)
 
@@ -78,12 +81,12 @@ Um envio de formulário retido deixa a página onde está; se a pessoa aprovar, 
 | Ferramenta | O que faz |
 |---|---|
 | `a11y_approve(decision, ids)` | Resposta da pessoa aos pedidos retidos: allow, deny ou allow_all (aprovação desligada pelo resto da sessão) |
-| `a11y_learnings(host)` | O que o servidor aprendeu em testes anteriores, guardado na pasta do usuário (A11Y_MCP_HOME, padrão ~/.a11y-mcp) |
-| `a11y_forget(topic, scope)` | Remove um aprendizado |
+| `a11y_learn(topic, learning, scope)` | O modelo do cliente grava uma lição aprendida testando (mesmo assunto atualiza, nunca duplica; marcada com a origem; sem fila de aprovação) |
+| `a11y_learnings(host)` | As lições guardadas na pasta do usuário (A11Y_MCP_HOME, padrão ~/.a11y-mcp) |
+| `a11y_forget(topic, scope)` | Remove uma lição (a pessoa manda no que fica) |
 
-Aprendizado sempre: depois de cada teste autônomo o modelo decide o que vale lembrar (só as mudanças; omitir nunca apaga; mesmo assunto atualiza, sem duplicar), na hora e sem fila de aprovação.
-Roteador semântico (router.py): com `A11Y_MCP_MODEL_FAST` diferente de `A11Y_MCP_MODEL`, quem escolhe a camada de cada chamada é um modelo, não uma regra. O modelo barato lê a finalidade do pedido, o contexto, fatos objetivos (tamanho, imagens anexas, saída esperada), os resultados recentes e as lições aprendidas, e decide a camada e se a resposta deve ser conferida. A resposta barata só sobe de camada quando não veio, quando a validação objetiva de quem chamou falhou (JSON ilegível, nome que não existe no catálogo) ou quando um verificador independente e mais forte a julgou inadequada; nunca pela confiança que o próprio modelo declara. Sem decisão válida do roteador, vale a camada forte. Com um só modelo não há chamada de roteamento. Os contadores aparecem em `a11y_status` (`routing`), e as lições de roteamento ficam na memória de aprendizado, no escopo `roteamento`.
-Tempo adaptativo: nenhum relógio fixo encerra um trabalho em andamento. A espera por um elemento continua enquanto a página mostra sinais de progresso (rede ou DOM mudando) e só desiste quando ela para de mudar, por um tempo proporcional ao que já esperou. A espera por uma página assentar continua enquanto houver requisição realmente em andamento; requisições que não terminam por natureza (event stream, long-poll) não contam como trabalho, e o limite para reconhecê-las acompanha a lentidão que o próprio site já mostrou (cada sessão aprende o ritmo do seu site). A chamada ao modelo, a auditoria e o carregamento de páginas são repetidos com mais tempo a cada tentativa, e a ação com efeito (clique, envio) roda uma única vez. A sessão parada só é fechada depois de um tempo que cresce com o ritmo da conversa (dez vezes o maior intervalo já visto, no mínimo dez minutos). O teste autônomo para por falta de progresso, por cancelamento (`a11y_close`) ou pelo orçamento de passos que a pessoa configurou.
+Aprendizado sempre: o modelo do cliente decide o que vale lembrar e grava com `a11y_learn`; omitir nunca apaga, mesmo assunto atualiza sem duplicar, vale na hora e sem fila de aprovação. Desligar: `A11Y_MCP_LEARN=0`.
+Tempo adaptativo: nenhum relógio fixo encerra um trabalho em andamento. A espera por um elemento continua enquanto a página mostra sinais de progresso (rede ou DOM mudando) e só desiste quando ela para de mudar, por um tempo proporcional ao que já esperou. A espera por uma página assentar continua enquanto houver requisição realmente em andamento; requisições que não terminam por natureza (event stream, long-poll) não contam como trabalho, e o limite para reconhecê-las acompanha a lentidão que o próprio site já mostrou (cada sessão aprende o ritmo do seu site). A auditoria e o carregamento de páginas são repetidos com mais tempo a cada tentativa, e a ação com efeito (clique, envio) roda uma única vez. A sessão parada só é fechada depois de um tempo que cresce com o ritmo da conversa (dez vezes o maior intervalo já visto, no mínimo dez minutos). Uma operação longa para por falta de progresso ou por cancelamento (`a11y_close`).
 
 ### Provar o comportamento e registrar achados com evidência
 
@@ -91,19 +94,19 @@ O que o axe e os scanners não enxergam aparece **agindo**: armadilha de teclado
 
 | Ferramenta | O que faz |
 |---|---|
-| `a11y_probe(kind, target)` | `tab_walk` (Tab do início ao fim: paradas, foco preso, foco coberto), `focus_obscured` (2.4.11), `target_size` (2.5.8), e o contrato do APG de `dialog`, `disclosure`, `menu`, `tabs`, `combobox`, mais `form_errors` (erro por campo, foco e anúncio) e `route_change` (título, foco e anúncio da nova tela). Os contratos devolvem `esperado × observado × met` (`null` = não deu para medir, não é aprovação) |
+| `a11y_probe(kind, target)` | `tab_walk` (Tab do início ao fim: paradas, foco preso, foco coberto), `focus_obscured` (2.4.11), `target_size` (2.5.8), e o contrato do APG de `dialog`, `disclosure`, `menu`, `tabs`, `combobox`, `listbox`, `tree` e `tooltip`, mais `form_errors` (erro por campo, foco e anúncio), `status_update` (a mudança chega a quem não vê a tela? a região viva já existia? o foco caiu no corpo?) e `route_change` (título, foco e anúncio da nova tela). Os contratos devolvem `esperado × observado × met` (`null` = não deu para medir, não é aprovação) |
 | `a11y_nvda_speech(url, tabs, reads)` | O que o **NVDA de verdade** FALA na página, em texto (Tab e modo leitura), sem veredito. Roda numa **VM Windows** com um agente (`nvda/vm/`), nunca no seu computador, então o seu NVDA, a sua voz e os seus complementos não são tocados. Só navega: não ativa botões nem envia formulários. A voz e a velocidade são as da VM. Precisa de `A11Y_MCP_NVDA_VM` e `A11Y_MCP_NVDA_TOKEN`; passo a passo em `nvda/vm/LEIAME.md` |
 | `a11y_finding(claim, criterion, severity, target, evidence_steps)` | Registra um achado com critério WCAG 2.2 (validado: número inexistente é descartado), gravidade, elemento e passos de evidência. Sem evidência válida vira `cantTell`, nunca `failed` |
 | `a11y_set_workspace(path)` / `a11y_read_file(path, offset, limit)` / `a11y_edit_file(path, old_string, new_string, replace_all)` / `a11y_approve_edit(decision, approval_id)` / `a11y_undo_edit(edit_id)` | Editor de arquivos do projeto da pessoa, sem depender de terminal: lê com números de linha, troca um trecho EXATO (ou cria arquivo), mantém cópia de segurança fora do projeto e desfaz. Só dentro da pasta que a pessoa nomeia na conversa (`a11y_set_workspace`, sem configurar nada antes); nunca lê nem escreve `.env`, chaves ou `.git`; um JSON ou Python válido não pode ficar inválido. Com a aprovação ligada (padrão, `A11Y_MCP_EDIT_APPROVAL`) a edição fica RETIDA mostrando o diff até a pessoa responder; desligada, edita sem perguntar |
 | `a11y_trace()` | O rastro ordenado da sessão (ações, `reach`, sondas); os números são a evidência que os achados citam |
-| `a11y_report(format)` | Os achados da sessão em `json`, `earl` (W3C EARL 1.0 JSON-LD: failed / cantTell) ou `sarif` (SARIF 2.1.0, para CI) |
-| `a11y_runs()` / `a11y_export(run_id, format)` / `a11y_diff(base, head)` | Cada teste autônomo guarda seus achados em `~/.a11y-mcp/runs` (desligar: `A11Y_MCP_RUNS=0`). Exporta uma execução e compara duas: o que é novo, o que foi corrigido e o que persiste (a identidade é critério + persona + papel e nome do elemento, não o id) |
+| `a11y_report(format, save, goal)` | Os achados da sessão em `json`, `earl` (W3C EARL 1.0 JSON-LD: failed / cantTell) ou `sarif` (SARIF 2.1.0, para CI). Com `save` (padrão) guarda a execução e devolve o `run_id` |
+| `a11y_runs()` / `a11y_export(run_id, format)` / `a11y_diff(base, head)` | Cada `a11y_report` guarda os achados da sessão em `~/.a11y-mcp/runs` (desligar: `A11Y_MCP_RUNS=0`). Exporta uma execução e compara duas: o que é novo, o que foi corrigido e o que persiste (a identidade é critério + persona + papel e nome do elemento, não o id) |
 
-No teste autônomo, o agente tem a ação `probe` e o campo `finding`. Antes do relatório, um **verificador** confere cada achado contra o rastro e os fatos do elemento: `supported` (vira `failed`), `unsupported` (refutado: sai do relatório, fica registrado) ou `cantTell`. Sem resposta válida do verificador, o achado nunca vira falha. O guia `wcag-evidence-and-probes` ensina qual sonda prova qual critério.
+Quem registra o achado é o modelo do cliente (`a11y_finding`); o servidor só confere fatos: os passos citados existem no rastro, o elemento foi visto na sessão, o critério WCAG é um número real. Sem evidência válida o achado nunca vira falha. O guia `wcag-evidence-and-probes` ensina qual sonda prova qual critério.
 
 ### Bancada de avaliação
 
-`python -m accessibility_mcp.a11y.bench facts` parte de uma página correta (`evals/boa.html`) e injeta um defeito conhecido por vez (13 mutações, cada uma com o critério WCAG que viola). Compara o axe sozinho com o conjunto de ferramentas e confere que a página boa não dispara alarme. Roda sem modelo e está nos testes. `python -m accessibility_mcp.a11y.bench agent` roda o agente de verdade (com o modelo configurado) e mede recall e falsos positivos por modelo, para saber se uma mudança melhorou ou piorou. O gabarito é dos defeitos plantados, não de todos os defeitos de um site real.
+`python -m accessibility_mcp.a11y.bench facts` parte de uma página correta (`evals/boa.html`) e injeta um defeito conhecido por vez (13 mutações, cada uma com o critério WCAG que viola). Compara o axe sozinho com o conjunto de ferramentas e confere que a página boa não dispara alarme. Roda sem modelo e está nos testes. O gabarito é dos defeitos plantados, não de todos os defeitos de um site real.
 
 ### Vários navegadores
 
@@ -111,7 +114,7 @@ No teste autônomo, o agente tem a ação `probe` e o campo `finding`. Antes do 
 |---|---|
 | `a11y_compare_browsers(url \| html, browsers)` | A mesma página em 2+ navegadores, lado a lado, só fatos: diferenças na árvore de acessibilidade, violações do axe que aparecem em um só e ordem de foco por navegador. Se a diferença é bug da página ou modo de o navegador expor, é julgamento do modelo (guia `cross-browser-a11y`) |
 
-Todas as medições (`a11y_audit`, `a11y_aria_snapshot`, `a11y_tab_order`), a sessão e os testes autônomos aceitam `browser`.
+Todas as medições (`a11y_audit`, `a11y_aria_snapshot`, `a11y_tab_order`) e a sessão aceitam `browser`.
 
 | Recurso | Chromium | Firefox / WebKit |
 |---|---|---|
@@ -138,45 +141,10 @@ Recursos MCP: `a11y://reference/{name}` e `a11y://example/{name}`.
 
 ## Como o julgamento funciona
 
-Toda decisão de sentido (que guia serve, o que uma tela mostra, qual o próximo passo de um usuário) é de um modelo; o servidor só
-valida fatos objetivos (o nome devolvido existe no catálogo?). Não há palavra-chave, regex nem ranking lexical.
+Toda decisão de sentido (que guia serve, o que uma tela mostra, o que um elemento é, o que corrigir) é do **modelo do cliente**. O servidor mede fatos e impõe limites (persona sem mouse, aprovação de mutações, pasta de trabalho, fechamento da sessão). Não há palavra-chave, regex nem ranking lexical, e não há chamada de modelo, chave de API, provedor ou variável de modelo para configurar. As ferramentas de medição reportam fatos; interpretar e corrigir fica com quem chamou.
 
-A especificação MCP de 2026-07-28 descontinuou o sampling (o servidor deve chamar o provedor direto). Por isso:
+O que o modelo precisa saber para testar bem está no próprio servidor: os guias `testing-playbook-for-ai` (ordem das ferramentas, o que pode e o que não pode afirmar, erros já cometidos) e `component-behavior-matrix` (o que cada componente deve e não deve fazer, o que o leitor de tela recebe e qual sonda mede), além dos fluxos prontos.
 
-1. Provedor configurado por ambiente (caminho principal), chamado direto, com suporte a imagens:
-
-| Variável | Uso |
-|---|---|
-| `ANTHROPIC_API_KEY` | ativa o provedor Anthropic |
-| `OPENAI_API_KEY` | ativa o provedor OpenAI |
-| `A11Y_MCP_BASE_URL` (+ `A11Y_MCP_API_KEY`) | qualquer servidor compatível com OpenAI (xAI, OpenRouter, LM Studio, Ollama `/v1`…) |
-| `A11Y_MCP_BACKEND` | `anthropic` \| `openai` \| `openai-compatible` \| `ollama` (opcional; senão detecta pelo ambiente) |
-| `OLLAMA_HOST` | Ollama nativo (padrão `http://localhost:11434`; use um modelo com visão para as capturas) |
-| `OLLAMA_API_KEY` | Ollama Cloud: a chave sozinha escolhe o backend `ollama` e o endereço `https://ollama.com` |
-| `A11Y_MCP_MODEL` | opcional: id do modelo, se você quiser escolher você mesmo. Sobrepõe qualquer resolução automática |
-
-**A chave sozinha costuma bastar** — `A11Y_MCP_MODEL` não é mais obrigatório. Sem ele, `models.py` resolve o modelo sozinho, nesta ordem, sem
-nenhuma tabela ou opinião nossa sobre "qual é bom": (1) uma escolha já feita antes fica guardada e é reaproveitada; (2) quando o provedor tem
-roteador nativo — `gpt-5-auto` na OpenAI, `openrouter/auto` quando `A11Y_MCP_BASE_URL` é literalmente o da OpenRouter —, delega para o produto
-deles; (3) senão, busca ao vivo o catálogo real de modelos da conta e pede ao modelo do cliente (via MCP sampling) que escolha um, pelo
-significado da tarefa; a resposta só vale se for um nome que existe de fato no catálogo, e a escolha fica guardada, então isso acontece uma vez
-por provedor. Sem chave nenhuma, ou com um cliente sem sampling e nada resolvido ainda, `a11y_status` mostra o catálogo real para você escolher.
-
-Exemplo no JSON do cliente: `"env": {"ANTHROPIC_API_KEY": "..."}` — só isso já é suficiente. Para fixar você mesmo: `"env": {"ANTHROPIC_API_KEY": "...", "A11Y_MCP_MODEL": "<seu modelo>"}`.
-
-**Papéis nomeados, além de main/fast.** O agente autônomo (`a11y_walkthrough`/`a11y_review`) usa 3 papéis fixos, não uma decisão de custo/qualidade:
-`vision` descreve em texto a captura de tela antes de qualquer raciocínio, `main` decide a próxima ação, e `write` escreve o relatório final
-cruzando tudo. Cada papel tem sua própria env var opcional (`A11Y_MCP_MODEL_VISION`, `A11Y_MCP_MODEL_WRITE`); sem ela, o papel herda a mesma
-resolução automática de `A11Y_MCP_MODEL` (a escolha específica do papel, se já foi feita antes, é reaproveitada primeiro). Ex.: com Ollama Cloud,
-`OLLAMA_API_KEY` sozinha basta, e cada papel aprende seu próprio modelo real do catálogo (visão precisa de um modelo multimodal, como
-`gemma4:31b`; main e write podem ser qualquer outro, como `deepseek-v4.1-flash` e `gpt-oss:120b`). Isso é diferente do roteador fast/main
-(`router.py`), que continua sendo uma decisão de julgamento do modelo, sem papel fixo — ver seção 13 de `docs/AUDITORIA.md`.
-
-2. Sampling do cliente, se ele ainda oferecer (bônus; o Claude Code não oferece).
-3. Sem nenhum dos dois: `a11y_find` devolve o catálogo para o modelo que chamou escolher, e `a11y_walkthrough`/`a11y_review` explicam como configurar.
-   As ferramentas de sessão (`a11y_open`, `a11y_dossier`, `a11y_act`…) funcionam sempre, porque aí o modelo do próprio cliente conduz.
-
-As ferramentas de medição não usam modelo: reportam fatos, e interpretar e corrigir fica com quem chamou.
 A auditoria completa (pesquisa, o que foi removido por ser heurística e o que ficou, com justificativa) está em `docs/AUDITORIA.md`.
 
 ## Instalação
@@ -184,14 +152,24 @@ A auditoria completa (pesquisa, o que foi removido por ser heurística e o que f
 ```bash
 cd "C:\projetos IA\mcp"
 pip install -r requirements.txt            # ou: uv sync
-python scripts/setup.py                    # registra no Claude Desktop e Cursor (entrada "accessibility")
+python scripts/setup.py                    # cadastra nos clientes que encontrar
 ```
+
+O `scripts/setup.py` cadastra o servidor (entrada `accessibility`) no Claude Desktop, no Claude Code, no Codex e no Cursor, e mostra como fazer no VS Code. Manualmente, em cada cliente:
+
+| Cliente | Como cadastrar |
+|---|---|
+| Claude Code | `claude mcp add --transport stdio --scope user accessibility -- uv --directory "C:\projetos IA\mcp" run mcp_server.py` (ou `.mcp.json` no projeto). Fluxos: `/mcp__accessibility__a11y_review` |
+| Codex | `codex mcp add accessibility -- uv --directory "C:\projetos IA\mcp" run mcp_server.py` (grava `[mcp_servers.accessibility]` em `~/.codex/config.toml`). Se o seu Codex não mostrar prompts, use a ferramenta `a11y_workflow` |
+| VS Code | Paleta de comandos, `MCP: Add Server`, `Command (stdio)`, o mesmo comando e o nome `accessibility`; ou um `mcp.json` com a chave `servers`. Fluxos: `/accessibility.a11y_review` |
+| Cursor | `~/.cursor/mcp.json`, chave `mcpServers`, entrada `accessibility` com `command` e `args` |
+| Claude Desktop | `claude_desktop_config.json`, chave `mcpServers`, entrada `accessibility` |
 
 O Playwright e o navegador pedido (Chromium por padrão; Firefox/WebKit na primeira vez que forem usados) são instalados sozinhos em segundo plano na primeira vez que o servidor sobe (leva alguns minutos e ~150 MB;
 `a11y_status` mostra o andamento). Para desligar: `A11Y_MCP_AUTO_INSTALL=0` (aí rode `python -m playwright install chromium`).
 
-Reinicie o Claude Desktop / Cursor. Para VS Code, o `setup.py` imprime o trecho para o `settings.json`. O `scripts/setup.ps1` faz tudo isso no Windows.
-Dependências: `mcp>=1.2,<2` (o mcp 2.x renomeou o `FastMCP`), `playwright`. O `httpx` já vem com o `mcp`.
+Reinicie o cliente depois de cadastrar. O `scripts/setup.ps1` faz tudo isso no Windows.
+Dependências: `mcp>=1.2,<2` (o mcp 2.x renomeou o `FastMCP`), `playwright`, `httpx`.
 
 ## Demonstração: "axe verde" não é acessível
 
@@ -211,7 +189,7 @@ python demo/loja/verificar.py
 - Personas são impostas pelo servidor (ex.: `keyboard` não tem mouse), não pela boa vontade do modelo.
 - Não digite credenciais reais em páginas testadas; use contas de teste.
 - Leitura de guias/exemplos só por nome do catálogo — texto do cliente nunca vira caminho de arquivo.
-- Chave de API só do ambiente, fora de logs; URL base de provedor validada (só `http(s)`).
+- Nenhuma chave de API é necessária nem lida: o servidor não chama modelo.
 
 ## Estrutura
 
@@ -220,15 +198,13 @@ C:\projetos IA\mcp\
 ├── mcp_server.py            ← ponto de entrada fino (a configuração do cliente continua apontando para ele)
 ├── accessibility_mcp/       ← o pacote do servidor
 │   ├── server.py            ← servidor FastMCP
-│   ├── llm.py               ← acesso ao modelo: provedores diretos (com visão) e sampling do cliente
-│   ├── router.py + models.py ← escolha e confiabilidade dos modelos
 │   └── a11y/
 │       ├── tools.py         ← ferramentas de conhecimento/medição e os recursos MCP
 │       ├── tools_ux.py      ← ferramentas de sessão: dossiê, ações, personas, design
 │       ├── session.py       ← sessão de navegador persistente (personas impostas, descoberta pelo Chromium, efeitos, estresse)
-│       ├── agent.py         ← usuário autônomo: o modelo decide, o harness impõe limites
+│       ├── prompts.py       ← fluxos prontos (prompts do MCP e a ferramenta a11y_workflow) para o modelo do cliente
 │       ├── probes.py        ← sondas de comportamento (Tab, contratos APG, formulários, troca de tela) + js/probe_*.js
-│       ├── findings.py + wcag.py + verify.py + runs.py ← achados com evidência, EARL/SARIF, verificador, execuções salvas e diff
+│       ├── findings.py + wcag.py + verify.py + runs.py + learn.py ← achados com evidência, EARL/SARIF, conferência de evidência, execuções salvas, diff e lições
 │       ├── bench.py         ← bancada de avaliação por mutação (evals/boa.html)
 │       ├── provisioning.py  ← instala Playwright e Chromium/Firefox/WebKit sozinho
 │       ├── compare.py       ← mesma página em vários navegadores (fatos lado a lado)
@@ -237,7 +213,7 @@ C:\projetos IA\mcp\
 │       ├── content_index.py ← catálogo dos guias/exemplos (leitura só por nome)
 │       ├── content/         ← guias, exemplos, template React + catalog.json (descrições escritas por IA)
 │       └── vendor/          ← axe-core 4.12.1 (MPL-2.0)
-├── tests/                   ← testes com Chromium real (auditoria, sessão, agente, provedores)
+├── tests/                   ← testes com Chromium real (auditoria, sessão, sondas, protocolo MCP)
 ├── evals/                   ← páginas de referência da bancada de avaliação
 ├── demo/                    ← loja de demonstração com defeitos conhecidos
 ├── nvda/                    ← fala real do NVDA numa VM (Guidepup)
@@ -258,4 +234,4 @@ ruff check .
 mypy
 ```
 
-Os testes nunca chamam modelo real: interceptam o HTTP e usam um cliente simulado.
+Não há modelo no servidor, então nenhum teste precisa de chave ou de modelo simulado.

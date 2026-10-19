@@ -1,7 +1,7 @@
-"""Aprendizado sempre: o servidor lembra o que aprendeu testando, entre execucoes, sem fila de aprovacao.
+"""Aprendizado sempre: o servidor guarda o que o modelo do cliente aprendeu testando, entre sessoes, sem fila de aprovacao.
 
-O MODELO decide o que vale lembrar e como fundir com o que ja existe (por significado). O codigo so guarda, valida o formato,
-limita o tamanho e impede duplicata de MESMO assunto (igualdade de texto normalizado e' fato objetivo). Fica na pasta do usuario
+O MODELO DO CLIENTE decide o que vale lembrar (`a11y_learn`), por significado. O codigo so guarda, valida o formato, limita o tamanho,
+marca a origem e impede duplicata de MESMO assunto (igualdade de texto normalizado e' fato objetivo). Fica na pasta do usuario
 (A11Y_MCP_HOME, padrao ~/.a11y-mcp), nunca no projeto. Desligar: A11Y_MCP_LEARN=0.
 """
 
@@ -10,21 +10,16 @@ from __future__ import annotations
 import json
 import os
 import tempfile
-from collections.abc import Awaitable, Callable
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from accessibility_mcp.llm import Hint, extract_json
-
 GENERAL = "geral"
-ROUTING = "roteamento"  # licoes do roteador de modelos (router.py); nao entram no prompt do agente
 MAX_PER_SCOPE = 30
 MAX_LEARNING_CHARS = 400
 PROMPT_CHARS = 2500
-
-AskFn = Callable[..., Awaitable[str | None]]
+ORIGIN = "cliente"  # quem escreveu: o modelo do cliente, a partir do que mediu; nunca vira instrucao
 
 
 def enabled() -> bool:
@@ -66,12 +61,16 @@ def relevant(host: str) -> list[dict[str, Any]]:
     return [e for e in load_all() if e.get("scope") in (GENERAL, host)]
 
 
-def remember(scope: str, topic: str, learning: str) -> None:
-    """Grava um FATO direto (sem passar por modelo), reaproveitando a mesma fusao/dedup/limite dos aprendizados
-    normais. Usado para coisas decididas uma vez e reaproveitadas (ex.: qual modelo um provedor resolveu ser),
-    nao para julgamento de execucao."""
+def remember(scope: str, topic: str, learning: str) -> dict[str, Any] | None:
+    """Grava um aprendizado (mesmo assunto = atualiza, nunca duplica) e devolve a entrada gravada; None se desligado ou invalido."""
+    if not enabled():
+        return None
+    topic, learning, scope = topic.strip(), learning.strip(), scope.strip().lower()
+    if not topic or not learning or not scope:
+        return None
     merged = merge_changes(load_all(), [{"topic": topic, "learning": learning, "scope": scope}], {scope})
     _save(merged)
+    return next((e for e in merged if e["scope"] == scope and _norm(e["topic"]) == _norm(topic)), None)
 
 
 def render_for_prompt(entries: list[dict[str, Any]]) -> str:
@@ -84,8 +83,8 @@ def _norm(text: str) -> str:
 
 
 def merge_changes(existing: list[dict[str, Any]], changes: list[Any], scopes: set[str]) -> list[dict[str, Any]]:
-    """Aplica as MUDANCAS devolvidas pelo modelo: cada item novo/atualizado entra (mesmo assunto = atualiza, nunca duplica);
-    remocao so quando o modelo pede de forma EXPLICITA. Omitir um aprendizado nunca o apaga."""
+    """Aplica as MUDANCAS: cada item novo/atualizado entra (mesmo assunto = atualiza, nunca duplica);
+    remocao so quando pedida de forma EXPLICITA. Omitir um aprendizado nunca o apaga."""
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     table: dict[tuple[str, str], dict[str, Any]] = {(e["scope"], _norm(e["topic"])): e for e in existing if e.get("scope") and e.get("topic")}
     for item in changes:
@@ -100,7 +99,7 @@ def merge_changes(existing: list[dict[str, Any]], changes: list[Any], scopes: se
             continue
         learning = str(item.get("learning") or "").strip()
         if learning:
-            table[key] = {"topic": topic[:80], "learning": learning[:MAX_LEARNING_CHARS], "scope": scope, "updated": now}
+            table[key] = {"topic": topic[:80], "learning": learning[:MAX_LEARNING_CHARS], "scope": scope, "origin": ORIGIN, "updated": now}
     out: list[dict[str, Any]] = []
     per_scope: dict[str, list[dict[str, Any]]] = {}
     for e in table.values():
@@ -109,42 +108,6 @@ def merge_changes(existing: list[dict[str, Any]], changes: list[Any], scopes: se
         entries.sort(key=lambda e: e.get("updated", ""), reverse=True)  # o teto descarta os mais antigos
         out.extend(entries[:MAX_PER_SCOPE])
     return out
-
-
-async def learn_from_run(ask: AskFn, host: str, run_digest: str, routing: str = "") -> list[str]:
-    """Pede ao modelo (nivel leve) as MUDANCAS nos aprendizados; aplica e grava na hora. Nunca derruba a execucao."""
-    if not enabled():
-        return []
-    try:
-        existing = load_all()
-        current = [e for e in existing if e.get("scope") in (GENERAL, host, ROUTING)]
-        prompt = (
-            "Voce mantem a memoria de um testador de acessibilidade. Abaixo estao os aprendizados ATUAIS (gerais e deste site) e o resumo "
-            "de uma execucao que acabou de terminar. Devolva SOMENTE AS MUDANCAS: itens novos ou atualizados. Se algo novo trata do "
-            "mesmo assunto de um aprendizado existente, reescreva o existente com o MESMO topic (nunca crie duplicata). Para remover algo "
-            'que a execucao provou errado, devolva {"topic": "...", "scope": "...", "remove": true}; o que voce nao mencionar continua '
-            "como esta. Vale registrar o que funcionou, o que enganou, como este site se comporta, que sondagem revelou o problema e "
-            "falsos positivos. Nada de dados pessoais, credenciais ou valores digitados. Cada item: "
-            f'{{"topic": "assunto curto", "learning": "o que lembrar, em ate {MAX_LEARNING_CHARS} caracteres, em portugues corrido sem markdown", '
-            f'"scope": "{GENERAL}" ou "{host}" ou "{ROUTING}"}}. O escopo "{ROUTING}" e so para licoes sobre qual camada de modelo '
-            "(fast ou main) atendeu bem cada tipo de pedido e quando foi preciso subir. Responda SOMENTE com um array JSON (pode ser vazio).\n\n"
-            f"APRENDIZADOS ATUAIS:\n{json.dumps(current, ensure_ascii=False)[:6000]}\n\nRESUMO DA EXECUCAO:\n{run_digest[:5000]}"
-            + (f"\n\nROTEAMENTO DESTA EXECUCAO (camada usada em cada chamada e se precisou subir):\n{routing[:3000]}" if routing else "")
-        )
-        hint = Hint(
-            purpose="atualizar a memoria de aprendizados a partir do resumo de uma execucao de teste",
-            brief=f"{len(current)} aprendizados atuais; resumo de {len(run_digest)} caracteres",
-            validate=lambda r: isinstance(extract_json(r, "array"), list),
-        )
-        raw = await ask(prompt, None, 1500, hint=hint)
-        returned = extract_json(raw, "array")
-        if not isinstance(returned, list):
-            return []
-        merged = merge_changes(existing, returned, {GENERAL, host, ROUTING})
-        _save(merged)
-        return sorted({e["topic"] for e in merged if e.get("scope") in (GENERAL, host)})
-    except Exception:  # noqa: BLE001 - aprender e' bonus: falha aqui nunca derruba o teste
-        return []
 
 
 def forget(topic: str, scope: str = "") -> int:

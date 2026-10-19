@@ -3,7 +3,6 @@ import json
 
 from accessibility_mcp.a11y import findings, runs, wcag
 from accessibility_mcp.a11y.session import SESSION
-from tests.test_agent import FINISH, Script, decision, run
 from tests.test_probes import BAD_DIALOG, HEAD
 
 SEEN = {"e1": {"descriptor": {"tag": "button", "role": "button", "name": "Comprar"}, "brief": {"tag": "button"}}}
@@ -77,82 +76,6 @@ def test_earl_and_sarif_shapes():
     assert first["partialFingerprints"]["a11yFingerprint/v1"] == findings.fingerprint(items[0])
 
 
-# --------------------------------------------------------------------------- no agente
-def verdicts(*pairs):
-    return json.dumps({"verdicts": [{"id": i, "verdict": v, "reason": r} for i, v, r in pairs]})
-
-
-def with_finding(action, finding, thought="penso"):
-    return json.dumps({"thought": thought, "friction": None, "finding": finding, "action": action})
-
-
-PRESS = decision({"type": "press", "value": "Tab"})
-FINDING = {"criterion": "2.4.7", "severity": "serious", "target": "e1", "claim": "o primeiro controle nao mostra foco", "evidence_steps": [1]}
-
-
-async def test_supported_finding_becomes_failed_and_reaches_the_report_with_its_evidence():
-    s = Script(PRESS, with_finding({"type": "finish", "outcome": "completed_with_friction", "summary": "x"}, FINDING),
-               verdicts(("f1", "supported", "o passo 1 mostra o foco sem mudanca")), "Relatorio")
-    r = await run(s, persona="keyboard")
-    assert [f["outcome"] for f in r["findings"]] == ["failed"] and r["rejected_findings"] == []
-    f = r["findings"][0]
-    assert f["criterion"] == "2.4.7" and f["verification"]["verdict"] == "supported" and f["evidence_steps"] == [1]
-    verifier = s.prompts[2]
-    assert "ACHADO f1" in verifier and "passo 1: press" in verifier and "fatos do elemento e1" in verifier  # o pacote de evidencia vai ao verificador
-    report_prompt = next(p for p in s.prompts if "RELATORIO desta sessao" in p)
-    assert "ACHADOS CONFERIDOS" in report_prompt and "f1 WCAG 2.4.7 serious failed" in report_prompt
-    assert r["run_id"] and runs.load(r["run_id"])["findings"][0]["claim"] == FINDING["claim"]
-
-
-async def test_refuted_finding_is_dropped_from_the_report_but_kept_on_record():
-    wrong = {**FINDING, "claim": "falta aria-modal no dialogo", "criterion": "4.1.2"}
-    s = Script(PRESS, with_finding({"type": "finish", "outcome": "completed", "summary": "x"}, wrong),
-               verdicts(("f1", "unsupported", "o fato do elemento mostra aria-modal=true")), "Relatorio")
-    r = await run(s, persona="keyboard")
-    assert r["findings"] == [] and r["rejected_findings"][0]["outcome"] == "unsupported"
-    report_prompt = next(p for p in s.prompts if "RELATORIO desta sessao" in p)
-    assert "AFIRMACOES REFUTADAS" in report_prompt and "falta aria-modal" in report_prompt and "ACHADOS CONFERIDOS" not in report_prompt
-    assert runs.load(r["run_id"])["findings"][0]["outcome"] == "unsupported"  # fica registrado, so nao entra nas exportacoes
-
-
-async def test_finding_without_any_evidence_is_cantTell_with_no_model_call():
-    no_ev = {"criterion": "1.1.1", "severity": "minor", "claim": "imagem sem alternativa", "evidence_steps": []}
-    s = Script(with_finding({"type": "finish", "outcome": "completed", "summary": "x"}, no_ev), "Relatorio")
-    r = await run(s)
-    assert r["findings"][0]["outcome"] == "cantTell" and "nenhuma evidencia" in r["findings"][0]["verification"]["reason"]
-    assert s.tiers == ["main", "write", None]  # sem pacote de evidencia nao ha chamada de verificacao
-
-
-async def test_verifier_silence_or_garbage_never_turns_a_finding_into_a_failure():
-    base = [PRESS, with_finding({"type": "finish", "outcome": "completed", "summary": "x"}, FINDING)]
-    r = await run(Script(*base, None, None, "Relatorio"), persona="keyboard")  # modelo indisponivel nas duas tentativas do verificador
-    assert r["findings"][0]["outcome"] == "cantTell" and "nao respondeu" in r["findings"][0]["verification"]["reason"]
-    r = await run(Script(*base, "lixo", verdicts(("f1", "talvez", "x"), ("f7", "supported", "x")), "Relatorio"), persona="keyboard")
-    assert r["findings"][0]["outcome"] == "cantTell"  # veredito fora do vocabulario e id inexistente sao ignorados
-
-
-async def test_invalid_references_are_reported_as_notes_not_crashes():
-    bad = {"criterion": "13.1.1", "severity": "x", "target": "e999", "claim": "algo", "evidence_steps": [1]}
-    s = Script(PRESS, with_finding({"type": "finish", "outcome": "completed", "summary": "x"}, [bad, "lixo", None]), verdicts(("f1", "cantTell", "sem fato")), "Relatorio")
-    r = await run(s, persona="keyboard")
-    assert len(r["findings"]) == 1 and r["findings"][0]["criterion"] is None and r["findings"][0]["target"] is None
-    assert any("nao existe no WCAG 2.2" in n for n in r["finding_notes"]) and any("e999" in n for n in r["finding_notes"])
-
-
-async def test_probe_action_runs_in_the_agent_and_its_facts_become_evidence():
-    s = Script(decision({"type": "probe", "value": "tab_walk"}), decision({"type": "probe", "value": "dialog"}),
-               decision({"type": "probe", "value": "inexistente"}),
-               with_finding({"type": "finish", "outcome": "completed", "summary": "x"}, {**FINDING, "target": None, "criterion": "2.1.2", "claim": "Tab percorre a pagina", "evidence_steps": [1]}),
-               verdicts(("f1", "supported", "ok")), "Relatorio")
-    r = await run(s, persona="keyboard")
-    assert r["steps"][0]["effect"].startswith("sonda tab_walk:") and r["steps"][0]["facts"]["summary"]
-    assert "precisa de target" in r["steps"][1]["refused"] and "uma sonda" in r["steps"][2]["refused"]
-    assert "SONDAS:" in s.prompts[0] and "tab_walk" in s.prompts[0] and "wcag-evidence-and-probes" not in s.prompts[0]  # o guia entra pelo conteudo, nao pelo nome
-    assert "Which probe proves which criterion" in s.prompts[0]
-    assert "fatos do passo 1" in s.prompts[4]
-    assert "tab_walk" in r["coverage"]["probes_run"] and not any("tab_walk" in g for g in r["coverage"]["gaps"])
-
-
 # --------------------------------------------------------------------------- ferramentas MCP
 async def test_manual_tools_probe_finding_trace_and_report_formats():
     from accessibility_mcp import server as mcp_server
@@ -210,4 +133,3 @@ async def test_saved_runs_can_be_listed_exported_and_diffed():
 def test_runs_can_be_turned_off(monkeypatch):
     monkeypatch.setenv("A11Y_MCP_RUNS", "0")
     assert runs.save("x.test", {"findings": []}) is None and runs.list_runs() == []
-    assert FINISH  # (formato usado pelos outros testes)

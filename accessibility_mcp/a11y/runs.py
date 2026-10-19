@@ -1,4 +1,4 @@
-"""Execucoes salvas: cada teste autonomo guarda seus achados na pasta do usuario (A11Y_MCP_HOME), para exportar (EARL/SARIF) e comparar.
+"""Execucoes salvas: `a11y_report` guarda os achados da sessao na pasta do usuario (A11Y_MCP_HOME), para exportar (EARL/SARIF) e comparar.
 
 Fica fora do projeto, como os aprendizados. Desligar: A11Y_MCP_RUNS=0. Guarda so as ultimas MAX_RUNS execucoes.
 """

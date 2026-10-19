@@ -2,8 +2,9 @@
 
 Origem: Qaaccessibility e este servidor. Ao mudar este guia, mudar também lá, na mesma entrega. Sources: WAI-ARIA Authoring Practices
 (APG), WCAG 2.2, HTML Standard, developer.android.com (Compose semantics, read 2026-10-19), angular.dev best-practices/a11y (read
-2026-10-19). Vue and iOS points below come from third-party articles only (the official pages did not come up in search on
-2026-10-19): treat them as pointers and confirm on vuejs.org and developer.apple.com before relying on them.
+2026-10-19), vuejs.org/guide/best-practices/accessibility (read 2026-10-19) and Scott O'Hara's article on lists and Safari (published 2019-01-12,
+updated 2023-01-30). The iOS points below are NOT confirmed in an official source: the Apple documentation page did not render for reading on
+2026-10-19; confirm them on developer.apple.com before relying on them.
 
 How to read it. Each component has: MUST (the contract), MUST NOT (the defects we actually see), TREE (what the browser hands to
 the screen reader: role, name, state; this is deterministic and the MCP measures it), SPEECH (what a screen reader typically says;
@@ -123,7 +124,7 @@ measures the behavior) and the stack notes. A probe result of `met: null` is "co
 
 - FOCUS: MUST keep a visible indicator (the default ring or a `:focus-visible` ring with 3:1 contrast). MUST NOT use `outline: none` without a replacement. Measure with `a11y_focus_style` (it lists what `:focus` changes; works with `css:` targets).
 - HIDDEN TEXT: `display:none` and `visibility:hidden` remove the text from the tree (the screen reader does not read it). Text meant only for the screen reader uses the visually-hidden technique (clip, 1 px, absolute). `aria-hidden` removes from the tree too.
-- LIST MARKER: `list-style:none` is reported by the MCP guides as dropping the list for Safari with VoiceOver. The Chromium and the Playwright WebKit measured here (2026-10-19) still expose a list, so this site labels the case "depends on the browser, not measured here". Add `role="list"` as a precaution.
+- LIST MARKER: in Safari with VoiceOver, `list-style:none` removes the list semantics; WebKit called it a purposeful change, and `role="list"` on the `ul` restores it (Scott O'Hara, published 2019-01-12, updated 2023-01-30; the update says a nested list inside a `nav` is still exposed as a list). The Chromium and the Playwright WebKit measured here (2026-10-19) still expose a list, so this site cannot reproduce it and labels the case "depends on the browser, not measured here". Add `role="list"` anyway.
 - HOVER MENUS: a submenu shown only by `:hover` is unreachable by Tab (measure: links in the code against links Tab reaches). Show it also with `:focus-within`, or use a disclosure button.
 - TEXT SPACING (WCAG 1.4.12): fixed `height` with `overflow:hidden` clips text when the person raises letter, word and line spacing. Use `min-height`. The measure depends on the font size: measure with the site's own styles.
 - CONTRAST: axe measures fixed colors; also audit `color_scheme=dark` and `forced_colors`.
@@ -148,8 +149,8 @@ measures the behavior) and the stack notes. A probe result of `met: null` is "co
 - PROBE: `route_change` (target = the link or button): `titulo_muda`, `foco_nao_se_perde`, `troca_perceptivel`. A jump to an
   in-page anchor (same document, only the fragment changes, same h1) reports the title check as `null`.
 - Angular: subscribe to `NavigationEnd` and move focus yourself; use `ariaCurrentWhenActive` on `RouterLinkActive`; `LiveAnnouncer`
-  from the CDK `a11y` package announces via `aria-live` (angular.dev, read 2026-10-19). Vue (third-party sources): vue-router
-  `afterEach` plus `nextTick`, focus the heading, update the title, optional announcer. React: no router does it for you.
+  from the CDK `a11y` package announces via `aria-live` (angular.dev, read 2026-10-19). Vue (official guide, read 2026-10-19): after a route change, call `focus()` on a `span` with `tabindex="-1"` placed just before the skip link (watch the route); the guide says nothing about
+  the page title or live regions, so do both yourself (title, announcement, or focus on the new heading as this site does); `useId()` gives unique ids for label and `aria-labelledby` links in reusable components. React: no router does it for you.
 
 ## 13. AJAX, lazy loading and infinite lists
 

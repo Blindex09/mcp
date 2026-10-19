@@ -56,11 +56,18 @@ CENARIOS: list[dict[str, Any]] = [
                 "corrigir": "Nada a corrigir.",
             },
             {
-                "tipo": OK, "titulo": "Lista de cartões com um título dentro de cada item",
+                "tipo": RUIM, "titulo": "Lista de cartões com um título dentro de cada item",
                 "html": '<ul class="cartoes"><li><h3><a href="#sencha">Sencha</a></h3><p>Chá verde japonês.</p></li>'
                         '<li><h3><a href="#matcha">Matcha</a></h3><p>Chá verde em pó.</p></li></ul>',
-                "porque": "É HTML válido: o item de lista pode conter título. O leitor de tela anuncia a lista e o total de itens e, em cada item, o título com o nível que o h3 tem. Compare a árvore abaixo com o que você ouve no seu leitor.",
-                "corrigir": "Em geral não precisa. Confira só se o nível do título combina com o lugar na hierarquia da página (aqui h3, porque a seção é um h2). Se a lista for só um enfeite visual de cartões, o título sozinho, sem a lista, também serve.",
+                "porque": "É HTML válido, mas a mesma informação aparece duas vezes: o leitor de tela anuncia \"lista com 2 itens\" e, em cada item, um título com o nível do h3. Quem navega por títulos passa a encontrar rótulos de cartão no lugar da estrutura da página. O guia aria-rules-dos-and-donts do MCP diz para usar título na estrutura do documento e não em título visual de cartão, e para expor cada informação uma só vez.",
+                "corrigir": "Troque por uma lista de links com descrição: ul, li e, dentro do item, o link com o nome do cartão e o parágrafo. A lista dá a contagem e os saltos; o link já é o nome. Se cada cartão for mesmo uma seção que merece estar no mapa da página, deixe os títulos e tire a lista, nunca os dois.",
+            },
+            {
+                "tipo": BOM, "titulo": "Lista de cartões como lista de links com descrição",
+                "html": '<ul class="cartoes"><li><a href="#sencha">Sencha</a><p>Chá verde japonês.</p></li>'
+                        '<li><a href="#matcha">Matcha</a><p>Chá verde em pó.</p></li></ul>',
+                "porque": "Uma só estrutura: o leitor de tela anuncia a lista com o total de itens e, em cada item, o link com o nome do cartão e a descrição. A lista de títulos da página continua só com os títulos de verdade.",
+                "corrigir": "Nada a corrigir.",
             },
         ],
     },

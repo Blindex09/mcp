@@ -396,3 +396,14 @@ Defeitos do próprio site, achados pelo MCP e corrigidos: os exemplos vivos de t
 O que o rastreamento mostra no site (a11y_crawl, nível AA): só o esperado dos exemplos ruins (`label` em campos, `image-alt` em imagens, salto de nível nos títulos, "clique aqui" repetido nos links), todo o resto limpo e um h1 por página. As correções 1 e 2 só valem numa sessão real depois de reiniciar o cliente MCP.
 
 Limite: as 21 medições são do Chromium. Como cada leitor de tela transforma a árvore em fala varia (a diferença do WebKit para links, por exemplo, está na seção 21), as falas só se confirmam ouvindo.
+
+### Adendo à seção 22: o título dentro do item de lista era mesmo um erro
+
+O dono esclareceu que falava do site anterior (pesquisas), da página inicial, e do que o NVDA fala ao ler o código `<li><h2>`: "lista com 6 itens, título de nível 2" (o nível estava certo; o "1" do primeiro relato foi engano). O que ele apontava como erro era a estrutura, e tinha razão: o guia `aria-rules-dos-and-donts` do próprio MCP manda usar título para a estrutura do documento e não para título visual de cartão (seção 5) e expor cada informação uma só vez (seção 2). Os seis cartões `li > h2` diziam a mesma coisa duas vezes (lista com 6 itens e seis títulos) e enchiam a lista de títulos da página de rótulos de cartão.
+
+Erros meus, corrigidos:
+- A página inicial do site anterior passou a ser uma lista de links com descrição (`li > a + p`), sem título dentro do item; a lista de títulos da página ficou só com o h1. Teste: `test_home_cards_are_a_list_of_links_not_a_list_of_headings`, que usa o fato novo do mapa da página.
+- No site de exemplos eu tinha classificado "lista de cartões com título dentro do item" como "não precisa corrigir", contra o guia do MCP. Passou a exemplo ruim, com o bom ao lado (lista de links com descrição).
+- Lição: afirmei "não precisa corrigir" sem conferir o guia do próprio MCP. A classificação de um exemplo precisa citar o guia que a sustenta.
+
+Correção no MCP: o guia `page-structure-review` ganhou, na seção de títulos, o aviso sobre títulos dentro de itens de lista ligado aos fatos `lists.details[].headings_in_items` e `items_with_heading` do `a11y_page_map`, com o que fazer (lista de links com descrição, ou títulos sem a lista, nunca os dois). Mudança numa instrução ao modelo tem portão (regra 15: conjunto amplo de avaliações em tentativas repetidas, ablação e período de observação). Isso NÃO foi feito: sem crédito de modelo, só os testes baratos rodaram. Fica registrado como pendência; o texto novo é uma frase e só reforça o que o guia `aria-rules-dos-and-donts` já dizia.

@@ -4,7 +4,7 @@ Oito cenários (títulos, listas, links, botões, campos de formulário, imagens
 
 Como gerar: python demo/exemplos-leitor-de-tela/construir.py. O texto dos exemplos está em exemplos.py. A árvore de acessibilidade e o resultado do axe não são escritos à mão: o gerador abre cada exemplo no Chromium e mede com o código do próprio MCP.
 
-O que os testes garantem (tests/test_demo_exemplos.py): todo cenário tem um exemplo ruim e um bom; todo exemplo bom ou "não precisa corrigir" passa no axe sem violação; o exemplo ruim entrega ao leitor de tela uma árvore diferente da do bom; e a lista de cartões com título dentro do item entrega o título com o nível do próprio h3, dentro do item da lista, nunca nível 1.
+O que os testes garantem (tests/test_demo_exemplos.py): todo cenário tem um exemplo ruim e um bom; todo exemplo bom ou "não precisa corrigir" passa no axe sem violação; o exemplo ruim entrega ao leitor de tela uma árvore diferente da do bom; e a lista de cartões com título dentro do item (exemplo ruim) entrega o título com o nível do próprio h3, dentro do item da lista, nunca nível 1. É ruim porque a mesma informação sai duas vezes (lista e títulos), contra o guia aria-rules-dos-and-donts; o exemplo bom é a lista de links com descrição.
 
 O que se descobriu testando este site com o MCP, e já foi corrigido, está na seção 22 de docs/AUDITORIA.md. Nos exemplos de títulos os títulos vivos começam em h3, porque a própria página já usa h1 e h2.
 

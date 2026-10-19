@@ -48,7 +48,7 @@ li { margin-block: 0.4rem; }
 .neste-texto a { min-height: 24px; display: inline-block; padding-block: 0.15rem; }
 .cartoes { list-style: none; padding: 0; margin: 1.5rem 0; display: grid; gap: 1rem; }
 .cartoes li { max-width: none; margin: 0; border: 1px solid var(--borda); border-radius: 8px; padding: 0.25rem 1rem 1rem; }
-.cartoes h2 { margin: 0.75rem 0 0.35rem; font-size: 1.2rem; }
+.cartoes a { display: inline-block; min-height: 44px; margin: 0.35rem 0 0; padding-block: 0.4rem; font-size: 1.2rem; font-weight: 700; }
 .cartoes p { margin: 0; }
 .entre { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--borda); }
 .entre a { display: inline-block; min-height: 44px; padding: 0.55rem 0; }

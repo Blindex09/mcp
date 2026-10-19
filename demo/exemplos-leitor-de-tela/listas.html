@@ -34,7 +34,8 @@
 <ol>
 <li><a href="#ex-1">Exemplo ruim: Lista falsa feita de divs com bolinha no texto</a></li>
 <li><a href="#ex-2">Exemplo bom: Lista de verdade</a></li>
-<li><a href="#ex-3">Não precisa corrigir: Lista de cartões com um título dentro de cada item</a></li>
+<li><a href="#ex-3">Exemplo ruim: Lista de cartões com um título dentro de cada item</a></li>
+<li><a href="#ex-4">Exemplo bom: Lista de cartões como lista de links com descrição</a></li>
 </ol>
 </nav>
 <h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Lista falsa feita de divs com bolinha no texto</h2>
@@ -64,12 +65,12 @@
 <p>O axe não achou nenhuma violação (nível AA).</p>
 <h3>Código</h3>
 <pre>&lt;ul&gt;&lt;li&gt;Sencha&lt;/li&gt;&lt;li&gt;Matcha&lt;/li&gt;&lt;li&gt;Gyokuro&lt;/li&gt;&lt;/ul&gt;</pre>
-<h2 id="ex-3"><span class="etiqueta t-ok">Não precisa corrigir:</span> Lista de cartões com um título dentro de cada item</h2>
-<div class="exemplo exemplo-ok"><ul class="cartoes"><li><h3><a href="#sencha">Sencha</a></h3><p>Chá verde japonês.</p></li><li><h3><a href="#matcha">Matcha</a></h3><p>Chá verde em pó.</p></li></ul></div>
+<h2 id="ex-3"><span class="etiqueta t-ruim">Exemplo ruim:</span> Lista de cartões com um título dentro de cada item</h2>
+<div class="exemplo exemplo-ruim"><ul class="cartoes"><li><h3><a href="#sencha">Sencha</a></h3><p>Chá verde japonês.</p></li><li><h3><a href="#matcha">Matcha</a></h3><p>Chá verde em pó.</p></li></ul></div>
 <h3>Por quê</h3>
-<p>É HTML válido: o item de lista pode conter título. O leitor de tela anuncia a lista e o total de itens e, em cada item, o título com o nível que o h3 tem. Compare a árvore abaixo com o que você ouve no seu leitor.</p>
+<p>É HTML válido, mas a mesma informação aparece duas vezes: o leitor de tela anuncia &quot;lista com 2 itens&quot; e, em cada item, um título com o nível do h3. Quem navega por títulos passa a encontrar rótulos de cartão no lugar da estrutura da página. O guia aria-rules-dos-and-donts do MCP diz para usar título na estrutura do documento e não em título visual de cartão, e para expor cada informação uma só vez.</p>
 <h3>O que corrigir</h3>
-<p>Em geral não precisa. Confira só se o nível do título combina com o lugar na hierarquia da página (aqui h3, porque a seção é um h2). Se a lista for só um enfeite visual de cartões, o título sozinho, sem a lista, também serve.</p>
+<p>Troque por uma lista de links com descrição: ul, li e, dentro do item, o link com o nome do cartão e o parágrafo. A lista dá a contagem e os saltos; o link já é o nome. Se cada cartão for mesmo uma seção que merece estar no mapa da página, deixe os títulos e tire a lista, nunca os dois.</p>
 <h3>O que o navegador entrega ao leitor de tela (medido)</h3>
 <pre>- list:
   - listitem:
@@ -83,9 +84,29 @@
         - /url: &quot;#matcha&quot;
     - paragraph: Chá verde em pó.</pre>
 <h3>O que o axe acha (medido)</h3>
-<p>O axe não achou nenhuma violação (nível AA).</p>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
 <h3>Código</h3>
 <pre>&lt;ul class=&quot;cartoes&quot;&gt;&lt;li&gt;&lt;h3&gt;&lt;a href=&quot;#sencha&quot;&gt;Sencha&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Chá verde japonês.&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;h3&gt;&lt;a href=&quot;#matcha&quot;&gt;Matcha&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Chá verde em pó.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;</pre>
+<h2 id="ex-4"><span class="etiqueta t-bom">Exemplo bom:</span> Lista de cartões como lista de links com descrição</h2>
+<div class="exemplo exemplo-bom"><ul class="cartoes"><li><a href="#sencha">Sencha</a><p>Chá verde japonês.</p></li><li><a href="#matcha">Matcha</a><p>Chá verde em pó.</p></li></ul></div>
+<h3>Por quê</h3>
+<p>Uma só estrutura: o leitor de tela anuncia a lista com o total de itens e, em cada item, o link com o nome do cartão e a descrição. A lista de títulos da página continua só com os títulos de verdade.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- list:
+  - listitem:
+    - link &quot;Sencha&quot;:
+      - /url: &quot;#sencha&quot;
+    - paragraph: Chá verde japonês.
+  - listitem:
+    - link &quot;Matcha&quot;:
+      - /url: &quot;#matcha&quot;
+    - paragraph: Chá verde em pó.</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Código</h3>
+<pre>&lt;ul class=&quot;cartoes&quot;&gt;&lt;li&gt;&lt;a href=&quot;#sencha&quot;&gt;Sencha&lt;/a&gt;&lt;p&gt;Chá verde japonês.&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;#matcha&quot;&gt;Matcha&lt;/a&gt;&lt;p&gt;Chá verde em pó.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;</pre>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="titulos.html">Anterior: Títulos</a>
 <a href="links.html">Próximo: Links</a>

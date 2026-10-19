@@ -2,7 +2,9 @@
 
 As pesquisas sao texto puro (titulos, paragrafos e listas simples). O HTML segue o que o proprio MCP recomenda
 (a11y_get_example html-semantic-foundation e css-accessibility): link de pular, landmarks nomeados, um so h1,
-foco visivel, tema claro e escuro, movimento reduzido e reflow. Secao sem nome nao vira landmark: os titulos
+foco visivel, tema claro e escuro, movimento reduzido e reflow. Os cartoes da pagina inicial sao uma lista de links com
+descricao, sem titulo dentro do item: titulo de cartao visual nao e titulo de documento (aria-rules-dos-and-donts do MCP).
+Secao sem nome nao vira landmark: os titulos
 dao a estrutura, e landmarks demais atrapalham quem navega por eles (page-structure-review do MCP).
 
 Uso:  python demo/leitor-de-tela/construir.py     (escreve os .html e o estilo.css nesta pasta)
@@ -87,7 +89,7 @@ li { margin-block: 0.4rem; }
 .neste-texto a { min-height: 24px; display: inline-block; padding-block: 0.15rem; }
 .cartoes { list-style: none; padding: 0; margin: 1.5rem 0; display: grid; gap: 1rem; }
 .cartoes li { max-width: none; margin: 0; border: 1px solid var(--borda); border-radius: 8px; padding: 0.25rem 1rem 1rem; }
-.cartoes h2 { margin: 0.75rem 0 0.35rem; font-size: 1.2rem; }
+.cartoes a { display: inline-block; min-height: 44px; margin: 0.35rem 0 0; padding-block: 0.4rem; font-size: 1.2rem; font-weight: 700; }
 .cartoes p { margin: 0; }
 .entre { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--borda); }
 .entre a { display: inline-block; min-height: 44px; padding: 0.55rem 0; }
@@ -270,7 +272,7 @@ def bloco_lista(tipo: str, itens: object) -> str:
 def pagina_inicial() -> str:
     cartoes = []
     for arquivo, curto, descricao in PESQUISAS:
-        cartoes.append(f'<li>\n<h2><a href="{arquivo}.html">{esc(curto)}</a></h2>\n<p>{esc(descricao)}</p>\n</li>')
+        cartoes.append(f'<li>\n<a href="{arquivo}.html">{esc(curto)}</a>\n<p>{esc(descricao)}</p>\n</li>')
     return (
         cabecalho(NOME_DO_SITE, None)
         + f"""<h1>{esc(NOME_DO_SITE)}</h1>

@@ -51,7 +51,7 @@ def test_a_heading_inside_a_list_item_keeps_the_level_of_its_own_tag(site):
     """Visto ouvindo o site: o leitor diz 'lista com N itens' e depois o titulo do item. Medido: o navegador entrega o nivel do proprio h3
     (aqui 3), e o titulo mora dentro do item da lista. Nunca o nivel 1."""
     mod, medidas = site
-    arvore = _por_tipo(mod, medidas, "listas", "ok")[0]["arvore"]
+    arvore = next(m for m in _por_tipo(mod, medidas, "listas", "ruim") if "[level=3]" in m["arvore"])["arvore"]
     assert arvore.startswith("- list:") and arvore.count("- listitem:") == 2
     assert arvore.count("[level=3]") == 2 and "[level=1]" not in arvore
 

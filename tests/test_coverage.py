@@ -200,3 +200,44 @@ async def test_reading_an_element_does_not_count_as_probing_its_behavior(rich):
     alcancado = rich.coverage_report()
     assert alcancado["interactive"]["probed_by_behavior"] == 1 and "reach" in alcancado["probes_run"]
     assert not any("nenhuma acao" in g for g in alcancado["gaps"])  # ja houve prova por comportamento, mesmo sem a11y_act
+
+
+async def test_page_map_tells_what_lives_inside_list_items_and_whether_the_marker_was_removed():
+    """Pedido do dono (visto ouvindo o site): o leitor diz "lista com N itens" e depois o titulo de cada item. Antes o mapa so contava listas
+    (ul, ol); nao mostrava que titulos moram dentro dos itens, nem de que nivel, nem se o marcador foi removido (o WebKit deixa de tratar
+    como lista). Sao fatos; julgar se incomoda e' do modelo."""
+    html = (
+        "<!doctype html><html lang='pt'><title>t</title><body><main><h1>Pagina</h1>"
+        "<ul id='cartoes' style='list-style:none'><li><h2><a href='/a'>Um</a></h2><p>x</p></li><li><h2><a href='/b'>Dois</a></h2></li></ul>"
+        "<ol><li>passo um</li><li>passo dois</li><li>passo tres</li></ol></main></body></html>"
+    )
+    await SESSION.open(None, html)
+    try:
+        d = (await SESSION.page_map())["main"]["lists"]
+        cartoes, passos = d["details"]
+        assert (d["ul"], d["ol"], d["lists_with_headings_in_items"]) == (1, 1, 1)
+        assert cartoes["items"] == 2 and cartoes["items_with_heading"] == 2 and cartoes["marker_removed"] is True
+        assert [h["level"] for h in cartoes["headings_in_items"]] == [2, 2] and cartoes["headings_in_items"][0]["text"] == "Um"
+        assert passos["items"] == 3 and passos["items_with_heading"] == 0 and passos["marker_removed"] is False
+        from accessibility_mcp.a11y.agent import page_map_text
+
+        texto = page_map_text(await SESSION.page_map())
+        assert "ul[2 itens, titulos nos itens=['h2', 'h2'], marcador removido]" in texto and "ol[3 itens]" in texto
+    finally:
+        await SESSION.close()
+
+
+async def test_reading_order_does_not_compare_an_element_with_its_own_descendant():
+    """Regressao real (achada rastreando o site de exemplos: 2 a 3 'inversoes' em todas as paginas): um h2 e o span DENTRO dele eram contados
+    como dois itens da ordem de leitura, e o texto do span ('Exemplo ruim:') vem antes do resto do texto do h2, entao parecia invertido.
+    Elemento e descendente se entrelacam por definicao; a ordem de leitura compara itens que nao estao um dentro do outro."""
+    html = (
+        "<!doctype html><html lang='pt'><title>t</title><body><main><h1>Pagina</h1>"
+        "<h2 style='font-size:20px;line-height:1'><span style='font-weight:700;font-size:22px'>Exemplo ruim:</span> Div que faz o papel de botao</h2><p>texto</p></main></body></html>"
+    )
+    await SESSION.open(None, html)
+    try:
+        d = (await SESSION.page_map())["main"]["reading_order"]
+        assert d["inverted_pairs"] == 0, d["adjacent_inversions_examples"]
+    finally:
+        await SESSION.close()

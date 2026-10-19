@@ -205,6 +205,16 @@ def _system_prompt(mode: str, persona: str, goal: str, allowed: list[str], visio
     )
 
 
+def _list_fact(x: dict[str, Any]) -> str:
+    """Uma lista em fatos: itens, niveis dos titulos que moram nos itens e se o marcador foi removido."""
+    parts = [f"{x['items']} itens"]
+    if x["items_with_heading"]:
+        parts.append("titulos nos itens=" + str([f"h{k['level']}" for k in x["headings_in_items"][:4]]))
+    if x["marker_removed"]:
+        parts.append("marcador removido")
+    return f"{x['tag']}[{', '.join(parts)}]"
+
+
 def page_map_text(pm: dict[str, Any]) -> str:
     """Fatos do mapa da pagina em poucas linhas (sem veredito), para o modelo julgar o conteudo nao interativo."""
     d = pm["main"]
@@ -223,6 +233,7 @@ def page_map_text(pm: dict[str, Any]) -> str:
         f"links: {lk['total']} | mesmo texto p/ destinos diferentes={lk['same_text_different_destination'][:5] or 'nenhum'} | sem texto={lk['empty_text']}",
         f"formularios: {len(fm['forms'])} | campos={fm['fields_total']} sem nome(label/aria)={fm['fields_without_any_name']}",
         f"tabelas: {[(t['header_cells'], t['rows']) for t in tb['items'][:6]]} (celulas-th, linhas)",
+        "listas: " + (", ".join(_list_fact(x) for x in d["lists"]["details"][:8]) or "(nenhuma)"),
         f"midia: {[(m['tag'], 'legenda' if m['tracks'] else 'sem-legenda') for m in d['media'][:4]] or 'nenhuma'} | regioes vivas: {len(d['live_regions'])}",
         f"ordem de leitura: pares invertidos={d['reading_order']['inverted_pairs']}/{d['reading_order']['items_compared']} itens | css order usado={d['reading_order']['css_order_used']} | tabindex>0={d['reading_order']['tabindex_positive']}",
         f"hover que revela conteudo (dado das folhas de estilo): {[x['rule'] for x in d['hover_reveals']['items'][:5]] or 'nenhum'}",

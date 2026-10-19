@@ -79,7 +79,18 @@
     cols: t.rows[0] ? t.rows[0].cells.length : 0, nested_tables: t.querySelectorAll('table').length, visible: visible(t)})), 20);
 
   // --- listas
-  const lists = {ul: q('ul').length, ol: q('ol').length, dl: q('dl').length, role_list: q('[role=list]').length};
+  // Cada lista com os fatos que mudam o que o leitor de tela fala: quantos itens, que titulos moram dentro dos itens (o leitor diz
+  // "lista com N itens" e depois o titulo de cada item) e se o marcador foi removido (o WebKit/VoiceOver deixa de tratar como lista).
+  const listItemsOf = (l) => Array.from(l.children).filter(c => tag(c) === 'li' || c.getAttribute('role') === 'listitem');
+  const headingsIn = (li) => Array.from(li.querySelectorAll('h1,h2,h3,h4,h5,h6,[role=heading]')).map(h => ({
+    level: parseInt(h.getAttribute('aria-level') || (/^h[1-6]$/.test(tag(h)) ? tag(h).slice(1) : ''), 10) || 2, text: clean(h.textContent).slice(0, 40)}));
+  const listDetails = q('ul,ol,[role=list]').filter(visible).slice(0, 30).map(l => {
+    const items = listItemsOf(l); const heads = items.flatMap(headingsIn);
+    return {tag: tag(l), items: items.length, items_with_heading: items.filter(li => headingsIn(li).length).length, headings_in_items: heads.slice(0, 8),
+      marker_removed: getComputedStyle(l).listStyleType === 'none', aria_label: nameOf(l)};
+  });
+  const lists = {ul: q('ul').length, ol: q('ol').length, dl: q('dl').length, role_list: q('[role=list]').length,
+    lists_with_headings_in_items: listDetails.filter(d => d.items_with_heading > 0).length, details: listDetails};
 
   // --- midia
   const media = q('video,audio').map(m => ({tag: tag(m), controls: m.controls, autoplay: m.autoplay, muted: m.muted, loop: m.loop,
@@ -111,7 +122,7 @@
   const visualSorted = lines.flatMap((line) => line.items.slice().sort((a, b) => rtl ? b.r.left - a.r.left : a.r.left - b.r.left));
   const rank = new Array(flow.length); visualSorted.forEach((x, vi) => { rank[x.i] = vi; });
   let inversions = 0; const adjacent = [];
-  for (let i = 0; i < flow.length; i++) for (let j = i + 1; j < flow.length; j++) if (rank[i] > rank[j]) { inversions++; if (j === i + 1 && adjacent.length < 8) adjacent.push({first_in_dom: clean(flow[i].textContent || flow[i].getAttribute('alt') || '').slice(0, 40), appears_visually_first: clean(flow[j].textContent || flow[j].getAttribute('alt') || '').slice(0, 40)}); }
+  for (let i = 0; i < flow.length; i++) for (let j = i + 1; j < flow.length; j++) if (rank[i] > rank[j] && !flow[i].contains(flow[j])) { inversions++; if (j === i + 1 && adjacent.length < 8) adjacent.push({first_in_dom: clean(flow[i].textContent || flow[i].getAttribute('alt') || '').slice(0, 40), appears_visually_first: clean(flow[j].textContent || flow[j].getAttribute('alt') || '').slice(0, 40)}); }
   const pairs = flow.length * (flow.length - 1) / 2;
   const reading = {items_compared: flow.length, inverted_pairs: inversions, inverted_ratio: pairs ? +(inversions / pairs).toFixed(4) : 0, adjacent_inversions_examples: adjacent,
     tabindex_positive: q('[tabindex]').filter(e => +e.getAttribute('tabindex') > 0).length, css_order_used: all.filter(e => { const o = getComputedStyle(e).order; return o && o !== '0'; }).length};

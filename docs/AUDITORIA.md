@@ -380,3 +380,19 @@ Pedido do dono: testar o MCP num site feito por nós e corrigir o que aparecer, 
 Também ficou registrado, sem correção ainda: `a11y_dossier` devolve cerca de 1,5 KB por elemento (quase tudo `null`), o que pesa no contexto de quem o chama; remover o que é `null` muda o formato e exige conferir os consumidores (agente, testes). O servidor MCP carrega o código uma vez só: estes cinco ajustes só valem numa sessão real depois de reiniciar o cliente.
 
 Pesquisas que ficaram finas e merecem rodada própria (contagem de linhas nas 6 pesquisas atuais): AJAX 4, Angular 3, Vue 1, Svelte 0, Web Components e Shadow DOM 1. A proposta é fonte oficial mais teste nosso (páginas boas e ruins de cada cenário, medidas pelo MCP e, depois, pelo NVDA real na VM).
+
+## 22. Site de exemplos bons e ruins e o título dentro da lista (outubro de 2026)
+
+Pedido do dono: um site com exemplos de leitor de tela, bom e ruim, para ver o que precisa de correção e o que não precisa, corrigindo o MCP diretamente; e um problema visto ouvindo o site: numa lista ("lista com N itens") o item tem um título dentro e o leitor fala "título de nível 1". O site é `demo/exemplos-leitor-de-tela/` (8 cenários, 21 exemplos, cada um medido no Chromium pelo código do próprio MCP).
+
+O caso da lista, medido. Em `ul > li > h3 > a`, o navegador entrega `list` > `listitem` > `heading [level=3]`: o nível é o do próprio `h3` e o título mora dentro do item. Em nenhum exemplo medido o nível vira 1 (teste `test_a_heading_inside_a_list_item_keeps_the_level_of_its_own_tag`). O que o NVDA fala a partir disso não foi medido: depende do NVDA real. Ficou pendente confirmar, ouvindo o exemplo vivo no leitor do dono ou pela VM, em que página e com que frase o "nível 1" foi dito.
+
+Defeitos do MCP achados e corrigidos, com teste de regressão (os que o rastreamento do site mostrou e os que o pedido apontou):
+1. `a11y_page_map` não dizia nada sobre títulos dentro de itens de lista: só contava `ul` e `ol`. Agora cada lista traz quantos itens tem, em quantos há título e de que nível, e se o marcador foi removido (`list-style: none`, que o WebKit trata como "não é lista"); o agente também lê isso (`listas: ul[2 itens, titulos nos itens=['h2','h2'], marcador removido]`). Teste: `test_page_map_tells_what_lives_inside_list_items_and_whether_the_marker_was_removed`.
+2. A ordem de leitura acusava "inversão" entre um elemento e o seu próprio descendente (um `h2` e o `span` dentro dele): o texto do span vem antes do resto do texto do h2, e as caixas diferem por 1 px, então parecia invertido. Elemento e descendente se entrelaçam por definição; a contagem agora ignora esses pares (fato de contenção do DOM). Apareceu como 2 a 3 inversões falsas em todas as 8 páginas do site. O primeiro teste que escrevi passava mesmo sem a correção (a geometria dele não repetia a do site); foi refeito com `line-height` curto e agora falha sem a correção e passa com ela, o que foi conferido removendo a correção de verdade. Teste: `test_reading_order_does_not_compare_an_element_with_its_own_descendant`.
+
+Defeitos do próprio site, achados pelo MCP e corrigidos: os exemplos vivos de título (h1 e h2) entravam no mapa da página e davam 3 h1; agora começam em h3 e a página explica por quê.
+
+O que o rastreamento mostra no site (a11y_crawl, nível AA): só o esperado dos exemplos ruins (`label` em campos, `image-alt` em imagens, salto de nível nos títulos, "clique aqui" repetido nos links), todo o resto limpo e um h1 por página. As correções 1 e 2 só valem numa sessão real depois de reiniciar o cliente MCP.
+
+Limite: as 21 medições são do Chromium. Como cada leitor de tela transforma a árvore em fala varia (a diferença do WebKit para links, por exemplo, está na seção 21), as falas só se confirmam ouvindo.

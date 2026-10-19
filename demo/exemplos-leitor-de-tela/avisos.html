@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avisos que aparecem sem recarregar | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html" aria-current="page">Avisos que aparecem sem recarregar</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Avisos que aparecem sem recarregar</h1>
+<p>Quando a página muda sozinha, quem não vê a tela só fica sabendo se a mudança for anunciada.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Mensagem que muda em silêncio</a></li>
+<li><a href="#ex-2">Exemplo bom: Mensagem numa região de status</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Mensagem que muda em silêncio</h2>
+<div class="exemplo exemplo-ruim"><button type="button" class="botao" onclick="document.getElementById('aviso-ruim').textContent = 'Adicionado ao carrinho'">Comprar</button><p id="aviso-ruim"></p></div>
+<h3>Por quê</h3>
+<p>O botão é de verdade, então o Tab funciona. Mas o texto aparece sem ninguém avisar: o leitor de tela fica em silêncio e a pessoa não sabe se a compra deu certo.</p>
+<h3>O que corrigir</h3>
+<p>Coloque a mensagem numa região de status (role=&quot;status&quot;) que já exista na página antes do clique, e troque só o texto dentro dela.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Comprar&quot;
+- paragraph</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Código</h3>
+<pre>&lt;button type=&quot;button&quot; class=&quot;botao&quot; onclick=&quot;document.getElementById(&#x27;aviso-ruim&#x27;).textContent = &#x27;Adicionado ao carrinho&#x27;&quot;&gt;Comprar&lt;/button&gt;&lt;p id=&quot;aviso-ruim&quot;&gt;&lt;/p&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Mensagem numa região de status</h2>
+<div class="exemplo exemplo-bom"><button type="button" class="botao" onclick="document.getElementById('aviso-bom').textContent = 'Adicionado ao carrinho'">Comprar</button><p id="aviso-bom" role="status"></p></div>
+<h3>Por quê</h3>
+<p>A região de status já está na página, vazia. Quando o texto entra, o leitor de tela o anuncia sem tirar o foco do botão.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Comprar&quot;
+- status</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Código</h3>
+<pre>&lt;button type=&quot;button&quot; class=&quot;botao&quot; onclick=&quot;document.getElementById(&#x27;aviso-bom&#x27;).textContent = &#x27;Adicionado ao carrinho&#x27;&quot;&gt;Comprar&lt;/button&gt;&lt;p id=&quot;aviso-bom&quot; role=&quot;status&quot;&gt;&lt;/p&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="tabelas.html">Anterior: Tabelas</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

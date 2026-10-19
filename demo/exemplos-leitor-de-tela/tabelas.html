@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tabelas | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html" aria-current="page">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Tabelas</h1>
+<p>Em tabela, o leitor de tela diz a que coluna e a que linha cada célula pertence, se houver células de cabeçalho.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Tabela sem células de cabeçalho</a></li>
+<li><a href="#ex-2">Exemplo bom: Tabela com cabeçalho e legenda</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Tabela sem células de cabeçalho</h2>
+<div class="exemplo exemplo-ruim"><table><tr><td>Chá</td><td>Preço</td></tr><tr><td>Sencha</td><td>R$ 39,90</td></tr><tr><td>Matcha</td><td>R$ 59,90</td></tr></table></div>
+<h3>Por quê</h3>
+<p>Visualmente a primeira linha parece cabeçalho. Para o leitor de tela, todas as células são iguais: ao ler R$ 39,90 não se ouve &quot;Preço&quot;.</p>
+<h3>O que corrigir</h3>
+<p>Use th com scope=&quot;col&quot; no cabeçalho, e uma legenda (caption) dizendo o assunto da tabela.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- table:
+  - rowgroup:
+    - row &quot;Chá Preço&quot;:
+      - cell &quot;Chá&quot;
+      - cell &quot;Preço&quot;
+    - row &quot;Sencha R$ 39,90&quot;:
+      - cell &quot;Sencha&quot;
+      - cell &quot;R$ 39,90&quot;
+    - row &quot;Matcha R$ 59,90&quot;:
+      - cell &quot;Matcha&quot;
+      - cell &quot;R$ 59,90&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Código</h3>
+<pre>&lt;table&gt;&lt;tr&gt;&lt;td&gt;Chá&lt;/td&gt;&lt;td&gt;Preço&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Sencha&lt;/td&gt;&lt;td&gt;R$ 39,90&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Matcha&lt;/td&gt;&lt;td&gt;R$ 59,90&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Tabela com cabeçalho e legenda</h2>
+<div class="exemplo exemplo-bom"><table><caption>Preço por chá</caption><thead><tr><th scope="col">Chá</th><th scope="col">Preço</th></tr></thead><tbody><tr><td>Sencha</td><td>R$ 39,90</td></tr><tr><td>Matcha</td><td>R$ 59,90</td></tr></tbody></table></div>
+<h3>Por quê</h3>
+<p>A legenda dá o assunto e os th ligam cada preço à coluna &quot;Preço&quot;.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- table &quot;Preço por chá&quot;:
+  - caption: Preço por chá
+  - rowgroup:
+    - row &quot;Chá Preço&quot;:
+      - columnheader &quot;Chá&quot;
+      - columnheader &quot;Preço&quot;
+  - rowgroup:
+    - row &quot;Sencha R$ 39,90&quot;:
+      - cell &quot;Sencha&quot;
+      - cell &quot;R$ 39,90&quot;
+    - row &quot;Matcha R$ 59,90&quot;:
+      - cell &quot;Matcha&quot;
+      - cell &quot;R$ 59,90&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Código</h3>
+<pre>&lt;table&gt;&lt;caption&gt;Preço por chá&lt;/caption&gt;&lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;Chá&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;Preço&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;Sencha&lt;/td&gt;&lt;td&gt;R$ 39,90&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Matcha&lt;/td&gt;&lt;td&gt;R$ 59,90&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="imagens.html">Anterior: Imagens</a>
+<a href="avisos.html">Próximo: Avisos que aparecem sem recarregar</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

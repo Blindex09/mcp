@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html" aria-current="page">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Leitor de tela: exemplos bons e ruins</h1>
+<p>Para cada assunto há um exemplo ruim, um bom e, quando existe, um que parece estranho mas não precisa de correção. Os exemplos estão vivos na página: ouça com o seu leitor de tela e compare. Embaixo de cada um estão o porquê, o que corrigir, o que o navegador entrega ao leitor de tela e o que o axe acha, medidos pelo próprio MCP.</p>
+<p>Ruim e bom parecem iguais de propósito. A diferença está na estrutura, não no visual.</p>
+<h2><a href="titulos.html">Títulos</a></h2>
+<p>Quem usa leitor de tela navega a página de título em título. Sem título de verdade, não existe mapa. Nos exemplos vivos desta página os títulos começam em h3, porque a própria página já usa h1 e h2; a regra vale em qualquer nível: não pular. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="listas.html">Listas</a></h2>
+<p>O leitor de tela anuncia uma lista com a quantidade de itens e a posição de cada um. Lista só no visual não é anunciada. (exemplo bom, exemplo ruim, não precisa corrigir.)</p>
+<h2><a href="links.html">Links</a></h2>
+<p>Quem usa leitor de tela costuma ouvir a lista de links da página, sem o texto em volta. O nome do link precisa dizer para onde ele leva. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="botoes.html">Botões</a></h2>
+<p>Botão precisa ser alcançado pelo Tab, ser anunciado como botão e ter um nome. (exemplo bom, exemplo ruim, não precisa corrigir.)</p>
+<h2><a href="campos.html">Campos de formulário</a></h2>
+<p>O leitor de tela anuncia o nome do campo quando o foco chega nele. Sem nome, a pessoa não sabe o que digitar. (exemplo bom, exemplo ruim, não precisa corrigir.)</p>
+<h2><a href="imagens.html">Imagens</a></h2>
+<p>Imagem com informação precisa de texto alternativo. Imagem decorativa precisa ser ignorada de propósito. (exemplo bom, exemplo ruim, não precisa corrigir.)</p>
+<h2><a href="tabelas.html">Tabelas</a></h2>
+<p>Em tabela, o leitor de tela diz a que coluna e a que linha cada célula pertence, se houver células de cabeçalho. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="avisos.html">Avisos que aparecem sem recarregar</a></h2>
+<p>Quando a página muda sozinha, quem não vê a tela só fica sabendo se a mudança for anunciada. (exemplo bom, exemplo ruim.)</p>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

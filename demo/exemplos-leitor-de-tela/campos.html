@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campos de formulário | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html" aria-current="page">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Campos de formulário</h1>
+<p>O leitor de tela anuncia o nome do campo quando o foco chega nele. Sem nome, a pessoa não sabe o que digitar.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Campo sem rótulo associado</a></li>
+<li><a href="#ex-2">Exemplo bom: Campo com label associado</a></li>
+<li><a href="#ex-3">Não precisa corrigir: Label que envolve o campo</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Campo sem rótulo associado</h2>
+<div class="exemplo exemplo-ruim"><p>Seu e-mail</p><input type="email" name="email-ruim"></div>
+<h3>Por quê</h3>
+<p>O texto &quot;Seu e-mail&quot; está perto do campo, mas não está ligado a ele. Quando o foco chega, o leitor diz só &quot;campo de edição&quot;.</p>
+<h3>O que corrigir</h3>
+<p>Use label com for apontando para o id do campo, ou envolva o campo no label.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph: Seu e-mail
+- textbox</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe achou: label (Form elements must have labels).</p>
+<h3>Código</h3>
+<pre>&lt;p&gt;Seu e-mail&lt;/p&gt;&lt;input type=&quot;email&quot; name=&quot;email-ruim&quot;&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Campo com label associado</h2>
+<div class="exemplo exemplo-bom"><label for="email-bom">Seu e-mail</label><br><input type="email" id="email-bom" name="email-bom" autocomplete="email"></div>
+<h3>Por quê</h3>
+<p>O foco chega e o leitor diz o nome do campo, &quot;Seu e-mail&quot;, e que é um campo de edição.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: Seu e-mail
+- textbox &quot;Seu e-mail&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Código</h3>
+<pre>&lt;label for=&quot;email-bom&quot;&gt;Seu e-mail&lt;/label&gt;&lt;br&gt;&lt;input type=&quot;email&quot; id=&quot;email-bom&quot; name=&quot;email-bom&quot; autocomplete=&quot;email&quot;&gt;</pre>
+<h2 id="ex-3"><span class="etiqueta t-ok">Não precisa corrigir:</span> Label que envolve o campo</h2>
+<div class="exemplo exemplo-ok"><label>Seu nome <input type="text" name="nome-ok" autocomplete="name"></label></div>
+<h3>Por quê</h3>
+<p>Também é uma associação válida. O nome do campo é o texto do label.</p>
+<h3>O que corrigir</h3>
+<p>Não precisa corrigir; só é mais difícil de estilizar do que o for com id.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: Seu nome
+- textbox &quot;Seu nome&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Código</h3>
+<pre>&lt;label&gt;Seu nome &lt;input type=&quot;text&quot; name=&quot;nome-ok&quot; autocomplete=&quot;name&quot;&gt;&lt;/label&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="botoes.html">Anterior: Botões</a>
+<a href="imagens.html">Próximo: Imagens</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

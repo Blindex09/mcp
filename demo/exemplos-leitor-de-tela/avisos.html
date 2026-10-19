@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Avisos que aparecem sem recarregar | Leitor de tela: exemplos bons e ruins</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">Leitor de tela: exemplos bons e ruins</p>
@@ -46,7 +48,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
 <h3>Código</h3>
-<pre>&lt;button type=&quot;button&quot; class=&quot;botao&quot; onclick=&quot;document.getElementById(&#x27;aviso-ruim&#x27;).textContent = &#x27;Adicionado ao carrinho&#x27;&quot;&gt;Comprar&lt;/button&gt;&lt;p id=&quot;aviso-ruim&quot;&gt;&lt;/p&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-1" aria-label="Copiar código para a área de transferência: Mensagem que muda em silêncio">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-1"><code>&lt;button type=&quot;button&quot; class=&quot;botao&quot; onclick=&quot;document.getElementById(&#x27;aviso-ruim&#x27;).textContent = &#x27;Adicionado ao carrinho&#x27;&quot;&gt;Comprar&lt;/button&gt;&lt;p id=&quot;aviso-ruim&quot;&gt;&lt;/p&gt;</code></pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Mensagem numa região de status</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Mensagem numa região de status"><button type="button" class="botao" onclick="document.getElementById('aviso-bom').textContent = 'Adicionado ao carrinho'">Comprar</button><p id="aviso-bom" role="status"></p></div>
 <h3>Por quê</h3>
@@ -59,7 +62,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nenhuma violação (nível AA).</p>
 <h3>Código</h3>
-<pre>&lt;button type=&quot;button&quot; class=&quot;botao&quot; onclick=&quot;document.getElementById(&#x27;aviso-bom&#x27;).textContent = &#x27;Adicionado ao carrinho&#x27;&quot;&gt;Comprar&lt;/button&gt;&lt;p id=&quot;aviso-bom&quot; role=&quot;status&quot;&gt;&lt;/p&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: Mensagem numa região de status">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-2"><code>&lt;button type=&quot;button&quot; class=&quot;botao&quot; onclick=&quot;document.getElementById(&#x27;aviso-bom&#x27;).textContent = &#x27;Adicionado ao carrinho&#x27;&quot;&gt;Comprar&lt;/button&gt;&lt;p id=&quot;aviso-bom&quot; role=&quot;status&quot;&gt;&lt;/p&gt;</code></pre>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="tabelas.html">Anterior: Tabelas</a>
 <a href="css.html">Próximo: CSS</a>

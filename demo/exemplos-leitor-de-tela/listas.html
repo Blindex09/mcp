@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Listas | Leitor de tela: exemplos bons e ruins</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">Leitor de tela: exemplos bons e ruins</p>
@@ -47,7 +49,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
 <h3>Código</h3>
-<pre>&lt;div&gt;• Sencha&lt;/div&gt;&lt;div&gt;• Matcha&lt;/div&gt;&lt;div&gt;• Gyokuro&lt;/div&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-1" aria-label="Copiar código para a área de transferência: Lista falsa feita de divs com bolinha no texto">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-1"><code>&lt;div&gt;• Sencha&lt;/div&gt;&lt;div&gt;• Matcha&lt;/div&gt;&lt;div&gt;• Gyokuro&lt;/div&gt;</code></pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Lista de verdade</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Lista de verdade"><ul><li>Sencha</li><li>Matcha</li><li>Gyokuro</li></ul></div>
 <h3>Por quê</h3>
@@ -62,7 +65,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nenhuma violação (nível AA).</p>
 <h3>Código</h3>
-<pre>&lt;ul&gt;&lt;li&gt;Sencha&lt;/li&gt;&lt;li&gt;Matcha&lt;/li&gt;&lt;li&gt;Gyokuro&lt;/li&gt;&lt;/ul&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: Lista de verdade">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-2"><code>&lt;ul&gt;&lt;li&gt;Sencha&lt;/li&gt;&lt;li&gt;Matcha&lt;/li&gt;&lt;li&gt;Gyokuro&lt;/li&gt;&lt;/ul&gt;</code></pre>
 <h2 id="ex-3"><span class="etiqueta t-ruim">Exemplo ruim:</span> Lista de cartões com um título dentro de cada item</h2>
 <div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Lista de cartões com um título dentro de cada item"><ul class="cartoes"><li><h3><a href="#sencha">Sencha</a></h3><p>Chá verde japonês.</p></li><li><h3><a href="#matcha">Matcha</a></h3><p>Chá verde em pó.</p></li></ul></div>
 <h3>Por quê</h3>
@@ -84,7 +88,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
 <h3>Código</h3>
-<pre>&lt;ul class=&quot;cartoes&quot;&gt;&lt;li&gt;&lt;h3&gt;&lt;a href=&quot;#sencha&quot;&gt;Sencha&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Chá verde japonês.&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;h3&gt;&lt;a href=&quot;#matcha&quot;&gt;Matcha&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Chá verde em pó.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-3" aria-label="Copiar código para a área de transferência: Lista de cartões com um título dentro de cada item">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-3"><code>&lt;ul class=&quot;cartoes&quot;&gt;&lt;li&gt;&lt;h3&gt;&lt;a href=&quot;#sencha&quot;&gt;Sencha&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Chá verde japonês.&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;h3&gt;&lt;a href=&quot;#matcha&quot;&gt;Matcha&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Chá verde em pó.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;</code></pre>
 <h2 id="ex-4"><span class="etiqueta t-bom">Exemplo bom:</span> Lista de cartões como lista de links com descrição</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Lista de cartões como lista de links com descrição"><ul class="cartoes"><li><a href="#sencha">Sencha</a><p>Chá verde japonês.</p></li><li><a href="#matcha">Matcha</a><p>Chá verde em pó.</p></li></ul></div>
 <h3>Por quê</h3>
@@ -104,7 +109,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nenhuma violação (nível AA).</p>
 <h3>Código</h3>
-<pre>&lt;ul class=&quot;cartoes&quot;&gt;&lt;li&gt;&lt;a href=&quot;#sencha&quot;&gt;Sencha&lt;/a&gt;&lt;p&gt;Chá verde japonês.&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;#matcha&quot;&gt;Matcha&lt;/a&gt;&lt;p&gt;Chá verde em pó.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-4" aria-label="Copiar código para a área de transferência: Lista de cartões como lista de links com descrição">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-4"><code>&lt;ul class=&quot;cartoes&quot;&gt;&lt;li&gt;&lt;a href=&quot;#sencha&quot;&gt;Sencha&lt;/a&gt;&lt;p&gt;Chá verde japonês.&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;#matcha&quot;&gt;Matcha&lt;/a&gt;&lt;p&gt;Chá verde em pó.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;</code></pre>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="titulos.html">Anterior: Títulos</a>
 <a href="links.html">Próximo: Links</a>

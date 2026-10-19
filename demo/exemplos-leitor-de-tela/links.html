@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Links | Leitor de tela: exemplos bons e ruins</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">Leitor de tela: exemplos bons e ruins</p>
@@ -56,7 +58,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
 <h3>Código</h3>
-<pre>&lt;p&gt;Sencha, chá verde japonês. &lt;a href=&quot;#a&quot;&gt;Clique aqui&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Matcha, chá verde em pó. &lt;a href=&quot;#b&quot;&gt;Clique aqui&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Gyokuro, chá sombreado. &lt;a href=&quot;#c&quot;&gt;Clique aqui&lt;/a&gt;&lt;/p&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-1" aria-label="Copiar código para a área de transferência: &quot;Clique aqui&quot; e &quot;Leia mais&quot; repetidos">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-1"><code>&lt;p&gt;Sencha, chá verde japonês. &lt;a href=&quot;#a&quot;&gt;Clique aqui&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Matcha, chá verde em pó. &lt;a href=&quot;#b&quot;&gt;Clique aqui&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Gyokuro, chá sombreado. &lt;a href=&quot;#c&quot;&gt;Clique aqui&lt;/a&gt;&lt;/p&gt;</code></pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Links que dizem para onde levam</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Links que dizem para onde levam"><p>Sencha, chá verde japonês. <a href="#a">Conheça o Sencha</a></p><p>Matcha, chá verde em pó. <a href="#b">Conheça o Matcha</a></p><p>Gyokuro, chá sombreado. <a href="#c">Conheça o Gyokuro</a></p></div>
 <h3>Por quê</h3>
@@ -79,7 +82,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nenhuma violação (nível AA).</p>
 <h3>Código</h3>
-<pre>&lt;p&gt;Sencha, chá verde japonês. &lt;a href=&quot;#a&quot;&gt;Conheça o Sencha&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Matcha, chá verde em pó. &lt;a href=&quot;#b&quot;&gt;Conheça o Matcha&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Gyokuro, chá sombreado. &lt;a href=&quot;#c&quot;&gt;Conheça o Gyokuro&lt;/a&gt;&lt;/p&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: Links que dizem para onde levam">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-2"><code>&lt;p&gt;Sencha, chá verde japonês. &lt;a href=&quot;#a&quot;&gt;Conheça o Sencha&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Matcha, chá verde em pó. &lt;a href=&quot;#b&quot;&gt;Conheça o Matcha&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Gyokuro, chá sombreado. &lt;a href=&quot;#c&quot;&gt;Conheça o Gyokuro&lt;/a&gt;&lt;/p&gt;</code></pre>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="listas.html">Anterior: Listas</a>
 <a href="botoes.html">Próximo: Botões</a>

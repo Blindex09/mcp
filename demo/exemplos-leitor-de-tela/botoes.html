@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Botões | Leitor de tela: exemplos bons e ruins</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">Leitor de tela: exemplos bons e ruins</p>
@@ -46,7 +48,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
 <h3>Código</h3>
-<pre>&lt;div class=&quot;fake-botao&quot; onclick=&quot;this.textContent = &#x27;Adicionado&#x27;&quot;&gt;Comprar&lt;/div&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-1" aria-label="Copiar código para a área de transferência: Div que faz o papel de botão">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-1"><code>&lt;div class=&quot;fake-botao&quot; onclick=&quot;this.textContent = &#x27;Adicionado&#x27;&quot;&gt;Comprar&lt;/div&gt;</code></pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Botão de verdade</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Botão de verdade"><button type="button" class="botao" onclick="this.textContent = 'Adicionado'">Comprar</button></div>
 <h3>Por quê</h3>
@@ -58,7 +61,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nenhuma violação (nível AA).</p>
 <h3>Código</h3>
-<pre>&lt;button type=&quot;button&quot; class=&quot;botao&quot; onclick=&quot;this.textContent = &#x27;Adicionado&#x27;&quot;&gt;Comprar&lt;/button&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: Botão de verdade">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-2"><code>&lt;button type=&quot;button&quot; class=&quot;botao&quot; onclick=&quot;this.textContent = &#x27;Adicionado&#x27;&quot;&gt;Comprar&lt;/button&gt;</code></pre>
 <h2 id="ex-3"><span class="etiqueta t-ok">Não precisa corrigir:</span> Botão só com ícone, com nome por aria-label</h2>
 <div class="exemplo exemplo-ok" role="group" aria-label="Exemplo ao vivo, não precisa corrigir: Botão só com ícone, com nome por aria-label"><button type="button" class="botao" aria-label="Abrir o carrinho"><span aria-hidden="true">&#128722;</span></button></div>
 <h3>Por quê</h3>
@@ -70,7 +74,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nenhuma violação (nível AA).</p>
 <h3>Código</h3>
-<pre>&lt;button type=&quot;button&quot; class=&quot;botao&quot; aria-label=&quot;Abrir o carrinho&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;&amp;#128722;&lt;/span&gt;&lt;/button&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-3" aria-label="Copiar código para a área de transferência: Botão só com ícone, com nome por aria-label">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-3"><code>&lt;button type=&quot;button&quot; class=&quot;botao&quot; aria-label=&quot;Abrir o carrinho&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;&amp;#128722;&lt;/span&gt;&lt;/button&gt;</code></pre>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="links.html">Anterior: Links</a>
 <a href="campos.html">Próximo: Campos de formulário</a>

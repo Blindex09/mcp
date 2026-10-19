@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Svelte | Leitor de tela: exemplos bons e ruins</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">Leitor de tela: exemplos bons e ruins</p>
@@ -63,7 +65,8 @@ NÃO cumpriu: o foco continua no botao. Observado: nenhum elemento (corpo da pag
 <pre>a11y_click_events_have_key_events: Visible, non-interactive element `&lt;div&gt;` with a click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as `&lt;button type=&quot;button&quot;&gt;` or `&lt;a&gt;` might be more appropriate
 a11y_no_static_element_interactions: `&lt;div&gt;` with a click handler must have an ARIA role</pre>
 <h3>Código</h3>
-<pre>&lt;script&gt;
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-1" aria-label="Copiar código para a área de transferência: Acordeão em Svelte: como não fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-1"><code>&lt;script&gt;
   let { k } = $props();
   let aberto = $state(false);
 &lt;/script&gt;
@@ -72,7 +75,7 @@ a11y_no_static_element_interactions: `&lt;div&gt;` with a click handler must hav
 &lt;div&gt;
   &lt;div id=&quot;{k}-gatilho&quot; class=&quot;fake-botao&quot; onclick={() =&gt; (aberto = !aberto)}&gt;Prazo de entrega&lt;/div&gt;
   {#if aberto}&lt;p id=&quot;{k}-painel&quot;&gt;Cinco dias úteis.&lt;/p&gt;{/if}
-&lt;/div&gt;</pre>
+&lt;/div&gt;</code></pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Acordeão em Svelte: como fazer</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Acordeão em Svelte: como fazer"><div data-exemplo="acordeao-bom"></div></div>
 <h3>Por quê</h3>
@@ -94,7 +97,8 @@ cumpriu: o foco continua no botao. Observado: button &#x27;Prazo de entrega&#x27
 <h3>Avisos do compilador do Svelte (medidos)</h3>
 <pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
 <h3>Código</h3>
-<pre>&lt;script&gt;
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: Acordeão em Svelte: como fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-2"><code>&lt;script&gt;
   let { k } = $props();
   let aberto = $state(false);
 &lt;/script&gt;
@@ -104,7 +108,7 @@ cumpriu: o foco continua no botao. Observado: button &#x27;Prazo de entrega&#x27
     Prazo de entrega
   &lt;/button&gt;
   &lt;div id=&quot;{k}-painel&quot; hidden={!aberto}&gt;&lt;p&gt;Cinco dias úteis.&lt;/p&gt;&lt;/div&gt;
-&lt;/div&gt;</pre>
+&lt;/div&gt;</code></pre>
 <h2 id="ex-3"><span class="etiqueta t-ruim">Exemplo ruim:</span> Diálogo em Svelte: como não fazer</h2>
 <div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Diálogo em Svelte: como não fazer"><div data-exemplo="dialogo-ruim"></div></div>
 <h3>Por quê</h3>
@@ -121,7 +125,8 @@ NÃO cumpriu: Enter no gatilho abre um dialogo visivel. Observado: nenhum dialog
 <h3>Avisos do compilador do Svelte (medidos)</h3>
 <pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
 <h3>Código</h3>
-<pre>&lt;script&gt;
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-3" aria-label="Copiar código para a área de transferência: Diálogo em Svelte: como não fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-3"><code>&lt;script&gt;
   let { k } = $props();
   let aberto = $state(false);
 &lt;/script&gt;
@@ -135,7 +140,7 @@ NÃO cumpriu: Enter no gatilho abre um dialogo visivel. Observado: nenhum dialog
       &lt;button type=&quot;button&quot; onclick={() =&gt; (aberto = false)}&gt;Cancelar&lt;/button&gt;
     &lt;/div&gt;
   {/if}
-&lt;/div&gt;</pre>
+&lt;/div&gt;</code></pre>
 <h2 id="ex-4"><span class="etiqueta t-bom">Exemplo bom:</span> Diálogo em Svelte: como fazer</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Diálogo em Svelte: como fazer"><div data-exemplo="dialogo-bom"></div></div>
 <h3>Por quê</h3>
@@ -158,7 +163,8 @@ cumpriu: ao fechar, o foco volta ao elemento que abriu o dialogo. Observado: but
 <h3>Avisos do compilador do Svelte (medidos)</h3>
 <pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
 <h3>Código</h3>
-<pre>&lt;script&gt;
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-4" aria-label="Copiar código para a área de transferência: Diálogo em Svelte: como fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-4"><code>&lt;script&gt;
   let { k } = $props();
   let dialogo;
 &lt;/script&gt;
@@ -171,7 +177,7 @@ cumpriu: ao fechar, o foco volta ao elemento que abriu o dialogo. Observado: but
     &lt;p&gt;Isso não pode ser desfeito.&lt;/p&gt;
     &lt;button type=&quot;button&quot; onclick={() =&gt; dialogo.close()}&gt;Cancelar&lt;/button&gt;
   &lt;/dialog&gt;
-&lt;/div&gt;</pre>
+&lt;/div&gt;</code></pre>
 <h2 id="ex-5"><span class="etiqueta t-ruim">Exemplo ruim:</span> Erro de formulário em Svelte: como não fazer</h2>
 <div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Erro de formulário em Svelte: como não fazer"><div data-exemplo="erro-ruim"></div></div>
 <h3>Por quê</h3>
@@ -193,7 +199,8 @@ NÃO cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foc
 <h3>Avisos do compilador do Svelte (medidos)</h3>
 <pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
 <h3>Código</h3>
-<pre>&lt;script&gt;
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-5" aria-label="Copiar código para a área de transferência: Erro de formulário em Svelte: como não fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-5"><code>&lt;script&gt;
   let { k } = $props();
   let mensagem = $state(&#x27;&#x27;);
   function enviar(e) {
@@ -207,7 +214,7 @@ NÃO cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foc
   &lt;label for=&quot;{k}-email&quot;&gt;E-mail&lt;/label&gt;
   &lt;input id=&quot;{k}-email&quot; name=&quot;email&quot; type=&quot;email&quot; required /&gt; &lt;span class=&quot;erro-visual&quot;&gt;{mensagem}&lt;/span&gt;
   &lt;p&gt;&lt;button type=&quot;submit&quot; id=&quot;{k}-enviar&quot;&gt;Enviar&lt;/button&gt;&lt;/p&gt;
-&lt;/form&gt;</pre>
+&lt;/form&gt;</code></pre>
 <h2 id="ex-6"><span class="etiqueta t-bom">Exemplo bom:</span> Erro de formulário em Svelte: como fazer</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Erro de formulário em Svelte: como fazer"><div data-exemplo="erro-bom"></div></div>
 <h3>Por quê</h3>
@@ -230,7 +237,8 @@ cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foco. Ob
 <h3>Avisos do compilador do Svelte (medidos)</h3>
 <pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
 <h3>Código</h3>
-<pre>&lt;script&gt;
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-6" aria-label="Copiar código para a área de transferência: Erro de formulário em Svelte: como fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-6"><code>&lt;script&gt;
   import { tick } from &#x27;svelte&#x27;;
   let { k } = $props();
   let mensagem = $state(&#x27;&#x27;);
@@ -249,7 +257,7 @@ cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foco. Ob
   &lt;input id=&quot;{k}-email&quot; bind:this={campo} type=&quot;email&quot; required aria-invalid={mensagem ? &#x27;true&#x27; : undefined} aria-describedby=&quot;{k}-erro&quot; /&gt;
   &lt;span id=&quot;{k}-erro&quot; class=&quot;erro-visual&quot; role=&quot;alert&quot;&gt;{mensagem}&lt;/span&gt;
   &lt;p&gt;&lt;button type=&quot;submit&quot; id=&quot;{k}-enviar&quot;&gt;Enviar&lt;/button&gt;&lt;/p&gt;
-&lt;/form&gt;</pre>
+&lt;/form&gt;</code></pre>
 <h2 id="ex-7"><span class="etiqueta t-ruim">Exemplo ruim:</span> Mensagem de status em Svelte: como não fazer</h2>
 <div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Mensagem de status em Svelte: como não fazer"><div data-exemplo="status-ruim"></div></div>
 <h3>Por quê</h3>
@@ -268,7 +276,8 @@ NÃO cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir 
 <h3>Avisos do compilador do Svelte (medidos)</h3>
 <pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
 <h3>Código</h3>
-<pre>&lt;script&gt;
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-7" aria-label="Copiar código para a área de transferência: Mensagem de status em Svelte: como não fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-7"><code>&lt;script&gt;
   let { k } = $props();
   let salvo = $state(false);
 &lt;/script&gt;
@@ -277,7 +286,7 @@ NÃO cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir 
 &lt;div&gt;
   &lt;button type=&quot;button&quot; id=&quot;{k}-salvar&quot; onclick={() =&gt; (salvo = true)}&gt;Salvar&lt;/button&gt;
   {#if salvo}&lt;div role=&quot;status&quot;&gt;Salvo com sucesso&lt;/div&gt;{/if}
-&lt;/div&gt;</pre>
+&lt;/div&gt;</code></pre>
 <h2 id="ex-8"><span class="etiqueta t-bom">Exemplo bom:</span> Mensagem de status em Svelte: como fazer</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Mensagem de status em Svelte: como fazer"><div data-exemplo="status-bom"></div></div>
 <h3>Por quê</h3>
@@ -297,7 +306,8 @@ cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regia
 <h3>Avisos do compilador do Svelte (medidos)</h3>
 <pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
 <h3>Código</h3>
-<pre>&lt;script&gt;
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-8" aria-label="Copiar código para a área de transferência: Mensagem de status em Svelte: como fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-8"><code>&lt;script&gt;
   let { k } = $props();
   let salvo = $state(false);
 &lt;/script&gt;
@@ -306,7 +316,7 @@ cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regia
 &lt;div&gt;
   &lt;button type=&quot;button&quot; id=&quot;{k}-salvar&quot; onclick={() =&gt; (salvo = true)}&gt;Salvar&lt;/button&gt;
   &lt;div role=&quot;status&quot;&gt;{salvo ? &#x27;Salvo com sucesso&#x27; : &#x27;&#x27;}&lt;/div&gt;
-&lt;/div&gt;</pre>
+&lt;/div&gt;</code></pre>
 <h2 id="ex-9"><span class="etiqueta t-ruim">Exemplo ruim:</span> Mudança de tela em Svelte: como não fazer</h2>
 <div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Mudança de tela em Svelte: como não fazer"><p><a href="svelte-rota-ruim.html">Abrir a aplicação de exemplo (ruim)</a></p></div>
 <h3>Por quê</h3>
@@ -326,7 +336,8 @@ NÃO cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido p
 <h3>Avisos do compilador do Svelte (medidos)</h3>
 <pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
 <h3>Código</h3>
-<pre>&lt;script&gt;
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-9" aria-label="Copiar código para a área de transferência: Mudança de tela em Svelte: como não fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-9"><code>&lt;script&gt;
   let { k } = $props();
   let tela = $state(&#x27;inicio&#x27;);
 &lt;/script&gt;
@@ -338,7 +349,7 @@ NÃO cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido p
     {#if tela === &#x27;inicio&#x27;}&lt;h1&gt;Início&lt;/h1&gt;&lt;p&gt;Bem-vindo à loja de chás.&lt;/p&gt;
     {:else}&lt;h1&gt;Contato&lt;/h1&gt;&lt;p&gt;Escreva para contato@loja.example.&lt;/p&gt;{/if}
   &lt;/main&gt;
-&lt;/div&gt;</pre>
+&lt;/div&gt;</code></pre>
 <h2 id="ex-10"><span class="etiqueta t-bom">Exemplo bom:</span> Mudança de tela em Svelte: como fazer</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Mudança de tela em Svelte: como fazer"><p><a href="svelte-rota-bom.html">Abrir a aplicação de exemplo (bom)</a></p></div>
 <h3>Por quê</h3>
@@ -358,7 +369,8 @@ cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido para o
 <h3>Avisos do compilador do Svelte (medidos)</h3>
 <pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
 <h3>Código</h3>
-<pre>&lt;script&gt;
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-10" aria-label="Copiar código para a área de transferência: Mudança de tela em Svelte: como fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-10"><code>&lt;script&gt;
   import { tick } from &#x27;svelte&#x27;;
   let { k } = $props();
   let tela = $state(&#x27;inicio&#x27;);
@@ -378,7 +390,7 @@ cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido para o
     &lt;p&gt;{tela === &#x27;inicio&#x27; ? &#x27;Bem-vindo à loja de chás.&#x27; : &#x27;Escreva para contato@loja.example.&#x27;}&lt;/p&gt;
   &lt;/main&gt;
   &lt;div role=&quot;status&quot; class=&quot;so-leitor&quot;&gt;{tela === &#x27;contato&#x27; ? &#x27;Página Contato carregada&#x27; : &#x27;&#x27;}&lt;/div&gt;
-&lt;/div&gt;</pre>
+&lt;/div&gt;</code></pre>
 <script src="app-svelte.js"></script>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="pilha-vue.html">Anterior: Vue</a>

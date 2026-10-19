@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tabelas | Leitor de tela: exemplos bons e ruins</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">Leitor de tela: exemplos bons e ruins</p>
@@ -55,7 +57,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
 <h3>Código</h3>
-<pre>&lt;table&gt;&lt;tr&gt;&lt;td&gt;Chá&lt;/td&gt;&lt;td&gt;Preço&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Sencha&lt;/td&gt;&lt;td&gt;R$ 39,90&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Matcha&lt;/td&gt;&lt;td&gt;R$ 59,90&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-1" aria-label="Copiar código para a área de transferência: Tabela sem células de cabeçalho">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-1"><code>&lt;table&gt;&lt;tr&gt;&lt;td&gt;Chá&lt;/td&gt;&lt;td&gt;Preço&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Sencha&lt;/td&gt;&lt;td&gt;R$ 39,90&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Matcha&lt;/td&gt;&lt;td&gt;R$ 59,90&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</code></pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Tabela com cabeçalho e legenda</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Tabela com cabeçalho e legenda"><table><caption>Preço por chá</caption><thead><tr><th scope="col">Chá</th><th scope="col">Preço</th></tr></thead><tbody><tr><td>Sencha</td><td>R$ 39,90</td></tr><tr><td>Matcha</td><td>R$ 59,90</td></tr></tbody></table></div>
 <h3>Por quê</h3>
@@ -79,7 +82,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nenhuma violação (nível AA).</p>
 <h3>Código</h3>
-<pre>&lt;table&gt;&lt;caption&gt;Preço por chá&lt;/caption&gt;&lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;Chá&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;Preço&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;Sencha&lt;/td&gt;&lt;td&gt;R$ 39,90&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Matcha&lt;/td&gt;&lt;td&gt;R$ 59,90&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: Tabela com cabeçalho e legenda">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-2"><code>&lt;table&gt;&lt;caption&gt;Preço por chá&lt;/caption&gt;&lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;Chá&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;Preço&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;Sencha&lt;/td&gt;&lt;td&gt;R$ 39,90&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Matcha&lt;/td&gt;&lt;td&gt;R$ 59,90&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</code></pre>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="imagens.html">Anterior: Imagens</a>
 <a href="avisos.html">Próximo: Avisos que aparecem sem recarregar</a>

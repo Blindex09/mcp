@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dica (tooltip) | Leitor de tela: exemplos bons e ruins</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">Leitor de tela: exemplos bons e ruins</p>
@@ -50,7 +52,8 @@
 NÃO cumpriu: a dica aparece quando o controle recebe o foco (nao so no mouse). Observado: dica visivel: False; so tem title (o navegador nao mostra title no foco do teclado).
 NÃO cumpriu: o controle aponta a dica com aria-describedby (role=tooltip). Observado: aria-describedby=[]; aponta um role=tooltip: False.</pre>
 <h3>Código</h3>
-<pre>&lt;button type=&quot;button&quot; id=&quot;dica-ruim-btn&quot; title=&quot;Salva o rascunho sem publicar&quot;&gt;Salvar&lt;/button&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-1" aria-label="Copiar código para a área de transferência: Dica só com title">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-1"><code>&lt;button type=&quot;button&quot; id=&quot;dica-ruim-btn&quot; title=&quot;Salva o rascunho sem publicar&quot;&gt;Salvar&lt;/button&gt;</code></pre>
 <h2 id="ex-2"><span class="etiqueta t-ruim">Exemplo ruim:</span> Dica que só aparece com o mouse</h2>
 <div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Dica que só aparece com o mouse"><button type="button" id="dica-mouse-btn" aria-describedby="dica-mouse-tip">Salvar</button><span role="tooltip" id="dica-mouse-tip" hidden>Salva o rascunho sem publicar</span><script>(function(){var b=document.getElementById('dica-mouse-btn'),t=document.getElementById('dica-mouse-tip');b.addEventListener('mouseenter',function(){t.hidden=false;});b.addEventListener('mouseleave',function(){t.hidden=true;});})();</script></div>
 <h3>Por quê</h3>
@@ -66,7 +69,8 @@ NÃO cumpriu: o controle aponta a dica com aria-describedby (role=tooltip). Obse
 NÃO cumpriu: a dica aparece quando o controle recebe o foco (nao so no mouse). Observado: dica visivel: False.
 cumpriu: o controle aponta a dica com aria-describedby (role=tooltip). Observado: aria-describedby=[&#x27;dica-mouse-tip&#x27;]; aponta um role=tooltip: True.</pre>
 <h3>Código</h3>
-<pre>&lt;button type=&quot;button&quot; id=&quot;dica-mouse-btn&quot; aria-describedby=&quot;dica-mouse-tip&quot;&gt;Salvar&lt;/button&gt;&lt;span role=&quot;tooltip&quot; id=&quot;dica-mouse-tip&quot; hidden&gt;Salva o rascunho sem publicar&lt;/span&gt;&lt;script&gt;(function(){var b=document.getElementById(&#x27;dica-mouse-btn&#x27;),t=document.getElementById(&#x27;dica-mouse-tip&#x27;);b.addEventListener(&#x27;mouseenter&#x27;,function(){t.hidden=false;});b.addEventListener(&#x27;mouseleave&#x27;,function(){t.hidden=true;});})();&lt;/script&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: Dica que só aparece com o mouse">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-2"><code>&lt;button type=&quot;button&quot; id=&quot;dica-mouse-btn&quot; aria-describedby=&quot;dica-mouse-tip&quot;&gt;Salvar&lt;/button&gt;&lt;span role=&quot;tooltip&quot; id=&quot;dica-mouse-tip&quot; hidden&gt;Salva o rascunho sem publicar&lt;/span&gt;&lt;script&gt;(function(){var b=document.getElementById(&#x27;dica-mouse-btn&#x27;),t=document.getElementById(&#x27;dica-mouse-tip&#x27;);b.addEventListener(&#x27;mouseenter&#x27;,function(){t.hidden=false;});b.addEventListener(&#x27;mouseleave&#x27;,function(){t.hidden=true;});})();&lt;/script&gt;</code></pre>
 <h2 id="ex-3"><span class="etiqueta t-bom">Exemplo bom:</span> Dica no foco, ligada ao botão e fechada com Escape</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Dica no foco, ligada ao botão e fechada com Escape"><button type="button" id="dica-bom-btn" aria-describedby="dica-bom-tip">Salvar</button><span role="tooltip" id="dica-bom-tip" hidden>Salva o rascunho sem publicar</span><script>(function(){var b=document.getElementById('dica-bom-btn'),t=document.getElementById('dica-bom-tip');function abre(){t.hidden=false;}function fecha(){t.hidden=true;}b.addEventListener('focus',abre);b.addEventListener('blur',fecha);b.addEventListener('mouseenter',abre);b.addEventListener('mouseleave',fecha);b.addEventListener('keydown',function(e){if(e.key==='Escape')fecha();});})();</script></div>
 <h3>Por quê</h3>
@@ -83,7 +87,8 @@ cumpriu: a dica aparece quando o controle recebe o foco (nao so no mouse). Obser
 cumpriu: o controle aponta a dica com aria-describedby (role=tooltip). Observado: aria-describedby=[&#x27;dica-bom-tip&#x27;]; aponta um role=tooltip: True.
 cumpriu: Escape fecha a dica sem tirar o foco do controle. Observado: dica visivel: False; foco: button &#x27;Salvar&#x27;.</pre>
 <h3>Código</h3>
-<pre>&lt;button type=&quot;button&quot; id=&quot;dica-bom-btn&quot; aria-describedby=&quot;dica-bom-tip&quot;&gt;Salvar&lt;/button&gt;&lt;span role=&quot;tooltip&quot; id=&quot;dica-bom-tip&quot; hidden&gt;Salva o rascunho sem publicar&lt;/span&gt;&lt;script&gt;(function(){var b=document.getElementById(&#x27;dica-bom-btn&#x27;),t=document.getElementById(&#x27;dica-bom-tip&#x27;);function abre(){t.hidden=false;}function fecha(){t.hidden=true;}b.addEventListener(&#x27;focus&#x27;,abre);b.addEventListener(&#x27;blur&#x27;,fecha);b.addEventListener(&#x27;mouseenter&#x27;,abre);b.addEventListener(&#x27;mouseleave&#x27;,fecha);b.addEventListener(&#x27;keydown&#x27;,function(e){if(e.key===&#x27;Escape&#x27;)fecha();});})();&lt;/script&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-3" aria-label="Copiar código para a área de transferência: Dica no foco, ligada ao botão e fechada com Escape">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-3"><code>&lt;button type=&quot;button&quot; id=&quot;dica-bom-btn&quot; aria-describedby=&quot;dica-bom-tip&quot;&gt;Salvar&lt;/button&gt;&lt;span role=&quot;tooltip&quot; id=&quot;dica-bom-tip&quot; hidden&gt;Salva o rascunho sem publicar&lt;/span&gt;&lt;script&gt;(function(){var b=document.getElementById(&#x27;dica-bom-btn&#x27;),t=document.getElementById(&#x27;dica-bom-tip&#x27;);function abre(){t.hidden=false;}function fecha(){t.hidden=true;}b.addEventListener(&#x27;focus&#x27;,abre);b.addEventListener(&#x27;blur&#x27;,fecha);b.addEventListener(&#x27;mouseenter&#x27;,abre);b.addEventListener(&#x27;mouseleave&#x27;,fecha);b.addEventListener(&#x27;keydown&#x27;,function(e){if(e.key===&#x27;Escape&#x27;)fecha();});})();&lt;/script&gt;</code></pre>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="carrossel.html">Anterior: Carrossel</a>
 <a href="lista-de-opcoes.html">Próximo: Lista de opções (listbox)</a>

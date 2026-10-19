@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mudança de tela em aplicação de uma página só | Leitor de tela: exemplos bons e ruins</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">Leitor de tela: exemplos bons e ruins</p>
@@ -51,7 +53,8 @@
 cumpriu: o foco nao fica perdido no corpo da pagina. Observado: button &#x27;Contato&#x27;.
 NÃO cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido para o novo conteudo ou carga de pagina nova. Observado: anuncio=False; foco mudou=False; mesmo documento=True.</pre>
 <h3>Código</h3>
-<pre>&lt;p&gt;&lt;a href=&quot;rota-ruim.html&quot;&gt;Abrir a aplicação de exemplo (ruim)&lt;/a&gt;&lt;/p&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-1" aria-label="Copiar código para a área de transferência: A tela muda e ninguém é avisado">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-1"><code>&lt;p&gt;&lt;a href=&quot;rota-ruim.html&quot;&gt;Abrir a aplicação de exemplo (ruim)&lt;/a&gt;&lt;/p&gt;</code></pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Título, foco e aviso acompanham a troca</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Título, foco e aviso acompanham a troca"><p><a href="rota-bom.html">Abrir a aplicação de exemplo (boa)</a></p></div>
 <h3>Por quê</h3>
@@ -69,7 +72,8 @@ NÃO cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido p
 cumpriu: o foco nao fica perdido no corpo da pagina. Observado: h1 &#x27;Contato&#x27;.
 cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido para o novo conteudo ou carga de pagina nova. Observado: anuncio=True; foco mudou=True; mesmo documento=True.</pre>
 <h3>Código</h3>
-<pre>&lt;p&gt;&lt;a href=&quot;rota-bom.html&quot;&gt;Abrir a aplicação de exemplo (boa)&lt;/a&gt;&lt;/p&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: Título, foco e aviso acompanham a troca">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-2"><code>&lt;p&gt;&lt;a href=&quot;rota-bom.html&quot;&gt;Abrir a aplicação de exemplo (boa)&lt;/a&gt;&lt;/p&gt;</code></pre>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="erros-de-formulario.html">Anterior: Erro de formulário</a>
 <a href="carrossel.html">Próximo: Carrossel</a>

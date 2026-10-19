@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Acordeão (mostrar e ocultar) | Leitor de tela: exemplos bons e ruins</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">Leitor de tela: exemplos bons e ruins</p>
@@ -53,7 +55,8 @@ NÃO cumpriu: o foco continua no botao. Observado: nenhum elemento (corpo da pag
 NÃO cumpriu: Space alterna o estado do botao e o conteudo controlado. Observado: expanded None-&gt;None; conteudo visivel None-&gt;None.
 NÃO cumpriu: o foco continua no botao. Observado: nenhum elemento (corpo da pagina).</pre>
 <h3>Código</h3>
-<pre>&lt;div id=&quot;gatilho-acd-ruim&quot; class=&quot;fake-botao&quot;&gt;Prazo de entrega&lt;/div&gt;&lt;div id=&quot;painel-acd-ruim&quot; hidden&gt;&lt;p&gt;Cinco dias úteis.&lt;/p&gt;&lt;/div&gt;&lt;script&gt;document.getElementById(&#x27;gatilho-acd-ruim&#x27;).addEventListener(&#x27;click&#x27;,function(){var p=document.getElementById(&#x27;painel-acd-ruim&#x27;);p.hidden=!p.hidden;});&lt;/script&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-1" aria-label="Copiar código para a área de transferência: div clicável sem estado e sem teclado">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-1"><code>&lt;div id=&quot;gatilho-acd-ruim&quot; class=&quot;fake-botao&quot;&gt;Prazo de entrega&lt;/div&gt;&lt;div id=&quot;painel-acd-ruim&quot; hidden&gt;&lt;p&gt;Cinco dias úteis.&lt;/p&gt;&lt;/div&gt;&lt;script&gt;document.getElementById(&#x27;gatilho-acd-ruim&#x27;).addEventListener(&#x27;click&#x27;,function(){var p=document.getElementById(&#x27;painel-acd-ruim&#x27;);p.hidden=!p.hidden;});&lt;/script&gt;</code></pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> button com aria-expanded e aria-controls</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: button com aria-expanded e aria-controls"><button type="button" id="gatilho-acd-bom" aria-expanded="false" aria-controls="painel-acd-bom">Prazo de entrega</button><div id="painel-acd-bom" hidden><p>Cinco dias úteis.</p></div><script>(function(){var b=document.getElementById('gatilho-acd-bom'),p=document.getElementById('painel-acd-bom');b.addEventListener('click',function(){var abrir=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(abrir));p.hidden=!abrir;});})();</script></div>
 <h3>Por quê</h3>
@@ -73,7 +76,8 @@ cumpriu: expanded=true mostra o conteudo; false o oculta. Observado: expanded=tr
 cumpriu: Space alterna o estado do botao e o conteudo controlado. Observado: expanded false-&gt;true; conteudo visivel False-&gt;True.
 cumpriu: o foco continua no botao. Observado: button &#x27;Prazo de entrega&#x27;.</pre>
 <h3>Código</h3>
-<pre>&lt;button type=&quot;button&quot; id=&quot;gatilho-acd-bom&quot; aria-expanded=&quot;false&quot; aria-controls=&quot;painel-acd-bom&quot;&gt;Prazo de entrega&lt;/button&gt;&lt;div id=&quot;painel-acd-bom&quot; hidden&gt;&lt;p&gt;Cinco dias úteis.&lt;/p&gt;&lt;/div&gt;&lt;script&gt;(function(){var b=document.getElementById(&#x27;gatilho-acd-bom&#x27;),p=document.getElementById(&#x27;painel-acd-bom&#x27;);b.addEventListener(&#x27;click&#x27;,function(){var abrir=b.getAttribute(&#x27;aria-expanded&#x27;)!==&#x27;true&#x27;;b.setAttribute(&#x27;aria-expanded&#x27;,String(abrir));p.hidden=!abrir;});})();&lt;/script&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: button com aria-expanded e aria-controls">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-2"><code>&lt;button type=&quot;button&quot; id=&quot;gatilho-acd-bom&quot; aria-expanded=&quot;false&quot; aria-controls=&quot;painel-acd-bom&quot;&gt;Prazo de entrega&lt;/button&gt;&lt;div id=&quot;painel-acd-bom&quot; hidden&gt;&lt;p&gt;Cinco dias úteis.&lt;/p&gt;&lt;/div&gt;&lt;script&gt;(function(){var b=document.getElementById(&#x27;gatilho-acd-bom&#x27;),p=document.getElementById(&#x27;painel-acd-bom&#x27;);b.addEventListener(&#x27;click&#x27;,function(){var abrir=b.getAttribute(&#x27;aria-expanded&#x27;)!==&#x27;true&#x27;;b.setAttribute(&#x27;aria-expanded&#x27;,String(abrir));p.hidden=!abrir;});})();&lt;/script&gt;</code></pre>
 <h2 id="ex-3"><span class="etiqueta t-ok">Não precisa corrigir:</span> details e summary</h2>
 <div class="exemplo exemplo-ok" role="group" aria-label="Exemplo ao vivo, não precisa corrigir: details e summary"><details id="detalhes-acd-ok"><summary id="resumo-acd-ok">Prazo de entrega</summary><p>Cinco dias úteis.</p></details></div>
 <h3>Por quê</h3>
@@ -93,7 +97,8 @@ cumpriu: expanded=true mostra o conteudo; false o oculta. Observado: expanded=tr
 cumpriu: Space alterna o estado do botao e o conteudo controlado. Observado: expanded false-&gt;true; conteudo visivel False-&gt;True.
 cumpriu: o foco continua no botao. Observado: summary &#x27;Prazo de entrega&#x27;.</pre>
 <h3>Código</h3>
-<pre>&lt;details id=&quot;detalhes-acd-ok&quot;&gt;&lt;summary id=&quot;resumo-acd-ok&quot;&gt;Prazo de entrega&lt;/summary&gt;&lt;p&gt;Cinco dias úteis.&lt;/p&gt;&lt;/details&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-3" aria-label="Copiar código para a área de transferência: details e summary">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-3"><code>&lt;details id=&quot;detalhes-acd-ok&quot;&gt;&lt;summary id=&quot;resumo-acd-ok&quot;&gt;Prazo de entrega&lt;/summary&gt;&lt;p&gt;Cinco dias úteis.&lt;/p&gt;&lt;/details&gt;</code></pre>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="dialogo.html">Anterior: Diálogo (janela modal)</a>
 <a href="abas.html">Próximo: Abas</a>

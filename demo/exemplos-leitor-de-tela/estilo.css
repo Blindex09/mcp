@@ -74,6 +74,10 @@ footer { border-top: 1px solid var(--borda); padding-block: 1rem 2rem; color: va
 .exemplo [role="option"][aria-selected="true"] { background: var(--link); color: var(--fundo); }
 .exemplo dialog { max-width: 28rem; border: 2px solid var(--borda); border-radius: 8px; background: var(--fundo); color: var(--texto); }
 .exemplo .erro-visual { color: var(--ruim); font-weight: 700; }
+.so-leitor { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.copiar-linha { margin: 0.4rem 0; }
+.copiar-linha .botao { display: inline-block; min-height: 44px; min-width: 44px; padding: 0.55rem 1rem; border: 2px solid var(--link); border-radius: 6px; background: var(--fundo); color: var(--link); font: inherit; cursor: pointer; }
+.copiar-linha .selo { margin-left: 0.75rem; font-weight: 700; color: var(--bom); }
 .exemplo summary { cursor: pointer; min-height: 44px; padding-block: 0.5rem; }
 .exemplo button { min-height: 44px; min-width: 44px; padding: 0.5rem 1rem; font: inherit; }
 

@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Campos de formulário | Leitor de tela: exemplos bons e ruins</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">Leitor de tela: exemplos bons e ruins</p>
@@ -47,7 +49,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe achou: label (Form elements must have labels).</p>
 <h3>Código</h3>
-<pre>&lt;p&gt;Seu e-mail&lt;/p&gt;&lt;input type=&quot;email&quot; name=&quot;email-ruim&quot;&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-1" aria-label="Copiar código para a área de transferência: Campo sem rótulo associado">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-1"><code>&lt;p&gt;Seu e-mail&lt;/p&gt;&lt;input type=&quot;email&quot; name=&quot;email-ruim&quot;&gt;</code></pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Campo com label associado</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Campo com label associado"><label for="email-bom">Seu e-mail</label><br><input type="email" id="email-bom" name="email-bom" autocomplete="email"></div>
 <h3>Por quê</h3>
@@ -60,7 +63,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nenhuma violação (nível AA).</p>
 <h3>Código</h3>
-<pre>&lt;label for=&quot;email-bom&quot;&gt;Seu e-mail&lt;/label&gt;&lt;br&gt;&lt;input type=&quot;email&quot; id=&quot;email-bom&quot; name=&quot;email-bom&quot; autocomplete=&quot;email&quot;&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: Campo com label associado">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-2"><code>&lt;label for=&quot;email-bom&quot;&gt;Seu e-mail&lt;/label&gt;&lt;br&gt;&lt;input type=&quot;email&quot; id=&quot;email-bom&quot; name=&quot;email-bom&quot; autocomplete=&quot;email&quot;&gt;</code></pre>
 <h2 id="ex-3"><span class="etiqueta t-ok">Não precisa corrigir:</span> Label que envolve o campo</h2>
 <div class="exemplo exemplo-ok" role="group" aria-label="Exemplo ao vivo, não precisa corrigir: Label que envolve o campo"><label>Seu nome <input type="text" name="nome-ok" autocomplete="name"></label></div>
 <h3>Por quê</h3>
@@ -73,7 +77,8 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nenhuma violação (nível AA).</p>
 <h3>Código</h3>
-<pre>&lt;label&gt;Seu nome &lt;input type=&quot;text&quot; name=&quot;nome-ok&quot; autocomplete=&quot;name&quot;&gt;&lt;/label&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-3" aria-label="Copiar código para a área de transferência: Label que envolve o campo">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-3"><code>&lt;label&gt;Seu nome &lt;input type=&quot;text&quot; name=&quot;nome-ok&quot; autocomplete=&quot;name&quot;&gt;&lt;/label&gt;</code></pre>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="botoes.html">Anterior: Botões</a>
 <a href="imagens.html">Próximo: Imagens</a>

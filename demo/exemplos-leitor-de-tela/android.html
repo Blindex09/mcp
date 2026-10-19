@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Android (Jetpack Compose) | Leitor de tela: exemplos bons e ruins</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">Leitor de tela: exemplos bons e ruins</p>
@@ -45,11 +47,12 @@
 <h3>O que corrigir</h3>
 <p>Use IconButton com contentDescription que diga a ação (&quot;Curtir&quot;). contentDescription = null só serve quando um texto ao lado já dá o nome.</p>
 <h3>Código</h3>
-<pre>Icon(
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-1" aria-label="Copiar código para a área de transferência: Ícone clicável sem descrição">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-1"><code>Icon(
     imageVector = Icons.Default.Favorite,
     contentDescription = null,
     modifier = Modifier.clickable { curtir() }
-)</pre>
+)</code></pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> IconButton com descrição</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Código de exemplo, exemplo bom: IconButton com descrição"><p>Não executado aqui: este MCP não tem Android. O código segue a documentação do Jetpack Compose (developer.android.com, semântica de acessibilidade, lida em 2026-10-19). Teste com o TalkBack num aparelho ou emulador.</p></div>
 <h3>Por quê</h3>
@@ -57,12 +60,13 @@
 <h3>O que corrigir</h3>
 <p>Nada a corrigir.</p>
 <h3>Código</h3>
-<pre>IconButton(onClick = { curtir() }) {
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: IconButton com descrição">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-2"><code>IconButton(onClick = { curtir() }) {
     Icon(
         imageVector = Icons.Default.Favorite,
         contentDescription = &quot;Curtir&quot;
     )
-}</pre>
+}</code></pre>
 <h2 id="ex-3"><span class="etiqueta t-ruim">Exemplo ruim:</span> Mensagem de status que muda em silêncio</h2>
 <div class="exemplo exemplo-ruim" role="group" aria-label="Código de exemplo, exemplo ruim: Mensagem de status que muda em silêncio"><p>Não executado aqui: este MCP não tem Android. O código segue a documentação do Jetpack Compose (developer.android.com, semântica de acessibilidade, lida em 2026-10-19). Teste com o TalkBack num aparelho ou emulador.</p></div>
 <h3>Por quê</h3>
@@ -70,9 +74,10 @@
 <h3>O que corrigir</h3>
 <p>Marque o texto de status como região viva.</p>
 <h3>Código</h3>
-<pre>var status by remember { mutableStateOf(&quot;&quot;) }
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-3" aria-label="Copiar código para a área de transferência: Mensagem de status que muda em silêncio">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-3"><code>var status by remember { mutableStateOf(&quot;&quot;) }
 Button(onClick = { status = &quot;Salvo com sucesso&quot; }) { Text(&quot;Salvar&quot;) }
-Text(status)</pre>
+Text(status)</code></pre>
 <h2 id="ex-4"><span class="etiqueta t-bom">Exemplo bom:</span> Região viva educada</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Código de exemplo, exemplo bom: Região viva educada"><p>Não executado aqui: este MCP não tem Android. O código segue a documentação do Jetpack Compose (developer.android.com, semântica de acessibilidade, lida em 2026-10-19). Teste com o TalkBack num aparelho ou emulador.</p></div>
 <h3>Por quê</h3>
@@ -80,12 +85,13 @@ Text(status)</pre>
 <h3>O que corrigir</h3>
 <p>Nada a corrigir.</p>
 <h3>Código</h3>
-<pre>var status by remember { mutableStateOf(&quot;&quot;) }
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-4" aria-label="Copiar código para a área de transferência: Região viva educada">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-4"><code>var status by remember { mutableStateOf(&quot;&quot;) }
 Button(onClick = { status = &quot;Salvo com sucesso&quot; }) { Text(&quot;Salvar&quot;) }
 Text(
     text = status,
     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
-)</pre>
+)</code></pre>
 <h2 id="ex-5"><span class="etiqueta t-ruim">Exemplo ruim:</span> Título de seção que é só texto grande</h2>
 <div class="exemplo exemplo-ruim" role="group" aria-label="Código de exemplo, exemplo ruim: Título de seção que é só texto grande"><p>Não executado aqui: este MCP não tem Android. O código segue a documentação do Jetpack Compose (developer.android.com, semântica de acessibilidade, lida em 2026-10-19). Teste com o TalkBack num aparelho ou emulador.</p></div>
 <h3>Por quê</h3>
@@ -93,7 +99,8 @@ Text(
 <h3>O que corrigir</h3>
 <p>Marque como título na semântica.</p>
 <h3>Código</h3>
-<pre>Text(&quot;Pedidos recentes&quot;, style = MaterialTheme.typography.headlineSmall)</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-5" aria-label="Copiar código para a área de transferência: Título de seção que é só texto grande">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-5"><code>Text(&quot;Pedidos recentes&quot;, style = MaterialTheme.typography.headlineSmall)</code></pre>
 <h2 id="ex-6"><span class="etiqueta t-bom">Exemplo bom:</span> Título marcado com heading()</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Código de exemplo, exemplo bom: Título marcado com heading()"><p>Não executado aqui: este MCP não tem Android. O código segue a documentação do Jetpack Compose (developer.android.com, semântica de acessibilidade, lida em 2026-10-19). Teste com o TalkBack num aparelho ou emulador.</p></div>
 <h3>Por quê</h3>
@@ -101,11 +108,12 @@ Text(
 <h3>O que corrigir</h3>
 <p>Nada a corrigir.</p>
 <h3>Código</h3>
-<pre>Text(
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-6" aria-label="Copiar código para a área de transferência: Título marcado com heading()">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-6"><code>Text(
     text = &quot;Pedidos recentes&quot;,
     style = MaterialTheme.typography.headlineSmall,
     modifier = Modifier.semantics { heading() }
-)</pre>
+)</code></pre>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="pilha-angular.html">Anterior: Angular</a>
 <a href="ios.html">Próximo: iOS (SwiftUI e UIKit)</a>

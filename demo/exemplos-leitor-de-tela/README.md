@@ -15,3 +15,6 @@ Cenários interativos: cada exemplo traz o código com o próprio script e a son
 Frameworks: o código de cada componente fica em frameworks/src (react.jsx, vue.js, svelte/*.svelte, angular.ts) e é compilado por frameworks/build.mjs (npm install e node build.mjs dentro de frameworks) para os pacotes app-*.js, que ficam versionados para os testes não dependerem de npm. O gerador mede a página já montada pelo framework e mostra, no Svelte, os avisos de acessibilidade que o próprio compilador emitiu.
 
 Categorias de exemplo: ruim, bom, não precisa corrigir e, quando o MCP não consegue provar o defeito aqui, "depende do navegador, não medido aqui". Mobile fica sempre como código e regra, com a frase "Não executado aqui".
+
+Copiar código: todo bloco de código tem, logo abaixo do título Código, o botão "Copiar código para a área de transferência" (copiar.js). Ele copia o texto do bloco, mantém o foco no botão, mostra o selo "Código copiado" enquanto o foco fica ali e avisa o leitor de tela numa região de status que já está na página; se o navegador recusar, avisa que não foi possível e orienta a copiar à mão. O nome acessível do botão começa pelo texto visível e termina com o título do exemplo, para os vários botões da página não terem o mesmo nome.
+

@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Erro de formulário | Leitor de tela: exemplos bons e ruins</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">Leitor de tela: exemplos bons e ruins</p>
@@ -53,7 +55,8 @@ NÃO cumpriu: o texto do erro esta ligado ao campo (aria-describedby). Observado
 NÃO cumpriu: o foco vai ao primeiro campo com erro (ou a um resumo de erros). Observado: button &#x27;Enviar&#x27;.
 NÃO cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foco. Observado: anuncios=[] regioes=[].</pre>
 <h3>Código</h3>
-<pre>&lt;form id=&quot;form-ruim&quot; novalidate&gt;&lt;label for=&quot;email-ruim&quot;&gt;E-mail&lt;/label&gt;&lt;input id=&quot;email-ruim&quot; type=&quot;email&quot; required&gt; &lt;span id=&quot;msg-ruim&quot; class=&quot;erro-visual&quot;&gt;&lt;/span&gt;&lt;p&gt;&lt;button type=&quot;submit&quot; id=&quot;enviar-form-ruim&quot;&gt;Enviar&lt;/button&gt;&lt;/p&gt;&lt;/form&gt;&lt;script&gt;(function(){var f=document.getElementById(&#x27;form-ruim&#x27;);f.addEventListener(&#x27;submit&#x27;,function(e){e.preventDefault();document.getElementById(&#x27;msg-ruim&#x27;).textContent=document.getElementById(&#x27;email-ruim&#x27;).value?&#x27;&#x27;:&#x27;Informe o e-mail.&#x27;;});})();&lt;/script&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-1" aria-label="Copiar código para a área de transferência: Texto vermelho solto">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-1"><code>&lt;form id=&quot;form-ruim&quot; novalidate&gt;&lt;label for=&quot;email-ruim&quot;&gt;E-mail&lt;/label&gt;&lt;input id=&quot;email-ruim&quot; type=&quot;email&quot; required&gt; &lt;span id=&quot;msg-ruim&quot; class=&quot;erro-visual&quot;&gt;&lt;/span&gt;&lt;p&gt;&lt;button type=&quot;submit&quot; id=&quot;enviar-form-ruim&quot;&gt;Enviar&lt;/button&gt;&lt;/p&gt;&lt;/form&gt;&lt;script&gt;(function(){var f=document.getElementById(&#x27;form-ruim&#x27;);f.addEventListener(&#x27;submit&#x27;,function(e){e.preventDefault();document.getElementById(&#x27;msg-ruim&#x27;).textContent=document.getElementById(&#x27;email-ruim&#x27;).value?&#x27;&#x27;:&#x27;Informe o e-mail.&#x27;;});})();&lt;/script&gt;</code></pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Campo marcado, erro ligado e foco no campo</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Campo marcado, erro ligado e foco no campo"><form id="form-bom" novalidate><label for="email-bom">E-mail</label><input id="email-bom" type="email" required aria-describedby="msg-bom"> <span id="msg-bom" class="erro-visual" role="alert"></span><p><button type="submit" id="enviar-form-bom">Enviar</button></p></form><script>(function(){var f=document.getElementById('form-bom'),c=document.getElementById('email-bom'),m=document.getElementById('msg-bom');f.addEventListener('submit',function(e){e.preventDefault();if(!c.value){c.setAttribute('aria-invalid','true');m.textContent='Informe o e-mail.';c.focus();}else{c.removeAttribute('aria-invalid');m.textContent='';}});})();</script></div>
 <h3>Por quê</h3>
@@ -74,7 +77,8 @@ cumpriu: o texto do erro esta ligado ao campo (aria-describedby). Observado: 1 d
 cumpriu: o foco vai ao primeiro campo com erro (ou a um resumo de erros). Observado: input &#x27;E-mail&#x27;.
 cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foco. Observado: anuncios=[&#x27;Informe o e-mail.&#x27;] regioes=[&#x27;Informe o e-mail.&#x27;].</pre>
 <h3>Código</h3>
-<pre>&lt;form id=&quot;form-bom&quot; novalidate&gt;&lt;label for=&quot;email-bom&quot;&gt;E-mail&lt;/label&gt;&lt;input id=&quot;email-bom&quot; type=&quot;email&quot; required aria-describedby=&quot;msg-bom&quot;&gt; &lt;span id=&quot;msg-bom&quot; class=&quot;erro-visual&quot; role=&quot;alert&quot;&gt;&lt;/span&gt;&lt;p&gt;&lt;button type=&quot;submit&quot; id=&quot;enviar-form-bom&quot;&gt;Enviar&lt;/button&gt;&lt;/p&gt;&lt;/form&gt;&lt;script&gt;(function(){var f=document.getElementById(&#x27;form-bom&#x27;),c=document.getElementById(&#x27;email-bom&#x27;),m=document.getElementById(&#x27;msg-bom&#x27;);f.addEventListener(&#x27;submit&#x27;,function(e){e.preventDefault();if(!c.value){c.setAttribute(&#x27;aria-invalid&#x27;,&#x27;true&#x27;);m.textContent=&#x27;Informe o e-mail.&#x27;;c.focus();}else{c.removeAttribute(&#x27;aria-invalid&#x27;);m.textContent=&#x27;&#x27;;}});})();&lt;/script&gt;</pre>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: Campo marcado, erro ligado e foco no campo">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-2"><code>&lt;form id=&quot;form-bom&quot; novalidate&gt;&lt;label for=&quot;email-bom&quot;&gt;E-mail&lt;/label&gt;&lt;input id=&quot;email-bom&quot; type=&quot;email&quot; required aria-describedby=&quot;msg-bom&quot;&gt; &lt;span id=&quot;msg-bom&quot; class=&quot;erro-visual&quot; role=&quot;alert&quot;&gt;&lt;/span&gt;&lt;p&gt;&lt;button type=&quot;submit&quot; id=&quot;enviar-form-bom&quot;&gt;Enviar&lt;/button&gt;&lt;/p&gt;&lt;/form&gt;&lt;script&gt;(function(){var f=document.getElementById(&#x27;form-bom&#x27;),c=document.getElementById(&#x27;email-bom&#x27;),m=document.getElementById(&#x27;msg-bom&#x27;);f.addEventListener(&#x27;submit&#x27;,function(e){e.preventDefault();if(!c.value){c.setAttribute(&#x27;aria-invalid&#x27;,&#x27;true&#x27;);m.textContent=&#x27;Informe o e-mail.&#x27;;c.focus();}else{c.removeAttribute(&#x27;aria-invalid&#x27;);m.textContent=&#x27;&#x27;;}});})();&lt;/script&gt;</code></pre>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="combobox.html">Anterior: Campo com lista de opções (combobox)</a>
 <a href="mudanca-de-tela.html">Próximo: Mudança de tela em aplicação de uma página só</a>

@@ -104,6 +104,10 @@ footer { border-top: 1px solid var(--borda); padding-block: 1rem 2rem; color: va
 .exemplo [role="option"][aria-selected="true"] { background: var(--link); color: var(--fundo); }
 .exemplo dialog { max-width: 28rem; border: 2px solid var(--borda); border-radius: 8px; background: var(--fundo); color: var(--texto); }
 .exemplo .erro-visual { color: var(--ruim); font-weight: 700; }
+.so-leitor { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.copiar-linha { margin: 0.4rem 0; }
+.copiar-linha .botao { display: inline-block; min-height: 44px; min-width: 44px; padding: 0.55rem 1rem; border: 2px solid var(--link); border-radius: 6px; background: var(--fundo); color: var(--link); font: inherit; cursor: pointer; }
+.copiar-linha .selo { margin-left: 0.75rem; font-weight: 700; color: var(--bom); }
 .exemplo summary { cursor: pointer; min-height: 44px; padding-block: 0.5rem; }
 .exemplo button { min-height: 44px; min-width: 44px; padding: 0.5rem 1rem; font: inherit; }
 
@@ -117,6 +121,52 @@ footer { border-top: 1px solid var(--borda); padding-block: 1rem 2rem; color: va
   nav a[aria-current="page"] { border-bottom-color: Highlight; }
   .exemplo, .neste-texto, pre { border-color: CanvasText; }
 }
+"""
+
+
+COPIAR_JS = """\
+// Botao "Copiar codigo": leva o texto do bloco de codigo para a area de transferencia e avisa uma vez, numa regiao de status que ja esta na pagina.
+(function () {
+  var aviso = document.getElementById('aviso-copia');
+  function dizer(texto) {
+    aviso.textContent = '';
+    requestAnimationFrame(function () { aviso.textContent = texto; });
+  }
+  function copiar(texto) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(texto);
+    return new Promise(function (ok, falha) {
+      var area = document.createElement('textarea');
+      area.value = texto;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      var copiou = false;
+      try { copiou = document.execCommand('copy'); } catch (e) { copiou = false; }
+      document.body.removeChild(area);
+      if (copiou) ok(); else falha(new Error('copy'));
+    });
+  }
+  function esconderSelos() {
+    Array.prototype.forEach.call(document.querySelectorAll('.selo'), function (s) { s.hidden = true; });
+  }
+  document.addEventListener('click', function (e) {
+    var botao = e.target.closest('[data-copiar]');
+    if (!botao) return;
+    var alvo = document.getElementById(botao.getAttribute('data-copiar'));
+    esconderSelos();
+    copiar(alvo.textContent).then(function () {
+      botao.nextElementSibling.hidden = false;
+      dizer('Código copiado');
+    }, function () {
+      dizer('Não foi possível copiar o código. Selecione o texto do bloco e copie com Control mais C.');
+    });
+  });
+  document.addEventListener('focusout', function (e) {
+    if (e.target.closest && e.target.closest('[data-copiar]')) esconderSelos();
+  });
+})();
 """
 
 
@@ -293,9 +343,11 @@ def cabecalho(titulo: str, atual: str | None) -> str:
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(titulo)}</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">{esc(NOME_DO_SITE)}</p>
@@ -347,6 +399,16 @@ def texto_dos_avisos(avisos: list[str]) -> str:
     return NL.join(avisos) if avisos else "O compilador não emitiu nenhum aviso de acessibilidade para este componente."
 
 
+def bloco_codigo(ident: str, titulo: str, texto: str) -> str:
+    """Titulo Codigo, o botao de copiar (copiar.js) e o bloco. O nome do botao diz de qual exemplo e o codigo."""
+    return (
+        f"<h3>Código</h3>{NL}"
+        f'<p class="copiar-linha"><button type="button" class="botao" data-copiar="{ident}" aria-label="Copiar código para a área de transferência: {esc(titulo)}">'
+        f'Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>{NL}'
+        f'<pre id="{ident}"><code>{esc(texto)}</code></pre>{NL}'
+    )
+
+
 def bloco_nao_executado(ex: dict[str, Any], i: int) -> str:
     tipo = ex["tipo"]
     return (
@@ -354,7 +416,7 @@ def bloco_nao_executado(ex: dict[str, Any], i: int) -> str:
         f'<div class="exemplo exemplo-{tipo}" role="group" aria-label="Código de exemplo, {esc(ROTULO[tipo].lower())}: {esc(ex["titulo"])}"><p>{esc(ex["nao_executado"])}</p></div>\n'
         f'<h3>Por quê</h3>\n<p>{esc(ex["porque"])}</p>\n'
         f'<h3>O que corrigir</h3>\n<p>{esc(ex["corrigir"])}</p>\n'
-        f'<h3>Código</h3>\n<pre>{esc(ex["codigo"])}</pre>\n'
+        + bloco_codigo(f"codigo-{i + 1}", ex["titulo"], ex["codigo"])
     )
 
 
@@ -377,7 +439,7 @@ def bloco_exemplo(cenario: dict[str, Any], i: int, medida: dict[str, Any]) -> st
             f'<h3>Avisos do compilador do Svelte (medidos)</h3>\n<pre>{esc(texto_dos_avisos(medida["avisos_compilador"]))}</pre>\n'
             if "avisos_compilador" in medida else ""
         )
-        + f'<h3>Código</h3>\n<pre>{esc(ex.get("codigo") or ex["html"])}</pre>\n'
+        + bloco_codigo(f"codigo-{i + 1}", ex["titulo"], ex.get("codigo") or ex["html"])
     )
 
 
@@ -421,6 +483,7 @@ def pagina_inicial() -> str:
 def main() -> int:
     medidas = asyncio.run(medir_todos())
     (HERE / "estilo.css").write_text(ESTILO, encoding="utf-8")
+    (HERE / "copiar.js").write_text(COPIAR_JS, encoding="utf-8")
     (HERE / "index.html").write_text(pagina_inicial(), encoding="utf-8")
     for nome, pagina in ROTAS.items():
         (HERE / f"{nome}.html").write_text(pagina, encoding="utf-8")

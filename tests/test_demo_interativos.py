@@ -194,3 +194,62 @@ async def test_the_site_navigation_is_grouped_so_the_keyboard_does_not_cross_31_
     finally:
         await SESSION.close()
     assert total >= 31 and visiveis <= 16, (pagina, visiveis, total)
+
+
+def test_every_code_block_has_a_copy_button_with_a_matching_target():
+    """Pedido do dono: sempre que for codigo, o botao 'Copiar codigo para a area de transferencia' esta presente (abaixo do titulo Codigo)."""
+    paginas = [p for p in sorted(DEMO.glob("*.html")) if "<h3>Código</h3>" in p.read_text(encoding="utf-8")]
+    assert len(paginas) >= 25
+    for pagina in paginas:
+        html = pagina.read_text(encoding="utf-8")
+        titulos = html.count("<h3>Código</h3>")
+        botoes = re.findall(r'<button type="button" class="botao" data-copiar="(codigo-\d+)" aria-label="Copiar código para a área de transferência: [^"]+">Copiar código para a área de transferência</button>', html)
+        assert len(botoes) == titulos, pagina.name
+        assert len(set(botoes)) == titulos and all(f'<pre id="{b}"><code>' in html for b in botoes), pagina.name
+        assert '<script src="copiar.js" defer></script>' in html and 'id="aviso-copia" role="status"' in html, pagina.name
+    assert "navigator.clipboard.writeText" in (DEMO / "copiar.js").read_text(encoding="utf-8")
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("pagina", ["dialogo", "pilha-react", "android"])
+async def test_the_copy_button_really_copies_the_code_by_keyboard_and_announces_it(pagina):
+    """Copia de verdade: area de transferencia real do Chromium (permissao concedida), tecla Enter, texto identico ao bloco e aviso na regiao de status."""
+    from playwright.async_api import async_playwright
+
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch()
+        try:
+            ctx = await browser.new_context(permissions=["clipboard-read", "clipboard-write"])
+            page = await ctx.new_page()
+            await page.goto((DEMO / f"{pagina}.html").as_uri())
+            botao = page.locator("[data-copiar]").nth(1)
+            alvo = await botao.get_attribute("data-copiar")
+            esperado = await page.evaluate("(id) => document.getElementById(id).textContent", alvo)
+            await botao.focus()
+            await page.keyboard.press("Enter")
+            await page.wait_for_function("() => document.getElementById('aviso-copia').textContent === 'Código copiado'")
+            copiado = await page.evaluate("() => navigator.clipboard.readText()")
+            assert copiado.replace(chr(13) + chr(10), chr(10)) == esperado and len(esperado) > 20  # o Windows grava as quebras de linha como CRLF na area de transferencia
+            assert await page.evaluate("(id) => document.querySelector('[data-copiar=\"' + id + '\"]').nextElementSibling.hidden", alvo) is False  # selo visivel
+            assert await page.evaluate("() => document.activeElement.dataset.copiar") == alvo  # o foco continua no botao
+            await page.keyboard.press("Tab")
+            assert await page.evaluate("() => document.querySelectorAll('.selo:not([hidden])').length") == 0  # o selo some quando o foco sai
+        finally:
+            await browser.close()
+
+
+@pytest.mark.slow
+async def test_the_copy_button_says_when_the_browser_refuses_to_copy():
+    from playwright.async_api import async_playwright
+
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch()
+        try:
+            page = await (await browser.new_context()).new_page()
+            await page.goto((DEMO / "dialogo.html").as_uri())
+            await page.evaluate("() => { Object.defineProperty(navigator, 'clipboard', { value: { writeText: () => Promise.reject(new Error('negado')) } }); }")
+            await page.locator("[data-copiar]").first.click()
+            await page.wait_for_function("() => document.getElementById('aviso-copia').textContent.startsWith('Não foi possível')")
+            assert await page.evaluate("() => document.querySelectorAll('.selo:not([hidden])').length") == 0  # nada de selo de sucesso
+        finally:
+            await browser.close()

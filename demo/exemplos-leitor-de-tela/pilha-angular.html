@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Angular | Leitor de tela: exemplos bons e ruins</title>
 <link rel="stylesheet" href="estilo.css">
+<script src="copiar.js" defer></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div id="aviso-copia" role="status" class="so-leitor"></div>
 <header>
 <div class="coluna">
 <p class="marca">Leitor de tela: exemplos bons e ruins</p>
@@ -60,7 +62,8 @@ NÃO cumpriu: o foco continua no botao. Observado: nenhum elemento (corpo da pag
 NÃO cumpriu: Space alterna o estado do botao e o conteudo controlado. Observado: expanded None-&gt;None; conteudo visivel None-&gt;None.
 NÃO cumpriu: o foco continua no botao. Observado: nenhum elemento (corpo da pagina).</pre>
 <h3>Código</h3>
-<pre>@Component({
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-1" aria-label="Copiar código para a área de transferência: Acordeão em Angular: como não fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-1"><code>@Component({
   selector: &#x27;acordeao-ruim&#x27;,
   standalone: true,
   // div com (click): sem papel, sem foco, sem Enter/Espaço e sem estado.
@@ -69,7 +72,7 @@ NÃO cumpriu: o foco continua no botao. Observado: nenhum elemento (corpo da pag
     @if (aberto()) { &lt;p [id]=&quot;k + &#x27;-painel&#x27;&quot;&gt;Cinco dias úteis.&lt;/p&gt; }
   &lt;/div&gt;`,
 })
-class AcordeaoRuim { @Input() k = &#x27;acordeao-ruim&#x27;; aberto = signal(false); }</pre>
+class AcordeaoRuim { @Input() k = &#x27;acordeao-ruim&#x27;; aberto = signal(false); }</code></pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Acordeão em Angular: como fazer</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Acordeão em Angular: como fazer"><div data-exemplo="acordeao-bom"></div></div>
 <h3>Por quê</h3>
@@ -89,7 +92,8 @@ cumpriu: expanded=true mostra o conteudo; false o oculta. Observado: expanded=tr
 cumpriu: Space alterna o estado do botao e o conteudo controlado. Observado: expanded false-&gt;true; conteudo visivel False-&gt;True.
 cumpriu: o foco continua no botao. Observado: button &#x27;Prazo de entrega&#x27;.</pre>
 <h3>Código</h3>
-<pre>@Component({
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: Acordeão em Angular: como fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-2"><code>@Component({
   selector: &#x27;acordeao-bom&#x27;,
   standalone: true,
   template: `&lt;div&gt;
@@ -97,7 +101,7 @@ cumpriu: o foco continua no botao. Observado: button &#x27;Prazo de entrega&#x27
     &lt;div [id]=&quot;k + &#x27;-painel&#x27;&quot; [hidden]=&quot;!aberto()&quot;&gt;&lt;p&gt;Cinco dias úteis.&lt;/p&gt;&lt;/div&gt;
   &lt;/div&gt;`,
 })
-class AcordeaoBom { @Input() k = &#x27;acordeao-bom&#x27;; aberto = signal(false); }</pre>
+class AcordeaoBom { @Input() k = &#x27;acordeao-bom&#x27;; aberto = signal(false); }</code></pre>
 <h2 id="ex-3"><span class="etiqueta t-ruim">Exemplo ruim:</span> Diálogo em Angular: como não fazer</h2>
 <div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Diálogo em Angular: como não fazer"><div data-exemplo="dialogo-ruim"></div></div>
 <h3>Por quê</h3>
@@ -112,7 +116,8 @@ class AcordeaoBom { @Input() k = &#x27;acordeao-bom&#x27;; aberto = signal(false
 <pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Excluir projeto&#x27;.
 NÃO cumpriu: Enter no gatilho abre um dialogo visivel. Observado: nenhum dialogo (papel dialog/alertdialog ou &lt;dialog open&gt;) visivel depois do Enter.</pre>
 <h3>Código</h3>
-<pre>@Component({
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-3" aria-label="Copiar código para a área de transferência: Diálogo em Angular: como não fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-3"><code>@Component({
   selector: &#x27;dialogo-ruim&#x27;,
   standalone: true,
   // Aparece na tela, mas não é um diálogo: sem papel, sem nome, sem foco, sem Escape.
@@ -121,7 +126,7 @@ NÃO cumpriu: Enter no gatilho abre um dialogo visivel. Observado: nenhum dialog
     @if (aberto()) { &lt;div class=&quot;caixa-falsa&quot;&gt;&lt;p&gt;Excluir este projeto?&lt;/p&gt;&lt;button type=&quot;button&quot; (click)=&quot;aberto.set(false)&quot;&gt;Cancelar&lt;/button&gt;&lt;/div&gt; }
   &lt;/div&gt;`,
 })
-class DialogoRuim { @Input() k = &#x27;dialogo-ruim&#x27;; aberto = signal(false); }</pre>
+class DialogoRuim { @Input() k = &#x27;dialogo-ruim&#x27;; aberto = signal(false); }</code></pre>
 <h2 id="ex-4"><span class="etiqueta t-bom">Exemplo bom:</span> Diálogo em Angular: como fazer</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Diálogo em Angular: como fazer"><div data-exemplo="dialogo-bom"></div></div>
 <h3>Por quê</h3>
@@ -142,7 +147,8 @@ cumpriu: Tab circula so entre os controles do dialogo (o foco nao vaza para a pa
 cumpriu: Escape fecha o dialogo. Observado: fechou.
 cumpriu: ao fechar, o foco volta ao elemento que abriu o dialogo. Observado: button &#x27;Excluir projeto&#x27;.</pre>
 <h3>Código</h3>
-<pre>@Component({
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-4" aria-label="Copiar código para a área de transferência: Diálogo em Angular: como fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-4"><code>@Component({
   selector: &#x27;dialogo-bom&#x27;,
   standalone: true,
   // &lt;dialog&gt; + showModal(): papel, foco preso, Escape e devolução do foco vêm do navegador.
@@ -159,7 +165,7 @@ class DialogoBom {
   private raiz: HTMLElement = inject(ElementRef).nativeElement;
   abrir() { (this.raiz.querySelector(&#x27;dialog&#x27;) as HTMLDialogElement).showModal(); }
   fechar() { (this.raiz.querySelector(&#x27;dialog&#x27;) as HTMLDialogElement).close(); }
-}</pre>
+}</code></pre>
 <h2 id="ex-5"><span class="etiqueta t-ruim">Exemplo ruim:</span> Erro de formulário em Angular: como não fazer</h2>
 <div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Erro de formulário em Angular: como não fazer"><div data-exemplo="erro-ruim"></div></div>
 <h3>Por quê</h3>
@@ -179,7 +185,8 @@ NÃO cumpriu: o texto do erro esta ligado ao campo (aria-describedby). Observado
 NÃO cumpriu: o foco vai ao primeiro campo com erro (ou a um resumo de erros). Observado: button &#x27;Enviar&#x27;.
 NÃO cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foco. Observado: anuncios=[] regioes=[].</pre>
 <h3>Código</h3>
-<pre>@Component({
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-5" aria-label="Copiar código para a área de transferência: Erro de formulário em Angular: como não fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-5"><code>@Component({
   selector: &#x27;erro-ruim&#x27;,
   standalone: true,
   // Texto vermelho solto: o campo não é marcado, a frase não está ligada a ele, o foco não se move.
@@ -197,7 +204,7 @@ class ErroRuim {
     const campo = (e.target as HTMLFormElement).elements.namedItem(&#x27;email&#x27;) as HTMLInputElement;
     this.mensagem.set(campo.value ? &#x27;&#x27; : &#x27;Informe o e-mail.&#x27;);
   }
-}</pre>
+}</code></pre>
 <h2 id="ex-6"><span class="etiqueta t-bom">Exemplo bom:</span> Erro de formulário em Angular: como fazer</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Erro de formulário em Angular: como fazer"><div data-exemplo="erro-bom"></div></div>
 <h3>Por quê</h3>
@@ -218,7 +225,8 @@ cumpriu: o texto do erro esta ligado ao campo (aria-describedby). Observado: 1 d
 cumpriu: o foco vai ao primeiro campo com erro (ou a um resumo de erros). Observado: input &#x27;E-mail&#x27;.
 cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foco. Observado: anuncios=[&#x27;Informe o e-mail.&#x27;] regioes=[&#x27;Informe o e-mail.&#x27;].</pre>
 <h3>Código</h3>
-<pre>@Component({
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-6" aria-label="Copiar código para a área de transferência: Erro de formulário em Angular: como fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-6"><code>@Component({
   selector: &#x27;erro-bom&#x27;,
   standalone: true,
   template: `&lt;form novalidate (submit)=&quot;enviar($event)&quot;&gt;
@@ -238,7 +246,7 @@ class ErroBom {
     this.mensagem.set(&#x27;Informe o e-mail.&#x27;);
     campo.focus(); // o foco vai ao campo com erro
   }
-}</pre>
+}</code></pre>
 <h2 id="ex-7"><span class="etiqueta t-ruim">Exemplo ruim:</span> Mensagem de status em Angular: como não fazer</h2>
 <div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Mensagem de status em Angular: como não fazer"><div data-exemplo="status-ruim"></div></div>
 <h3>Por quê</h3>
@@ -255,7 +263,8 @@ cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no co
 cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[&#x27;Salvo com sucesso&#x27;]; foco movido=False; conteudo novo na arvore=1 linhas.
 NÃO cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regiao e texto juntos nao e confiavel). Observado: a regiao nasceu junto com o texto.</pre>
 <h3>Código</h3>
-<pre>@Component({
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-7" aria-label="Copiar código para a área de transferência: Mensagem de status em Angular: como não fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-7"><code>@Component({
   selector: &#x27;status-ruim&#x27;,
   standalone: true,
   // @if: a região viva só existe quando há texto. Nasce junto com a mensagem e muitos leitores de tela não falam.
@@ -264,7 +273,7 @@ NÃO cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir 
     @if (salvo()) { &lt;div role=&quot;status&quot;&gt;Salvo com sucesso&lt;/div&gt; }
   &lt;/div&gt;`,
 })
-class StatusRuim { @Input() k = &#x27;status-ruim&#x27;; salvo = signal(false); }</pre>
+class StatusRuim { @Input() k = &#x27;status-ruim&#x27;; salvo = signal(false); }</code></pre>
 <h2 id="ex-8"><span class="etiqueta t-bom">Exemplo bom:</span> Mensagem de status em Angular: como fazer</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Mensagem de status em Angular: como fazer"><div data-exemplo="status-bom"></div></div>
 <h3>Por quê</h3>
@@ -282,7 +291,8 @@ cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no co
 cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[&#x27;Salvo com sucesso&#x27;]; foco movido=False; conteudo novo na arvore=1 linhas.
 cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regiao e texto juntos nao e confiavel). Observado: a regiao ja existia.</pre>
 <h3>Código</h3>
-<pre>@Component({
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-8" aria-label="Copiar código para a área de transferência: Mensagem de status em Angular: como fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-8"><code>@Component({
   selector: &#x27;status-bom&#x27;,
   standalone: true,
   // A região fica sempre na página; só o texto muda.
@@ -291,7 +301,7 @@ cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regia
     &lt;div role=&quot;status&quot;&gt;{{ salvo() ? &#x27;Salvo com sucesso&#x27; : &#x27;&#x27; }}&lt;/div&gt;
   &lt;/div&gt;`,
 })
-class StatusBom { @Input() k = &#x27;status-bom&#x27;; salvo = signal(false); }</pre>
+class StatusBom { @Input() k = &#x27;status-bom&#x27;; salvo = signal(false); }</code></pre>
 <h2 id="ex-9"><span class="etiqueta t-ruim">Exemplo ruim:</span> Mudança de tela em Angular: como não fazer</h2>
 <div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Mudança de tela em Angular: como não fazer"><p><a href="angular-rota-ruim.html">Abrir a aplicação de exemplo (ruim)</a></p></div>
 <h3>Por quê</h3>
@@ -309,7 +319,8 @@ class StatusBom { @Input() k = &#x27;status-bom&#x27;; salvo = signal(false); }<
 cumpriu: o foco nao fica perdido no corpo da pagina. Observado: button &#x27;Contato&#x27;.
 NÃO cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido para o novo conteudo ou carga de pagina nova. Observado: anuncio=False; foco mudou=False; mesmo documento=True.</pre>
 <h3>Código</h3>
-<pre>@Component({
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-9" aria-label="Copiar código para a área de transferência: Mudança de tela em Angular: como não fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-9"><code>@Component({
   selector: &#x27;rota-ruim&#x27;,
   standalone: true,
   // O conteúdo troca, mas o título da aba, o foco e o aviso continuam como estavam.
@@ -321,7 +332,7 @@ NÃO cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido p
     &lt;/main&gt;
   &lt;/div&gt;`,
 })
-class RotaRuim { @Input() k = &#x27;rota-ruim&#x27;; tela = signal(&#x27;inicio&#x27;); }</pre>
+class RotaRuim { @Input() k = &#x27;rota-ruim&#x27;; tela = signal(&#x27;inicio&#x27;); }</code></pre>
 <h2 id="ex-10"><span class="etiqueta t-bom">Exemplo bom:</span> Mudança de tela em Angular: como fazer</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Mudança de tela em Angular: como fazer"><p><a href="angular-rota-bom.html">Abrir a aplicação de exemplo (bom)</a></p></div>
 <h3>Por quê</h3>
@@ -339,7 +350,8 @@ class RotaRuim { @Input() k = &#x27;rota-ruim&#x27;; tela = signal(&#x27;inicio&
 cumpriu: o foco nao fica perdido no corpo da pagina. Observado: h1 &#x27;Contato&#x27;.
 cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido para o novo conteudo ou carga de pagina nova. Observado: anuncio=True; foco mudou=True; mesmo documento=True.</pre>
 <h3>Código</h3>
-<pre>@Component({
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-10" aria-label="Copiar código para a área de transferência: Mudança de tela em Angular: como fazer">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<pre id="codigo-10"><code>@Component({
   selector: &#x27;rota-bom&#x27;,
   standalone: true,
   template: `&lt;div&gt;
@@ -364,7 +376,7 @@ class RotaBom {
       void this.anunciador.announce(&#x27;Página Contato carregada&#x27;, &#x27;polite&#x27;);
     });
   }
-}</pre>
+}</code></pre>
 <script src="app-angular.js"></script>
 <nav class="entre" aria-label="Entre os cenários">
 <a href="pilha-svelte.html">Anterior: Svelte</a>

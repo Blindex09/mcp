@@ -488,3 +488,8 @@ Não confirmado ou não feito, declarado:
 - Portão da regra 15 (guias e textos dos fluxos): sem modelo no servidor, só pode ser medido no cliente. Pendente.
 - NVDA real e a VM: dependem do dono (fone fora e VM pronta).
 - Prompts no Codex: suporte não confirmado nas páginas oficiais.
+
+### Adendo à seção 25: botão de copiar código no site de exemplos
+
+Pedido do dono: em todo bloco de código da página de exemplos, o botão "Copiar código para a área de transferência" deve estar presente e funcionar. Feito em `construir.py` e `copiar.js`: o botão fica abaixo do título Código, o nome acessível começa pelo texto visível e termina com o título do exemplo, a cópia usa `navigator.clipboard` (com reserva por `execCommand`), o foco fica no botão, o selo "Código copiado" aparece enquanto o foco está ali e a região de status que já existe na página avisa o leitor de tela (e avisa também quando o navegador recusa). Provas: teste que confere botão e alvo em todas as páginas com código, e teste que copia de verdade na área de transferência do Chromium por teclado nas páginas de HTML, de framework e de Android (o Windows grava as quebras de linha como CRLF; o teste normaliza), mais o caso de recusa. Axe em claro e escuro e tamanho de alvo conferidos nas páginas.
+

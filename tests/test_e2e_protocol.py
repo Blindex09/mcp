@@ -142,6 +142,11 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         assert [u.replace(base, "") for u in crawl["skipped"]["robots_disallowed"]] == ["/privado/x.html"]
         assert crawl["site_facts"]["duplicate_titles"][0]["title"] == "Página" and any("sobre" in u for u in crawl["site_facts"]["pages_without_lang"])
 
+        # ---------- verificacao de comportamento em UMA chamada (cliente que nao mantem sessao)
+        one = js(await call("a11y_check_page", url=index, probes=json.dumps([{"kind": "disclosure", "target": "css:button"}])))
+        assert one["tab_walk"]["stops"] and one["elements"] and all(e["css"] for e in one["elements"]) and one["probes"][0]["kind"] == "disclosure"
+        assert "leitor de tela real" in one["not_verified"]
+
         # ---------- sessao: olhos, maos e cobertura
         opened = js(await call("a11y_open", url=index, persona="default"))
         assert opened["mutations"] == "permitidas" and opened["browser"] == "chromium"

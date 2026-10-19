@@ -61,7 +61,7 @@ async def test_server_exposes_only_accessibility_tools() -> None:
         # editor de arquivos do projeto da pessoa
         "a11y_set_workspace", "a11y_read_file", "a11y_edit_file", "a11y_approve_edit", "a11y_undo_edit",
         # sondas de comportamento, achados com evidencia, execucoes salvas
-        "a11y_probe", "a11y_finding", "a11y_trace", "a11y_report", "a11y_runs", "a11y_export", "a11y_diff",
+        "a11y_probe", "a11y_check_page", "a11y_finding", "a11y_trace", "a11y_report", "a11y_runs", "a11y_export", "a11y_diff",
     }
     assert not any("skill" in n for n in names)
     # nenhuma ferramenta depende de modelo: as de antes (busca por modelo, usuario autonomo, revisao autonoma) nao existem mais

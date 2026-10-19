@@ -47,12 +47,25 @@ function (scope) {
   const pop = controlled[0];
   const popItems = pop ? Array.from(pop.querySelectorAll('[role],a,button,li,option')) : [];
   const cs = getComputedStyle(el); const r = el.getBoundingClientRect();
+  // Seletor CSS curto e unico dentro da propria raiz (id quando e' unico; senao o caminho por tag e posicao). Serve de alvo `css:` numa chamada futura.
+  const cssOf = (e) => {
+    const esc = (t) => (window.CSS && CSS.escape ? CSS.escape(t) : String(t).replace(/[^a-zA-Z0-9_-]/g, '\$&'));
+    const unique = (sel) => { try { return root.querySelectorAll(sel).length === 1; } catch (x) { return false; } };
+    if (e.id && unique('#' + esc(e.id))) return '#' + esc(e.id);
+    const parts = [];
+    for (let n = e; n && n.nodeType === 1; n = n.parentElement) {
+      if (n.id && unique('#' + esc(n.id))) { parts.unshift('#' + esc(n.id)); break; }
+      const same = n.parentElement ? Array.from(n.parentElement.children).filter((c) => c.tagName === n.tagName) : [n];
+      parts.unshift(n.tagName.toLowerCase() + (same.length > 1 ? ':nth-of-type(' + (same.indexOf(n) + 1) + ')' : ''));
+    }
+    return parts.join(' > ');
+  };
   const isPw = el.tagName === 'INPUT' && el.type === 'password';
   let hover = null; for (const h of hoverRules()) { try { if (el.matches(h.trigger)) { hover = h.rule; break; } } catch (e) {} }
   const listeners = el.__a11yL ? Array.from(el.__a11yL) : [];
   const handlerProps = ['onclick', 'onmousedown', 'onmouseup', 'onpointerdown', 'ontouchstart', 'onkeydown'].filter(p => typeof el[p] === 'function');
   return {
-    id: g('data-a11y-id'), tag: el.tagName.toLowerCase(), type: g('type'), role_attr: g('role'),
+    id: g('data-a11y-id'), css: cssOf(el), tag: el.tagName.toLowerCase(), type: g('type'), role_attr: g('role'),
     where: {frame_url: (doc.URL || '').slice(0, 80), in_shadow: root instanceof ShadowRoot, shadow_host: root instanceof ShadowRoot ? root.host.tagName.toLowerCase() : null},
     attrs: {aria_label: g('aria-label'), labelledby: textOf(byIds(g('aria-labelledby'))) || null,
       label: el.labels && el.labels.length ? textOf(Array.from(el.labels)) : null, placeholder: g('placeholder'), title: g('title'), alt: g('alt')},

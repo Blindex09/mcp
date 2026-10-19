@@ -36,6 +36,14 @@ The component contracts (what each widget must and must not do, and what the scr
 8. Report: `a11y_finding` with criterion, severity, element and evidence (cite the trace numbers), then `a11y_report` and
    `a11y_export`. Always include `a11y_coverage` and what was NOT verified.
 
+### 2b. If your client cannot keep a session open between calls
+
+Some clients start this server anew for every call (a session opened by `a11y_open` would be lost before the next call). Use `a11y_check_page(url, probes)`: call it once
+without `probes` to get the Tab walk, the page summary and the list of interactive elements, each with a `css` selector; decide by meaning what each element really is
+(`component-identity-guide`); then call it again with `probes=[{"kind": "...", "target": "css:<selector>"}]` for the components that matter. Each call is independent
+(the selectors are stable because they come from the page, not from the call), changes to data are held and dropped, and it refuses to run while an `a11y_open` session
+is open. It cannot do multi-step flows with state between steps; for those you need a client that keeps the connection (Claude Code, Codex, VS Code, Cursor do).
+
 ## 3. What you may claim, what you may not
 
 You MAY claim, because the server measured it: the role, name and state in the tree; that a key did or did not do something in

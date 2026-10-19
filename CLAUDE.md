@@ -80,8 +80,9 @@ NVDAStudio: ao mudá-la num, muda-se nos outros dois na mesma entrega.
   palavra-chave, regex ou ranking lexical (regra 2). Os fluxos de trabalho são prompts do MCP e a ferramenta `a11y_workflow`. (rules/projeto-mcp.md)
 - Nenhum prazo fixo corta o trabalho (regra 8): a sessão, as operações longas, as instalações e o rastreamento terminam por convergência, parada de
   avanço, repetição, cancelamento ou orçamento da própria pessoa. (rules/tempo-e-lacos.md, rules/projeto-mcp.md)
-- O conteúdo de `accessibility_mcp/a11y/content/` e os playbooks dos especialistas vêm do Qaaccessibility; ao mudar um, mudar nos dois na mesma entrega.
-  (rules/projeto-mcp.md)
+- Os playbooks dos especialistas (`specialist-*`) e os guias de leitor de tela nascem no Qaaccessibility, que é a fonte (fontes datadas, correções registradas, testes): ao mudar um
+  deles lá, trazer a mudança para cá na mesma entrega. Os guias, as sondas e os fluxos próprios do MCP (`testing-playbook-for-ai`, `component-behavior-matrix`, prompts) nascem aqui
+  e não são espelhados lá, porque ensinam a conduzir as ferramentas deste servidor. (rules/projeto-mcp.md)
 - Nada para a pessoa configurar na tela: o navegador se instala sozinho, a pasta do editor se escolhe na conversa e os padrões são seguros. Variáveis de ambiente são só para quem quer mudar o padrão.
 - A matriz de cobertura da regra 18 é `scripts/run_2026_coverage_matrix.py`; rode antes de dar por pronta qualquer mudança no servidor.
 - Uma única branch: `main`.

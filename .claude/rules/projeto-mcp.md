@@ -41,7 +41,9 @@ libera um navegador abandonado.
 ### Conhecimento (regra 10 e 18)
 
 O conteúdo de `accessibility_mcp/a11y/content/` vem de fontes oficiais, com a data da consulta e o que não pôde ser lido declarado. Os guias de leitor de tela, ARIA,
-frameworks, mobile, documentos e conformidade vieram do Qaaccessibility (mesma pesquisa), e os playbooks dos especialistas também. Mudança de
+frameworks, mobile, documentos e conformidade vieram do Qaaccessibility (mesma pesquisa), e os playbooks dos especialistas também: lá é a fonte, e uma mudança de lá
+vem para cá na mesma entrega. O que é próprio do MCP (guias de como conduzir as ferramentas, sondas, fluxos, exemplos do site) nasce aqui e não é espelhado no Qaaccessibility
+(decisão do dono de 19/out/2026, depois de comparar os dois projetos: o Qaaccessibility analisa o código com IA e entrega relatórios, correções e tickets; o MCP prova o comportamento no navegador). Mudança de
 um guia, de um playbook ou do texto de um fluxo (`prompts.py`) é mudança de instrução ao modelo do cliente e segue o portão da regra 15; sem crédito de modelo para a avaliação ampla, ela é registrada como pendência.
 
 ### Edição de arquivos

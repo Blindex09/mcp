@@ -225,6 +225,26 @@ def register_ux(mcp: Any) -> None:
         return await _run(run_probe(SESSION, kind, target or None, container or None, max_stops))
 
     @mcp.tool()
+    async def a11y_check_page(url: str = "", html: str = "", probes: str = "", persona: str = "keyboard", browser: str = "chromium", color_scheme: str = "") -> str:
+        """ONE-CALL behavior check, for clients that cannot keep a session open between calls (each call may start this server anew). It opens a throwaway
+        session on url (http/https) or html, measures how the page behaves with the keyboard, runs the probes you ask for, and closes. FACTS only: the Tab walk (stops,
+        keyboard trap, covered focus, links the browser did not stop on), target sizes, a short page summary (headings, landmarks, live regions, reading order) and a
+        list of interactive elements, each with a `css` selector you can use as the target of a later call. probes: JSON list, e.g.
+        [{"kind": "dialog", "target": "css:#abrir"}, {"kind": "form_errors", "target": "css:#enviar"}]; kinds: dialog, disclosure, menu, tabs, combobox, listbox,
+        tree, tooltip, form_errors, status_update, route_change (and tab_walk, focus_obscured, target_size, which need no target). Typical use: call once without
+        probes to see the elements, decide by meaning what each one really is, then call again with the probes. Requests that change data are HELD, never sent (the
+        result lists them as dropped). Refused while a session from a11y_open is open. You decide what each element is and whether a deviation is a defect."""
+        from . import check_page as cp
+
+        try:
+            async with SESSION.lock:
+                return _json(await cp.check_page(SESSION, url, html, probes, persona, browser, color_scheme))
+        except SessionError as e:
+            return _json({"error": str(e)})
+        except Exception as e:  # noqa: BLE001 - fronteira da ferramenta
+            return _error(e)
+
+    @mcp.tool()
     async def a11y_finding(claim: str, criterion: str = "", severity: str = "moderate", target: str = "", evidence_steps: str = "") -> str:
         """Record a finding of this session WITH EVIDENCE. claim: one plain sentence (what is wrong, for whom). criterion: WCAG 2.2 number such as
         2.1.2 (empty if unsure; an unknown number is dropped). severity: blocker | serious | moderate | minor. target: dossier id or css:<selector>

@@ -22,6 +22,8 @@
 <li><a href="imagens.html">Imagens</a></li>
 <li><a href="tabelas.html">Tabelas</a></li>
 <li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
 <li><a href="dialogo.html">Diálogo (janela modal)</a></li>
 <li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
 <li><a href="abas.html">Abas</a></li>
@@ -29,6 +31,19 @@
 <li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
 <li><a href="erros-de-formulario.html">Erro de formulário</a></li>
 <li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html">Carrossel</a></li>
+<li><a href="dica.html">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
+<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html">Svelte</a></li>
+<li><a href="pilha-angular.html">Angular</a></li>
+<li><a href="android.html">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
 </ul>
 </nav>
 </div>
@@ -54,6 +69,10 @@
 <p>Em tabela, o leitor de tela diz a que coluna e a que linha cada célula pertence, se houver células de cabeçalho. (exemplo bom, exemplo ruim.)</p>
 <h2><a href="avisos.html">Avisos que aparecem sem recarregar</a></h2>
 <p>Quando a página muda sozinha, quem não vê a tela só fica sabendo se a mudança for anunciada. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="css.html">CSS</a></h2>
+<p>O CSS muda o que o leitor de tela recebe (texto escondido, lista sem marcador), o que o teclado alcança (menu aberto só com mouse), o que se vê no foco, no espaçamento de texto e no movimento. Cada exemplo é medido pelo MCP. (depende do navegador, não medido aqui, exemplo bom, exemplo ruim.)</p>
+<h2><a href="ajax.html">AJAX (conteúdo que chega depois)</a></h2>
+<p>Quando o conteúdo chega depois do clique, o leitor de tela não ouve nada se a página não avisar. Os três casos: carregar resultados, falhar com nova tentativa e carregar mais. Cada exemplo é medido apertando Enter no botão. (exemplo bom, exemplo ruim.)</p>
 <h2><a href="dialogo.html">Diálogo (janela modal)</a></h2>
 <p>Ao abrir um diálogo, o foco do teclado precisa entrar nele, ficar preso lá dentro, e voltar ao botão que o abriu quando ele fecha. O leitor de tela anuncia o nome do diálogo. (exemplo bom, exemplo ruim.)</p>
 <h2><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></h2>
@@ -68,6 +87,32 @@
 <p>Quem não vê a tela precisa ouvir que há erro, em qual campo e o que fazer. O campo inválido é marcado, o texto do erro fica ligado a ele e o foco vai para lá. (exemplo bom, exemplo ruim.)</p>
 <h2><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></h2>
 <p>Quando o conteúdo troca sem recarregar a página, o navegador não anuncia nada. A aplicação precisa mudar o título da aba, levar o foco ao novo conteúdo e avisar o leitor de tela. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="carrossel.html">Carrossel</a></h2>
+<p>Um carrossel precisa ser anunciado como carrossel, dizer em que slide está e avisar quando o slide muda. Controles sem nome (só uma seta) não dizem o que fazem. Este cenário não tem rotação automática; se tivesse, precisaria de um botão de pausa como primeiro controle e respeitar prefers-reduced-motion (WCAG 2.2.2). (exemplo bom, exemplo ruim.)</p>
+<h2><a href="dica.html">Dica (tooltip)</a></h2>
+<p>Uma dica precisa aparecer também quando o controle recebe o foco, estar ligada ao controle por aria-describedby e fechar com Escape sem tirar o foco. O atributo title sozinho não aparece para quem usa teclado. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></h2>
+<p>Uma lista em que se escolhe uma opção precisa de role=listbox, opções com role=option, uma única parada de Tab e setas, Home e End para andar. Quem escolhe entre opções conhecidas usa as setas; nunca um campo para adivinhar. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="arvore.html">Árvore (tree view)</a></h2>
+<p>Uma árvore de pastas e arquivos precisa de role=tree, itens treeitem, aria-expanded nos pais e as setas: para baixo e para cima andam, para a direita abre, para a esquerda fecha. Uma lista aninhada comum não faz nada disso. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="tabela-ordenavel.html">Tabela ordenável</a></h2>
+<p>Em uma tabela que ordena, cada coluna ordenável precisa de um botão dentro do cabeçalho, com aria-sort na coluna ordenada, e a mudança precisa ser anunciada. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="web-components.html">Web Components (elemento personalizado)</a></h2>
+<p>Um elemento personalizado com Shadow DOM aberto continua sendo medido pelo MCP. O defeito comum é o mesmo de sempre, só que escondido dentro do shadow: um div clicável. O bom entrega um botão de verdade, ou usa ElementInternals para dar o papel e o estado ao próprio elemento. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="chat-ia.html">Resposta de IA em streaming</a></h2>
+<p>Uma resposta que chega aos poucos não pode ser uma região viva atualizada a cada palavra: o leitor de tela fica falando por cima de si mesmo. O padrão do MCP é escrever a resposta numa área que não anuncia e avisar uma vez, no fim, numa região de status. O número de anúncios abaixo é medido, sem veredito. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="pilha-react.html">React</a></h2>
+<p>React 19, componentes de função com hooks (useState, useRef, useId, useEffect). Os mesmos cinco componentes (acordeão, diálogo, erro de formulário, mensagem de status e mudança de tela), cada um ruim e bom, em código real compilado. O framework não faz acessibilidade por você: o que muda é onde cada um esconde o erro. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="pilha-vue.html">Vue</a></h2>
+<p>Vue 3.5, componentes com setup() e template, useId e nextTick. Os mesmos cinco componentes (acordeão, diálogo, erro de formulário, mensagem de status e mudança de tela), cada um ruim e bom, em código real compilado. O framework não faz acessibilidade por você: o que muda é onde cada um esconde o erro. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="pilha-svelte.html">Svelte</a></h2>
+<p>Svelte 5, componentes .svelte com runes ($state, $props), compilados; os avisos de acessibilidade do compilador estão medidos. Os mesmos cinco componentes (acordeão, diálogo, erro de formulário, mensagem de status e mudança de tela), cada um ruim e bom, em código real compilado. O framework não faz acessibilidade por você: o que muda é onde cada um esconde o erro. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="pilha-angular.html">Angular</a></h2>
+<p>Angular 20, componentes standalone com signals, compilação JIT no pacote e o CDK a11y (LiveAnnouncer). Os mesmos cinco componentes (acordeão, diálogo, erro de formulário, mensagem de status e mudança de tela), cada um ruim e bom, em código real compilado. O framework não faz acessibilidade por você: o que muda é onde cada um esconde o erro. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="android.html">Android (Jetpack Compose)</a></h2>
+<p>No Compose a acessibilidade vem da árvore de semântica. clickable, toggleable e ListItem já juntam os filhos num só item; ícones precisam de descrição; mudanças que o usuário não vê precisam de liveRegion; títulos de seção usam heading(). (exemplo bom, exemplo ruim.)</p>
+<h2><a href="ios.html">iOS (SwiftUI e UIKit)</a></h2>
+<p>No iOS o VoiceOver lê o rótulo, o valor e os traços de cada elemento. Toque num texto ou imagem com onTapGesture não vira botão; imagens decorativas precisam sair da árvore; mudanças que o usuário não vê precisam ser anunciadas. (exemplo bom, exemplo ruim.)</p>
 </div>
 </main>
 <footer>

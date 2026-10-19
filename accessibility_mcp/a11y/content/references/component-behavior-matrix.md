@@ -111,10 +111,29 @@ measures the behavior) and the stack notes. A probe result of `met: null` is "co
 - TREE: `combobox "City" [expanded]`, `option "Recife" [selected]`. PROBE: `combobox` (target = the field). Native popups
   (`datalist`, `select`) are not observable in the DOM: the probe returns `null` for those checks, which is not a pass.
 
+## 10b. Listbox, tree view, tooltip, carousel and sortable table
+
+- LISTBOX (probe `listbox`). MUST: `role="listbox"` with a name, options `role="option"`, one Tab stop (the list with `aria-activedescendant`, or the current option with `tabindex="0"`), ArrowUp/Down, Home/End, Space/Enter select with `aria-selected`. MUST NOT: `div` rows with click handlers; one Tab stop per option.
+- TREE VIEW (probe `tree`). MUST: `role="tree"` with a name, `role="treeitem"`, `aria-expanded` on every parent, one Tab stop (roving), ArrowDown/Up move, ArrowRight opens (or enters the first child), ArrowLeft closes (or goes to the parent), Home/End. MUST NOT: nested `ul` opened only by a click on a `span`.
+- TOOLTIP (probe `tooltip`). MUST: appears on focus as well as hover, element `role="tooltip"` tied to the control by `aria-describedby`, Escape closes it without moving focus, the pointer can move onto it without it vanishing (WCAG 1.4.13). MUST NOT: `title` alone (not shown for keyboard focus); a tooltip only on `mouseenter`.
+- CAROUSEL (probe `status_update` on the next button). MUST: `aria-roledescription="carousel"` plus a name, slides as `role="group"` `aria-roledescription="slide"` with "1 of 3", named controls ("Previous slide"), the change announced in a status region that already exists; with automatic rotation also a pause control FIRST in the tab order, pause on hover and focus, and no rotation under `prefers-reduced-motion` (WCAG 2.2.2). MUST NOT: controls named only with a glyph (the screen reader says the symbol or nothing).
+- SORTABLE TABLE (probe `status_update` on the header button). MUST: a `button` inside the `th`, `aria-sort` on the sorted column, the new order announced in a status region. MUST NOT: a clickable `th` that is not focusable.
+
+## 10c. CSS: what the style sheet changes for the screen reader, the keyboard and the reader
+
+- FOCUS: MUST keep a visible indicator (the default ring or a `:focus-visible` ring with 3:1 contrast). MUST NOT use `outline: none` without a replacement. Measure with `a11y_focus_style` (it lists what `:focus` changes; works with `css:` targets).
+- HIDDEN TEXT: `display:none` and `visibility:hidden` remove the text from the tree (the screen reader does not read it). Text meant only for the screen reader uses the visually-hidden technique (clip, 1 px, absolute). `aria-hidden` removes from the tree too.
+- LIST MARKER: `list-style:none` is reported by the MCP guides as dropping the list for Safari with VoiceOver. The Chromium and the Playwright WebKit measured here (2026-10-19) still expose a list, so this site labels the case "depends on the browser, not measured here". Add `role="list"` as a precaution.
+- HOVER MENUS: a submenu shown only by `:hover` is unreachable by Tab (measure: links in the code against links Tab reaches). Show it also with `:focus-within`, or use a disclosure button.
+- TEXT SPACING (WCAG 1.4.12): fixed `height` with `overflow:hidden` clips text when the person raises letter, word and line spacing. Use `min-height`. The measure depends on the font size: measure with the site's own styles.
+- CONTRAST: axe measures fixed colors; also audit `color_scheme=dark` and `forced_colors`.
+- MOTION: animations must stop or shrink under `@media (prefers-reduced-motion: reduce)`. Measure with the `reduced_motion` persona (computed `animation-name`).
+
 ## 11. Live regions, status and alerts
 
 - MUST: the live region element exists in the DOM before its text changes; `role="status"` (polite) for results and saved
   messages, `role="alert"` (assertive) only for urgent errors; the message is short and says what changed.
+- PROBE: `status_update` (target = the button): checks that the change reaches someone who cannot see it, that the region already existed before the text (`fresh` in the live observer), and that focus did not fall to the body. `role="alert"` born with its text is usually spoken, so it is not flagged.
 - MUST NOT: inserting the region and its text in the same tick and expecting speech; announcing on every keystroke or timer;
   `aria-live` on a large container that re-renders; relying on color/animation as the only signal.
 - TOOLS: `a11y_act` and `a11y_announce` report what was announced; page_map lists live regions. Whether a given screen reader
@@ -138,7 +157,9 @@ measures the behavior) and the stack notes. A probe result of `met: null` is "co
   content does not steal focus unless the person asked for it; on error say what failed and offer a retry; "load more" moves
   focus to the first new item or keeps it on the button and announces the count; infinite scroll has a keyboard alternative
   and a reachable footer.
-- MUST NOT: a spinner with no text; replacing the whole list under the focused item; timeouts that remove content before it is read.
+- MUST NOT: a spinner with no text; replacing the whole list under the focused item; removing the "Load more" button that holds the focus (focus falls to the body); timeouts that remove content before it is read.
+- PROBE: `status_update` on the button that starts the request. On failure the message goes to a `role="alert"` region that already exists, says what to do, and offers "Try again".
+- STREAMING AI ANSWERS: do not update a live region word by word (the screen reader talks over itself). Write the answer in an element that does not announce, keep focus in the field, and announce once at the end in a status region ("Answer ready"). The number of announcements after one action is a measured fact in this site (chat example): count them, do not guess.
 
 ## 14. Tables
 
@@ -154,11 +175,12 @@ measures the behavior) and the stack notes. A probe result of `met: null` is "co
 | CSS | `display:none` vs offscreen; `list-style:none` drops list in Safari; focus ring removed; content only via `::before`; hover-only reveal; text clipped at 320 px or with user text spacing; contrast in dark and forced-colors | `a11y_open` with `color_scheme`, persona `forced_colors`/`low_vision`, `a11y_stress`, `page_map.hover_reveals`, `a11y_focus_style` |
 | JS | click-only handlers; focus not managed after DOM updates; `tabindex>0`; timers that remove content | `tab_walk`, `a11y_reach`, `a11y_act`, the contract probes |
 | AJAX/fetch | silent updates, focus lost when the DOM node is replaced, no error state | `a11y_act` then read the announcement/tree diff; section 13 |
+| React / Vue / Svelte / Angular, same five failures | the compiler does not warn about a `div` with a click handler (only a linter such as eslint-plugin-jsx-a11y, eslint-plugin-vuejs-accessibility or the angular-eslint template rules, if configured); the Svelte compiler DOES warn (`a11y_click_events_have_key_events`, `a11y_no_static_element_interactions`), so do not silence it with `svelte-ignore`; a conditional render (`{x && ...}`, `v-if`, `@if`, `{#if}`) creates a live region together with its text; none of the routers moves focus or the title for you | build the real component and probe the built page (this site does, for the four) |
 | React | `key` re-mounting the focused node; `useId` for label/description ids; effects that move focus on every render; portals for dialogs (focus return); synthetic `div` buttons; fragments hiding landmarks | probes on the built page, not on the source |
 | Angular | no focus move on `NavigationEnd`; `*ngIf` removing a live region before it speaks; use CDK `cdkTrapFocus`, `LiveAnnouncer`, `FocusMonitor`; bind ARIA with `[attr.aria-*]` or `[aria-label]` as the version supports | probes; read `specialist-angular-framework` |
 | Vue | `v-if` removing the live region/focused node; `v-show` leaves content in the tree if only the style hides it from sight (it uses `display:none`, which hides it); route announcer is your job | `route_change`, tree diff |
 | Svelte | compiler warnings `a11y_click_events_have_key_events` and `a11y_no_static_element_interactions` (and others) are real signals: fix with a native element, not by suppressing with `svelte-ignore` | read the warning list on svelte.dev/e; probes |
-| Web Components | closed shadow roots hide the tree from the dossier; `delegatesFocus`; ids do not cross shadow boundaries (`aria-labelledby`/`for` break); form-associated custom elements need `ElementInternals` for labels and validity | `a11y_dossier` (crosses open shadow DOM), `a11y_aria_snapshot`; `specialist-web-components` |
+| Web Components | the site's CSS does NOT reach inside a shadow root (a `button` inside measured 21 px high until the shadow got its own style); closed shadow roots hide the tree from the dossier; `delegatesFocus`; ids do not cross shadow boundaries (`aria-labelledby`/`for` break); form-associated custom elements need `ElementInternals` for labels and validity | `a11y_dossier` (crosses open shadow DOM), `a11y_aria_snapshot`; `specialist-web-components` |
 | Android (Compose) | missing `contentDescription` on icons (null when a text label sits beside it); custom clickables without `Role`; no `stateDescription`; many nodes read one by one instead of `semantics(mergeDescendants = true)`; `liveRegion` (`Polite` normally, `Assertive` rarely, never on fast-updating text); `heading()` for section titles; `clickable`/`toggleable` merge descendants already | official docs, TalkBack on a real device or emulator; this MCP has no Android runner (declare as not verified) |
 | iOS (SwiftUI/UIKit) | custom views without `accessibilityLabel`/traits; decorative images not hidden; `UIAccessibility.post(notification:)` for announcements and layout/screen changes | developer.apple.com; VoiceOver on a real device; no iOS runner here (declare as not verified) |
 

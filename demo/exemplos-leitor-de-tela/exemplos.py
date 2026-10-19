@@ -9,7 +9,8 @@ from __future__ import annotations
 from typing import Any
 
 RUIM, BOM, OK = "ruim", "bom", "ok"
-ROTULO = {RUIM: "Exemplo ruim", BOM: "Exemplo bom", OK: "Não precisa corrigir"}
+INCERTO = "incerto"
+ROTULO = {RUIM: "Exemplo ruim", BOM: "Exemplo bom", OK: "Não precisa corrigir", INCERTO: "Depende do navegador, não medido aqui"}
 
 CENARIOS: list[dict[str, Any]] = [
     {
@@ -210,6 +211,17 @@ CENARIOS: list[dict[str, Any]] = [
     },
 ]
 
+from componentes import COMPONENTES
+from css_ajax import CSS_AJAX
 from interativos import INTERATIVOS
 
+CENARIOS.extend(CSS_AJAX)
 CENARIOS.extend(INTERATIVOS)
+CENARIOS.extend(COMPONENTES)
+from pilhas import cenarios as _cenarios_das_pilhas
+
+CENARIOS.extend(_cenarios_das_pilhas())
+
+from mobile import MOBILE
+
+CENARIOS.extend(MOBILE)

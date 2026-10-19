@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html" aria-current="page">CSS</a></li>
+<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html">Carrossel</a></li>
+<li><a href="dica.html">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
+<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html">Svelte</a></li>
+<li><a href="pilha-angular.html">Angular</a></li>
+<li><a href="android.html">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>CSS</h1>
+<p>O CSS muda o que o leitor de tela recebe (texto escondido, lista sem marcador), o que o teclado alcança (menu aberto só com mouse), o que se vê no foco, no espaçamento de texto e no movimento. Cada exemplo é medido pelo MCP.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Foco do teclado removido</a></li>
+<li><a href="#ex-2">Exemplo bom: Foco visível</a></li>
+<li><a href="#ex-3">Exemplo ruim: Texto para leitor de tela escondido com display:none</a></li>
+<li><a href="#ex-4">Exemplo bom: Texto só para leitor de tela</a></li>
+<li><a href="#ex-5">Depende do navegador, não medido aqui: Lista sem marcador e sem role</a></li>
+<li><a href="#ex-6">Exemplo bom: Lista sem marcador com role=list</a></li>
+<li><a href="#ex-7">Exemplo ruim: Submenu que só abre com o mouse (:hover)</a></li>
+<li><a href="#ex-8">Exemplo bom: Submenu que abre também com o foco</a></li>
+<li><a href="#ex-9">Exemplo ruim: Altura fixa que corta o texto com o espaçamento do usuário</a></li>
+<li><a href="#ex-10">Exemplo bom: Altura que cresce com o texto</a></li>
+<li><a href="#ex-11">Exemplo ruim: Texto cinza claro sobre branco</a></li>
+<li><a href="#ex-12">Exemplo bom: Texto com contraste suficiente</a></li>
+<li><a href="#ex-13">Exemplo ruim: Animação que ignora a preferência por menos movimento</a></li>
+<li><a href="#ex-14">Exemplo bom: Animação que respeita a preferência</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Foco do teclado removido</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Foco do teclado removido"><style>#foco-ruim-btn{outline:none !important}</style><button type="button" id="foco-ruim-btn">Comprar</button></div>
+<h3>Por quê</h3>
+<p>Quem navega com Tab não vê onde está. O outline:none apaga o anel de foco e nada o substitui; a medida mostra que o :focus não muda nenhuma propriedade visível.</p>
+<h3>O que corrigir</h3>
+<p>Não remova o outline. Se o anel padrão não combina com o design, troque por um :focus-visible com contraste (anel de 2 px ou mais, com 3:1 contra o fundo).</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Comprar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Medida a mais (feita pelo MCP)</h3>
+<pre>Contorno quando focado: none 3px rgb(0, 0, 0) 2px. Sombra quando focado: none. Propriedades que o :focus muda: border-bottom-left-radius, border-bottom-right-radius, border-end-end-radius, border-end-start-radius, border-start-end-radius, border-start-start-radius, border-top-left-radius, border-top-right-radius, outline-offset.</pre>
+<h3>Código</h3>
+<pre>&lt;style&gt;#foco-ruim-btn{outline:none !important}&lt;/style&gt;&lt;button type=&quot;button&quot; id=&quot;foco-ruim-btn&quot;&gt;Comprar&lt;/button&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Foco visível</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Foco visível"><button type="button" id="foco-bom-btn">Comprar</button></div>
+<h3>Por quê</h3>
+<p>O botão mantém o anel de foco. A medida mostra o que o :focus muda.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Comprar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Medida a mais (feita pelo MCP)</h3>
+<pre>Contorno quando focado: solid 3px rgb(10, 74, 173) 2px. Sombra quando focado: none. Propriedades que o :focus muda: border-bottom-left-radius, border-bottom-right-radius, border-end-end-radius, border-end-start-radius, border-start-end-radius, border-start-start-radius, border-top-left-radius, border-top-right-radius, outline-color, outline-offset, outline-style.</pre>
+<h3>Código</h3>
+<pre>&lt;button type=&quot;button&quot; id=&quot;foco-bom-btn&quot;&gt;Comprar&lt;/button&gt;</pre>
+<h2 id="ex-3"><span class="etiqueta t-ruim">Exemplo ruim:</span> Texto para leitor de tela escondido com display:none</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Texto para leitor de tela escondido com display:none"><style>.so-leitor-ruim{display:none}</style><p><a href="#relatorio">Relatório<span class="so-leitor-ruim"> (abre em nova janela)</span></a></p></div>
+<h3>Por quê</h3>
+<p>Quem enxerga não vê o aviso, e quem usa leitor de tela também não: display:none tira o elemento da árvore de acessibilidade. O nome do link continua só Relatório.</p>
+<h3>O que corrigir</h3>
+<p>Use a técnica de ocultar só visualmente (clip, 1 px, posição absoluta), que mantém o texto na árvore.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph:
+  - link &quot;Relatório&quot;:
+    - /url: &quot;#relatorio&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Código</h3>
+<pre>&lt;style&gt;.so-leitor-ruim{display:none}&lt;/style&gt;&lt;p&gt;&lt;a href=&quot;#relatorio&quot;&gt;Relatório&lt;span class=&quot;so-leitor-ruim&quot;&gt; (abre em nova janela)&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;</pre>
+<h2 id="ex-4"><span class="etiqueta t-bom">Exemplo bom:</span> Texto só para leitor de tela</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Texto só para leitor de tela"><style>.so-leitor-bom{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}</style><p><a href="#relatorio">Relatório<span class="so-leitor-bom"> (abre em nova janela)</span></a></p></div>
+<h3>Por quê</h3>
+<p>O texto fica fora da vista mas dentro da árvore: o nome do link passa a ser Relatório (abre em nova janela).</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph:
+  - link &quot;Relatório (abre em nova janela)&quot;:
+    - /url: &quot;#relatorio&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Código</h3>
+<pre>&lt;style&gt;.so-leitor-bom{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}&lt;/style&gt;&lt;p&gt;&lt;a href=&quot;#relatorio&quot;&gt;Relatório&lt;span class=&quot;so-leitor-bom&quot;&gt; (abre em nova janela)&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;</pre>
+<h2 id="ex-5"><span class="etiqueta t-incerto">Depende do navegador, não medido aqui:</span> Lista sem marcador e sem role</h2>
+<div class="exemplo exemplo-incerto" role="group" aria-label="Exemplo ao vivo, depende do navegador, não medido aqui: Lista sem marcador e sem role"><ul style="list-style:none;padding:0;margin:0"><li>Sencha</li><li>Matcha</li><li>Gyokuro</li></ul></div>
+<h3>Por quê</h3>
+<p>O guia do MCP registra que o Safari com VoiceOver já deixou de anunciar como lista a ul com list-style:none. Esta medida não consegue provar isso: no Chromium e no WebKit do Playwright a lista continua sendo lista (veja as duas árvores abaixo). Quem tem um Mac deve ouvir no Safari.</p>
+<h3>O que corrigir</h3>
+<p>Por precaução, acrescente role=&quot;list&quot; na ul sem marcador. Não custa nada e vale em todos os navegadores.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- list:
+  - listitem: Sencha
+  - listitem: Matcha
+  - listitem: Gyokuro</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Medida a mais (feita pelo MCP)</h3>
+<pre>Chromium:
+- list:
+  - listitem: Sencha
+  - listitem: Matcha
+  - listitem: Gyokuro
+
+WebKit (o motor do Safari):
+- list:
+  - listitem: Sencha
+  - listitem: Matcha
+  - listitem: Gyokuro
+
+As duas árvores são iguais nesta versão medida.</pre>
+<h3>Código</h3>
+<pre>&lt;ul style=&quot;list-style:none;padding:0;margin:0&quot;&gt;&lt;li&gt;Sencha&lt;/li&gt;&lt;li&gt;Matcha&lt;/li&gt;&lt;li&gt;Gyokuro&lt;/li&gt;&lt;/ul&gt;</pre>
+<h2 id="ex-6"><span class="etiqueta t-bom">Exemplo bom:</span> Lista sem marcador com role=list</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Lista sem marcador com role=list"><ul role="list" style="list-style:none;padding:0;margin:0"><li>Sencha</li><li>Matcha</li><li>Gyokuro</li></ul></div>
+<h3>Por quê</h3>
+<p>O role=list devolve a semântica onde o estilo a tira.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- list:
+  - listitem: Sencha
+  - listitem: Matcha
+  - listitem: Gyokuro</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Medida a mais (feita pelo MCP)</h3>
+<pre>Chromium:
+- list:
+  - listitem: Sencha
+  - listitem: Matcha
+  - listitem: Gyokuro
+
+WebKit (o motor do Safari):
+- list:
+  - listitem: Sencha
+  - listitem: Matcha
+  - listitem: Gyokuro
+
+As duas árvores são iguais nesta versão medida.</pre>
+<h3>Código</h3>
+<pre>&lt;ul role=&quot;list&quot; style=&quot;list-style:none;padding:0;margin:0&quot;&gt;&lt;li&gt;Sencha&lt;/li&gt;&lt;li&gt;Matcha&lt;/li&gt;&lt;li&gt;Gyokuro&lt;/li&gt;&lt;/ul&gt;</pre>
+<h2 id="ex-7"><span class="etiqueta t-ruim">Exemplo ruim:</span> Submenu que só abre com o mouse (:hover)</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Submenu que só abre com o mouse (:hover)"><style>.menu-ruim{list-style:none;margin:0;padding:0}.menu-ruim ul{display:none;list-style:none;margin:0;padding:0 0 0 1rem}.menu-ruim li:hover>ul{display:block}</style><ul class="menu-ruim"><li><a href="#produtos">Produtos</a><ul><li><a href="#chas">Chás</a></li><li><a href="#bules">Bules</a></li></ul></li></ul></div>
+<h3>Por quê</h3>
+<p>Com o mouse o submenu aparece. Com o teclado, o submenu fica em display:none e os links de dentro não recebem foco: Chás e Bules são inalcançáveis.</p>
+<h3>O que corrigir</h3>
+<p>Mostre o submenu também com :focus-within, ou use um botão de disclosure com aria-expanded.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- list:
+  - listitem:
+    - link &quot;Produtos&quot;:
+      - /url: &quot;#produtos&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Medida a mais (feita pelo MCP)</h3>
+<pre>Links no código: 3. Links que o Tab alcança: 1 (Produtos).</pre>
+<h3>Código</h3>
+<pre>&lt;style&gt;.menu-ruim{list-style:none;margin:0;padding:0}.menu-ruim ul{display:none;list-style:none;margin:0;padding:0 0 0 1rem}.menu-ruim li:hover&gt;ul{display:block}&lt;/style&gt;&lt;ul class=&quot;menu-ruim&quot;&gt;&lt;li&gt;&lt;a href=&quot;#produtos&quot;&gt;Produtos&lt;/a&gt;&lt;ul&gt;&lt;li&gt;&lt;a href=&quot;#chas&quot;&gt;Chás&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;#bules&quot;&gt;Bules&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;</pre>
+<h2 id="ex-8"><span class="etiqueta t-bom">Exemplo bom:</span> Submenu que abre também com o foco</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Submenu que abre também com o foco"><style>.menu-bom{list-style:none;margin:0;padding:0}.menu-bom ul{display:none;list-style:none;margin:0;padding:0 0 0 1rem}.menu-bom li:hover>ul,.menu-bom li:focus-within>ul{display:block}</style><ul class="menu-bom"><li><a href="#produtos">Produtos</a><ul><li><a href="#chas">Chás</a></li><li><a href="#bules">Bules</a></li></ul></li></ul></div>
+<h3>Por quê</h3>
+<p>O :focus-within mostra o submenu quando o foco entra no item, e o Tab alcança todos os links.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir (para menu de comandos ou submenu longo, prefira o botão com aria-expanded).</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- list:
+  - listitem:
+    - link &quot;Produtos&quot;:
+      - /url: &quot;#produtos&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Medida a mais (feita pelo MCP)</h3>
+<pre>Links no código: 3. Links que o Tab alcança: 3 (Produtos, Chás, Bules).</pre>
+<h3>Código</h3>
+<pre>&lt;style&gt;.menu-bom{list-style:none;margin:0;padding:0}.menu-bom ul{display:none;list-style:none;margin:0;padding:0 0 0 1rem}.menu-bom li:hover&gt;ul,.menu-bom li:focus-within&gt;ul{display:block}&lt;/style&gt;&lt;ul class=&quot;menu-bom&quot;&gt;&lt;li&gt;&lt;a href=&quot;#produtos&quot;&gt;Produtos&lt;/a&gt;&lt;ul&gt;&lt;li&gt;&lt;a href=&quot;#chas&quot;&gt;Chás&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;#bules&quot;&gt;Bules&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;</pre>
+<h2 id="ex-9"><span class="etiqueta t-ruim">Exemplo ruim:</span> Altura fixa que corta o texto com o espaçamento do usuário</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Altura fixa que corta o texto com o espaçamento do usuário"><p style="width:34rem;max-width:100%;height:1.5em;overflow:hidden;line-height:1.5;margin:0">Frete grátis para todo o Brasil em compras acima de cem reais</p></div>
+<h3>Por quê</h3>
+<p>Quem aumenta o espaçamento entre letras, palavras e linhas (WCAG 1.4.12) vê a segunda linha cortada: a altura é fixa e o excesso fica escondido.</p>
+<h3>O que corrigir</h3>
+<p>Use min-height (ou nenhuma altura) e não esconda o excesso com overflow:hidden.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph: Frete grátis para todo o Brasil em compras acima de cem reais</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Medida a mais (feita pelo MCP)</h3>
+<pre>Com o espaçamento do usuário (WCAG 1.4.12) 1 trecho(s) passaram a ficar cortados: &#x27;Frete grátis para todo o Brasil em compras acima d&#x27;.</pre>
+<h3>Código</h3>
+<pre>&lt;p style=&quot;width:34rem;max-width:100%;height:1.5em;overflow:hidden;line-height:1.5;margin:0&quot;&gt;Frete grátis para todo o Brasil em compras acima de cem reais&lt;/p&gt;</pre>
+<h2 id="ex-10"><span class="etiqueta t-bom">Exemplo bom:</span> Altura que cresce com o texto</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Altura que cresce com o texto"><p style="width:34rem;max-width:100%;min-height:1.5em;line-height:1.5;margin:0">Frete grátis para todo o Brasil em compras acima de cem reais</p></div>
+<h3>Por quê</h3>
+<p>A caixa cresce com o texto e nada é cortado com o espaçamento do usuário.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph: Frete grátis para todo o Brasil em compras acima de cem reais</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Medida a mais (feita pelo MCP)</h3>
+<pre>Com o espaçamento do usuário (WCAG 1.4.12) nada passou a ficar cortado (cortados antes: 0).</pre>
+<h3>Código</h3>
+<pre>&lt;p style=&quot;width:34rem;max-width:100%;min-height:1.5em;line-height:1.5;margin:0&quot;&gt;Frete grátis para todo o Brasil em compras acima de cem reais&lt;/p&gt;</pre>
+<h2 id="ex-11"><span class="etiqueta t-ruim">Exemplo ruim:</span> Texto cinza claro sobre branco</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Texto cinza claro sobre branco"><p style="color:#9a9a9a;background:#ffffff;margin:0;padding:0.5rem">Entrega em até cinco dias úteis</p></div>
+<h3>Por quê</h3>
+<p>O contraste é de cerca de 2,8 para 1; o mínimo do WCAG para texto comum é 4,5 para 1. Pessoas com baixa visão não leem.</p>
+<h3>O que corrigir</h3>
+<p>Use uma cor de texto mais escura (por exemplo #595959, perto de 7 para 1). Meça com a ferramenta de contraste do MCP.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph: Entrega em até cinco dias úteis</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe achou: color-contrast (Elements must meet minimum color contrast ratio thresholds).</p>
+<h3>Código</h3>
+<pre>&lt;p style=&quot;color:#9a9a9a;background:#ffffff;margin:0;padding:0.5rem&quot;&gt;Entrega em até cinco dias úteis&lt;/p&gt;</pre>
+<h2 id="ex-12"><span class="etiqueta t-bom">Exemplo bom:</span> Texto com contraste suficiente</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Texto com contraste suficiente"><p style="color:#595959;background:#ffffff;margin:0;padding:0.5rem">Entrega em até cinco dias úteis</p></div>
+<h3>Por quê</h3>
+<p>Cerca de 7 para 1 sobre branco: passa o nível AA e o AAA.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph: Entrega em até cinco dias úteis</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Código</h3>
+<pre>&lt;p style=&quot;color:#595959;background:#ffffff;margin:0;padding:0.5rem&quot;&gt;Entrega em até cinco dias úteis&lt;/p&gt;</pre>
+<h2 id="ex-13"><span class="etiqueta t-ruim">Exemplo ruim:</span> Animação que ignora a preferência por menos movimento</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Animação que ignora a preferência por menos movimento"><style>@keyframes gira-ruim{to{transform:rotate(360deg)}}#mov-ruim{display:inline-block;animation:gira-ruim 2s linear infinite}</style><p><span id="mov-ruim">&#9679;</span> Atualizando</p></div>
+<h3>Por quê</h3>
+<p>Quem pede menos movimento no sistema (prefers-reduced-motion) continua vendo o giro infinito. Para algumas pessoas isso causa náusea ou tontura.</p>
+<h3>O que corrigir</h3>
+<p>Dentro de @media (prefers-reduced-motion: reduce) desligue ou reduza a animação.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph: ● Atualizando</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Medida a mais (feita pelo MCP)</h3>
+<pre>Com a preferência de menos movimento ligada (emulada), a animação calculada do elemento é: gira-ruim.</pre>
+<h3>Código</h3>
+<pre>&lt;style&gt;@keyframes gira-ruim{to{transform:rotate(360deg)}}#mov-ruim{display:inline-block;animation:gira-ruim 2s linear infinite}&lt;/style&gt;&lt;p&gt;&lt;span id=&quot;mov-ruim&quot;&gt;&amp;#9679;&lt;/span&gt; Atualizando&lt;/p&gt;</pre>
+<h2 id="ex-14"><span class="etiqueta t-bom">Exemplo bom:</span> Animação que respeita a preferência</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Animação que respeita a preferência"><style>@keyframes gira-bom{to{transform:rotate(360deg)}}#mov-bom{display:inline-block;animation:gira-bom 2s linear infinite}@media (prefers-reduced-motion: reduce){#mov-bom{animation:none}}</style><p><span id="mov-bom">&#9679;</span> Atualizando</p></div>
+<h3>Por quê</h3>
+<p>Com a preferência ligada a animação some; a medida abaixo emula a preferência e confere.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph: ● Atualizando</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Medida a mais (feita pelo MCP)</h3>
+<pre>Com a preferência de menos movimento ligada (emulada), a animação calculada do elemento é: none.</pre>
+<h3>Código</h3>
+<pre>&lt;style&gt;@keyframes gira-bom{to{transform:rotate(360deg)}}#mov-bom{display:inline-block;animation:gira-bom 2s linear infinite}@media (prefers-reduced-motion: reduce){#mov-bom{animation:none}}&lt;/style&gt;&lt;p&gt;&lt;span id=&quot;mov-bom&quot;&gt;&amp;#9679;&lt;/span&gt; Atualizando&lt;/p&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="avisos.html">Anterior: Avisos que aparecem sem recarregar</a>
+<a href="ajax.html">Próximo: AJAX (conteúdo que chega depois)</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

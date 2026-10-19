@@ -52,6 +52,17 @@ You MAY NOT claim from this server alone:
   official docs and a real device.
 - that you tested a flow you did not run (login, checkout, upload). List untested flows.
 
+## 3b. More rules learned from building and measuring a site with this MCP
+
+- Do not label an example "bad" (or "good") on a claim you did not measure. If a behavior is documented for a browser or screen reader you cannot run here
+  (for example Safari with VoiceOver dropping a list with `list-style:none`), say "depends on the browser, not measured here" and show what you did measure.
+- Measure a component in the page as the person gets it, with the site's own styles (font size changes text-spacing results) and, for a framework, the BUILT page, not the source. Wait for the component to mount by a condition (the mount points are filled), never by a fixed time.
+- A live example next to its twin needs a named group (`role="group"` with a label), otherwise two buttons with the same name confuse a screen reader user.
+- The site's CSS does not enter a shadow root: give controls inside it their own size and focus styles.
+- `met: null` means "could not measure". A probe that cannot reach the component (it is not focusable, nothing opens) reports that, it never passes.
+- Say what the framework does and does not do only after seeing it: the Svelte compiler warns (measured), React, Vue and Angular compile a click-only `div` without a warning (only linters, if configured).
+- Reading a page with the MCP is not enough. Operate it: keyboard persona, probes on the served page, other personas (`low_vision`, `mobile_touch`, `forced_colors`, `reduced_motion`), dark scheme, and Firefox and WebKit. Expect to find defects in your own examples.
+
 ## 4. Rules of the tool itself (the harness)
 
 - Approval is on or off, never a flat refusal. On non-local sites, POST/PUT/PATCH/DELETE and form submits are HELD and shown
@@ -74,6 +85,15 @@ You MAY NOT claim from this server alone:
 | Controls 21 px high | plain `button` had no `min-height`; only a measure on a phone persona showed it | run `target_size` with `mobile_touch` on every page you build |
 | "It needs no fix" said without checking the project's own guide | assumed instead of reading `aria-rules-dos-and-donts` | before calling something fine or broken, read the guide, then measure |
 | A regression test that passed without the fix | the geometry of the test did not reproduce the real page | remove the fix and see the test fail before trusting it |
+| A button inside a shadow root measured 21 px high | the site's CSS does not reach into a shadow root | give shadow content its own styles; run `target_size` on every built page |
+| A text-spacing example "did not clip" | the measure document used a 16 px font, the site uses 18 px | measure with the site's styles |
+| `a11y_focus_style` failed with a `css:` target | it only knew dossier ids | tag the element for the measure; covered by a regression test |
+| A "bad" list-style example could not be reproduced in WebKit | the Safari/VoiceOver behavior does not exist in Playwright's WebKit | the new label "depends on the browser, not measured here" |
+| `tab_walk` said "keyboard trap" in Firefox at the last link of the page | headless Firefox has no browser UI to take the focus, so Tab stays on the last element | the probe checks whether the stuck element is the last focusable one and says so |
+| WebKit stopped only 2 times with Tab | Safari/WebKit does not Tab to links by default | `tab_walk` now returns `links_sem_parada` (links in the code against links with a stop) |
+| "Focus covered 5/5" for a button inside an open shadow root | `elementFromPoint` returns the shadow host | the probe descends into open shadow roots before comparing |
+| `aria_snapshot` did not show `role=checkbox` set by `ElementInternals` | Playwright builds its tree from the DOM; Chromium's real tree (CDP) has the role | the tool appends the roles Chromium computes for custom elements |
+| `page_map` counted the paragraph of a closed `<details>` in the reading order | it has a rectangle but is not rendered | visibility uses `checkVisibility()` |
 | Reading a file and concluding what a voice says | the configured voice did not exist on that machine | speech claims come from running the screen reader, not from reading config |
 
 ## 6. Working ON the MCP (maintainers, human or AI)

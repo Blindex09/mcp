@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import html
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -18,6 +19,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent.parent))
 
+import pilhas
 from exemplos import CENARIOS, ROTULO
 from interativos import ROTAS
 
@@ -69,11 +71,11 @@ p, li { max-width: 70ch; }
 .etiqueta { font-weight: 700; }
 .t-ruim { color: var(--ruim); }
 .t-bom { color: var(--bom); }
-.t-ok { color: var(--ok); }
+.t-ok, .t-incerto { color: var(--ok); }
 .exemplo { border: 2px dashed var(--borda); border-radius: 8px; padding: 1rem; margin-block: 0.75rem; }
 .exemplo-ruim { border-left: 8px solid var(--ruim); }
 .exemplo-bom { border-left: 8px solid var(--bom); }
-.exemplo-ok { border-left: 8px solid var(--ok); }
+.exemplo-ok, .exemplo-incerto { border-left: 8px solid var(--ok); }
 pre { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--destaque); border: 1px solid var(--borda); border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.95rem; line-height: 1.45; margin: 0.4rem 0; }
 .entre { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--borda); }
 .entre a { display: inline-block; min-height: 44px; padding: 0.55rem 0; }
@@ -120,16 +122,28 @@ def esc(texto: str) -> str:
     return html.escape(texto, quote=True)
 
 
-async def medir(fragmento: str) -> dict[str, Any]:
+def embutir(documento: str, script: str | None) -> str:
+    """Troca o <script src> do pacote do framework pelo conteudo dele, para medir sem servidor (e sem fechar o script por engano)."""
+    if not script:
+        return documento
+    corpo = (HERE / script).read_text(encoding="utf-8").replace("</script", "<\\/script")
+    return documento.replace(f'<script src="{script}"></script>', "") .replace("</body>", f"<script>{corpo}</script></body>")
+
+
+MONTADO = "() => Array.from(document.querySelectorAll('[data-exemplo]')).every((e) => e.childElementCount > 0)"
+
+
+async def medir(fragmento: str, script: str | None = None) -> dict[str, Any]:
     """A arvore de acessibilidade do fragmento e as violacoes do axe (nivel AA), medidas pelo codigo do proprio MCP."""
-    documento = (
+    documento = embutir(
         '<!doctype html><html lang="pt-BR"><head><title>exemplo</title></head><body><main><div id="medida">'
-        + fragmento + "</div></main></body></html>"
+        + fragmento + "</div></main></body></html>", script,
     )
     axe_js = audit.AXE_PATH.read_text(encoding="utf-8")
 
     async def fn(page: Any) -> dict[str, Any]:
-        arvore = str(await page.locator("#medida").aria_snapshot())
+        await page.wait_for_function(MONTADO)  # o framework monta o componente depois de carregar
+        arvore = await audit.snapshot_com_papeis_do_navegador(page, page.locator("#medida"))
         await page.add_script_tag(content=axe_js)
         bruto = await page.evaluate("tags => axe.run(document, {runOnly: {type: 'tag', values: tags}})", audit._LEVEL_TAGS["AA"])
         violacoes = [(v["id"], v["help"]) for v in audit.summarize_axe(bruto)["violations"]]
@@ -139,28 +153,110 @@ async def medir(fragmento: str) -> dict[str, Any]:
     return resultado
 
 
-async def medir_sonda(fragmento: str, tipo: str, alvo: str, documento: str | None = None) -> list[dict[str, Any]]:
+async def medir_sonda(fragmento: str, tipo: str, alvo: str, documento: str | None = None, script: str | None = None) -> list[dict[str, Any]]:
     """Roda a sonda do MCP (teclado de verdade, no Chromium) contra o exemplo sozinho e devolve os checks esperado x observado."""
     from accessibility_mcp.a11y.probes import run_probe
     from accessibility_mcp.a11y.session import SESSION
 
     if documento is None:
         documento = '<!doctype html><html lang="pt-BR"><head><title>exemplo</title></head><body><main>' + fragmento + "</main></body></html>"
-    await SESSION.open(None, documento)
+    await SESSION.open(None, embutir(documento, script))
     try:
+        await SESSION.page.wait_for_function(MONTADO)
         resultado = await run_probe(SESSION, tipo, alvo)
     finally:
         await SESSION.close()
     return list(resultado["checks"])
 
 
+def documento_simples(fragmento: str) -> str:
+    return '<!doctype html><html lang="pt-BR"><head><title>exemplo</title></head><body><main>' + fragmento + "</main></body></html>"
+
+
+async def medir_extra(ex: dict[str, Any], arvore_chromium: str) -> str:
+    """Medidas que nao sao um contrato de teclado: foco, espacamento de texto, alcance por Tab, a arvore no WebKit e o movimento reduzido.
+    Sao fatos medidos pelo codigo do MCP; o texto so os descreve."""
+    from accessibility_mcp.a11y.probes import run_probe
+    from accessibility_mcp.a11y.session import SESSION
+
+    tipo, alvo = ex["extra"]
+    # mesmo estilo do site (fonte, tamanhos): o espacamento e o corte de texto dependem do tamanho da letra
+    documento = documento_simples(f"<style>{ESTILO}</style><div class=\"exemplo\">{ex['html']}</div>")
+    if tipo == "webkit_tree":
+        async def fn(page: Any) -> str:
+            return str(await page.locator("#medida").aria_snapshot()).strip()
+
+        doc = '<!doctype html><html lang="pt-BR"><head><title>exemplo</title></head><body><main><div id="medida">' + ex["html"] + "</div></main></body></html>"
+        webkit: str = await audit._with_page(None, doc, fn, browser="webkit")
+        igual = webkit == arvore_chromium
+        return (
+            "Chromium:" + NL + arvore_chromium + NL + NL + "WebKit (o motor do Safari):" + NL + webkit + NL + NL
+            + ("As duas árvores são iguais nesta versão medida." if igual else "As duas árvores são diferentes: o leitor de tela do Safari recebe outra coisa.")
+        )
+    persona = "reduced_motion" if tipo == "movimento" else "default"
+    await SESSION.open(None, documento, persona)
+    try:
+        if tipo == "focus_style":
+            r = await SESSION.focus_style(alvo)
+            mudou = ", ".join(sorted(r["changed_on_focus"])) or "nada"
+            return f"Contorno quando focado: {r['outline_when_focused'].strip()}. Sombra quando focado: {r['box_shadow_when_focused']}. Propriedades que o :focus muda: {mudou}."
+        if tipo == "stress":
+            r = await SESSION.stress(alvo)
+            cortados = r["newly_clipped_with_user_spacing"]
+            if cortados:
+                return f"Com o espaçamento do usuário (WCAG 1.4.12) {len(cortados)} trecho(s) passaram a ficar cortados: " + "; ".join(repr(c["text"]) for c in cortados) + "."
+            return f"Com o espaçamento do usuário (WCAG 1.4.12) nada passou a ficar cortado (cortados antes: {r['clipped_before']})."
+        if tipo == "alcance":
+            ligacoes = await SESSION.page.evaluate("() => document.querySelectorAll('a[href]').length")
+            volta = await run_probe(SESSION, "tab_walk")
+            paradas = [x for x in volta["stops"] if x.get("tag") == "a"]
+            return f"Links no código: {ligacoes}. Links que o Tab alcança: {len(paradas)}" + (" (" + ", ".join(x["name"] for x in paradas) + ")" if paradas else "") + "."
+        if tipo == "anuncios":
+            r = await run_probe(SESSION, "status_update", alvo)
+            ditos = r["facts"].get("announced", [])
+            return (
+                f"Anúncios que o leitor de tela receberia depois de apertar Enter no botão: {len(ditos)} (o MCP guarda no máximo 20 por ação)."
+                + (NL + NL.join(f"{n + 1}. [{a['role']}] {a['text'][:60]}" for n, a in enumerate(ditos[:12])) if ditos else "")
+            )
+        if tipo == "movimento":
+            seletor = alvo.removeprefix("css:")
+            nome = await SESSION.page.evaluate("(s) => getComputedStyle(document.querySelector(s)).animationName", seletor)
+            return f"Com a preferência de menos movimento ligada (emulada), a animação calculada do elemento é: {nome}."
+    finally:
+        await SESSION.close()
+    raise KeyError(tipo)
+
+
+def documento_da_rota(ex: dict[str, Any]) -> str:
+    if ex.get("pilha"):
+        return pilhas.pagina_rota(ex["pilha"], ex["tipo"])
+    return ROTAS[ex["documento"]]
+
+
+def avisos_do_svelte(chave: str) -> list[str]:
+    """Os avisos de acessibilidade que o compilador do Svelte emitiu para o componente (frameworks/build.mjs os grava)."""
+    arquivo = HERE / "app-svelte.avisos.json"
+    if not arquivo.exists():
+        return []
+    todos = json.loads(arquivo.read_text(encoding="utf-8"))
+    return [f"{a['codigo']}: {a['mensagem'].splitlines()[0]}" for a in todos if a["arquivo"].replace(chr(92), "/").split("/")[-1] == pilhas.arquivo_svelte(chave)]
+
+
 async def medir_todos() -> dict[tuple[str, int], dict[str, Any]]:
     medidas: dict[tuple[str, int], dict[str, Any]] = {}
     for cenario in CENARIOS:
         for i, ex in enumerate(cenario["exemplos"]):
-            medida = await medir(ex["html"])
+            if ex.get("nao_executado"):
+                medidas[(cenario["slug"], i)] = {"arvore": "", "violacoes": [], "nao_executado": True}
+                continue
+            medida = await medir(ex["html"], ex.get("script"))
             if ex.get("sonda"):
-                medida["sonda"] = await medir_sonda(ex["html"], *ex["sonda"], documento=ROTAS[ex["documento"]] if ex.get("documento") else None)
+                documento = documento_da_rota(ex) if ex.get("documento") else None
+                medida["sonda"] = await medir_sonda(ex["html"], *ex["sonda"], documento=documento, script=ex.get("script"))
+            if ex.get("extra"):
+                medida["extra"] = await medir_extra(ex, medida["arvore"])
+            if ex.get("pilha") == "svelte":
+                medida["avisos_compilador"] = avisos_do_svelte(ex["chave"])
             medidas[(cenario["slug"], i)] = medida
     return medidas
 
@@ -228,10 +324,27 @@ def texto_da_sonda(checks: list[dict[str, Any]]) -> str:
     return NL.join(linhas)
 
 
+def texto_dos_avisos(avisos: list[str]) -> str:
+    return NL.join(avisos) if avisos else "O compilador não emitiu nenhum aviso de acessibilidade para este componente."
+
+
+def bloco_nao_executado(ex: dict[str, Any], i: int) -> str:
+    tipo = ex["tipo"]
+    return (
+        f'<h2 id="ex-{i + 1}"><span class="etiqueta t-{tipo}">{esc(ROTULO[tipo])}:</span> {esc(ex["titulo"])}</h2>\n'
+        f'<div class="exemplo exemplo-{tipo}" role="group" aria-label="Código de exemplo, {esc(ROTULO[tipo].lower())}: {esc(ex["titulo"])}"><p>{esc(ex["nao_executado"])}</p></div>\n'
+        f'<h3>Por quê</h3>\n<p>{esc(ex["porque"])}</p>\n'
+        f'<h3>O que corrigir</h3>\n<p>{esc(ex["corrigir"])}</p>\n'
+        f'<h3>Código</h3>\n<pre>{esc(ex["codigo"])}</pre>\n'
+    )
+
+
 def bloco_exemplo(cenario: dict[str, Any], i: int, medida: dict[str, Any]) -> str:
     ex = cenario["exemplos"][i]
     tipo = ex["tipo"]
     ident = f"ex-{i + 1}"
+    if ex.get("nao_executado"):
+        return bloco_nao_executado(ex, i)
     return (
         f'<h2 id="{ident}"><span class="etiqueta t-{tipo}">{esc(ROTULO[tipo])}:</span> {esc(ex["titulo"])}</h2>\n'
         f'<div class="exemplo exemplo-{tipo}" role="group" aria-label="Exemplo ao vivo, {esc(ROTULO[tipo].lower())}: {esc(ex["titulo"])}">{ex["html"]}</div>\n'
@@ -240,8 +353,12 @@ def bloco_exemplo(cenario: dict[str, Any], i: int, medida: dict[str, Any]) -> st
         f'<h3>O que o navegador entrega ao leitor de tela (medido)</h3>\n<pre>{esc(medida["arvore"])}</pre>\n'
         f'<h3>O que o axe acha (medido)</h3>\n<p>{esc(texto_do_axe(tipo, medida["violacoes"]))}</p>\n'
         + (f'<h3>Comportamento com o teclado (sonda {esc(ex["sonda"][0])}, medido)</h3>\n<pre>{esc(texto_da_sonda(medida["sonda"]))}</pre>\n' if medida.get("sonda") else "")
-        +
-        f'<h3>Código</h3>\n<pre>{esc(ex["html"])}</pre>\n'
+        + (f'<h3>Medida a mais (feita pelo MCP)</h3>\n<pre>{esc(medida["extra"])}</pre>\n' if medida.get("extra") else "")
+        + (
+            f'<h3>Avisos do compilador do Svelte (medidos)</h3>\n<pre>{esc(texto_dos_avisos(medida["avisos_compilador"]))}</pre>\n'
+            if "avisos_compilador" in medida else ""
+        )
+        + f'<h3>Código</h3>\n<pre>{esc(ex.get("codigo") or ex["html"])}</pre>\n'
     )
 
 
@@ -254,6 +371,8 @@ def pagina_cenario(indice: int, medidas: dict[tuple[str, int], dict[str, Any]]) 
     saida.append(f'<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>\n<ol>\n{itens}\n</ol>\n</nav>\n')
     for i in range(len(c["exemplos"])):
         saida.append(bloco_exemplo(c, i, medidas[(c["slug"], i)]))
+    for script in dict.fromkeys(ex["script"] for ex in c["exemplos"] if ex.get("script") and "data-exemplo" in ex["html"]):
+        saida.append(f'<script src="{script}"></script>\n')
     anterior = CENARIOS[indice - 1] if indice > 0 else None
     seguinte = CENARIOS[indice + 1] if indice < len(CENARIOS) - 1 else None
     links = [f'<a href="{anterior["slug"]}.html">Anterior: {esc(anterior["nome"])}</a>' if anterior else '<a href="index.html">Início</a>']
@@ -286,6 +405,9 @@ def main() -> int:
     (HERE / "index.html").write_text(pagina_inicial(), encoding="utf-8")
     for nome, pagina in ROTAS.items():
         (HERE / f"{nome}.html").write_text(pagina, encoding="utf-8")
+    for pilha in pilhas.PILHAS:
+        for tipo in ("ruim", "bom"):
+            (HERE / f"{pilha}-rota-{tipo}.html").write_text(pilhas.pagina_rota(pilha, tipo), encoding="utf-8")
     for i, c in enumerate(CENARIOS):
         (HERE / f"{c['slug']}.html").write_text(pagina_cenario(i, medidas), encoding="utf-8")
     total = sum(len(c["exemplos"]) for c in CENARIOS)

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resposta de IA em streaming | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html">Carrossel</a></li>
+<li><a href="dica.html">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
+<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html" aria-current="page">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html">Svelte</a></li>
+<li><a href="pilha-angular.html">Angular</a></li>
+<li><a href="android.html">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Resposta de IA em streaming</h1>
+<p>Uma resposta que chega aos poucos não pode ser uma região viva atualizada a cada palavra: o leitor de tela fica falando por cima de si mesmo. O padrão do MCP é escrever a resposta numa área que não anuncia e avisar uma vez, no fim, numa região de status. O número de anúncios abaixo é medido, sem veredito.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Cada palavra numa região assertiva</a></li>
+<li><a href="#ex-2">Exemplo bom: Resposta sem região viva e um aviso no fim</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Cada palavra numa região assertiva</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Cada palavra numa região assertiva"><button type="button" id="chat-ruim-btn">Perguntar</button><div id="chat-ruim-resp" aria-live="assertive"></div><script>document.getElementById('chat-ruim-btn').addEventListener('click',function(){var r=document.getElementById('chat-ruim-resp');r.textContent='';'O chá verde deve ser preparado com água abaixo de oitenta graus'.split(' ').forEach(function(p,i){setTimeout(function(){r.textContent+=p+' ';},i*40);});});</script></div>
+<h3>Por quê</h3>
+<p>Cada palavra que entra é uma mudança numa região assertiva: o leitor de tela interrompe e repete, e quem usa se perde antes de a resposta acabar.</p>
+<h3>O que corrigir</h3>
+<p>Escreva a resposta num elemento sem aria-live, mantenha o foco no campo e avise uma vez, no fim, numa região de status (Resposta pronta).</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Perguntar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Medida a mais (feita pelo MCP)</h3>
+<pre>Anúncios que o leitor de tela receberia depois de apertar Enter no botão: 12 (o MCP guarda no máximo 20 por ação).
+1. [aria-live=assertive] O
+2. [aria-live=assertive] O chá
+3. [aria-live=assertive] O chá verde
+4. [aria-live=assertive] O chá verde deve
+5. [aria-live=assertive] O chá verde deve ser
+6. [aria-live=assertive] O chá verde deve ser preparado
+7. [aria-live=assertive] O chá verde deve ser preparado com
+8. [aria-live=assertive] O chá verde deve ser preparado com água
+9. [aria-live=assertive] O chá verde deve ser preparado com água abaixo
+10. [aria-live=assertive] O chá verde deve ser preparado com água abaixo de
+11. [aria-live=assertive] O chá verde deve ser preparado com água abaixo de oitenta
+12. [aria-live=assertive] O chá verde deve ser preparado com água abaixo de oitenta gr</pre>
+<h3>Código</h3>
+<pre>&lt;button type=&quot;button&quot; id=&quot;chat-ruim-btn&quot;&gt;Perguntar&lt;/button&gt;&lt;div id=&quot;chat-ruim-resp&quot; aria-live=&quot;assertive&quot;&gt;&lt;/div&gt;&lt;script&gt;document.getElementById(&#x27;chat-ruim-btn&#x27;).addEventListener(&#x27;click&#x27;,function(){var r=document.getElementById(&#x27;chat-ruim-resp&#x27;);r.textContent=&#x27;&#x27;;&#x27;O chá verde deve ser preparado com água abaixo de oitenta graus&#x27;.split(&#x27; &#x27;).forEach(function(p,i){setTimeout(function(){r.textContent+=p+&#x27; &#x27;;},i*40);});});&lt;/script&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Resposta sem região viva e um aviso no fim</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Resposta sem região viva e um aviso no fim"><button type="button" id="chat-bom-btn">Perguntar</button><div id="chat-bom-resp" aria-busy="false"></div><div role="status" id="chat-bom-aviso"></div><script>document.getElementById('chat-bom-btn').addEventListener('click',function(){var r=document.getElementById('chat-bom-resp'),a=document.getElementById('chat-bom-aviso');r.textContent='';r.setAttribute('aria-busy','true');var t='O chá verde deve ser preparado com água abaixo de oitenta graus'.split(' ');t.forEach(function(p,i){setTimeout(function(){r.textContent+=p+' ';if(i===t.length-1){r.setAttribute('aria-busy','false');a.textContent='Resposta pronta';}},i*40);});});</script></div>
+<h3>Por quê</h3>
+<p>A resposta aparece sem interromper ninguém. Um único aviso, Resposta pronta, chega no fim, e a pessoa lê o texto quando quiser.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Perguntar&quot;
+- status</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Medida a mais (feita pelo MCP)</h3>
+<pre>Anúncios que o leitor de tela receberia depois de apertar Enter no botão: 1 (o MCP guarda no máximo 20 por ação).
+1. [status] Resposta pronta</pre>
+<h3>Código</h3>
+<pre>&lt;button type=&quot;button&quot; id=&quot;chat-bom-btn&quot;&gt;Perguntar&lt;/button&gt;&lt;div id=&quot;chat-bom-resp&quot; aria-busy=&quot;false&quot;&gt;&lt;/div&gt;&lt;div role=&quot;status&quot; id=&quot;chat-bom-aviso&quot;&gt;&lt;/div&gt;&lt;script&gt;document.getElementById(&#x27;chat-bom-btn&#x27;).addEventListener(&#x27;click&#x27;,function(){var r=document.getElementById(&#x27;chat-bom-resp&#x27;),a=document.getElementById(&#x27;chat-bom-aviso&#x27;);r.textContent=&#x27;&#x27;;r.setAttribute(&#x27;aria-busy&#x27;,&#x27;true&#x27;);var t=&#x27;O chá verde deve ser preparado com água abaixo de oitenta graus&#x27;.split(&#x27; &#x27;);t.forEach(function(p,i){setTimeout(function(){r.textContent+=p+&#x27; &#x27;;if(i===t.length-1){r.setAttribute(&#x27;aria-busy&#x27;,&#x27;false&#x27;);a.textContent=&#x27;Resposta pronta&#x27;;}},i*40);});});&lt;/script&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="web-components.html">Anterior: Web Components (elemento personalizado)</a>
+<a href="pilha-react.html">Próximo: React</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

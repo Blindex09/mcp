@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dica (tooltip) | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html">Carrossel</a></li>
+<li><a href="dica.html" aria-current="page">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
+<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html">Svelte</a></li>
+<li><a href="pilha-angular.html">Angular</a></li>
+<li><a href="android.html">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Dica (tooltip)</h1>
+<p>Uma dica precisa aparecer também quando o controle recebe o foco, estar ligada ao controle por aria-describedby e fechar com Escape sem tirar o foco. O atributo title sozinho não aparece para quem usa teclado.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Dica só com title</a></li>
+<li><a href="#ex-2">Exemplo ruim: Dica que só aparece com o mouse</a></li>
+<li><a href="#ex-3">Exemplo bom: Dica no foco, ligada ao botão e fechada com Escape</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Dica só com title</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Dica só com title"><button type="button" id="dica-ruim-btn" title="Salva o rascunho sem publicar">Salvar</button></div>
+<h3>Por quê</h3>
+<p>Com o mouse o navegador mostra a dica depois de um instante. Com o teclado ela não aparece, e leitores de tela leem o title de forma inconstante.</p>
+<h3>O que corrigir</h3>
+<p>Use um elemento role=tooltip ligado ao botão por aria-describedby, mostrado no foco e no mouse, e fechado com Escape.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Salvar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda tooltip, medido)</h3>
+<pre>cumpriu: o controle recebe o foco do teclado. Observado: button &#x27;Salvar&#x27;.
+NÃO cumpriu: a dica aparece quando o controle recebe o foco (nao so no mouse). Observado: dica visivel: False; so tem title (o navegador nao mostra title no foco do teclado).
+NÃO cumpriu: o controle aponta a dica com aria-describedby (role=tooltip). Observado: aria-describedby=[]; aponta um role=tooltip: False.</pre>
+<h3>Código</h3>
+<pre>&lt;button type=&quot;button&quot; id=&quot;dica-ruim-btn&quot; title=&quot;Salva o rascunho sem publicar&quot;&gt;Salvar&lt;/button&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-ruim">Exemplo ruim:</span> Dica que só aparece com o mouse</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Dica que só aparece com o mouse"><button type="button" id="dica-mouse-btn" aria-describedby="dica-mouse-tip">Salvar</button><span role="tooltip" id="dica-mouse-tip" hidden>Salva o rascunho sem publicar</span><script>(function(){var b=document.getElementById('dica-mouse-btn'),t=document.getElementById('dica-mouse-tip');b.addEventListener('mouseenter',function(){t.hidden=false;});b.addEventListener('mouseleave',function(){t.hidden=true;});})();</script></div>
+<h3>Por quê</h3>
+<p>A ligação por aria-describedby está certa, mas a dica só abre no mouse: quem navega com Tab nunca a vê (WCAG 1.4.13 e 2.1.1).</p>
+<h3>O que corrigir</h3>
+<p>Abra também no focus e feche no blur e no Escape.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Salvar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda tooltip, medido)</h3>
+<pre>cumpriu: o controle recebe o foco do teclado. Observado: button &#x27;Salvar&#x27;.
+NÃO cumpriu: a dica aparece quando o controle recebe o foco (nao so no mouse). Observado: dica visivel: False.
+cumpriu: o controle aponta a dica com aria-describedby (role=tooltip). Observado: aria-describedby=[&#x27;dica-mouse-tip&#x27;]; aponta um role=tooltip: True.</pre>
+<h3>Código</h3>
+<pre>&lt;button type=&quot;button&quot; id=&quot;dica-mouse-btn&quot; aria-describedby=&quot;dica-mouse-tip&quot;&gt;Salvar&lt;/button&gt;&lt;span role=&quot;tooltip&quot; id=&quot;dica-mouse-tip&quot; hidden&gt;Salva o rascunho sem publicar&lt;/span&gt;&lt;script&gt;(function(){var b=document.getElementById(&#x27;dica-mouse-btn&#x27;),t=document.getElementById(&#x27;dica-mouse-tip&#x27;);b.addEventListener(&#x27;mouseenter&#x27;,function(){t.hidden=false;});b.addEventListener(&#x27;mouseleave&#x27;,function(){t.hidden=true;});})();&lt;/script&gt;</pre>
+<h2 id="ex-3"><span class="etiqueta t-bom">Exemplo bom:</span> Dica no foco, ligada ao botão e fechada com Escape</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Dica no foco, ligada ao botão e fechada com Escape"><button type="button" id="dica-bom-btn" aria-describedby="dica-bom-tip">Salvar</button><span role="tooltip" id="dica-bom-tip" hidden>Salva o rascunho sem publicar</span><script>(function(){var b=document.getElementById('dica-bom-btn'),t=document.getElementById('dica-bom-tip');function abre(){t.hidden=false;}function fecha(){t.hidden=true;}b.addEventListener('focus',abre);b.addEventListener('blur',fecha);b.addEventListener('mouseenter',abre);b.addEventListener('mouseleave',fecha);b.addEventListener('keydown',function(e){if(e.key==='Escape')fecha();});})();</script></div>
+<h3>Por quê</h3>
+<p>A dica aparece no foco e no mouse, o botão a descreve por aria-describedby e o Escape a fecha sem mover o foco.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Salvar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda tooltip, medido)</h3>
+<pre>cumpriu: o controle recebe o foco do teclado. Observado: button &#x27;Salvar&#x27;.
+cumpriu: a dica aparece quando o controle recebe o foco (nao so no mouse). Observado: dica visivel: True (&#x27;Salva o rascunho sem publicar&#x27;).
+cumpriu: o controle aponta a dica com aria-describedby (role=tooltip). Observado: aria-describedby=[&#x27;dica-bom-tip&#x27;]; aponta um role=tooltip: True.
+cumpriu: Escape fecha a dica sem tirar o foco do controle. Observado: dica visivel: False; foco: button &#x27;Salvar&#x27;.</pre>
+<h3>Código</h3>
+<pre>&lt;button type=&quot;button&quot; id=&quot;dica-bom-btn&quot; aria-describedby=&quot;dica-bom-tip&quot;&gt;Salvar&lt;/button&gt;&lt;span role=&quot;tooltip&quot; id=&quot;dica-bom-tip&quot; hidden&gt;Salva o rascunho sem publicar&lt;/span&gt;&lt;script&gt;(function(){var b=document.getElementById(&#x27;dica-bom-btn&#x27;),t=document.getElementById(&#x27;dica-bom-tip&#x27;);function abre(){t.hidden=false;}function fecha(){t.hidden=true;}b.addEventListener(&#x27;focus&#x27;,abre);b.addEventListener(&#x27;blur&#x27;,fecha);b.addEventListener(&#x27;mouseenter&#x27;,abre);b.addEventListener(&#x27;mouseleave&#x27;,fecha);b.addEventListener(&#x27;keydown&#x27;,function(e){if(e.key===&#x27;Escape&#x27;)fecha();});})();&lt;/script&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="carrossel.html">Anterior: Carrossel</a>
+<a href="lista-de-opcoes.html">Próximo: Lista de opções (listbox)</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

@@ -977,12 +977,21 @@ class Session:
         eid = await loc.get_attribute("data-a11y-id")
         cdp = self.cdp
         backend = next((b for b, i in self._ids.items() if i == eid), None)
+        marked = False
         if backend is not None:  # pelo id interno do navegador: atravessa iframes e Shadow DOM
             await cdp.send("DOM.getDocument", {"depth": 0})
             node = (await cdp.send("DOM.pushNodesByBackendIdsToFrontend", {"backendNodeIds": [backend]}))["nodeIds"][0]
         else:
+            if eid is None:  # alvo "css:" que o dossie ainda nao numerou: marca o elemento so durante a medida
+                eid = "focus-style-probe"
+                await loc.evaluate("(el, v) => el.setAttribute('data-a11y-id', v)", eid)
+                marked = True
             root = (await cdp.send("DOM.getDocument", {"depth": 0}))["root"]["nodeId"]
             node = (await cdp.send("DOM.querySelector", {"nodeId": root, "selector": f'[data-a11y-id="{eid}"]'}))["nodeId"]
+            if marked:
+                await loc.evaluate("(el) => el.removeAttribute('data-a11y-id')")
+            if not node:  # elemento dentro de Shadow DOM: sem como achar pelo seletor, mede focando de verdade
+                return await self._focus_style_by_focusing(target, loc)
         await cdp.send("CSS.enable")
 
         async def computed() -> dict[str, str]:

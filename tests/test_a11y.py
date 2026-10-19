@@ -232,3 +232,18 @@ def test_missing_or_orphan_description_is_detected(tmp_path):
     idx = ContentIndex(tmp_path)
     assert idx.catalog_problems() == {"sem_descricao": ["reference:novo"], "descricao_orfa": ["reference:velho"]}
     assert idx.catalog()[0]["quando_usar"] == "(sem descricao no catalogo)"
+
+
+async def test_aria_snapshot_shows_the_role_that_element_internals_gives_a_custom_element():
+    """Regressao real (achada medindo o site de exemplos): o aria_snapshot do Playwright nao ve o papel vindo de ElementInternals; o Chromium (CDP) ve."""
+    html = (
+        '<!doctype html><html lang="pt"><head><title>t</title></head><body><main><caixa-bom>Receber novidades</caixa-bom>'
+        "<script>customElements.define('caixa-bom',class extends HTMLElement{constructor(){super();this.i=this.attachInternals();this.i.role='checkbox';this.i.ariaChecked='false';}"
+        "connectedCallback(){this.tabIndex=0;}});</script></main></body></html>"
+    )
+    from accessibility_mcp.a11y import audit
+
+    texto = await audit.aria_snapshot(None, html)
+    assert 'caixa-bom: checkbox "Receber novidades" [checked=false]' in texto
+    plain = await audit.aria_snapshot(None, "<!doctype html><html lang='pt'><head><title>t</title></head><body><button>Ok</button></body></html>")
+    assert "Elementos personalizados" not in plain

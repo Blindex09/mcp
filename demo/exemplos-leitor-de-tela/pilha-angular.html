@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Angular | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html">Carrossel</a></li>
+<li><a href="dica.html">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
+<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html">Svelte</a></li>
+<li><a href="pilha-angular.html" aria-current="page">Angular</a></li>
+<li><a href="android.html">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Angular</h1>
+<p>Angular 20, componentes standalone com signals, compilação JIT no pacote e o CDK a11y (LiveAnnouncer). Os mesmos cinco componentes (acordeão, diálogo, erro de formulário, mensagem de status e mudança de tela), cada um ruim e bom, em código real compilado. O framework não faz acessibilidade por você: o que muda é onde cada um esconde o erro.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Acordeão em Angular: como não fazer</a></li>
+<li><a href="#ex-2">Exemplo bom: Acordeão em Angular: como fazer</a></li>
+<li><a href="#ex-3">Exemplo ruim: Diálogo em Angular: como não fazer</a></li>
+<li><a href="#ex-4">Exemplo bom: Diálogo em Angular: como fazer</a></li>
+<li><a href="#ex-5">Exemplo ruim: Erro de formulário em Angular: como não fazer</a></li>
+<li><a href="#ex-6">Exemplo bom: Erro de formulário em Angular: como fazer</a></li>
+<li><a href="#ex-7">Exemplo ruim: Mensagem de status em Angular: como não fazer</a></li>
+<li><a href="#ex-8">Exemplo bom: Mensagem de status em Angular: como fazer</a></li>
+<li><a href="#ex-9">Exemplo ruim: Mudança de tela em Angular: como não fazer</a></li>
+<li><a href="#ex-10">Exemplo bom: Mudança de tela em Angular: como fazer</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Acordeão em Angular: como não fazer</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Acordeão em Angular: como não fazer"><div data-exemplo="acordeao-ruim"></div></div>
+<h3>Por quê</h3>
+<p>O clique funciona só com o mouse. A div não recebe foco, não é anunciada como botão e não diz se está aberta ou fechada. O (click) numa div compila sem aviso; só as regras de acessibilidade de template do angular-eslint reclamam, e só se estiverem ativas.</p>
+<h3>O que corrigir</h3>
+<p>Troque a div por button e mantenha aria-expanded igual ao estado do componente.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: Prazo de entrega</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda disclosure, medido)</h3>
+<pre>NÃO cumpriu: o gatilho recebe o foco do teclado. Observado: nenhum elemento (corpo da pagina).
+NÃO cumpriu: estado aberto/fechado exposto (aria-expanded no botao ou &lt;summary&gt; de &lt;details&gt;). Observado: aria-expanded=None.
+NÃO cumpriu: Enter alterna o estado do botao e o conteudo controlado. Observado: expanded None-&gt;None; conteudo visivel None-&gt;None.
+NÃO cumpriu: o foco continua no botao. Observado: nenhum elemento (corpo da pagina).
+NÃO cumpriu: Space alterna o estado do botao e o conteudo controlado. Observado: expanded None-&gt;None; conteudo visivel None-&gt;None.
+NÃO cumpriu: o foco continua no botao. Observado: nenhum elemento (corpo da pagina).</pre>
+<h3>Código</h3>
+<pre>@Component({
+  selector: &#x27;acordeao-ruim&#x27;,
+  standalone: true,
+  // div com (click): sem papel, sem foco, sem Enter/Espaço e sem estado.
+  template: `&lt;div&gt;
+    &lt;div [id]=&quot;k + &#x27;-gatilho&#x27;&quot; class=&quot;fake-botao&quot; (click)=&quot;aberto.set(!aberto())&quot;&gt;Prazo de entrega&lt;/div&gt;
+    @if (aberto()) { &lt;p [id]=&quot;k + &#x27;-painel&#x27;&quot;&gt;Cinco dias úteis.&lt;/p&gt; }
+  &lt;/div&gt;`,
+})
+class AcordeaoRuim { @Input() k = &#x27;acordeao-ruim&#x27;; aberto = signal(false); }</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Acordeão em Angular: como fazer</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Acordeão em Angular: como fazer"><div data-exemplo="acordeao-bom"></div></div>
+<h3>Por quê</h3>
+<p>Um button com aria-expanded e aria-controls: o leitor de tela anuncia botão, recolhido ou expandido, e Enter e Espaço alternam.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Prazo de entrega&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda disclosure, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Prazo de entrega&#x27;.
+cumpriu: estado aberto/fechado exposto (aria-expanded no botao ou &lt;summary&gt; de &lt;details&gt;). Observado: aria-expanded=false.
+cumpriu: Enter alterna o estado do botao e o conteudo controlado. Observado: expanded false-&gt;true; conteudo visivel False-&gt;True.
+cumpriu: o foco continua no botao. Observado: button &#x27;Prazo de entrega&#x27;.
+cumpriu: expanded=true mostra o conteudo; false o oculta. Observado: expanded=true conteudo_visivel=True.
+cumpriu: Space alterna o estado do botao e o conteudo controlado. Observado: expanded false-&gt;true; conteudo visivel False-&gt;True.
+cumpriu: o foco continua no botao. Observado: button &#x27;Prazo de entrega&#x27;.</pre>
+<h3>Código</h3>
+<pre>@Component({
+  selector: &#x27;acordeao-bom&#x27;,
+  standalone: true,
+  template: `&lt;div&gt;
+    &lt;button type=&quot;button&quot; [id]=&quot;k + &#x27;-gatilho&#x27;&quot; [attr.aria-expanded]=&quot;aberto()&quot; [attr.aria-controls]=&quot;k + &#x27;-painel&#x27;&quot; (click)=&quot;aberto.set(!aberto())&quot;&gt;Prazo de entrega&lt;/button&gt;
+    &lt;div [id]=&quot;k + &#x27;-painel&#x27;&quot; [hidden]=&quot;!aberto()&quot;&gt;&lt;p&gt;Cinco dias úteis.&lt;/p&gt;&lt;/div&gt;
+  &lt;/div&gt;`,
+})
+class AcordeaoBom { @Input() k = &#x27;acordeao-bom&#x27;; aberto = signal(false); }</pre>
+<h2 id="ex-3"><span class="etiqueta t-ruim">Exemplo ruim:</span> Diálogo em Angular: como não fazer</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Diálogo em Angular: como não fazer"><div data-exemplo="dialogo-ruim"></div></div>
+<h3>Por quê</h3>
+<p>Para quem vê, abriu uma janela. Para o teclado e o leitor de tela, não é um diálogo: sem papel, sem nome, o foco fica no botão de trás e o Escape não fecha. O @if cria a caixa só quando abre; o dialog nativo existe sempre e o showModal() o abre. O CDK também oferece cdkTrapFocus para caixas que não são dialog.</p>
+<h3>O que corrigir</h3>
+<p>Use dialog com showModal() em vez de renderizar uma caixa condicional, e ligue o nome ao título com aria-labelledby.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Excluir projeto&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda dialog, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Excluir projeto&#x27;.
+NÃO cumpriu: Enter no gatilho abre um dialogo visivel. Observado: nenhum dialogo (papel dialog/alertdialog ou &lt;dialog open&gt;) visivel depois do Enter.</pre>
+<h3>Código</h3>
+<pre>@Component({
+  selector: &#x27;dialogo-ruim&#x27;,
+  standalone: true,
+  // Aparece na tela, mas não é um diálogo: sem papel, sem nome, sem foco, sem Escape.
+  template: `&lt;div&gt;
+    &lt;button type=&quot;button&quot; [id]=&quot;k + &#x27;-gatilho&#x27;&quot; (click)=&quot;aberto.set(true)&quot;&gt;Excluir projeto&lt;/button&gt;
+    @if (aberto()) { &lt;div class=&quot;caixa-falsa&quot;&gt;&lt;p&gt;Excluir este projeto?&lt;/p&gt;&lt;button type=&quot;button&quot; (click)=&quot;aberto.set(false)&quot;&gt;Cancelar&lt;/button&gt;&lt;/div&gt; }
+  &lt;/div&gt;`,
+})
+class DialogoRuim { @Input() k = &#x27;dialogo-ruim&#x27;; aberto = signal(false); }</pre>
+<h2 id="ex-4"><span class="etiqueta t-bom">Exemplo bom:</span> Diálogo em Angular: como fazer</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Diálogo em Angular: como fazer"><div data-exemplo="dialogo-bom"></div></div>
+<h3>Por quê</h3>
+<p>O elemento dialog aberto com showModal() dá papel, nome (pelo título), foco preso, Escape e devolução do foco ao botão.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Excluir projeto&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda dialog, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Excluir projeto&#x27;.
+cumpriu: Enter no gatilho abre um dialogo visivel. Observado: abriu &lt;dialog&gt; role=None.
+cumpriu: o foco entra no dialogo ao abrir. Observado: dentro.
+cumpriu: o dialogo tem nome (aria-label ou aria-labelledby). Observado: &#x27;Excluir este projeto?&#x27;.
+cumpriu: aria-modal=true ou &lt;dialog&gt; aberto com showModal(). Observado: aria-modal=None :modal=True.
+cumpriu: Tab circula so entre os controles do dialogo (o foco nao vaza para a pagina). Observado: circulou dentro e voltou ao inicio em 2 Tab.
+cumpriu: Escape fecha o dialogo. Observado: fechou.
+cumpriu: ao fechar, o foco volta ao elemento que abriu o dialogo. Observado: button &#x27;Excluir projeto&#x27;.</pre>
+<h3>Código</h3>
+<pre>@Component({
+  selector: &#x27;dialogo-bom&#x27;,
+  standalone: true,
+  // &lt;dialog&gt; + showModal(): papel, foco preso, Escape e devolução do foco vêm do navegador.
+  template: `&lt;div&gt;
+    &lt;button type=&quot;button&quot; [id]=&quot;k + &#x27;-gatilho&#x27;&quot; (click)=&quot;abrir()&quot;&gt;Excluir projeto&lt;/button&gt;
+    &lt;dialog [attr.aria-labelledby]=&quot;k + &#x27;-titulo&#x27;&quot;&gt;
+      &lt;h3 [id]=&quot;k + &#x27;-titulo&#x27;&quot;&gt;Excluir este projeto?&lt;/h3&gt;&lt;p&gt;Isso não pode ser desfeito.&lt;/p&gt;
+      &lt;button type=&quot;button&quot; (click)=&quot;fechar()&quot;&gt;Cancelar&lt;/button&gt;
+    &lt;/dialog&gt;
+  &lt;/div&gt;`,
+})
+class DialogoBom {
+  @Input() k = &#x27;dialogo-bom&#x27;;
+  private raiz: HTMLElement = inject(ElementRef).nativeElement;
+  abrir() { (this.raiz.querySelector(&#x27;dialog&#x27;) as HTMLDialogElement).showModal(); }
+  fechar() { (this.raiz.querySelector(&#x27;dialog&#x27;) as HTMLDialogElement).close(); }
+}</pre>
+<h2 id="ex-5"><span class="etiqueta t-ruim">Exemplo ruim:</span> Erro de formulário em Angular: como não fazer</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Erro de formulário em Angular: como não fazer"><div data-exemplo="erro-ruim"></div></div>
+<h3>Por quê</h3>
+<p>Aparece uma frase vermelha ao lado. O campo não é marcado como inválido, a frase não está ligada a ele, o foco não se move e nada é anunciado. No bom, o campo recebe o foco no mesmo envio em que a mensagem aparece, e a mensagem fica num elemento sempre presente.</p>
+<h3>O que corrigir</h3>
+<p>Marque o campo, ligue a mensagem, mova o foco e mantenha o elemento da mensagem sempre presente.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: E-mail
+- textbox &quot;E-mail&quot;
+- paragraph:
+  - button &quot;Enviar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda form_errors, medido)</h3>
+<pre>NÃO cumpriu: cada campo com erro tem aria-invalid=true. Observado: 0 de 1 marcados.
+NÃO cumpriu: o texto do erro esta ligado ao campo (aria-describedby). Observado: 0 de 1 com descricao.
+NÃO cumpriu: o foco vai ao primeiro campo com erro (ou a um resumo de erros). Observado: button &#x27;Enviar&#x27;.
+NÃO cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foco. Observado: anuncios=[] regioes=[].</pre>
+<h3>Código</h3>
+<pre>@Component({
+  selector: &#x27;erro-ruim&#x27;,
+  standalone: true,
+  // Texto vermelho solto: o campo não é marcado, a frase não está ligada a ele, o foco não se move.
+  template: `&lt;form novalidate (submit)=&quot;enviar($event)&quot;&gt;
+    &lt;label [for]=&quot;k + &#x27;-email&#x27;&quot;&gt;E-mail&lt;/label&gt;
+    &lt;input [id]=&quot;k + &#x27;-email&#x27;&quot; name=&quot;email&quot; type=&quot;email&quot; required&gt; &lt;span class=&quot;erro-visual&quot;&gt;{{ mensagem() }}&lt;/span&gt;
+    &lt;p&gt;&lt;button type=&quot;submit&quot; [id]=&quot;k + &#x27;-enviar&#x27;&quot;&gt;Enviar&lt;/button&gt;&lt;/p&gt;
+  &lt;/form&gt;`,
+})
+class ErroRuim {
+  @Input() k = &#x27;erro-ruim&#x27;;
+  mensagem = signal(&#x27;&#x27;);
+  enviar(e: Event) {
+    e.preventDefault();
+    const campo = (e.target as HTMLFormElement).elements.namedItem(&#x27;email&#x27;) as HTMLInputElement;
+    this.mensagem.set(campo.value ? &#x27;&#x27; : &#x27;Informe o e-mail.&#x27;);
+  }
+}</pre>
+<h2 id="ex-6"><span class="etiqueta t-bom">Exemplo bom:</span> Erro de formulário em Angular: como fazer</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Erro de formulário em Angular: como fazer"><div data-exemplo="erro-bom"></div></div>
+<h3>Por quê</h3>
+<p>O campo recebe aria-invalid, o texto do erro fica ligado por aria-describedby e anunciado por role=alert, e o foco vai ao campo.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: E-mail
+- textbox &quot;E-mail&quot;
+- alert
+- paragraph:
+  - button &quot;Enviar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda form_errors, medido)</h3>
+<pre>cumpriu: cada campo com erro tem aria-invalid=true. Observado: 1 de 1 marcados.
+cumpriu: o texto do erro esta ligado ao campo (aria-describedby). Observado: 1 de 1 com descricao.
+cumpriu: o foco vai ao primeiro campo com erro (ou a um resumo de erros). Observado: input &#x27;E-mail&#x27;.
+cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foco. Observado: anuncios=[&#x27;Informe o e-mail.&#x27;] regioes=[&#x27;Informe o e-mail.&#x27;].</pre>
+<h3>Código</h3>
+<pre>@Component({
+  selector: &#x27;erro-bom&#x27;,
+  standalone: true,
+  template: `&lt;form novalidate (submit)=&quot;enviar($event)&quot;&gt;
+    &lt;label [for]=&quot;k + &#x27;-email&#x27;&quot;&gt;E-mail&lt;/label&gt;
+    &lt;input [id]=&quot;k + &#x27;-email&#x27;&quot; name=&quot;email&quot; type=&quot;email&quot; required [attr.aria-invalid]=&quot;mensagem() ? &#x27;true&#x27; : null&quot; [attr.aria-describedby]=&quot;k + &#x27;-erro&#x27;&quot;&gt;
+    &lt;span [id]=&quot;k + &#x27;-erro&#x27;&quot; class=&quot;erro-visual&quot; role=&quot;alert&quot;&gt;{{ mensagem() }}&lt;/span&gt;
+    &lt;p&gt;&lt;button type=&quot;submit&quot; [id]=&quot;k + &#x27;-enviar&#x27;&quot;&gt;Enviar&lt;/button&gt;&lt;/p&gt;
+  &lt;/form&gt;`,
+})
+class ErroBom {
+  @Input() k = &#x27;erro-bom&#x27;;
+  mensagem = signal(&#x27;&#x27;);
+  enviar(e: Event) {
+    e.preventDefault();
+    const campo = (e.target as HTMLFormElement).elements.namedItem(&#x27;email&#x27;) as HTMLInputElement;
+    if (campo.value) { this.mensagem.set(&#x27;&#x27;); return; }
+    this.mensagem.set(&#x27;Informe o e-mail.&#x27;);
+    campo.focus(); // o foco vai ao campo com erro
+  }
+}</pre>
+<h2 id="ex-7"><span class="etiqueta t-ruim">Exemplo ruim:</span> Mensagem de status em Angular: como não fazer</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Mensagem de status em Angular: como não fazer"><div data-exemplo="status-ruim"></div></div>
+<h3>Por quê</h3>
+<p>A região viva só passa a existir junto com o texto. Muitos leitores de tela só falam o que muda dentro de uma região que já estava na página. O @if cria a região junto com o texto; o bom usa a região sempre presente. O LiveAnnouncer do CDK cria a sua região na criação do serviço, antes de qualquer texto.</p>
+<h3>O que corrigir</h3>
+<p>Renderize a região sempre; troque só o texto dentro dela.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Salvar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Salvar&#x27;.
+cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no corpo). Observado: button &#x27;Salvar&#x27;.
+cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[&#x27;Salvo com sucesso&#x27;]; foco movido=False; conteudo novo na arvore=1 linhas.
+NÃO cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regiao e texto juntos nao e confiavel). Observado: a regiao nasceu junto com o texto.</pre>
+<h3>Código</h3>
+<pre>@Component({
+  selector: &#x27;status-ruim&#x27;,
+  standalone: true,
+  // @if: a região viva só existe quando há texto. Nasce junto com a mensagem e muitos leitores de tela não falam.
+  template: `&lt;div&gt;
+    &lt;button type=&quot;button&quot; [id]=&quot;k + &#x27;-salvar&#x27;&quot; (click)=&quot;salvo.set(true)&quot;&gt;Salvar&lt;/button&gt;
+    @if (salvo()) { &lt;div role=&quot;status&quot;&gt;Salvo com sucesso&lt;/div&gt; }
+  &lt;/div&gt;`,
+})
+class StatusRuim { @Input() k = &#x27;status-ruim&#x27;; salvo = signal(false); }</pre>
+<h2 id="ex-8"><span class="etiqueta t-bom">Exemplo bom:</span> Mensagem de status em Angular: como fazer</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Mensagem de status em Angular: como fazer"><div data-exemplo="status-bom"></div></div>
+<h3>Por quê</h3>
+<p>A região role=status fica sempre na página e só o texto muda, então o leitor de tela fala a mensagem.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Salvar&quot;
+- status</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Salvar&#x27;.
+cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no corpo). Observado: button &#x27;Salvar&#x27;.
+cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[&#x27;Salvo com sucesso&#x27;]; foco movido=False; conteudo novo na arvore=1 linhas.
+cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regiao e texto juntos nao e confiavel). Observado: a regiao ja existia.</pre>
+<h3>Código</h3>
+<pre>@Component({
+  selector: &#x27;status-bom&#x27;,
+  standalone: true,
+  // A região fica sempre na página; só o texto muda.
+  template: `&lt;div&gt;
+    &lt;button type=&quot;button&quot; [id]=&quot;k + &#x27;-salvar&#x27;&quot; (click)=&quot;salvo.set(true)&quot;&gt;Salvar&lt;/button&gt;
+    &lt;div role=&quot;status&quot;&gt;{{ salvo() ? &#x27;Salvo com sucesso&#x27; : &#x27;&#x27; }}&lt;/div&gt;
+  &lt;/div&gt;`,
+})
+class StatusBom { @Input() k = &#x27;status-bom&#x27;; salvo = signal(false); }</pre>
+<h2 id="ex-9"><span class="etiqueta t-ruim">Exemplo ruim:</span> Mudança de tela em Angular: como não fazer</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Mudança de tela em Angular: como não fazer"><p><a href="angular-rota-ruim.html">Abrir a aplicação de exemplo (ruim)</a></p></div>
+<h3>Por quê</h3>
+<p>O conteúdo vira Contato, mas o título da aba continua Início, o foco permanece no botão e não há aviso: quem usa leitor de tela não sabe que a tela mudou. O Router do Angular não move o foco: a documentação manda ouvir NavigationEnd e focar um elemento da nova tela. Aqui o bom usa o LiveAnnouncer do CDK, foco e título.</p>
+<h3>O que corrigir</h3>
+<p>Ao trocar a tela, atualize document.title, mova o foco para o novo h1 (tabindex -1) e avise numa região de status. O framework não faz isso sozinho.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph:
+  - link &quot;Abrir a aplicação de exemplo (ruim)&quot;:
+    - /url: angular-rota-ruim.html</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda route_change, medido)</h3>
+<pre>NÃO cumpriu: o titulo da pagina muda com a nova tela. Observado: &#x27;Início | Loja de chás&#x27; -&gt; &#x27;Início | Loja de chás&#x27;.
+cumpriu: o foco nao fica perdido no corpo da pagina. Observado: button &#x27;Contato&#x27;.
+NÃO cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido para o novo conteudo ou carga de pagina nova. Observado: anuncio=False; foco mudou=False; mesmo documento=True.</pre>
+<h3>Código</h3>
+<pre>@Component({
+  selector: &#x27;rota-ruim&#x27;,
+  standalone: true,
+  // O conteúdo troca, mas o título da aba, o foco e o aviso continuam como estavam.
+  template: `&lt;div&gt;
+    &lt;p&gt;&lt;button type=&quot;button&quot; [id]=&quot;k + &#x27;-ir&#x27;&quot; (click)=&quot;tela.set(&#x27;contato&#x27;)&quot;&gt;Contato&lt;/button&gt;&lt;/p&gt;
+    &lt;main&gt;
+      @if (tela() === &#x27;inicio&#x27;) { &lt;h1&gt;Início&lt;/h1&gt;&lt;p&gt;Bem-vindo à loja de chás.&lt;/p&gt; }
+      @else { &lt;h1&gt;Contato&lt;/h1&gt;&lt;p&gt;Escreva para contato@loja.example.&lt;/p&gt; }
+    &lt;/main&gt;
+  &lt;/div&gt;`,
+})
+class RotaRuim { @Input() k = &#x27;rota-ruim&#x27;; tela = signal(&#x27;inicio&#x27;); }</pre>
+<h2 id="ex-10"><span class="etiqueta t-bom">Exemplo bom:</span> Mudança de tela em Angular: como fazer</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Mudança de tela em Angular: como fazer"><p><a href="angular-rota-bom.html">Abrir a aplicação de exemplo (bom)</a></p></div>
+<h3>Por quê</h3>
+<p>Depois de atualizar o conteúdo, o título da aba muda, o foco vai ao novo título e há uma mensagem de status.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph:
+  - link &quot;Abrir a aplicação de exemplo (bom)&quot;:
+    - /url: angular-rota-bom.html</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda route_change, medido)</h3>
+<pre>cumpriu: o titulo da pagina muda com a nova tela. Observado: &#x27;Início | Loja de chás&#x27; -&gt; &#x27;Contato | Loja de chás&#x27;.
+cumpriu: o foco nao fica perdido no corpo da pagina. Observado: h1 &#x27;Contato&#x27;.
+cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido para o novo conteudo ou carga de pagina nova. Observado: anuncio=True; foco mudou=True; mesmo documento=True.</pre>
+<h3>Código</h3>
+<pre>@Component({
+  selector: &#x27;rota-bom&#x27;,
+  standalone: true,
+  template: `&lt;div&gt;
+    &lt;p&gt;&lt;button type=&quot;button&quot; [id]=&quot;k + &#x27;-ir&#x27;&quot; (click)=&quot;ir()&quot;&gt;Contato&lt;/button&gt;&lt;/p&gt;
+    &lt;main&gt;
+      &lt;h1 tabindex=&quot;-1&quot;&gt;{{ tela() === &#x27;inicio&#x27; ? &#x27;Início&#x27; : &#x27;Contato&#x27; }}&lt;/h1&gt;
+      &lt;p&gt;{{ tela() === &#x27;inicio&#x27; ? &#x27;Bem-vindo à loja de chás.&#x27; : &#x27;Escreva para contato@loja.example.&#x27; }}&lt;/p&gt;
+    &lt;/main&gt;
+  &lt;/div&gt;`,
+})
+class RotaBom {
+  @Input() k = &#x27;rota-bom&#x27;;
+  tela = signal(&#x27;inicio&#x27;);
+  private raiz: HTMLElement = inject(ElementRef).nativeElement;
+  private anunciador = inject(LiveAnnouncer); // cria a região aria-live na criação do serviço, antes de qualquer texto
+  ir() {
+    this.tela.set(&#x27;contato&#x27;);
+    // Depois que o Angular atualizar o DOM: título da aba, foco no novo título e aviso para o leitor de tela.
+    setTimeout(() =&gt; {
+      document.title = &#x27;Contato | Loja de chás&#x27;;
+      (this.raiz.querySelector(&#x27;h1&#x27;) as HTMLElement).focus();
+      void this.anunciador.announce(&#x27;Página Contato carregada&#x27;, &#x27;polite&#x27;);
+    });
+  }
+}</pre>
+<script src="app-angular.js"></script>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="pilha-svelte.html">Anterior: Svelte</a>
+<a href="android.html">Próximo: Android (Jetpack Compose)</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

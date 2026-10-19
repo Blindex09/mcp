@@ -10,7 +10,9 @@
   let covered = 0, offscreen = 0, by = null;
   for (const [x, y] of pts) {
     if (x < 0 || y < 0 || x >= vw || y >= vh) { offscreen++; continue; }
-    const top = document.elementFromPoint(x, y);
+    // elementFromPoint devolve o hospedeiro de um Shadow DOM aberto, nao o elemento de dentro: desce ate o mais profundo.
+    let top = document.elementFromPoint(x, y);
+    while (top && top.shadowRoot) { const dentro = top.shadowRoot.elementFromPoint(x, y); if (!dentro || dentro === top) break; top = dentro; }
     if (!top) continue;
     if (top === e || e.contains(top) || top.contains(e)) continue;
     covered++;

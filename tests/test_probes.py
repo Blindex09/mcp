@@ -270,3 +270,114 @@ async def test_the_servers_own_vanilla_examples_meet_the_contract_the_probe_meas
     finally:
         await SESSION.close()
     assert r["unmet"] == [], r["checks"]
+
+
+GOOD_STATUS = """<button id="b">Salvar</button><div id="r" role="status"></div>
+<script>document.getElementById('b').addEventListener('click',()=>{document.getElementById('r').textContent='Salvo com sucesso';});</script>"""
+LATE_STATUS = """<button id="b">Salvar</button><div id="host"></div>
+<script>document.getElementById('b').addEventListener('click',()=>{document.getElementById('host').innerHTML='<div role="status">Salvo com sucesso</div>';});</script>"""
+SILENT_STATUS = """<button id="b">Salvar</button><div id="r"></div>
+<script>document.getElementById('b').addEventListener('click',()=>{document.getElementById('r').textContent='Salvo com sucesso';});</script>"""
+
+
+async def test_status_update_separates_a_region_that_existed_from_one_born_with_its_text_and_from_silence():
+    good = await probe(GOOD_STATUS, "status_update", "css:#b")
+    assert good["unmet"] == [], good["checks"]
+    late = met(await probe(LATE_STATUS, "status_update", "css:#b"))
+    assert late["mudanca_anunciada"] is True and late["regiao_existia_antes"] is False
+    silent = met(await probe(SILENT_STATUS, "status_update", "css:#b"))
+    assert silent["mudanca_anunciada"] is False and "regiao_existia_antes" not in silent
+
+
+async def test_status_update_reports_when_nothing_changed_and_a_role_alert_born_with_text_is_not_flagged():
+    nothing = met(await probe("<button id='b'>Nada</button>", "status_update", "css:#b"))
+    assert nothing["houve_mudanca"] is None
+    alert = """<button id="b">Falhar</button><div id="host"></div>
+<script>document.getElementById('b').addEventListener('click',()=>{document.getElementById('host').innerHTML='<div role="alert">Erro ao salvar</div>';});</script>"""
+    assert met(await probe(alert, "status_update", "css:#b"))["regiao_existia_antes"] is True
+
+
+GOOD_LISTBOX = """<ul id="lb" role="listbox" aria-label="Cidades" tabindex="0" aria-activedescendant="o1">
+<li role="option" id="o1" aria-selected="false">Curitiba</li><li role="option" id="o2" aria-selected="false">Recife</li><li role="option" id="o3" aria-selected="false">Salvador</li></ul>
+<script>(function(){var lb=document.getElementById('lb'),op=Array.prototype.slice.call(lb.children),a=0;
+function go(i){a=i;lb.setAttribute('aria-activedescendant',op[i].id);}
+lb.addEventListener('keydown',function(e){if(e.key==='ArrowDown'){e.preventDefault();go(Math.min(a+1,op.length-1));}
+else if(e.key==='ArrowUp'){e.preventDefault();go(Math.max(a-1,0));}else if(e.key==='Home'){e.preventDefault();go(0);}else if(e.key==='End'){e.preventDefault();go(op.length-1);}
+else if(e.key===' '){e.preventDefault();op.forEach(function(o,j){o.setAttribute('aria-selected',String(j===a));});}});})();</script>"""
+BAD_LISTBOX = """<div id="lb" class="l"><div class="o">Curitiba</div><div class="o">Recife</div><div class="o">Salvador</div></div>
+<script>Array.prototype.forEach.call(document.querySelectorAll('.o'),function(o){o.addEventListener('click',function(){o.style.fontWeight='700';});});</script>"""
+
+
+async def test_listbox_good_apg_vs_click_only_divs():
+    good = await probe(GOOD_LISTBOX, "listbox", "css:#lb")
+    assert good["unmet"] == [], good["checks"]
+    bad = met(await probe(BAD_LISTBOX, "listbox", "css:#lb"))
+    assert bad["papel_listbox"] is False and bad["tem_nome"] is False and bad["opcoes"] is False and bad["recebe_foco"] is False
+
+
+GOOD_TREE = """<ul id="t" role="tree" aria-label="Arquivos">
+<li role="treeitem" aria-expanded="false" tabindex="0" id="p1">Pasta<ul role="group"><li role="treeitem" tabindex="-1" id="f1">a.txt</li><li role="treeitem" tabindex="-1" id="f2">b.txt</li></ul></li>
+<li role="treeitem" tabindex="-1" id="p2">leia.md</li><li role="treeitem" tabindex="-1" id="p3">fim.md</li></ul>
+<style>[role=group]{display:none}[aria-expanded=true]>[role=group]{display:block}</style>
+<script>(function(){var t=document.getElementById('t');function vis(){return Array.prototype.slice.call(t.querySelectorAll('[role=treeitem]')).filter(function(e){var r=e.getBoundingClientRect();return r.width>0&&r.height>0;});}
+function go(el){t.querySelectorAll('[role=treeitem]').forEach(function(e){e.tabIndex=-1;});el.tabIndex=0;el.focus();}
+t.addEventListener('keydown',function(e){var v=vis(),i=v.indexOf(document.activeElement),el=document.activeElement;e.stopPropagation();
+if(e.key==='ArrowDown'){e.preventDefault();go(v[Math.min(i+1,v.length-1)]);}else if(e.key==='ArrowUp'){e.preventDefault();go(v[Math.max(i-1,0)]);}
+else if(e.key==='Home'){e.preventDefault();go(v[0]);}else if(e.key==='End'){e.preventDefault();go(v[v.length-1]);}
+else if(e.key==='ArrowRight'&&el.getAttribute('aria-expanded')==='false'){e.preventDefault();el.setAttribute('aria-expanded','true');}
+else if(e.key==='ArrowLeft'&&el.getAttribute('aria-expanded')==='true'){e.preventDefault();el.setAttribute('aria-expanded','false');}});})();</script>"""
+BAD_TREE = """<ul id="t"><li>Pasta<ul><li>a.txt</li><li>b.txt</li></ul></li><li>leia.md</li></ul>"""
+
+
+async def test_tree_good_apg_vs_plain_nested_list():
+    good = await probe(GOOD_TREE, "tree", "css:#p1")
+    assert good["unmet"] == [], good["checks"]
+    bad = met(await probe(BAD_TREE, "tree", "css:#t"))
+    assert bad["papel_tree"] is False and "seta_baixo_anda" not in bad
+
+
+GOOD_TIP = """<button id="b" aria-describedby="tip">Ajuda</button><div id="tip" role="tooltip" hidden>Salva o rascunho</div>
+<script>(function(){var b=document.getElementById('b'),t=document.getElementById('tip');b.addEventListener('focus',function(){t.hidden=false;});b.addEventListener('blur',function(){t.hidden=true;});
+b.addEventListener('keydown',function(e){if(e.key==='Escape')t.hidden=true;});})();</script>"""
+BAD_TIP = """<button id="b" title="Salva o rascunho">Ajuda</button>"""
+HOVER_TIP = """<button id="b" aria-describedby="tip">Ajuda</button><div id="tip" role="tooltip" hidden>Salva o rascunho</div>
+<script>var b=document.getElementById('b');b.addEventListener('mouseenter',function(){document.getElementById('tip').hidden=false;});</script>"""
+
+
+async def test_tooltip_good_vs_title_only_vs_hover_only():
+    good = await probe(GOOD_TIP, "tooltip", "css:#b")
+    assert good["unmet"] == [], good["checks"]
+    title = met(await probe(BAD_TIP, "tooltip", "css:#b"))
+    assert title["aparece_no_foco"] is False and title["ligado_ao_gatilho"] is False
+    hover = met(await probe(HOVER_TIP, "tooltip", "css:#b"))
+    assert hover["aparece_no_foco"] is False and hover["ligado_ao_gatilho"] is True
+
+
+async def test_status_update_flags_focus_that_falls_to_the_body():
+    lost = """<div id="host"><button id="b">Carregar mais</button></div><div role="status" id="r"></div>
+<script>document.getElementById('b').addEventListener('click',function(){document.getElementById('host').innerHTML='<p>itens novos</p>';document.getElementById('r').textContent='Carregado';});</script>"""
+    r = met(await probe(lost, "status_update", "css:#b"))
+    assert r["foco_nao_se_perde"] is False and r["mudanca_anunciada"] is True
+
+
+async def test_focus_style_accepts_css_targets_that_the_dossier_never_numbered():
+    """Regressao real: a11y_focus_style so funcionava com id do dossie; com 'css:' dava 'Could not find node with given id'."""
+    await SESSION.open(None, HEAD + "<style>#a{outline:none !important}</style><button id='a'>Sem anel</button><button id='b'>Com anel</button></body></html>")
+    try:
+        sem = await SESSION.focus_style("css:#a")
+        com = await SESSION.focus_style("css:#b")
+    finally:
+        await SESSION.close()
+    assert sem["properties_changed"] == 0 and "none" in sem["outline_when_focused"]
+    assert com["properties_changed"] > 0 and "outline-style" in com["changed_on_focus"]
+
+
+async def test_tab_walk_does_not_say_a_button_inside_an_open_shadow_root_is_covered_by_its_own_host():
+    """Regressao real (rodada ao vivo no site de exemplos): elementFromPoint devolve o hospedeiro do shadow e a sonda concluia 'foco coberto 5/5'."""
+    html = (
+        "<my-box></my-box><script>customElements.define('my-box',class extends HTMLElement{connectedCallback(){"
+        "this.attachShadow({mode:'open'}).innerHTML='<button type=\"button\" style=\"min-height:44px\">Dentro do shadow</button>';}});</script>"
+    )
+    r = await probe(html, "tab_walk")
+    assert [x["name"] for x in r["stops"]] == ["Dentro do shadow"]
+    assert r["obscured_stops"] == [], r["obscured_stops"]

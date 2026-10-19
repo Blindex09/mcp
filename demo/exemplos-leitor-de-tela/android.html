@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Android (Jetpack Compose) | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html">Carrossel</a></li>
+<li><a href="dica.html">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
+<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html">Svelte</a></li>
+<li><a href="pilha-angular.html">Angular</a></li>
+<li><a href="android.html" aria-current="page">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Android (Jetpack Compose)</h1>
+<p>No Compose a acessibilidade vem da árvore de semântica. clickable, toggleable e ListItem já juntam os filhos num só item; ícones precisam de descrição; mudanças que o usuário não vê precisam de liveRegion; títulos de seção usam heading().</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Ícone clicável sem descrição</a></li>
+<li><a href="#ex-2">Exemplo bom: IconButton com descrição</a></li>
+<li><a href="#ex-3">Exemplo ruim: Mensagem de status que muda em silêncio</a></li>
+<li><a href="#ex-4">Exemplo bom: Região viva educada</a></li>
+<li><a href="#ex-5">Exemplo ruim: Título de seção que é só texto grande</a></li>
+<li><a href="#ex-6">Exemplo bom: Título marcado com heading()</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Ícone clicável sem descrição</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Código de exemplo, exemplo ruim: Ícone clicável sem descrição"><p>Não executado aqui: este MCP não tem Android. O código segue a documentação do Jetpack Compose (developer.android.com, semântica de acessibilidade, lida em 2026-10-19). Teste com o TalkBack num aparelho ou emulador.</p></div>
+<h3>Por quê</h3>
+<p>O TalkBack encontra um item clicável sem nome: diz só que é botão ou nada. Com contentDescription nulo, o ícone não tem texto nenhum. A área de toque também não é garantida.</p>
+<h3>O que corrigir</h3>
+<p>Use IconButton com contentDescription que diga a ação (&quot;Curtir&quot;). contentDescription = null só serve quando um texto ao lado já dá o nome.</p>
+<h3>Código</h3>
+<pre>Icon(
+    imageVector = Icons.Default.Favorite,
+    contentDescription = null,
+    modifier = Modifier.clickable { curtir() }
+)</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> IconButton com descrição</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Código de exemplo, exemplo bom: IconButton com descrição"><p>Não executado aqui: este MCP não tem Android. O código segue a documentação do Jetpack Compose (developer.android.com, semântica de acessibilidade, lida em 2026-10-19). Teste com o TalkBack num aparelho ou emulador.</p></div>
+<h3>Por quê</h3>
+<p>O IconButton traz o papel de botão e a área de toque mínima; a descrição diz a ação.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>Código</h3>
+<pre>IconButton(onClick = { curtir() }) {
+    Icon(
+        imageVector = Icons.Default.Favorite,
+        contentDescription = &quot;Curtir&quot;
+    )
+}</pre>
+<h2 id="ex-3"><span class="etiqueta t-ruim">Exemplo ruim:</span> Mensagem de status que muda em silêncio</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Código de exemplo, exemplo ruim: Mensagem de status que muda em silêncio"><p>Não executado aqui: este MCP não tem Android. O código segue a documentação do Jetpack Compose (developer.android.com, semântica de acessibilidade, lida em 2026-10-19). Teste com o TalkBack num aparelho ou emulador.</p></div>
+<h3>Por quê</h3>
+<p>O texto muda na tela, mas nenhum serviço de acessibilidade é avisado: quem usa o TalkBack não ouve que salvou.</p>
+<h3>O que corrigir</h3>
+<p>Marque o texto de status como região viva.</p>
+<h3>Código</h3>
+<pre>var status by remember { mutableStateOf(&quot;&quot;) }
+Button(onClick = { status = &quot;Salvo com sucesso&quot; }) { Text(&quot;Salvar&quot;) }
+Text(status)</pre>
+<h2 id="ex-4"><span class="etiqueta t-bom">Exemplo bom:</span> Região viva educada</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Código de exemplo, exemplo bom: Região viva educada"><p>Não executado aqui: este MCP não tem Android. O código segue a documentação do Jetpack Compose (developer.android.com, semântica de acessibilidade, lida em 2026-10-19). Teste com o TalkBack num aparelho ou emulador.</p></div>
+<h3>Por quê</h3>
+<p>liveRegion = Polite faz o TalkBack anunciar a mudança sem interromper. Use Assertive só para o que não pode esperar, e nunca em texto que muda o tempo todo, como um cronômetro.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>Código</h3>
+<pre>var status by remember { mutableStateOf(&quot;&quot;) }
+Button(onClick = { status = &quot;Salvo com sucesso&quot; }) { Text(&quot;Salvar&quot;) }
+Text(
+    text = status,
+    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+)</pre>
+<h2 id="ex-5"><span class="etiqueta t-ruim">Exemplo ruim:</span> Título de seção que é só texto grande</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Código de exemplo, exemplo ruim: Título de seção que é só texto grande"><p>Não executado aqui: este MCP não tem Android. O código segue a documentação do Jetpack Compose (developer.android.com, semântica de acessibilidade, lida em 2026-10-19). Teste com o TalkBack num aparelho ou emulador.</p></div>
+<h3>Por quê</h3>
+<p>Para quem vê é um título. Para o TalkBack é uma linha de texto: não dá para pular de seção em seção.</p>
+<h3>O que corrigir</h3>
+<p>Marque como título na semântica.</p>
+<h3>Código</h3>
+<pre>Text(&quot;Pedidos recentes&quot;, style = MaterialTheme.typography.headlineSmall)</pre>
+<h2 id="ex-6"><span class="etiqueta t-bom">Exemplo bom:</span> Título marcado com heading()</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Código de exemplo, exemplo bom: Título marcado com heading()"><p>Não executado aqui: este MCP não tem Android. O código segue a documentação do Jetpack Compose (developer.android.com, semântica de acessibilidade, lida em 2026-10-19). Teste com o TalkBack num aparelho ou emulador.</p></div>
+<h3>Por quê</h3>
+<p>heading() deixa os serviços de acessibilidade navegarem direto entre os títulos.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>Código</h3>
+<pre>Text(
+    text = &quot;Pedidos recentes&quot;,
+    style = MaterialTheme.typography.headlineSmall,
+    modifier = Modifier.semantics { heading() }
+)</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="pilha-angular.html">Anterior: Angular</a>
+<a href="ios.html">Próximo: iOS (SwiftUI e UIKit)</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

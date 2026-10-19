@@ -64,6 +64,17 @@ async def _focus_target(s: Any, target: str) -> tuple[Any, Any]:
 
 
 # ------------------------------------------------------------------------------------------------ varredura de Tab
+# O foco esta no ultimo elemento focavel do documento (ordem do DOM, sem Shadow DOM)? Firefox sem interface nao tem para onde levar o foco depois dele.
+TAB_END_JS = """() => {
+  let a = document.activeElement; while (a && a.shadowRoot && a.shadowRoot.activeElement) a = a.shadowRoot.activeElement;
+  const sel = 'a[href],button,input,select,textarea,summary,[tabindex],[contenteditable=""],[contenteditable=true],iframe';
+  const ok = (e) => { if (e.tabIndex < 0 || e.disabled || e.type === 'hidden') return false; const r = e.getBoundingClientRect(); const cs = getComputedStyle(e); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden'; };
+  const lista = Array.from(document.querySelectorAll(sel)).filter(ok);
+  return !!a && lista.length > 0 && lista[lista.length - 1] === a;
+}"""
+TAB_LINKS_JS = "() => Array.from(document.querySelectorAll('a[href]')).filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && e.tabIndex >= 0; }).length"
+
+
 async def tab_walk(s: Any, target: str | None = None, container: str | None = None, max_stops: int = 0) -> dict[str, Any]:
     """Aperta Tab do inicio da pagina e registra cada parada: nome, se o foco esta coberto por outro elemento, e onde o foco ficou preso."""
     page = s._need()
@@ -95,6 +106,9 @@ async def tab_walk(s: Any, target: str | None = None, container: str | None = No
             stop["offscreen"] = True
         stops.append(stop)
         idents.append(ident)
+        if len(idents) >= 3 and idents[-1] == idents[-2] == idents[-3] and await page.evaluate(TAB_END_JS):
+            end = "o foco chegou ao ultimo elemento focavel da pagina e o navegador nao tem interface para onde leva-lo (nao e armadilha)"
+            break
         if len(idents) >= 3 and idents[-1] == idents[-2] == idents[-3]:
             stuck.append({"n": i, "tag": f["tag"], "name": f["name"]})
             end = "o foco parou de mover: Tab nao sai deste elemento (possivel armadilha de teclado)"
@@ -104,8 +118,12 @@ async def tab_walk(s: Any, target: str | None = None, container: str | None = No
             stuck.append({"n": i, "tag": f["tag"], "name": f["name"], "loop_of": len(set(window))})
             end = "o foco circula entre poucos elementos sem avancar (possivel armadilha de teclado)"
             break
+    links_no_codigo = int(await page.evaluate(TAB_LINKS_JS))
+    links_com_parada = sum(1 for x in stops if x.get("tag") == "a")
+    links_sem_parada = {"no_codigo": links_no_codigo, "com_parada": links_com_parada} if links_no_codigo > links_com_parada and not stuck and not s.stop_requested else None
     return {
         "probe": "tab_walk", "stops_total": len(stops), "ended_because": end, "stuck_at": stuck,
+        **({"links_sem_parada": links_sem_parada, "links_sem_parada_nota": f"{links_no_codigo - links_com_parada} link(s) com href e tabindex normal nao receberam parada de Tab neste navegador ({s.browser_name}); o Safari/WebKit nao para em links por padrao (preferencia do sistema)"} if links_sem_parada else {}),
         "stops": stops[:60] + ([{"n": "...", "note": f"{len(stops) - 60} paradas omitidas"}] if len(stops) > 60 else []),
         "obscured_stops": [x for x in stops if x.get("obscured")][:20], "offscreen_stops": [x["n"] for x in stops if x.get("offscreen")][:20],
         "summary": f"{len(stops)} paradas; fim: {end}; presas: {len(stuck)}; focos cobertos: {sum(1 for x in stops if x.get('obscured'))}",
@@ -438,6 +456,146 @@ async def route_change(s: Any, target: str | None, container: str | None = None,
     return _report("route_change", target, checks, facts, "WCAG 2.4.2, 2.4.3 e 4.1.3 (troca de tela em SPA)")
 
 
+async def status_update(s: Any, target: str | None, container: str | None = None, max_stops: int = 0) -> dict[str, Any]:
+    """Ativa um botao pelo teclado e mede se a mudanca na tela chega a quem nao a ve: regiao viva que ja existia, ou foco movido para o novo conteudo."""
+    _loc, (trig_ident, f0) = await _focus_target(s, str(target))
+    checks = [_check("gatilho_recebe_foco", "o gatilho recebe o foco do teclado", _where(f0), trig_ident is not None, ["2.1.1"])]
+    await s._live_new()
+    tree0 = await s._tree_lines()
+    await _key(s, "Enter")
+    live = await s._live_new()
+    from .session import tree_diff
+
+    diff = tree_diff(tree0, await s._tree_lines())
+    changed = bool(diff["added"] or diff["removed"] or live)
+    ident1, f1 = await _ident(s)
+    moved = f1 is not None and ident1 != trig_ident
+    if not changed:
+        checks.append(_check("houve_mudanca", "ativar o gatilho muda algo na tela", "nada mudou na arvore nem em regioes vivas", None, ["4.1.3"]))
+        return _report("status_update", target, checks, {"tree_added": [], "tree_removed": []}, "WCAG 4.1.3 Status Messages e tecnica ARIA19/ARIA22")
+    checks.append(_check("foco_nao_se_perde", "depois da mudanca o foco continua num elemento da pagina (nao cai no corpo)", _where(f1), f1 is not None, ["2.4.3"]))
+    heard = bool(live) or moved
+    checks.append(_check("mudanca_anunciada", "a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo",
+                         f"anuncios={[a['text'][:40] for a in live][:3]}; foco movido={moved}; conteudo novo na arvore={len(diff['added'])} linhas", heard, ["4.1.3"]))
+    if live:
+        # Regiao inserida junto com o texto: muitos leitores de tela nao anunciam (a regiao precisa existir antes de o texto mudar). role=alert costuma ser falado mesmo assim.
+        late = [a for a in live if a.get("fresh") and a["role"] != "alert"]
+        checks.append(_check("regiao_existia_antes", "a regiao viva ja estava na pagina antes de o texto mudar (inserir regiao e texto juntos nao e confiavel)",
+                             "a regiao nasceu junto com o texto" if late else "a regiao ja existia", not late, ["4.1.3"]))
+    return _report("status_update", target, checks, {"announced": live, "tree_added": diff["added"][:8], "tree_removed": diff["removed"][:8], "focus_moved": moved},
+                   "WCAG 4.1.3 Status Messages e tecnica ARIA19/ARIA22")
+
+
+def _option_index(info: dict[str, Any]) -> int | None:
+    """Indice da opcao 'atual': a que tem o foco ou a apontada por aria-activedescendant (fato do DOM)."""
+    ad = info.get("activedescendant")
+    for o in info["options"]:
+        if o["focused"] or (ad and o["id"] == ad):
+            return int(o["index"])
+    return None
+
+
+async def listbox(s: Any, target: str | None, container: str | None = None, max_stops: int = 0) -> dict[str, Any]:
+    """Lista de opcoes (role=listbox): APG Listbox. O alvo e' a lista ou uma opcao. Setas, Home/End e a selecao exposta."""
+    loc, (trig_ident, f0) = await _focus_target(s, str(target))
+    info = await loc.evaluate(js.PROBE_LISTBOX_JS)
+    opts = info["options"]
+    checks = [
+        _check("papel_listbox", "o elemento tem role=listbox", f"{info['tag']} role=listbox" if info["listbox"] else f"{info['tag']} sem role=listbox", info["listbox"], ["4.1.2"]),
+        _check("tem_nome", "a lista tem nome (aria-label ou aria-labelledby)", repr(info["name"]) if info["name"] else "sem nome acessivel", bool(info["name"]), ["4.1.2"]),
+        _check("opcoes", "as opcoes tem role=option (pelo menos duas)", f"{len(opts)} opcoes com role=option", len(opts) >= 2, ["4.1.2", "1.3.1"]),
+        _check("recebe_foco", "a lista (ou uma opcao) recebe o foco do teclado", _where(f0), trig_ident is not None, ["2.1.1"]),
+    ]
+    if len(opts) < 2 or trig_ident is None:
+        return _report("listbox", target, checks, {"listbox": info}, "WAI-ARIA APG: padrao Listbox")
+    stops = (1 if info["box_tabbable"] else 0) + sum(1 for o in opts if o["tabbable"])
+    checks.append(_check("uma_parada_de_tab", "so uma parada de Tab na lista (a lista com aria-activedescendant, ou a opcao atual com tabindex 0)", f"{stops} paradas de Tab", stops == 1, ["2.4.3"]))
+    start = _option_index(info)
+    await _key(s, "ArrowDown")
+    after = await loc.evaluate(js.PROBE_LISTBOX_JS)
+    idx = _option_index(after)
+    checks.append(_check("seta_baixo_anda", "Seta para baixo move a opcao atual", f"opcao atual {start} -> {idx}", idx is not None and idx != start, ["2.1.1"]))
+    await _key(s, "End", settle=False)
+    end_idx = _option_index(await loc.evaluate(js.PROBE_LISTBOX_JS))
+    await _key(s, "Home", settle=False)
+    home_idx = _option_index(await loc.evaluate(js.PROBE_LISTBOX_JS))
+    checks.append(_check("home_e_end", "Home vai a primeira opcao e End a ultima", f"Home->{home_idx}, End->{end_idx}", home_idx == 0 and end_idx == len(opts) - 1, ["2.1.1"]))
+    await _key(s, "ArrowDown", settle=False)
+    await _key(s, "Space")
+    chosen = await loc.evaluate(js.PROBE_LISTBOX_JS)
+    marked = [o["index"] for o in chosen["options"] if o["selected"] == "true"]
+    defined = all(o["selected"] in ("true", "false") for o in chosen["options"])
+    checks.append(_check("selecao_exposta", "a opcao escolhida fica com aria-selected=true e as outras false", f"selecionadas: {marked}; todas com aria-selected definido: {defined}", bool(marked) and defined, ["4.1.2"]))
+    return _report("listbox", target, checks, {"listbox": info}, "WAI-ARIA APG: padrao Listbox")
+
+
+async def tree(s: Any, target: str | None, container: str | None = None, max_stops: int = 0) -> dict[str, Any]:
+    """Arvore (role=tree): APG Tree View. O alvo e' a arvore ou um item. Setas, expandir/recolher, Home/End."""
+    loc, (trig_ident, f0) = await _focus_target(s, str(target))
+    info = await loc.evaluate(js.PROBE_TREE_JS)
+    items = info["items"]
+    checks = [
+        _check("papel_tree", "o elemento fica dentro de um role=tree", "sim" if info["tree"] else "nao ha role=tree ao redor", info["tree"], ["4.1.2"]),
+        _check("itens_treeitem", "os itens tem role=treeitem (pelo menos dois visiveis)", f"{len(items)} itens visiveis", len(items) >= 2, ["4.1.2", "1.3.1"]),
+    ]
+    if not info["tree"]:
+        return _report("tree", target, checks, {"tree": info}, "WAI-ARIA APG: padrao Tree View")
+    checks.append(_check("tem_nome", "a arvore tem nome (aria-label ou aria-labelledby)", repr(info["name"]) if info["name"] else "sem nome acessivel", bool(info["name"]), ["4.1.2"]))
+    checks.append(_check("recebe_foco", "a arvore (ou um item) recebe o foco do teclado", _where(f0), trig_ident is not None, ["2.1.1"]))
+    parents = [t for t in items if t["has_group"]]
+    checks.append(_check("pais_com_estado", "todo item que tem filhos expoe aria-expanded true/false", f"{sum(1 for t in parents if t['expanded'] in ('true', 'false'))} de {len(parents)} pais com estado", all(t["expanded"] in ("true", "false") for t in parents) if parents else None, ["4.1.2"]))
+    if len(items) < 2 or trig_ident is None:
+        return _report("tree", target, checks, {"tree": info}, "WAI-ARIA APG: padrao Tree View")
+    stops = (1 if info["tree_tabbable"] else 0) + sum(1 for t in items if t["tabbable"])
+    checks.append(_check("uma_parada_de_tab", "so uma parada de Tab na arvore (item atual com tabindex 0, ou a arvore com aria-activedescendant)", f"{stops} paradas de Tab", stops == 1, ["2.4.3"]))
+
+    def current(i: dict[str, Any]) -> int | None:
+        ad = i.get("activedescendant")
+        return next((int(t["index"]) for t in i["items"] if t["focused"] or (ad and t["id"] == ad)), None)
+
+    first = current(info)
+    await _key(s, "ArrowDown")
+    nxt = current(await loc.evaluate(js.PROBE_TREE_JS))
+    checks.append(_check("seta_baixo_anda", "Seta para baixo move o foco para o proximo item visivel", f"item atual {first} -> {nxt}", nxt is not None and nxt != first, ["2.1.1"]))
+    await _key(s, "End", settle=False)
+    last = current(await loc.evaluate(js.PROBE_TREE_JS))
+    await _key(s, "Home", settle=False)
+    home = current(await loc.evaluate(js.PROBE_TREE_JS))
+    n_visible = len((await loc.evaluate(js.PROBE_TREE_JS))["items"])
+    checks.append(_check("home_e_end", "Home vai ao primeiro item e End ao ultimo visivel", f"Home->{home}, End->{last} de {n_visible} visiveis", home == 0 and last == n_visible - 1, ["2.1.1"]))
+    closed = next((t for t in parents if t["expanded"] == "false"), None)
+    if closed is not None:
+        await loc.evaluate("(el, i) => { const t = el.closest('[role=tree]'); const vis = Array.from(t.querySelectorAll('[role=treeitem]')).filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }); vis[i].focus(); }", closed["index"])
+        await _key(s, "ArrowRight")
+        opened = next((t for t in (await loc.evaluate(js.PROBE_TREE_JS))["items"] if t["index"] == closed["index"]), None)
+        checks.append(_check("seta_direita_expande", "Seta para a direita abre um item fechado", f"aria-expanded {closed['expanded']} -> {opened['expanded'] if opened else None}", bool(opened and opened["expanded"] == "true"), ["2.1.1", "4.1.2"]))
+        if opened and opened["expanded"] == "true":
+            await loc.evaluate("(el, i) => { const t = el.closest('[role=tree]'); const vis = Array.from(t.querySelectorAll('[role=treeitem]')).filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }); vis[i].focus(); }", closed["index"])
+            await _key(s, "ArrowLeft")
+            back = next((t for t in (await loc.evaluate(js.PROBE_TREE_JS))["items"] if t["index"] == closed["index"]), None)
+            checks.append(_check("seta_esquerda_recolhe", "Seta para a esquerda fecha um item aberto", f"aria-expanded true -> {back['expanded'] if back else None}", bool(back and back["expanded"] == "false"), ["2.1.1", "4.1.2"]))
+    else:
+        checks.append(_check("seta_direita_expande", "Seta para a direita abre um item fechado", "nao ha item pai fechado para testar", None, ["2.1.1"]))
+    return _report("tree", target, checks, {"tree": info}, "WAI-ARIA APG: padrao Tree View")
+
+
+async def tooltip(s: Any, target: str | None, container: str | None = None, max_stops: int = 0) -> dict[str, Any]:
+    """Dica que aparece no foco (role=tooltip): APG Tooltip. O alvo e' o controle que tem a dica."""
+    loc, (trig_ident, f0) = await _focus_target(s, str(target))
+    info = await loc.evaluate(js.PROBE_TOOLTIP_JS)
+    checks = [
+        _check("gatilho_recebe_foco", "o controle recebe o foco do teclado", _where(f0), trig_ident is not None, ["2.1.1"]),
+        _check("aparece_no_foco", "a dica aparece quando o controle recebe o foco (nao so no mouse)", f"dica visivel: {info['tooltip_visible']}" + (f" ({info['tooltip_text']!r})" if info["tooltip_visible"] else "") + ("; so tem title (o navegador nao mostra title no foco do teclado)" if info["has_title"] and not info["tooltip_visible"] else ""), bool(info["tooltip_visible"]), ["1.4.13", "2.1.1"]),
+        _check("ligado_ao_gatilho", "o controle aponta a dica com aria-describedby (role=tooltip)", f"aria-describedby={info['describedby_ids']}; aponta um role=tooltip: {info['described_by_tooltip']}", bool(info["described_by_tooltip"]), ["1.3.1", "4.1.2"]),
+    ]
+    if info["tooltip_visible"]:
+        await _key(s, "Escape")
+        after = await loc.evaluate(js.PROBE_TOOLTIP_JS)
+        _i, f1 = await _ident(s)
+        checks.append(_check("escape_fecha", "Escape fecha a dica sem tirar o foco do controle", f"dica visivel: {after['tooltip_visible']}; foco: {_where(f1)}", (not after["tooltip_visible"]) and f1 is not None, ["1.4.13"]))
+    return _report("tooltip", target, checks, {"tooltip": info}, "WAI-ARIA APG: padrao Tooltip e WCAG 1.4.13")
+
+
 ProbeFn = Callable[..., Awaitable[dict[str, Any]]]
 
 # kind -> (funcao, precisa de alvo, o que mede)
@@ -451,6 +609,10 @@ PROBES: dict[str, tuple[ProbeFn, bool, str]] = {
     "tabs": (tabs, True, "contrato APG de abas (alvo = uma das abas)"),
     "combobox": (combobox, True, "contrato APG de combobox (alvo = o campo)"),
     "form_errors": (form_errors, True, "envia o formulario pelo teclado e mede erro por campo, foco e anuncio (alvo = botao de envio ou campo)"),
+    "listbox": (listbox, True, "contrato APG de lista de opcoes (role=listbox): nome, opcoes, uma parada de Tab, setas, Home/End e selecao exposta (alvo = a lista ou uma opcao)"),
+    "tree": (tree, True, "contrato APG de arvore (role=tree): itens, estado aberto/fechado, setas para andar/expandir/recolher, Home/End (alvo = a arvore ou um item)"),
+    "tooltip": (tooltip, True, "contrato APG de dica (role=tooltip): aparece no foco, ligada por aria-describedby e Escape fecha sem tirar o foco (alvo = o controle)"),
+    "status_update": (status_update, True, "ativa um botao e mede se a mudanca (salvou, N resultados, carregando) chega a quem nao ve a tela: regiao viva ja existente ou foco movido (alvo = o botao)"),
     "route_change": (route_change, True, "ativa um link/botao e mede titulo, foco e anuncio da nova tela (alvo = o link)"),
 }
 

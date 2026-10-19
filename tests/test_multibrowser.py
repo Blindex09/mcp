@@ -169,3 +169,37 @@ def test_tab_that_skips_only_links_is_reported_as_a_browser_fact_not_a_page_defe
     assert tab_skips_links(ref, ref) is None  # ordem igual: nada a dizer
     assert tab_skips_links(ref, ["a:Pular", "a:Inicio", "input:Nome"]) is None  # faltou um BOTAO: nao e' o caso dos links
     assert tab_skips_links(["button:A"], []) is None  # sem links na referencia
+
+
+_PAGINA_COM_LINKS = (
+    "<!doctype html><html lang='pt'><head><title>t</title></head><body><main><h1>Titulo</h1>"
+    "<a href='#a'>Um</a> <a href='#b'>Dois</a> <button type='button'>Tres</button> <a href='#c'>Quatro</a></main></body></html>"
+)
+
+
+async def _tab_walk(navegador: str) -> dict:
+    from accessibility_mcp.a11y.probes import run_probe
+    from accessibility_mcp.a11y.session import SESSION
+
+    await SESSION.open(None, _PAGINA_COM_LINKS, "keyboard", browser=navegador)
+    try:
+        return await run_probe(SESSION, "tab_walk")
+    finally:
+        await SESSION.close()
+
+
+async def test_firefox_stopping_on_the_last_focusable_element_is_not_reported_as_a_keyboard_trap():
+    """Regressao real (rodada ao vivo): o Firefox sem interface deixa o foco no ultimo elemento da pagina; a sonda dizia 'possivel armadilha de teclado'."""
+    r = await _tab_walk("firefox")
+    assert r["stuck_at"] == [], r
+    assert "nao e armadilha" in r["ended_because"]
+
+
+async def test_tab_walk_says_when_the_browser_did_not_stop_on_links():
+    """O WebKit do Playwright nao para em links com Tab; a sonda agora diz quantos links ficaram sem parada em vez de listar so 2 paradas."""
+    r = await _tab_walk("webkit")
+    nomes = [x["name"] for x in r["stops"]]
+    if "Um" in nomes:  # um WebKit que para em links: nada a declarar
+        assert "links_sem_parada" not in r
+    else:
+        assert r["links_sem_parada"] == {"no_codigo": 3, "com_parada": 0}, r

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AJAX (conteúdo que chega depois) | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="ajax.html" aria-current="page">AJAX (conteúdo que chega depois)</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html">Carrossel</a></li>
+<li><a href="dica.html">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
+<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html">Svelte</a></li>
+<li><a href="pilha-angular.html">Angular</a></li>
+<li><a href="android.html">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>AJAX (conteúdo que chega depois)</h1>
+<p>Quando o conteúdo chega depois do clique, o leitor de tela não ouve nada se a página não avisar. Os três casos: carregar resultados, falhar com nova tentativa e carregar mais. Cada exemplo é medido apertando Enter no botão.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Resultados que aparecem em silêncio</a></li>
+<li><a href="#ex-2">Exemplo bom: Carregando e resultados anunciados</a></li>
+<li><a href="#ex-3">Exemplo ruim: Falha sem aviso e sem nova tentativa</a></li>
+<li><a href="#ex-4">Exemplo bom: Falha anunciada, com nova tentativa</a></li>
+<li><a href="#ex-5">Exemplo ruim: Carregar mais que faz o foco desaparecer</a></li>
+<li><a href="#ex-6">Exemplo bom: Carregar mais com foco mantido e quantidade anunciada</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Resultados que aparecem em silêncio</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Resultados que aparecem em silêncio"><button type="button" id="aj1-ruim-btn">Buscar chás</button><ul id="aj1-ruim-lista"></ul><script>(function(){var l=document.getElementById('aj1-ruim-lista');document.getElementById('aj1-ruim-btn').addEventListener('click',function(){fetch('data:application/json,%5B%22Sencha%22,%22Matcha%22,%22Gyokuro%22%5D').then(function(r){return r.json();}).then(function(chas){setTimeout(function(){l.innerHTML=chas.map(function(c){return '<li>'+c+'</li>';}).join('');},150);});});})();</script></div>
+<h3>Por quê</h3>
+<p>A lista aparece, mas ninguém fala nada: não há aviso de carregando nem de quantos resultados chegaram, e o foco continua no botão.</p>
+<h3>O que corrigir</h3>
+<p>Mantenha uma região role=status na página, escreva nela Carregando e depois a quantidade de resultados, e marque a lista com aria-busy enquanto carrega.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Buscar chás&quot;
+- list</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Buscar chás&#x27;.
+cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no corpo). Observado: button &#x27;Buscar chás&#x27;.
+NÃO cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[]; foco movido=False; conteudo novo na arvore=4 linhas.</pre>
+<h3>Código</h3>
+<pre>&lt;button type=&quot;button&quot; id=&quot;aj1-ruim-btn&quot;&gt;Buscar chás&lt;/button&gt;&lt;ul id=&quot;aj1-ruim-lista&quot;&gt;&lt;/ul&gt;&lt;script&gt;(function(){var l=document.getElementById(&#x27;aj1-ruim-lista&#x27;);document.getElementById(&#x27;aj1-ruim-btn&#x27;).addEventListener(&#x27;click&#x27;,function(){fetch(&#x27;data:application/json,%5B%22Sencha%22,%22Matcha%22,%22Gyokuro%22%5D&#x27;).then(function(r){return r.json();}).then(function(chas){setTimeout(function(){l.innerHTML=chas.map(function(c){return &#x27;&lt;li&gt;&#x27;+c+&#x27;&lt;/li&gt;&#x27;;}).join(&#x27;&#x27;);},150);});});})();&lt;/script&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Carregando e resultados anunciados</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Carregando e resultados anunciados"><button type="button" id="aj1-bom-btn">Buscar chás</button><div role="status" id="aj1-bom-status"></div><ul id="aj1-bom-lista" aria-busy="false"></ul><script>(function(){var l=document.getElementById('aj1-bom-lista'),s=document.getElementById('aj1-bom-status');document.getElementById('aj1-bom-btn').addEventListener('click',function(){s.textContent='Carregando chás…';l.setAttribute('aria-busy','true');fetch('data:application/json,%5B%22Sencha%22,%22Matcha%22,%22Gyokuro%22%5D').then(function(r){return r.json();}).then(function(chas){setTimeout(function(){l.innerHTML=chas.map(function(c){return '<li>'+c+'</li>';}).join('');l.setAttribute('aria-busy','false');s.textContent=chas.length+' chás encontrados';},150);});});})();</script></div>
+<h3>Por quê</h3>
+<p>A região de status já estava na página: o leitor de tela fala Carregando chás e depois 3 chás encontrados.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Buscar chás&quot;
+- status
+- list</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Buscar chás&#x27;.
+cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no corpo). Observado: button &#x27;Buscar chás&#x27;.
+cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[&#x27;Carregando chás…&#x27;, &#x27;3 chás encontrados&#x27;]; foco movido=False; conteudo novo na arvore=5 linhas.
+cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regiao e texto juntos nao e confiavel). Observado: a regiao ja existia.</pre>
+<h3>Código</h3>
+<pre>&lt;button type=&quot;button&quot; id=&quot;aj1-bom-btn&quot;&gt;Buscar chás&lt;/button&gt;&lt;div role=&quot;status&quot; id=&quot;aj1-bom-status&quot;&gt;&lt;/div&gt;&lt;ul id=&quot;aj1-bom-lista&quot; aria-busy=&quot;false&quot;&gt;&lt;/ul&gt;&lt;script&gt;(function(){var l=document.getElementById(&#x27;aj1-bom-lista&#x27;),s=document.getElementById(&#x27;aj1-bom-status&#x27;);document.getElementById(&#x27;aj1-bom-btn&#x27;).addEventListener(&#x27;click&#x27;,function(){s.textContent=&#x27;Carregando chás…&#x27;;l.setAttribute(&#x27;aria-busy&#x27;,&#x27;true&#x27;);fetch(&#x27;data:application/json,%5B%22Sencha%22,%22Matcha%22,%22Gyokuro%22%5D&#x27;).then(function(r){return r.json();}).then(function(chas){setTimeout(function(){l.innerHTML=chas.map(function(c){return &#x27;&lt;li&gt;&#x27;+c+&#x27;&lt;/li&gt;&#x27;;}).join(&#x27;&#x27;);l.setAttribute(&#x27;aria-busy&#x27;,&#x27;false&#x27;);s.textContent=chas.length+&#x27; chás encontrados&#x27;;},150);});});})();&lt;/script&gt;</pre>
+<h2 id="ex-3"><span class="etiqueta t-ruim">Exemplo ruim:</span> Falha sem aviso e sem nova tentativa</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Falha sem aviso e sem nova tentativa"><button type="button" id="aj2-ruim-btn">Carregar pedidos</button><div id="aj2-ruim-msg" class="erro-visual"></div><script>document.getElementById('aj2-ruim-btn').addEventListener('click',function(){new Promise(function(_,no){setTimeout(function(){no(new Error('rede'));},150);}).catch(function(){document.getElementById('aj2-ruim-msg').textContent='Falhou.';});});</script></div>
+<h3>Por quê</h3>
+<p>A falha aparece como texto vermelho solto: nenhuma região viva a anuncia, a frase não diz o que fazer e não há como tentar de novo.</p>
+<h3>O que corrigir</h3>
+<p>Mostre a falha numa região role=alert que já exista, diga o que aconteceu e ofereça o botão Tentar de novo.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Carregar pedidos&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Carregar pedidos&#x27;.
+cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no corpo). Observado: button &#x27;Carregar pedidos&#x27;.
+NÃO cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[]; foco movido=False; conteudo novo na arvore=1 linhas.</pre>
+<h3>Código</h3>
+<pre>&lt;button type=&quot;button&quot; id=&quot;aj2-ruim-btn&quot;&gt;Carregar pedidos&lt;/button&gt;&lt;div id=&quot;aj2-ruim-msg&quot; class=&quot;erro-visual&quot;&gt;&lt;/div&gt;&lt;script&gt;document.getElementById(&#x27;aj2-ruim-btn&#x27;).addEventListener(&#x27;click&#x27;,function(){new Promise(function(_,no){setTimeout(function(){no(new Error(&#x27;rede&#x27;));},150);}).catch(function(){document.getElementById(&#x27;aj2-ruim-msg&#x27;).textContent=&#x27;Falhou.&#x27;;});});&lt;/script&gt;</pre>
+<h2 id="ex-4"><span class="etiqueta t-bom">Exemplo bom:</span> Falha anunciada, com nova tentativa</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Falha anunciada, com nova tentativa"><button type="button" id="aj2-bom-btn">Carregar pedidos</button><div id="aj2-bom-msg" class="erro-visual" role="alert"></div><script>(function(){var b=document.getElementById('aj2-bom-btn');b.addEventListener('click',function(){new Promise(function(_,no){setTimeout(function(){no(new Error('rede'));},150);}).catch(function(){document.getElementById('aj2-bom-msg').textContent='Não foi possível carregar os pedidos. Verifique a conexão e tente de novo.';b.textContent='Tentar de novo';});});})();</script></div>
+<h3>Por quê</h3>
+<p>A região role=alert já estava na página, a mensagem diz o que fazer e o botão passa a se chamar Tentar de novo, com o foco ainda nele.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Carregar pedidos&quot;
+- alert</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Carregar pedidos&#x27;.
+cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no corpo). Observado: button &#x27;Tentar de novo&#x27;.
+cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[&#x27;Não foi possível carregar os pedidos. Ve&#x27;]; foco movido=False; conteudo novo na arvore=2 linhas.
+cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regiao e texto juntos nao e confiavel). Observado: a regiao ja existia.</pre>
+<h3>Código</h3>
+<pre>&lt;button type=&quot;button&quot; id=&quot;aj2-bom-btn&quot;&gt;Carregar pedidos&lt;/button&gt;&lt;div id=&quot;aj2-bom-msg&quot; class=&quot;erro-visual&quot; role=&quot;alert&quot;&gt;&lt;/div&gt;&lt;script&gt;(function(){var b=document.getElementById(&#x27;aj2-bom-btn&#x27;);b.addEventListener(&#x27;click&#x27;,function(){new Promise(function(_,no){setTimeout(function(){no(new Error(&#x27;rede&#x27;));},150);}).catch(function(){document.getElementById(&#x27;aj2-bom-msg&#x27;).textContent=&#x27;Não foi possível carregar os pedidos. Verifique a conexão e tente de novo.&#x27;;b.textContent=&#x27;Tentar de novo&#x27;;});});})();&lt;/script&gt;</pre>
+<h2 id="ex-5"><span class="etiqueta t-ruim">Exemplo ruim:</span> Carregar mais que faz o foco desaparecer</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Carregar mais que faz o foco desaparecer"><ul id="aj3-ruim-lista"><li>Chá 1</li><li>Chá 2</li><li>Chá 3</li></ul><div id="aj3-ruim-host"><button type="button" id="aj3-ruim-btn">Carregar mais</button></div><script>document.getElementById('aj3-ruim-btn').addEventListener('click',function(){setTimeout(function(){document.getElementById('aj3-ruim-lista').insertAdjacentHTML('beforeend','<li>Chá 4</li><li>Chá 5</li><li>Chá 6</li>');document.getElementById('aj3-ruim-host').innerHTML='';},150);});</script></div>
+<h3>Por quê</h3>
+<p>O botão é apagado ao carregar: o foco cai no corpo da página e quem usa teclado precisa começar de novo. Nada anuncia que chegaram mais itens.</p>
+<h3>O que corrigir</h3>
+<p>Não remova o botão em que o foco está. Mantenha-o (ou mova o foco para o primeiro item novo) e anuncie a quantidade numa região de status.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- list:
+  - listitem: Chá 1
+  - listitem: Chá 2
+  - listitem: Chá 3
+- button &quot;Carregar mais&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Carregar mais&#x27;.
+NÃO cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no corpo). Observado: nenhum elemento (corpo da pagina).
+NÃO cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[]; foco movido=False; conteudo novo na arvore=3 linhas.</pre>
+<h3>Código</h3>
+<pre>&lt;ul id=&quot;aj3-ruim-lista&quot;&gt;&lt;li&gt;Chá 1&lt;/li&gt;&lt;li&gt;Chá 2&lt;/li&gt;&lt;li&gt;Chá 3&lt;/li&gt;&lt;/ul&gt;&lt;div id=&quot;aj3-ruim-host&quot;&gt;&lt;button type=&quot;button&quot; id=&quot;aj3-ruim-btn&quot;&gt;Carregar mais&lt;/button&gt;&lt;/div&gt;&lt;script&gt;document.getElementById(&#x27;aj3-ruim-btn&#x27;).addEventListener(&#x27;click&#x27;,function(){setTimeout(function(){document.getElementById(&#x27;aj3-ruim-lista&#x27;).insertAdjacentHTML(&#x27;beforeend&#x27;,&#x27;&lt;li&gt;Chá 4&lt;/li&gt;&lt;li&gt;Chá 5&lt;/li&gt;&lt;li&gt;Chá 6&lt;/li&gt;&#x27;);document.getElementById(&#x27;aj3-ruim-host&#x27;).innerHTML=&#x27;&#x27;;},150);});&lt;/script&gt;</pre>
+<h2 id="ex-6"><span class="etiqueta t-bom">Exemplo bom:</span> Carregar mais com foco mantido e quantidade anunciada</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Carregar mais com foco mantido e quantidade anunciada"><ul id="aj3-bom-lista"><li>Chá 1</li><li>Chá 2</li><li>Chá 3</li></ul><button type="button" id="aj3-bom-btn">Carregar mais</button><div role="status" id="aj3-bom-status"></div><script>document.getElementById('aj3-bom-btn').addEventListener('click',function(){setTimeout(function(){document.getElementById('aj3-bom-lista').insertAdjacentHTML('beforeend','<li>Chá 4</li><li>Chá 5</li><li>Chá 6</li>');document.getElementById('aj3-bom-status').textContent='3 itens a mais, 6 no total';},150);});</script></div>
+<h3>Por quê</h3>
+<p>O botão fica onde está, com o foco, e a região de status fala 3 itens a mais, 6 no total.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- list:
+  - listitem: Chá 1
+  - listitem: Chá 2
+  - listitem: Chá 3
+- button &quot;Carregar mais&quot;
+- status</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Carregar mais&#x27;.
+cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no corpo). Observado: button &#x27;Carregar mais&#x27;.
+cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[&#x27;3 itens a mais, 6 no total&#x27;]; foco movido=False; conteudo novo na arvore=4 linhas.
+cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regiao e texto juntos nao e confiavel). Observado: a regiao ja existia.</pre>
+<h3>Código</h3>
+<pre>&lt;ul id=&quot;aj3-bom-lista&quot;&gt;&lt;li&gt;Chá 1&lt;/li&gt;&lt;li&gt;Chá 2&lt;/li&gt;&lt;li&gt;Chá 3&lt;/li&gt;&lt;/ul&gt;&lt;button type=&quot;button&quot; id=&quot;aj3-bom-btn&quot;&gt;Carregar mais&lt;/button&gt;&lt;div role=&quot;status&quot; id=&quot;aj3-bom-status&quot;&gt;&lt;/div&gt;&lt;script&gt;document.getElementById(&#x27;aj3-bom-btn&#x27;).addEventListener(&#x27;click&#x27;,function(){setTimeout(function(){document.getElementById(&#x27;aj3-bom-lista&#x27;).insertAdjacentHTML(&#x27;beforeend&#x27;,&#x27;&lt;li&gt;Chá 4&lt;/li&gt;&lt;li&gt;Chá 5&lt;/li&gt;&lt;li&gt;Chá 6&lt;/li&gt;&#x27;);document.getElementById(&#x27;aj3-bom-status&#x27;).textContent=&#x27;3 itens a mais, 6 no total&#x27;;},150);});&lt;/script&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="css.html">Anterior: CSS</a>
+<a href="dialogo.html">Próximo: Diálogo (janela modal)</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

@@ -32,7 +32,7 @@ def test_every_scenario_has_a_bad_and_a_good_example_and_the_good_ones_pass_axe(
         tipos = {ex["tipo"] for ex in c["exemplos"]}
         assert {"ruim", "bom"} <= tipos, c["slug"]
         for i, ex in enumerate(c["exemplos"]):
-            if ex["tipo"] in ("bom", "ok"):
+            if ex["tipo"] in ("bom", "ok", "incerto"):
                 assert medidas[(c["slug"], i)]["violacoes"] == [], (c["slug"], ex["titulo"])
 
 
@@ -41,7 +41,7 @@ def test_the_bad_example_changes_what_the_browser_hands_to_the_screen_reader(sit
     """O ruim parece igual ao bom, mas a arvore de acessibilidade tem que ser diferente: e' essa a diferenca que o leitor de tela ouve."""
     mod, medidas = site
     for c in mod.CENARIOS:
-        if any(ex.get("sonda") for ex in c["exemplos"]):
+        if any(ex.get("sonda") or ex.get("extra") or ex.get("nao_executado") for ex in c["exemplos"]):
             continue  # componente interativo: a diferenca e' de comportamento (teclado), medida pelas sondas em test_demo_interativos.py
         bons = {m["arvore"] for m in _por_tipo(mod, medidas, c["slug"], "bom")}
         for ruim in _por_tipo(mod, medidas, c["slug"], "ruim"):

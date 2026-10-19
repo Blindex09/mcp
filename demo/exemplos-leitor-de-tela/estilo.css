@@ -41,11 +41,11 @@ p, li { max-width: 70ch; }
 .etiqueta { font-weight: 700; }
 .t-ruim { color: var(--ruim); }
 .t-bom { color: var(--bom); }
-.t-ok { color: var(--ok); }
+.t-ok, .t-incerto { color: var(--ok); }
 .exemplo { border: 2px dashed var(--borda); border-radius: 8px; padding: 1rem; margin-block: 0.75rem; }
 .exemplo-ruim { border-left: 8px solid var(--ruim); }
 .exemplo-bom { border-left: 8px solid var(--bom); }
-.exemplo-ok { border-left: 8px solid var(--ok); }
+.exemplo-ok, .exemplo-incerto { border-left: 8px solid var(--ok); }
 pre { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--destaque); border: 1px solid var(--borda); border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.95rem; line-height: 1.45; margin: 0.4rem 0; }
 .entre { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--borda); }
 .entre a { display: inline-block; min-height: 44px; padding: 0.55rem 0; }

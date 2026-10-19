@@ -44,3 +44,7 @@ segurança antes de cada edição, escrita atômica, conferência de sintaxe do 
 ### Antes de testar acessibilidade ou mexer nas sondas
 
 Ler o guia `testing-playbook-for-ai` (ordem das ferramentas, o que se pode e não se pode afirmar, erros já cometidos) e a matriz `component-behavior-matrix` (o que cada componente deve e não deve fazer, o que o leitor de tela recebe, qual sonda mede). Sonda nova ou alterada nasce com um par bom e ruim em `tests/test_probes.py` e no site `demo/exemplos-leitor-de-tela/`.
+
+### O que pode e o que não pode, ao testar com o MCP
+
+Pode afirmar o que o servidor mediu: papel, nome e estado na árvore, o efeito de uma tecla, onde ficou o foco, tamanhos, contraste, o que entrou numa região viva. Não pode afirmar a fala exata de um leitor de tela sem rodar o leitor, nem que um `met: null` passou, nem nada sobre Android ou iOS (sem executor aqui), nem que o produto está em conformidade. Não pode chamar um exemplo de ruim por algo que não mediu: usa a categoria "depende do navegador, não medido aqui". Não pode julgar por palavra-chave. Mede o componente como a pessoa o recebe (estilos do site, página já montada pelo framework) e espera a montagem por condição, nunca por tempo fixo. Detalhes e erros já cometidos: guia `testing-playbook-for-ai`.

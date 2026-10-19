@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iOS (SwiftUI e UIKit) | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html">Carrossel</a></li>
+<li><a href="dica.html">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
+<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html">Svelte</a></li>
+<li><a href="pilha-angular.html">Angular</a></li>
+<li><a href="android.html">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html" aria-current="page">iOS (SwiftUI e UIKit)</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>iOS (SwiftUI e UIKit)</h1>
+<p>No iOS o VoiceOver lê o rótulo, o valor e os traços de cada elemento. Toque num texto ou imagem com onTapGesture não vira botão; imagens decorativas precisam sair da árvore; mudanças que o usuário não vê precisam ser anunciadas.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Imagem com onTapGesture</a></li>
+<li><a href="#ex-2">Exemplo bom: Button com rótulo</a></li>
+<li><a href="#ex-3">Exemplo ruim: Título de seção que é só texto grande</a></li>
+<li><a href="#ex-4">Exemplo bom: Título com o traço isHeader</a></li>
+<li><a href="#ex-5">Exemplo ruim: Mensagem de status que só aparece na tela</a></li>
+<li><a href="#ex-6">Exemplo bom: Anúncio de acessibilidade</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Imagem com onTapGesture</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Código de exemplo, exemplo ruim: Imagem com onTapGesture"><p>Não executado aqui: este MCP não tem iOS. As APIs vieram de artigos de terceiros; a página oficial da Apple não pôde ser lida. Confirme em developer.apple.com e teste com o VoiceOver num aparelho.</p></div>
+<h3>Por quê</h3>
+<p>O VoiceOver lê o nome do símbolo (&quot;heart&quot;) ou nada, sem dizer que é botão, e o toque pode ficar menor que o mínimo.</p>
+<h3>O que corrigir</h3>
+<p>Use Button e dê um rótulo que diga a ação.</p>
+<h3>Código</h3>
+<pre>Image(systemName: &quot;heart&quot;)
+    .onTapGesture { curtir() }</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Button com rótulo</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Código de exemplo, exemplo bom: Button com rótulo"><p>Não executado aqui: este MCP não tem iOS. As APIs vieram de artigos de terceiros; a página oficial da Apple não pôde ser lida. Confirme em developer.apple.com e teste com o VoiceOver num aparelho.</p></div>
+<h3>Por quê</h3>
+<p>Button traz o traço de botão; accessibilityLabel diz a ação em vez do nome do símbolo.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>Código</h3>
+<pre>Button(action: curtir) {
+    Image(systemName: &quot;heart&quot;)
+}
+.accessibilityLabel(&quot;Curtir&quot;)</pre>
+<h2 id="ex-3"><span class="etiqueta t-ruim">Exemplo ruim:</span> Título de seção que é só texto grande</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Código de exemplo, exemplo ruim: Título de seção que é só texto grande"><p>Não executado aqui: este MCP não tem iOS. As APIs vieram de artigos de terceiros; a página oficial da Apple não pôde ser lida. Confirme em developer.apple.com e teste com o VoiceOver num aparelho.</p></div>
+<h3>Por quê</h3>
+<p>Para quem vê é um título. Para o VoiceOver é texto comum: o rotor de títulos não o encontra.</p>
+<h3>O que corrigir</h3>
+<p>Acrescente o traço de título.</p>
+<h3>Código</h3>
+<pre>Text(&quot;Pedidos recentes&quot;)
+    .font(.title2)</pre>
+<h2 id="ex-4"><span class="etiqueta t-bom">Exemplo bom:</span> Título com o traço isHeader</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Código de exemplo, exemplo bom: Título com o traço isHeader"><p>Não executado aqui: este MCP não tem iOS. As APIs vieram de artigos de terceiros; a página oficial da Apple não pôde ser lida. Confirme em developer.apple.com e teste com o VoiceOver num aparelho.</p></div>
+<h3>Por quê</h3>
+<p>O traço isHeader põe o texto no rotor de títulos do VoiceOver.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>Código</h3>
+<pre>Text(&quot;Pedidos recentes&quot;)
+    .font(.title2)
+    .accessibilityAddTraits(.isHeader)</pre>
+<h2 id="ex-5"><span class="etiqueta t-ruim">Exemplo ruim:</span> Mensagem de status que só aparece na tela</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Código de exemplo, exemplo ruim: Mensagem de status que só aparece na tela"><p>Não executado aqui: este MCP não tem iOS. As APIs vieram de artigos de terceiros; a página oficial da Apple não pôde ser lida. Confirme em developer.apple.com e teste com o VoiceOver num aparelho.</p></div>
+<h3>Por quê</h3>
+<p>O texto muda, mas o VoiceOver não é avisado: quem não vê a tela não sabe que salvou.</p>
+<h3>O que corrigir</h3>
+<p>Poste um anúncio de acessibilidade quando o estado mudar.</p>
+<h3>Código</h3>
+<pre>@State private var status = &quot;&quot;
+Button(&quot;Salvar&quot;) { status = &quot;Salvo com sucesso&quot; }
+Text(status)</pre>
+<h2 id="ex-6"><span class="etiqueta t-bom">Exemplo bom:</span> Anúncio de acessibilidade</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Código de exemplo, exemplo bom: Anúncio de acessibilidade"><p>Não executado aqui: este MCP não tem iOS. As APIs vieram de artigos de terceiros; a página oficial da Apple não pôde ser lida. Confirme em developer.apple.com e teste com o VoiceOver num aparelho.</p></div>
+<h3>Por quê</h3>
+<p>UIAccessibility.post com a notificação de anúncio faz o VoiceOver falar a mensagem. No iOS 17 também existe a forma de SwiftUI (AccessibilityNotification); confirme na documentação da Apple.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>Código</h3>
+<pre>@State private var status = &quot;&quot;
+Button(&quot;Salvar&quot;) {
+    status = &quot;Salvo com sucesso&quot;
+    UIAccessibility.post(notification: .announcement, argument: status)
+}
+Text(status)</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="android.html">Anterior: Android (Jetpack Compose)</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

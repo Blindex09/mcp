@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tabela ordenável | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html">Carrossel</a></li>
+<li><a href="dica.html">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html" aria-current="page">Tabela ordenável</a></li>
+<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html">Svelte</a></li>
+<li><a href="pilha-angular.html">Angular</a></li>
+<li><a href="android.html">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Tabela ordenável</h1>
+<p>Em uma tabela que ordena, cada coluna ordenável precisa de um botão dentro do cabeçalho, com aria-sort na coluna ordenada, e a mudança precisa ser anunciada.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Cabeçalho clicável que só o mouse alcança</a></li>
+<li><a href="#ex-2">Exemplo bom: Botão no cabeçalho, aria-sort e aviso</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Cabeçalho clicável que só o mouse alcança</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Cabeçalho clicável que só o mouse alcança"><table><caption>Chás</caption><thead><tr><th scope="col">Nome</th><th scope="col" id="tab-ruim-preco" style="cursor:pointer">Preço</th></tr></thead><tbody id="tab-ruim-corpo"><tr><td>Sencha</td><td>30</td></tr><tr><td>Matcha</td><td>50</td></tr><tr><td>Gyokuro</td><td>80</td></tr></tbody></table><script>document.getElementById('tab-ruim-preco').addEventListener('click',function(){var c=document.getElementById('tab-ruim-corpo');Array.prototype.slice.call(c.rows).reverse().forEach(function(r){c.appendChild(r);});});</script></div>
+<h3>Por quê</h3>
+<p>O cabeçalho ordena, mas não é um botão: o teclado não chega, o leitor de tela não sabe que ordena, e nada diz a coluna nem o sentido.</p>
+<h3>O que corrigir</h3>
+<p>Ponha um button dentro do th, atualize aria-sort e avise numa região de status (Ordenado por Preço, crescente).</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- table &quot;Chás&quot;:
+  - caption: Chás
+  - rowgroup:
+    - row &quot;Nome Preço&quot;:
+      - columnheader &quot;Nome&quot;
+      - columnheader &quot;Preço&quot;
+  - rowgroup:
+    - row &quot;Sencha 30&quot;:
+      - cell &quot;Sencha&quot;
+      - cell &quot;30&quot;
+    - row &quot;Matcha 50&quot;:
+      - cell &quot;Matcha&quot;
+      - cell &quot;50&quot;
+    - row &quot;Gyokuro 80&quot;:
+      - cell &quot;Gyokuro&quot;
+      - cell &quot;80&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>NÃO cumpriu: o gatilho recebe o foco do teclado. Observado: nenhum elemento (corpo da pagina).
+não deu para medir: ativar o gatilho muda algo na tela. Observado: nada mudou na arvore nem em regioes vivas.</pre>
+<h3>Código</h3>
+<pre>&lt;table&gt;&lt;caption&gt;Chás&lt;/caption&gt;&lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;Nome&lt;/th&gt;&lt;th scope=&quot;col&quot; id=&quot;tab-ruim-preco&quot; style=&quot;cursor:pointer&quot;&gt;Preço&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;tab-ruim-corpo&quot;&gt;&lt;tr&gt;&lt;td&gt;Sencha&lt;/td&gt;&lt;td&gt;30&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Matcha&lt;/td&gt;&lt;td&gt;50&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Gyokuro&lt;/td&gt;&lt;td&gt;80&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;script&gt;document.getElementById(&#x27;tab-ruim-preco&#x27;).addEventListener(&#x27;click&#x27;,function(){var c=document.getElementById(&#x27;tab-ruim-corpo&#x27;);Array.prototype.slice.call(c.rows).reverse().forEach(function(r){c.appendChild(r);});});&lt;/script&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Botão no cabeçalho, aria-sort e aviso</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Botão no cabeçalho, aria-sort e aviso"><table><caption>Chás</caption><thead><tr><th scope="col">Nome</th><th scope="col" id="tab-bom-th" aria-sort="none"><button type="button" id="tab-bom-preco">Preço</button></th></tr></thead><tbody id="tab-bom-corpo"><tr><td>Sencha</td><td>30</td></tr><tr><td>Matcha</td><td>50</td></tr><tr><td>Gyokuro</td><td>80</td></tr></tbody></table><div role="status" id="tab-bom-aviso"></div><script>(function(){var d=true;document.getElementById('tab-bom-preco').addEventListener('click',function(){var c=document.getElementById('tab-bom-corpo');var l=Array.prototype.slice.call(c.rows).sort(function(a,b){return (a.cells[1].textContent-b.cells[1].textContent)*(d?-1:1);});l.forEach(function(r){c.appendChild(r);});document.getElementById('tab-bom-th').setAttribute('aria-sort',d?'descending':'ascending');document.getElementById('tab-bom-aviso').textContent='Ordenado por Preço, '+(d?'decrescente':'crescente');d=!d;});})();</script></div>
+<h3>Por quê</h3>
+<p>O leitor de tela encontra o botão Preço, ouve a coluna ordenada pelo aria-sort e a região de status fala Ordenado por Preço, decrescente.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- table &quot;Chás&quot;:
+  - caption: Chás
+  - rowgroup:
+    - row &quot;Nome Preço&quot;:
+      - columnheader &quot;Nome&quot;
+      - columnheader &quot;Preço&quot;:
+        - button &quot;Preço&quot;
+  - rowgroup:
+    - row &quot;Sencha 30&quot;:
+      - cell &quot;Sencha&quot;
+      - cell &quot;30&quot;
+    - row &quot;Matcha 50&quot;:
+      - cell &quot;Matcha&quot;
+      - cell &quot;50&quot;
+    - row &quot;Gyokuro 80&quot;:
+      - cell &quot;Gyokuro&quot;
+      - cell &quot;80&quot;
+- status</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Preço&#x27;.
+cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no corpo). Observado: button &#x27;Preço&#x27;.
+cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[&#x27;Ordenado por Preço, decrescente&#x27;]; foco movido=False; conteudo novo na arvore=1 linhas.
+cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regiao e texto juntos nao e confiavel). Observado: a regiao ja existia.</pre>
+<h3>Código</h3>
+<pre>&lt;table&gt;&lt;caption&gt;Chás&lt;/caption&gt;&lt;thead&gt;&lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;Nome&lt;/th&gt;&lt;th scope=&quot;col&quot; id=&quot;tab-bom-th&quot; aria-sort=&quot;none&quot;&gt;&lt;button type=&quot;button&quot; id=&quot;tab-bom-preco&quot;&gt;Preço&lt;/button&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;tab-bom-corpo&quot;&gt;&lt;tr&gt;&lt;td&gt;Sencha&lt;/td&gt;&lt;td&gt;30&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Matcha&lt;/td&gt;&lt;td&gt;50&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Gyokuro&lt;/td&gt;&lt;td&gt;80&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;div role=&quot;status&quot; id=&quot;tab-bom-aviso&quot;&gt;&lt;/div&gt;&lt;script&gt;(function(){var d=true;document.getElementById(&#x27;tab-bom-preco&#x27;).addEventListener(&#x27;click&#x27;,function(){var c=document.getElementById(&#x27;tab-bom-corpo&#x27;);var l=Array.prototype.slice.call(c.rows).sort(function(a,b){return (a.cells[1].textContent-b.cells[1].textContent)*(d?-1:1);});l.forEach(function(r){c.appendChild(r);});document.getElementById(&#x27;tab-bom-th&#x27;).setAttribute(&#x27;aria-sort&#x27;,d?&#x27;descending&#x27;:&#x27;ascending&#x27;);document.getElementById(&#x27;tab-bom-aviso&#x27;).textContent=&#x27;Ordenado por Preço, &#x27;+(d?&#x27;decrescente&#x27;:&#x27;crescente&#x27;);d=!d;});})();&lt;/script&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="arvore.html">Anterior: Árvore (tree view)</a>
+<a href="web-components.html">Próximo: Web Components (elemento personalizado)</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

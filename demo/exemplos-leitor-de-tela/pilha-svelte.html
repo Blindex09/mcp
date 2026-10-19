@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Svelte | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html">Carrossel</a></li>
+<li><a href="dica.html">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
+<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html" aria-current="page">Svelte</a></li>
+<li><a href="pilha-angular.html">Angular</a></li>
+<li><a href="android.html">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Svelte</h1>
+<p>Svelte 5, componentes .svelte com runes ($state, $props), compilados; os avisos de acessibilidade do compilador estão medidos. Os mesmos cinco componentes (acordeão, diálogo, erro de formulário, mensagem de status e mudança de tela), cada um ruim e bom, em código real compilado. O framework não faz acessibilidade por você: o que muda é onde cada um esconde o erro.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Acordeão em Svelte: como não fazer</a></li>
+<li><a href="#ex-2">Exemplo bom: Acordeão em Svelte: como fazer</a></li>
+<li><a href="#ex-3">Exemplo ruim: Diálogo em Svelte: como não fazer</a></li>
+<li><a href="#ex-4">Exemplo bom: Diálogo em Svelte: como fazer</a></li>
+<li><a href="#ex-5">Exemplo ruim: Erro de formulário em Svelte: como não fazer</a></li>
+<li><a href="#ex-6">Exemplo bom: Erro de formulário em Svelte: como fazer</a></li>
+<li><a href="#ex-7">Exemplo ruim: Mensagem de status em Svelte: como não fazer</a></li>
+<li><a href="#ex-8">Exemplo bom: Mensagem de status em Svelte: como fazer</a></li>
+<li><a href="#ex-9">Exemplo ruim: Mudança de tela em Svelte: como não fazer</a></li>
+<li><a href="#ex-10">Exemplo bom: Mudança de tela em Svelte: como fazer</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Acordeão em Svelte: como não fazer</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Acordeão em Svelte: como não fazer"><div data-exemplo="acordeao-ruim"></div></div>
+<h3>Por quê</h3>
+<p>O clique funciona só com o mouse. A div não recebe foco, não é anunciada como botão e não diz se está aberta ou fechada. Aqui o compilador do Svelte avisa de verdade (veja os avisos medidos abaixo): uma div com clique, sem papel e sem teclado. Não esconda o aviso com svelte-ignore; troque pelo button.</p>
+<h3>O que corrigir</h3>
+<p>Troque a div por button e mantenha aria-expanded igual ao estado do componente.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: Prazo de entrega</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda disclosure, medido)</h3>
+<pre>NÃO cumpriu: o gatilho recebe o foco do teclado. Observado: nenhum elemento (corpo da pagina).
+NÃO cumpriu: estado aberto/fechado exposto (aria-expanded no botao ou &lt;summary&gt; de &lt;details&gt;). Observado: aria-expanded=None.
+NÃO cumpriu: Enter alterna o estado do botao e o conteudo controlado. Observado: expanded None-&gt;None; conteudo visivel None-&gt;None.
+NÃO cumpriu: o foco continua no botao. Observado: nenhum elemento (corpo da pagina).
+NÃO cumpriu: Space alterna o estado do botao e o conteudo controlado. Observado: expanded None-&gt;None; conteudo visivel None-&gt;None.
+NÃO cumpriu: o foco continua no botao. Observado: nenhum elemento (corpo da pagina).</pre>
+<h3>Avisos do compilador do Svelte (medidos)</h3>
+<pre>a11y_click_events_have_key_events: Visible, non-interactive element `&lt;div&gt;` with a click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as `&lt;button type=&quot;button&quot;&gt;` or `&lt;a&gt;` might be more appropriate
+a11y_no_static_element_interactions: `&lt;div&gt;` with a click handler must have an ARIA role</pre>
+<h3>Código</h3>
+<pre>&lt;script&gt;
+  let { k } = $props();
+  let aberto = $state(false);
+&lt;/script&gt;
+
+&lt;!-- div com on:click: sem papel, sem foco, sem Enter/Espaço e sem estado. O compilador do Svelte avisa. --&gt;
+&lt;div&gt;
+  &lt;div id=&quot;{k}-gatilho&quot; class=&quot;fake-botao&quot; onclick={() =&gt; (aberto = !aberto)}&gt;Prazo de entrega&lt;/div&gt;
+  {#if aberto}&lt;p id=&quot;{k}-painel&quot;&gt;Cinco dias úteis.&lt;/p&gt;{/if}
+&lt;/div&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Acordeão em Svelte: como fazer</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Acordeão em Svelte: como fazer"><div data-exemplo="acordeao-bom"></div></div>
+<h3>Por quê</h3>
+<p>Um button com aria-expanded e aria-controls: o leitor de tela anuncia botão, recolhido ou expandido, e Enter e Espaço alternam.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Prazo de entrega&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda disclosure, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Prazo de entrega&#x27;.
+cumpriu: estado aberto/fechado exposto (aria-expanded no botao ou &lt;summary&gt; de &lt;details&gt;). Observado: aria-expanded=false.
+cumpriu: Enter alterna o estado do botao e o conteudo controlado. Observado: expanded false-&gt;true; conteudo visivel False-&gt;True.
+cumpriu: o foco continua no botao. Observado: button &#x27;Prazo de entrega&#x27;.
+cumpriu: expanded=true mostra o conteudo; false o oculta. Observado: expanded=true conteudo_visivel=True.
+cumpriu: Space alterna o estado do botao e o conteudo controlado. Observado: expanded false-&gt;true; conteudo visivel False-&gt;True.
+cumpriu: o foco continua no botao. Observado: button &#x27;Prazo de entrega&#x27;.</pre>
+<h3>Avisos do compilador do Svelte (medidos)</h3>
+<pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
+<h3>Código</h3>
+<pre>&lt;script&gt;
+  let { k } = $props();
+  let aberto = $state(false);
+&lt;/script&gt;
+
+&lt;div&gt;
+  &lt;button type=&quot;button&quot; id=&quot;{k}-gatilho&quot; aria-expanded={aberto} aria-controls=&quot;{k}-painel&quot; onclick={() =&gt; (aberto = !aberto)}&gt;
+    Prazo de entrega
+  &lt;/button&gt;
+  &lt;div id=&quot;{k}-painel&quot; hidden={!aberto}&gt;&lt;p&gt;Cinco dias úteis.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+<h2 id="ex-3"><span class="etiqueta t-ruim">Exemplo ruim:</span> Diálogo em Svelte: como não fazer</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Diálogo em Svelte: como não fazer"><div data-exemplo="dialogo-ruim"></div></div>
+<h3>Por quê</h3>
+<p>Para quem vê, abriu uma janela. Para o teclado e o leitor de tela, não é um diálogo: sem papel, sem nome, o foco fica no botão de trás e o Escape não fecha. O {#if} cria a caixa só quando abre; o dialog nativo existe sempre e o showModal() o abre.</p>
+<h3>O que corrigir</h3>
+<p>Use dialog com showModal() em vez de renderizar uma caixa condicional, e ligue o nome ao título com aria-labelledby.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Excluir projeto&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda dialog, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Excluir projeto&#x27;.
+NÃO cumpriu: Enter no gatilho abre um dialogo visivel. Observado: nenhum dialogo (papel dialog/alertdialog ou &lt;dialog open&gt;) visivel depois do Enter.</pre>
+<h3>Avisos do compilador do Svelte (medidos)</h3>
+<pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
+<h3>Código</h3>
+<pre>&lt;script&gt;
+  let { k } = $props();
+  let aberto = $state(false);
+&lt;/script&gt;
+
+&lt;!-- Aparece na tela, mas não é um diálogo: sem papel, sem nome, sem foco, sem Escape. --&gt;
+&lt;div&gt;
+  &lt;button type=&quot;button&quot; id=&quot;{k}-gatilho&quot; onclick={() =&gt; (aberto = true)}&gt;Excluir projeto&lt;/button&gt;
+  {#if aberto}
+    &lt;div class=&quot;caixa-falsa&quot;&gt;
+      &lt;p&gt;Excluir este projeto?&lt;/p&gt;
+      &lt;button type=&quot;button&quot; onclick={() =&gt; (aberto = false)}&gt;Cancelar&lt;/button&gt;
+    &lt;/div&gt;
+  {/if}
+&lt;/div&gt;</pre>
+<h2 id="ex-4"><span class="etiqueta t-bom">Exemplo bom:</span> Diálogo em Svelte: como fazer</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Diálogo em Svelte: como fazer"><div data-exemplo="dialogo-bom"></div></div>
+<h3>Por quê</h3>
+<p>O elemento dialog aberto com showModal() dá papel, nome (pelo título), foco preso, Escape e devolução do foco ao botão.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Excluir projeto&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda dialog, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Excluir projeto&#x27;.
+cumpriu: Enter no gatilho abre um dialogo visivel. Observado: abriu &lt;dialog&gt; role=None.
+cumpriu: o foco entra no dialogo ao abrir. Observado: dentro.
+cumpriu: o dialogo tem nome (aria-label ou aria-labelledby). Observado: &#x27;Excluir este projeto?&#x27;.
+cumpriu: aria-modal=true ou &lt;dialog&gt; aberto com showModal(). Observado: aria-modal=None :modal=True.
+cumpriu: Tab circula so entre os controles do dialogo (o foco nao vaza para a pagina). Observado: circulou dentro e voltou ao inicio em 2 Tab.
+cumpriu: Escape fecha o dialogo. Observado: fechou.
+cumpriu: ao fechar, o foco volta ao elemento que abriu o dialogo. Observado: button &#x27;Excluir projeto&#x27;.</pre>
+<h3>Avisos do compilador do Svelte (medidos)</h3>
+<pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
+<h3>Código</h3>
+<pre>&lt;script&gt;
+  let { k } = $props();
+  let dialogo;
+&lt;/script&gt;
+
+&lt;!-- &lt;dialog&gt; + showModal(): papel, foco preso, Escape e devolução do foco vêm do navegador. --&gt;
+&lt;div&gt;
+  &lt;button type=&quot;button&quot; id=&quot;{k}-gatilho&quot; onclick={() =&gt; dialogo.showModal()}&gt;Excluir projeto&lt;/button&gt;
+  &lt;dialog bind:this={dialogo} aria-labelledby=&quot;{k}-titulo&quot;&gt;
+    &lt;h3 id=&quot;{k}-titulo&quot;&gt;Excluir este projeto?&lt;/h3&gt;
+    &lt;p&gt;Isso não pode ser desfeito.&lt;/p&gt;
+    &lt;button type=&quot;button&quot; onclick={() =&gt; dialogo.close()}&gt;Cancelar&lt;/button&gt;
+  &lt;/dialog&gt;
+&lt;/div&gt;</pre>
+<h2 id="ex-5"><span class="etiqueta t-ruim">Exemplo ruim:</span> Erro de formulário em Svelte: como não fazer</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Erro de formulário em Svelte: como não fazer"><div data-exemplo="erro-ruim"></div></div>
+<h3>Por quê</h3>
+<p>Aparece uma frase vermelha ao lado. O campo não é marcado como inválido, a frase não está ligada a ele, o foco não se move e nada é anunciado. No bom, await tick() espera o DOM novo antes de chamar focus().</p>
+<h3>O que corrigir</h3>
+<p>Marque o campo, ligue a mensagem, mova o foco e mantenha o elemento da mensagem sempre presente.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: E-mail
+- textbox &quot;E-mail&quot;
+- paragraph:
+  - button &quot;Enviar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda form_errors, medido)</h3>
+<pre>NÃO cumpriu: cada campo com erro tem aria-invalid=true. Observado: 0 de 1 marcados.
+NÃO cumpriu: o texto do erro esta ligado ao campo (aria-describedby). Observado: 0 de 1 com descricao.
+NÃO cumpriu: o foco vai ao primeiro campo com erro (ou a um resumo de erros). Observado: button &#x27;Enviar&#x27;.
+NÃO cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foco. Observado: anuncios=[] regioes=[].</pre>
+<h3>Avisos do compilador do Svelte (medidos)</h3>
+<pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
+<h3>Código</h3>
+<pre>&lt;script&gt;
+  let { k } = $props();
+  let mensagem = $state(&#x27;&#x27;);
+  function enviar(e) {
+    e.preventDefault();
+    mensagem = e.currentTarget.elements.email.value ? &#x27;&#x27; : &#x27;Informe o e-mail.&#x27;;
+  }
+&lt;/script&gt;
+
+&lt;!-- Texto vermelho solto: o campo não é marcado, a frase não está ligada a ele, o foco não se move. --&gt;
+&lt;form novalidate onsubmit={enviar}&gt;
+  &lt;label for=&quot;{k}-email&quot;&gt;E-mail&lt;/label&gt;
+  &lt;input id=&quot;{k}-email&quot; name=&quot;email&quot; type=&quot;email&quot; required /&gt; &lt;span class=&quot;erro-visual&quot;&gt;{mensagem}&lt;/span&gt;
+  &lt;p&gt;&lt;button type=&quot;submit&quot; id=&quot;{k}-enviar&quot;&gt;Enviar&lt;/button&gt;&lt;/p&gt;
+&lt;/form&gt;</pre>
+<h2 id="ex-6"><span class="etiqueta t-bom">Exemplo bom:</span> Erro de formulário em Svelte: como fazer</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Erro de formulário em Svelte: como fazer"><div data-exemplo="erro-bom"></div></div>
+<h3>Por quê</h3>
+<p>O campo recebe aria-invalid, o texto do erro fica ligado por aria-describedby e anunciado por role=alert, e o foco vai ao campo.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: E-mail
+- textbox &quot;E-mail&quot;
+- alert
+- paragraph:
+  - button &quot;Enviar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda form_errors, medido)</h3>
+<pre>cumpriu: cada campo com erro tem aria-invalid=true. Observado: 1 de 1 marcados.
+cumpriu: o texto do erro esta ligado ao campo (aria-describedby). Observado: 1 de 1 com descricao.
+cumpriu: o foco vai ao primeiro campo com erro (ou a um resumo de erros). Observado: input &#x27;E-mail&#x27;.
+cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foco. Observado: anuncios=[&#x27;Informe o e-mail.&#x27;] regioes=[&#x27;Informe o e-mail.&#x27;].</pre>
+<h3>Avisos do compilador do Svelte (medidos)</h3>
+<pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
+<h3>Código</h3>
+<pre>&lt;script&gt;
+  import { tick } from &#x27;svelte&#x27;;
+  let { k } = $props();
+  let mensagem = $state(&#x27;&#x27;);
+  let campo;
+  async function enviar(e) {
+    e.preventDefault();
+    if (campo.value) { mensagem = &#x27;&#x27;; return; }
+    mensagem = &#x27;Informe o e-mail.&#x27;;
+    await tick();
+    campo.focus(); // o foco vai ao campo com erro
+  }
+&lt;/script&gt;
+
+&lt;form novalidate onsubmit={enviar}&gt;
+  &lt;label for=&quot;{k}-email&quot;&gt;E-mail&lt;/label&gt;
+  &lt;input id=&quot;{k}-email&quot; bind:this={campo} type=&quot;email&quot; required aria-invalid={mensagem ? &#x27;true&#x27; : undefined} aria-describedby=&quot;{k}-erro&quot; /&gt;
+  &lt;span id=&quot;{k}-erro&quot; class=&quot;erro-visual&quot; role=&quot;alert&quot;&gt;{mensagem}&lt;/span&gt;
+  &lt;p&gt;&lt;button type=&quot;submit&quot; id=&quot;{k}-enviar&quot;&gt;Enviar&lt;/button&gt;&lt;/p&gt;
+&lt;/form&gt;</pre>
+<h2 id="ex-7"><span class="etiqueta t-ruim">Exemplo ruim:</span> Mensagem de status em Svelte: como não fazer</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Mensagem de status em Svelte: como não fazer"><div data-exemplo="status-ruim"></div></div>
+<h3>Por quê</h3>
+<p>A região viva só passa a existir junto com o texto. Muitos leitores de tela só falam o que muda dentro de uma região que já estava na página. O {#if} cria a região junto com o texto; o bom usa a região sempre presente.</p>
+<h3>O que corrigir</h3>
+<p>Renderize a região sempre; troque só o texto dentro dela.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Salvar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Salvar&#x27;.
+cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no corpo). Observado: button &#x27;Salvar&#x27;.
+cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[&#x27;Salvo com sucesso&#x27;]; foco movido=False; conteudo novo na arvore=1 linhas.
+NÃO cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regiao e texto juntos nao e confiavel). Observado: a regiao nasceu junto com o texto.</pre>
+<h3>Avisos do compilador do Svelte (medidos)</h3>
+<pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
+<h3>Código</h3>
+<pre>&lt;script&gt;
+  let { k } = $props();
+  let salvo = $state(false);
+&lt;/script&gt;
+
+&lt;!-- {#if}: a região viva só existe quando há texto. Nasce junto com a mensagem e muitos leitores de tela não falam. --&gt;
+&lt;div&gt;
+  &lt;button type=&quot;button&quot; id=&quot;{k}-salvar&quot; onclick={() =&gt; (salvo = true)}&gt;Salvar&lt;/button&gt;
+  {#if salvo}&lt;div role=&quot;status&quot;&gt;Salvo com sucesso&lt;/div&gt;{/if}
+&lt;/div&gt;</pre>
+<h2 id="ex-8"><span class="etiqueta t-bom">Exemplo bom:</span> Mensagem de status em Svelte: como fazer</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Mensagem de status em Svelte: como fazer"><div data-exemplo="status-bom"></div></div>
+<h3>Por quê</h3>
+<p>A região role=status fica sempre na página e só o texto muda, então o leitor de tela fala a mensagem.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Salvar&quot;
+- status</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Salvar&#x27;.
+cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no corpo). Observado: button &#x27;Salvar&#x27;.
+cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[&#x27;Salvo com sucesso&#x27;]; foco movido=False; conteudo novo na arvore=1 linhas.
+cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regiao e texto juntos nao e confiavel). Observado: a regiao ja existia.</pre>
+<h3>Avisos do compilador do Svelte (medidos)</h3>
+<pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
+<h3>Código</h3>
+<pre>&lt;script&gt;
+  let { k } = $props();
+  let salvo = $state(false);
+&lt;/script&gt;
+
+&lt;!-- A região fica sempre na página; só o texto muda. --&gt;
+&lt;div&gt;
+  &lt;button type=&quot;button&quot; id=&quot;{k}-salvar&quot; onclick={() =&gt; (salvo = true)}&gt;Salvar&lt;/button&gt;
+  &lt;div role=&quot;status&quot;&gt;{salvo ? &#x27;Salvo com sucesso&#x27; : &#x27;&#x27;}&lt;/div&gt;
+&lt;/div&gt;</pre>
+<h2 id="ex-9"><span class="etiqueta t-ruim">Exemplo ruim:</span> Mudança de tela em Svelte: como não fazer</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Mudança de tela em Svelte: como não fazer"><p><a href="svelte-rota-ruim.html">Abrir a aplicação de exemplo (ruim)</a></p></div>
+<h3>Por quê</h3>
+<p>O conteúdo vira Contato, mas o título da aba continua Início, o foco permanece no botão e não há aviso: quem usa leitor de tela não sabe que a tela mudou. O Svelte não move o foco na troca de tela. No bom, await tick() espera o DOM novo e depois cuida do foco e do título.</p>
+<h3>O que corrigir</h3>
+<p>Ao trocar a tela, atualize document.title, mova o foco para o novo h1 (tabindex -1) e avise numa região de status. O framework não faz isso sozinho.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph:
+  - link &quot;Abrir a aplicação de exemplo (ruim)&quot;:
+    - /url: svelte-rota-ruim.html</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda route_change, medido)</h3>
+<pre>NÃO cumpriu: o titulo da pagina muda com a nova tela. Observado: &#x27;Início | Loja de chás&#x27; -&gt; &#x27;Início | Loja de chás&#x27;.
+cumpriu: o foco nao fica perdido no corpo da pagina. Observado: button &#x27;Contato&#x27;.
+NÃO cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido para o novo conteudo ou carga de pagina nova. Observado: anuncio=False; foco mudou=False; mesmo documento=True.</pre>
+<h3>Avisos do compilador do Svelte (medidos)</h3>
+<pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
+<h3>Código</h3>
+<pre>&lt;script&gt;
+  let { k } = $props();
+  let tela = $state(&#x27;inicio&#x27;);
+&lt;/script&gt;
+
+&lt;!-- O conteúdo troca, mas o título da aba, o foco e o aviso continuam como estavam. --&gt;
+&lt;div&gt;
+  &lt;p&gt;&lt;button type=&quot;button&quot; id=&quot;{k}-ir&quot; onclick={() =&gt; (tela = &#x27;contato&#x27;)}&gt;Contato&lt;/button&gt;&lt;/p&gt;
+  &lt;main&gt;
+    {#if tela === &#x27;inicio&#x27;}&lt;h1&gt;Início&lt;/h1&gt;&lt;p&gt;Bem-vindo à loja de chás.&lt;/p&gt;
+    {:else}&lt;h1&gt;Contato&lt;/h1&gt;&lt;p&gt;Escreva para contato@loja.example.&lt;/p&gt;{/if}
+  &lt;/main&gt;
+&lt;/div&gt;</pre>
+<h2 id="ex-10"><span class="etiqueta t-bom">Exemplo bom:</span> Mudança de tela em Svelte: como fazer</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Mudança de tela em Svelte: como fazer"><p><a href="svelte-rota-bom.html">Abrir a aplicação de exemplo (bom)</a></p></div>
+<h3>Por quê</h3>
+<p>Depois de atualizar o conteúdo, o título da aba muda, o foco vai ao novo título e há uma mensagem de status.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph:
+  - link &quot;Abrir a aplicação de exemplo (bom)&quot;:
+    - /url: svelte-rota-bom.html</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda route_change, medido)</h3>
+<pre>cumpriu: o titulo da pagina muda com a nova tela. Observado: &#x27;Início | Loja de chás&#x27; -&gt; &#x27;Contato | Loja de chás&#x27;.
+cumpriu: o foco nao fica perdido no corpo da pagina. Observado: h1 &#x27;Contato&#x27;.
+cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido para o novo conteudo ou carga de pagina nova. Observado: anuncio=True; foco mudou=True; mesmo documento=True.</pre>
+<h3>Avisos do compilador do Svelte (medidos)</h3>
+<pre>O compilador não emitiu nenhum aviso de acessibilidade para este componente.</pre>
+<h3>Código</h3>
+<pre>&lt;script&gt;
+  import { tick } from &#x27;svelte&#x27;;
+  let { k } = $props();
+  let tela = $state(&#x27;inicio&#x27;);
+  let titulo;
+  async function ir() {
+    tela = &#x27;contato&#x27;;
+    await tick(); // espera o DOM novo antes de mexer no foco
+    document.title = &#x27;Contato | Loja de chás&#x27;; // título da aba
+    titulo.focus(); // foco no novo título
+  }
+&lt;/script&gt;
+
+&lt;div&gt;
+  &lt;p&gt;&lt;button type=&quot;button&quot; id=&quot;{k}-ir&quot; onclick={ir}&gt;Contato&lt;/button&gt;&lt;/p&gt;
+  &lt;main&gt;
+    &lt;h1 bind:this={titulo} tabindex=&quot;-1&quot;&gt;{tela === &#x27;inicio&#x27; ? &#x27;Início&#x27; : &#x27;Contato&#x27;}&lt;/h1&gt;
+    &lt;p&gt;{tela === &#x27;inicio&#x27; ? &#x27;Bem-vindo à loja de chás.&#x27; : &#x27;Escreva para contato@loja.example.&#x27;}&lt;/p&gt;
+  &lt;/main&gt;
+  &lt;div role=&quot;status&quot; class=&quot;so-leitor&quot;&gt;{tela === &#x27;contato&#x27; ? &#x27;Página Contato carregada&#x27; : &#x27;&#x27;}&lt;/div&gt;
+&lt;/div&gt;</pre>
+<script src="app-svelte.js"></script>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="pilha-vue.html">Anterior: Vue</a>
+<a href="pilha-angular.html">Próximo: Angular</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

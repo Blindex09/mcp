@@ -219,7 +219,9 @@ def register_ux(mcp: Any) -> None:
         focus_obscured | target_size (targets under 24x24 px and the spacing exception; 2.5.8) | dialog (APG modal dialog contract, target = the button that
         opens it) | disclosure (accordion/FAQ/nav submenu button) | menu (menu button) | tabs (target = any tab) | combobox (target = the field) |
         form_errors (submits the form by keyboard and measures error marking, description, focus, announcement; target = submit button or field) |
-        route_change (activates a link/button and measures title, focus and announcement of the new screen). target: dossier id or 'css:<selector>'.
+        route_change (activates a link/button and measures title, focus and announcement of the new screen) |
+        listbox (APG listbox; target = the list or an option) | tree (APG tree view; target = the tree or an item) | tooltip (APG tooltip; target = the control) |
+        status_update (activates a button and measures whether the change reaches someone who cannot see it: pre-existing live region or moved focus). target: dossier id or 'css:<selector>'.
         container: optional CSS selector of the dialog for kind=dialog. Contract probes return checks with expected (WAI-ARIA Authoring Practices) x
         observed x met (true | false | null = could not measure, not a pass). YOU decide what the component really is and whether a deviation hurts.
         Read a11y_get_reference "wcag-evidence-and-probes". Every probe is added to the session trace (cite its number in a11y_finding)."""

@@ -42,3 +42,7 @@ env/
 nvda/node_modules/
 nvda/out/
 nvda/vm/iniciar-agente.cmd
+
+# dependencias do build dos exemplos de framework (os pacotes app-*.js ficam versionados)
+demo/exemplos-leitor-de-tela/frameworks/node_modules/
+demo/exemplos-leitor-de-tela/frameworks/package-lock.json

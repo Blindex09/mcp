@@ -433,3 +433,34 @@ Não feito, declarado:
 - NVDA real e a VM: dependem do dono (fone fora, VM pronta). Nada de fala real foi afirmado.
 - Espelho no Qaaccessibility: aquele projeto guarda o conhecimento em outro formato (`backend/src/resources/leitor_de_tela_*.md`), sem arquivo equivalente aos guias novos. Pendente de decisão: converter o conteúdo dos dois guias para lá.
 - Web Components, Vue e Svelte não ganharam cenário vivo no site (só a matriz e os guias de especialista que já existiam); Android e iOS não têm executor aqui.
+
+## 24. Site de exemplos completo, três novas camadas de sondas e a rodada ao vivo (outubro de 2026)
+
+Pedido do dono: o site de exemplos precisava ter tudo o que o MCP tem (HTML, JavaScript, AJAX, React, Angular, mobile), seguindo o MCP; depois, uma rodada ao vivo na própria página corrigindo os erros pelo caminho, e as regras do MCP (o que pode e o que não pode) corrigidas.
+
+O que o site tem agora: 30 cenários, 126 exemplos, todos medidos pelo gerador com o código do próprio MCP.
+- Estrutura (8, os de antes), CSS (14 exemplos: foco, texto só para leitor de tela, lista sem marcador, submenu por hover, espaçamento de texto, contraste, movimento reduzido) e AJAX (6: resultados, falha com nova tentativa, carregar mais).
+- Comportamento (7), componentes (carrossel, dica, lista de opções, árvore, tabela ordenável, Web Components, resposta de IA em streaming) e quatro frameworks reais, React 19, Vue 3.5, Svelte 5 e Angular 20, com os mesmos cinco componentes cada (acordeão, diálogo, erro de formulário, mensagem de status, mudança de tela). Os pacotes são compilados por `frameworks/build.mjs` e versionados. O gerador mede a página já montada pelo framework e, no Svelte, mostra os avisos de acessibilidade que o próprio compilador emitiu.
+- Android (Compose) e iOS (SwiftUI): só código e regra, com a frase "Não executado aqui": o MCP não tem executor de nenhum dos dois. As APIs do Android foram conferidas em developer.android.com; as do iOS vieram de artigos de terceiros.
+
+Sondas novas, cada uma com par bom e ruim testado: `status_update` (a mudança chega a quem não vê? a região viva já existia? o foco caiu no corpo?), `listbox`, `tree`, `tooltip`. A categoria de exemplo "depende do navegador, não medido aqui" foi criada para não chamar de ruim o que não deu para provar (a lista com `list-style:none`: no Chromium e no WebKit do Playwright continua sendo lista).
+
+Defeitos do MCP achados fazendo a rodada ao vivo e corrigidos na causa, cada um com teste de regressão provado (falha sem a correção):
+1. `a11y_focus_style` quebrava com alvo `css:` (só funcionava com id do dossiê).
+2. `a11y_aria_snapshot` não mostrava o papel vindo de `ElementInternals`; agora acrescenta os papéis que o Chromium calcula para elementos personalizados.
+3. `a11y_page_map` contava o parágrafo de um `<details>` fechado na ordem de leitura (inversão falsa); passou a usar `checkVisibility()`.
+4. `tab_walk` chamava de "possível armadilha" o Tab parado no último elemento no Firefox sem interface.
+5. `tab_walk` não dizia que o WebKit não para em links; agora devolve `links_sem_parada`.
+6. `tab_walk` dizia "foco coberto 5/5" para botão dentro de Shadow DOM aberto (o `elementFromPoint` devolve o hospedeiro).
+7. O gerador mostrava a árvore de um exemplo sem o estilo do site (a fonte muda o resultado do espaçamento de texto); a medida extra passou a usar o estilo do site.
+Defeitos do próprio site corrigidos: botão dentro de Shadow DOM com 21 px (o CSS do site não entra no shadow).
+
+Rodada ao vivo (41 páginas servidas, persona só teclado): axe em claro e escuro, mapa da página, Tab, baixa visão (320 px e espaçamento de texto), toque (alvos de 24 px), Firefox e WebKit. Só aparecem os defeitos dos exemplos ruins (rótulo, alt, título pulado, link repetido, contraste, foco removido). As sondas dos 74 exemplos com sonda deram o mesmo resultado nas páginas servidas e nos três navegadores, com duas observações por desenho. Observação de uso, não corrigida: a navegação do site tem 31 links antes do conteúdo; há o link "Pular para o conteúdo", mas um agrupamento ajudaria.
+
+Regras do MCP revistas (guias `testing-playbook-for-ai`, `component-behavior-matrix`, `wcag-evidence-and-probes` e `.claude/rules/projeto-mcp.md`): o que pode afirmar, o que não pode, como medir um componente (estilos do site, página montada pelo framework, espera por condição) e a tabela de erros já cometidos.
+
+Não feito, declarado:
+- Ferramentas que usam modelo, NVDA real e VM: sem crédito, fone e VM, como antes. Os guias novos e as alterações são mudança de instrução ao modelo, e o portão da regra 15 continua pendente.
+- Vue e iOS: fontes oficiais não puderam ser lidas; pontos marcados como indicações a confirmar.
+- Não há executor Android nem iOS; o Safari com VoiceOver (macOS) não é medido em nenhum ponto.
+- Espelho no Qaaccessibility continua pendente de decisão (formato diferente).

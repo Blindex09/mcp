@@ -241,3 +241,19 @@ async def test_reading_order_does_not_compare_an_element_with_its_own_descendant
         assert d["inverted_pairs"] == 0, d["adjacent_inversions_examples"]
     finally:
         await SESSION.close()
+
+
+async def test_reading_order_ignores_the_content_of_a_closed_details():
+    """Regressao real (rodada ao vivo no site de exemplos): o paragrafo dentro de <details> fechado nao e renderizado mas tem retangulo, e virava inversao falsa."""
+    await SESSION.open(
+        None,
+        "<!doctype html><html lang='pt'><head><title>t</title></head><body><main><h1>Titulo</h1>"
+        "<details><summary>Prazo</summary><p>Cinco dias uteis.</p></details><h2>Depois</h2><p>Texto de depois.</p></main></body></html>",
+    )
+    try:
+        mapa = await SESSION.page_map()
+    finally:
+        await SESSION.close()
+    ordem = mapa["main"]["reading_order"]
+    # h1, summary, h2 e o paragrafo de depois: o paragrafo do <details> fechado nao e renderizado e nao entra na comparacao
+    assert ordem["items_compared"] == 4 and ordem["inverted_pairs"] == 0, ordem

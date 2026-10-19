@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web Components (elemento personalizado) | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html">Carrossel</a></li>
+<li><a href="dica.html">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
+<li><a href="web-components.html" aria-current="page">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html">Svelte</a></li>
+<li><a href="pilha-angular.html">Angular</a></li>
+<li><a href="android.html">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Web Components (elemento personalizado)</h1>
+<p>Um elemento personalizado com Shadow DOM aberto continua sendo medido pelo MCP. O defeito comum é o mesmo de sempre, só que escondido dentro do shadow: um div clicável. O bom entrega um botão de verdade, ou usa ElementInternals para dar o papel e o estado ao próprio elemento.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Elemento personalizado com div clicável no shadow</a></li>
+<li><a href="#ex-2">Exemplo bom: Elemento personalizado com button no shadow</a></li>
+<li><a href="#ex-3">Exemplo ruim: Caixa de seleção personalizada sem papel nem teclado</a></li>
+<li><a href="#ex-4">Exemplo bom: Caixa de seleção personalizada com ElementInternals</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Elemento personalizado com div clicável no shadow</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Elemento personalizado com div clicável no shadow"><meu-acordeao-ruim></meu-acordeao-ruim><script>customElements.define('meu-acordeao-ruim',class extends HTMLElement{connectedCallback(){var r=this.attachShadow({mode:'open'});r.innerHTML='<div id="wc-ruim-gatilho" style="cursor:pointer">Prazo de entrega</div><p id="wc-ruim-painel" hidden>Cinco dias úteis.</p>';r.getElementById('wc-ruim-gatilho').addEventListener('click',function(){var p=r.getElementById('wc-ruim-painel');p.hidden=!p.hidden;});}});</script></div>
+<h3>Por quê</h3>
+<p>O shadow DOM não muda a regra: a div dentro dele não é botão, não recebe foco e não tem estado.</p>
+<h3>O que corrigir</h3>
+<p>Dentro do shadow, use um button com aria-expanded e aria-controls (ids dentro do mesmo shadow root).</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: Prazo de entrega</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda disclosure, medido)</h3>
+<pre>NÃO cumpriu: o gatilho recebe o foco do teclado. Observado: nenhum elemento (corpo da pagina).
+NÃO cumpriu: estado aberto/fechado exposto (aria-expanded no botao ou &lt;summary&gt; de &lt;details&gt;). Observado: aria-expanded=None.
+NÃO cumpriu: Enter alterna o estado do botao e o conteudo controlado. Observado: expanded None-&gt;None; conteudo visivel None-&gt;None.
+NÃO cumpriu: o foco continua no botao. Observado: nenhum elemento (corpo da pagina).
+NÃO cumpriu: Space alterna o estado do botao e o conteudo controlado. Observado: expanded None-&gt;None; conteudo visivel None-&gt;None.
+NÃO cumpriu: o foco continua no botao. Observado: nenhum elemento (corpo da pagina).</pre>
+<h3>Código</h3>
+<pre>&lt;meu-acordeao-ruim&gt;&lt;/meu-acordeao-ruim&gt;&lt;script&gt;customElements.define(&#x27;meu-acordeao-ruim&#x27;,class extends HTMLElement{connectedCallback(){var r=this.attachShadow({mode:&#x27;open&#x27;});r.innerHTML=&#x27;&lt;div id=&quot;wc-ruim-gatilho&quot; style=&quot;cursor:pointer&quot;&gt;Prazo de entrega&lt;/div&gt;&lt;p id=&quot;wc-ruim-painel&quot; hidden&gt;Cinco dias úteis.&lt;/p&gt;&#x27;;r.getElementById(&#x27;wc-ruim-gatilho&#x27;).addEventListener(&#x27;click&#x27;,function(){var p=r.getElementById(&#x27;wc-ruim-painel&#x27;);p.hidden=!p.hidden;});}});&lt;/script&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Elemento personalizado com button no shadow</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Elemento personalizado com button no shadow"><meu-acordeao-bom></meu-acordeao-bom><script>customElements.define('meu-acordeao-bom',class extends HTMLElement{connectedCallback(){var r=this.attachShadow({mode:'open'});r.innerHTML='<style>button{min-height:44px;min-width:44px;padding:0.5rem 1rem;font:inherit}</style><button type="button" id="wc-bom-gatilho" aria-expanded="false" aria-controls="wc-bom-painel">Prazo de entrega</button><div id="wc-bom-painel" hidden><p>Cinco dias úteis.</p></div>';var b=r.getElementById('wc-bom-gatilho'),p=r.getElementById('wc-bom-painel');b.addEventListener('click',function(){var a=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(a));p.hidden=!a;});}});</script></div>
+<h3>Por quê</h3>
+<p>O botão dentro do shadow é exposto ao leitor de tela com seu estado, e aria-controls funciona porque os dois ids estão no mesmo shadow root.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- button &quot;Prazo de entrega&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda disclosure, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Prazo de entrega&#x27;.
+cumpriu: estado aberto/fechado exposto (aria-expanded no botao ou &lt;summary&gt; de &lt;details&gt;). Observado: aria-expanded=false.
+cumpriu: Enter alterna o estado do botao e o conteudo controlado. Observado: expanded false-&gt;true; conteudo visivel False-&gt;True.
+cumpriu: o foco continua no botao. Observado: button &#x27;Prazo de entrega&#x27;.
+cumpriu: expanded=true mostra o conteudo; false o oculta. Observado: expanded=true conteudo_visivel=True.
+cumpriu: Space alterna o estado do botao e o conteudo controlado. Observado: expanded false-&gt;true; conteudo visivel False-&gt;True.
+cumpriu: o foco continua no botao. Observado: button &#x27;Prazo de entrega&#x27;.</pre>
+<h3>Código</h3>
+<pre>&lt;meu-acordeao-bom&gt;&lt;/meu-acordeao-bom&gt;&lt;script&gt;customElements.define(&#x27;meu-acordeao-bom&#x27;,class extends HTMLElement{connectedCallback(){var r=this.attachShadow({mode:&#x27;open&#x27;});r.innerHTML=&#x27;&lt;style&gt;button{min-height:44px;min-width:44px;padding:0.5rem 1rem;font:inherit}&lt;/style&gt;&lt;button type=&quot;button&quot; id=&quot;wc-bom-gatilho&quot; aria-expanded=&quot;false&quot; aria-controls=&quot;wc-bom-painel&quot;&gt;Prazo de entrega&lt;/button&gt;&lt;div id=&quot;wc-bom-painel&quot; hidden&gt;&lt;p&gt;Cinco dias úteis.&lt;/p&gt;&lt;/div&gt;&#x27;;var b=r.getElementById(&#x27;wc-bom-gatilho&#x27;),p=r.getElementById(&#x27;wc-bom-painel&#x27;);b.addEventListener(&#x27;click&#x27;,function(){var a=b.getAttribute(&#x27;aria-expanded&#x27;)!==&#x27;true&#x27;;b.setAttribute(&#x27;aria-expanded&#x27;,String(a));p.hidden=!a;});}});&lt;/script&gt;</pre>
+<h2 id="ex-3"><span class="etiqueta t-ruim">Exemplo ruim:</span> Caixa de seleção personalizada sem papel nem teclado</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Caixa de seleção personalizada sem papel nem teclado"><caixa-ruim>Receber novidades</caixa-ruim><script>customElements.define('caixa-ruim',class extends HTMLElement{connectedCallback(){var r=this.attachShadow({mode:'open'});r.innerHTML='<span class="marca" style="display:inline-block;width:1.25rem;height:1.25rem;border:2px solid currentColor;vertical-align:middle"></span> <slot></slot>';r.querySelector('.marca').addEventListener('click',function(e){e.target.textContent=e.target.textContent?'':'✓';});}});</script></div>
+<h3>Por quê</h3>
+<p>Parece uma caixa de seleção, mas para o leitor de tela é só um texto. Não tem papel de checkbox, não tem estado marcado, não recebe foco.</p>
+<h3>O que corrigir</h3>
+<p>Use ElementInternals: role checkbox, ariaChecked, tabindex 0 e a tecla Espaço (veja o exemplo web-component-element-internals do MCP), ou simplesmente um input type=checkbox.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: Receber novidades</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Código</h3>
+<pre>&lt;caixa-ruim&gt;Receber novidades&lt;/caixa-ruim&gt;&lt;script&gt;customElements.define(&#x27;caixa-ruim&#x27;,class extends HTMLElement{connectedCallback(){var r=this.attachShadow({mode:&#x27;open&#x27;});r.innerHTML=&#x27;&lt;span class=&quot;marca&quot; style=&quot;display:inline-block;width:1.25rem;height:1.25rem;border:2px solid currentColor;vertical-align:middle&quot;&gt;&lt;/span&gt; &lt;slot&gt;&lt;/slot&gt;&#x27;;r.querySelector(&#x27;.marca&#x27;).addEventListener(&#x27;click&#x27;,function(e){e.target.textContent=e.target.textContent?&#x27;&#x27;:&#x27;✓&#x27;;});}});&lt;/script&gt;</pre>
+<h2 id="ex-4"><span class="etiqueta t-bom">Exemplo bom:</span> Caixa de seleção personalizada com ElementInternals</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Caixa de seleção personalizada com ElementInternals"><caixa-bom>Receber novidades</caixa-bom><script>customElements.define('caixa-bom',class extends HTMLElement{static get formAssociated(){return true;}constructor(){super();this.i=this.attachInternals();this.i.role='checkbox';this.i.ariaChecked='false';this.attachShadow({mode:'open'}).innerHTML='<style>:host{display:inline-flex;align-items:center;gap:0.5rem;min-height:44px}</style><span style="display:inline-block;width:1.25rem;height:1.25rem;border:2px solid currentColor;vertical-align:middle"></span> <slot></slot>';}connectedCallback(){this.tabIndex=0;var t=this;function alterna(){var on=t.i.ariaChecked!=='true';t.i.ariaChecked=String(on);t.shadowRoot.querySelector('span').textContent=on?'✓':'';}this.addEventListener('click',alterna);this.addEventListener('keydown',function(e){if(e.key===' '){e.preventDefault();alterna();}});}});</script></div>
+<h3>Por quê</h3>
+<p>O elemento ganha o papel checkbox, o estado marcado, foco e a tecla Espaço, tudo no próprio host.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir. Se um input type=checkbox resolver, prefira ele.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: Receber novidades
+
+# Elementos personalizados, como o Chromium calcula (o snapshot acima pode nao mostrar o papel que vem de ElementInternals):
+- caixa-bom: checkbox &quot;Receber novidades&quot; [invalid=false] [checked=false]</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Código</h3>
+<pre>&lt;caixa-bom&gt;Receber novidades&lt;/caixa-bom&gt;&lt;script&gt;customElements.define(&#x27;caixa-bom&#x27;,class extends HTMLElement{static get formAssociated(){return true;}constructor(){super();this.i=this.attachInternals();this.i.role=&#x27;checkbox&#x27;;this.i.ariaChecked=&#x27;false&#x27;;this.attachShadow({mode:&#x27;open&#x27;}).innerHTML=&#x27;&lt;style&gt;:host{display:inline-flex;align-items:center;gap:0.5rem;min-height:44px}&lt;/style&gt;&lt;span style=&quot;display:inline-block;width:1.25rem;height:1.25rem;border:2px solid currentColor;vertical-align:middle&quot;&gt;&lt;/span&gt; &lt;slot&gt;&lt;/slot&gt;&#x27;;}connectedCallback(){this.tabIndex=0;var t=this;function alterna(){var on=t.i.ariaChecked!==&#x27;true&#x27;;t.i.ariaChecked=String(on);t.shadowRoot.querySelector(&#x27;span&#x27;).textContent=on?&#x27;✓&#x27;:&#x27;&#x27;;}this.addEventListener(&#x27;click&#x27;,alterna);this.addEventListener(&#x27;keydown&#x27;,function(e){if(e.key===&#x27; &#x27;){e.preventDefault();alterna();}});}});&lt;/script&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="tabela-ordenavel.html">Anterior: Tabela ordenável</a>
+<a href="chat-ia.html">Próximo: Resposta de IA em streaming</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

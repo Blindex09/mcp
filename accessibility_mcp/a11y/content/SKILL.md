@@ -45,7 +45,7 @@ A green audit is not accessibility. To find what really happens, open a persiste
 | Do what a user does and get the effect (focus, tree changes, announcements) | `a11y_act` |
 | Tab presses needed to reach an element; what a screen reader gets for it | `a11y_reach` / `a11y_announce` |
 | Reflow at 320 px, text-spacing clipping | `a11y_stress` |
-| Behavior probes that scanners cannot see (Tab walk/keyboard trap, covered focus, target size, APG dialog/menu/tabs/combobox/disclosure contracts, form errors, route change) | `a11y_probe` |
+| Behavior probes that scanners cannot see (Tab walk/keyboard trap, covered focus, target size, APG dialog/menu/tabs/combobox/disclosure/listbox/tree/tooltip contracts, form errors, status messages, route change) | `a11y_probe` |
 | Record a finding with WCAG criterion, severity, element and evidence; export (JSON/EARL/SARIF); compare runs | `a11y_finding` / `a11y_trace` / `a11y_report` / `a11y_runs` / `a11y_export` / `a11y_diff` |
 | The site's real design language; try a change temporarily; look at it | `a11y_design_tokens` / `a11y_preview_css` / `a11y_screenshot` |
 

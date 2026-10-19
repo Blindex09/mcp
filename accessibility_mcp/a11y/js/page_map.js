@@ -15,7 +15,12 @@
     }
   };
   walk(rootEl);
-  const visible = (el) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'; };
+  // checkVisibility() cobre o que getBoundingClientRect nao ve: conteudo de <details> fechado e content-visibility (sem renderizacao, mas com retangulo).
+  const visible = (el) => {
+    const r = el.getBoundingClientRect(); const cs = getComputedStyle(el);
+    if (!(r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none')) return false;
+    return typeof el.checkVisibility === 'function' ? el.checkVisibility({visibilityProperty: true, contentVisibilityAuto: true}) : true;
+  };
   const q = (sel) => all.filter(e => e.matches(sel));
   const tag = (e) => e.tagName.toLowerCase();
   const byId = (e, ids) => (ids || '').split(/\s+/).filter(Boolean).map(i => (e.getRootNode().getElementById ? e.getRootNode().getElementById(i) : document.getElementById(i))).filter(Boolean);

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carrossel | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html" aria-current="page">Carrossel</a></li>
+<li><a href="dica.html">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
+<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html">Svelte</a></li>
+<li><a href="pilha-angular.html">Angular</a></li>
+<li><a href="android.html">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Carrossel</h1>
+<p>Um carrossel precisa ser anunciado como carrossel, dizer em que slide está e avisar quando o slide muda. Controles sem nome (só uma seta) não dizem o que fazem. Este cenário não tem rotação automática; se tivesse, precisaria de um botão de pausa como primeiro controle e respeitar prefers-reduced-motion (WCAG 2.2.2).</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Setas sem nome e troca de slide calada</a></li>
+<li><a href="#ex-2">Exemplo bom: Carrossel no padrão do APG, sem rotação automática</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Setas sem nome e troca de slide calada</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Setas sem nome e troca de slide calada"><div id="car-ruim"><div class="slide-ruim">Slide 1: chá verde</div><div class="slide-ruim" hidden>Slide 2: chá preto</div><div class="slide-ruim" hidden>Slide 3: chá branco</div></div><button type="button" id="car-ruim-ant">&#9664;</button> <button type="button" id="car-ruim-prox">&#9654;</button><script>(function(){var s=Array.prototype.slice.call(document.querySelectorAll('#car-ruim .slide-ruim')),a=0;function ir(d){a=(a+d+s.length)%s.length;s.forEach(function(e,i){e.hidden=i!==a;});}document.getElementById('car-ruim-ant').addEventListener('click',function(){ir(-1);});document.getElementById('car-ruim-prox').addEventListener('click',function(){ir(1);});})();</script></div>
+<h3>Por quê</h3>
+<p>Os botões se chamam só &amp;#9664; e &amp;#9654;, o leitor de tela diz o símbolo ou nada. O slide muda, mas nenhuma região avisa: quem não vê não sabe que mudou nem qual é.</p>
+<h3>O que corrigir</h3>
+<p>Nomeie os botões (Slide anterior, Próximo slide), marque o conjunto com aria-roledescription=&quot;carousel&quot; e cada slide com aria-roledescription=&quot;slide&quot; e &quot;1 de 3&quot;, e avise a troca numa região de status que já exista.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: &quot;Slide 1: chá verde&quot;
+- button &quot;◀&quot;
+- button &quot;▶&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;▶&#x27;.
+cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no corpo). Observado: button &#x27;▶&#x27;.
+NÃO cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[]; foco movido=False; conteudo novo na arvore=1 linhas.</pre>
+<h3>Código</h3>
+<pre>&lt;div id=&quot;car-ruim&quot;&gt;&lt;div class=&quot;slide-ruim&quot;&gt;Slide 1: chá verde&lt;/div&gt;&lt;div class=&quot;slide-ruim&quot; hidden&gt;Slide 2: chá preto&lt;/div&gt;&lt;div class=&quot;slide-ruim&quot; hidden&gt;Slide 3: chá branco&lt;/div&gt;&lt;/div&gt;&lt;button type=&quot;button&quot; id=&quot;car-ruim-ant&quot;&gt;&amp;#9664;&lt;/button&gt; &lt;button type=&quot;button&quot; id=&quot;car-ruim-prox&quot;&gt;&amp;#9654;&lt;/button&gt;&lt;script&gt;(function(){var s=Array.prototype.slice.call(document.querySelectorAll(&#x27;#car-ruim .slide-ruim&#x27;)),a=0;function ir(d){a=(a+d+s.length)%s.length;s.forEach(function(e,i){e.hidden=i!==a;});}document.getElementById(&#x27;car-ruim-ant&#x27;).addEventListener(&#x27;click&#x27;,function(){ir(-1);});document.getElementById(&#x27;car-ruim-prox&#x27;).addEventListener(&#x27;click&#x27;,function(){ir(1);});})();&lt;/script&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Carrossel no padrão do APG, sem rotação automática</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Carrossel no padrão do APG, sem rotação automática"><section aria-roledescription="carousel" aria-label="Chás em destaque"><div id="car-bom"><div class="slide-bom" role="group" aria-roledescription="slide" aria-label="1 de 3">Slide 1: chá verde</div><div class="slide-bom" role="group" aria-roledescription="slide" aria-label="2 de 3" hidden>Slide 2: chá preto</div><div class="slide-bom" role="group" aria-roledescription="slide" aria-label="3 de 3" hidden>Slide 3: chá branco</div></div><button type="button" id="car-bom-ant" aria-controls="car-bom">Slide anterior</button> <button type="button" id="car-bom-prox" aria-controls="car-bom">Próximo slide</button><div role="status" id="car-bom-aviso"></div></section><script>(function(){var s=Array.prototype.slice.call(document.querySelectorAll('#car-bom .slide-bom')),a=0;function ir(d){a=(a+d+s.length)%s.length;s.forEach(function(e,i){e.hidden=i!==a;});document.getElementById('car-bom-aviso').textContent='Slide '+(a+1)+' de '+s.length;}document.getElementById('car-bom-ant').addEventListener('click',function(){ir(-1);});document.getElementById('car-bom-prox').addEventListener('click',function(){ir(1);});})();</script></div>
+<h3>Por quê</h3>
+<p>O conjunto é anunciado como carrossel, cada slide como slide com a posição, os botões têm nome e a região de status que já estava na página fala Slide 2 de 3.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- region &quot;Chás em destaque&quot;:
+  - group &quot;1 de 3&quot;: &quot;Slide 1: chá verde&quot;
+  - button &quot;Slide anterior&quot;
+  - button &quot;Próximo slide&quot;
+  - status</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda status_update, medido)</h3>
+<pre>cumpriu: o gatilho recebe o foco do teclado. Observado: button &#x27;Próximo slide&#x27;.
+cumpriu: depois da mudanca o foco continua num elemento da pagina (nao cai no corpo). Observado: button &#x27;Próximo slide&#x27;.
+cumpriu: a mudanca chega a quem nao a ve: regiao viva (status, alert, aria-live) ou foco movido para o novo conteudo. Observado: anuncios=[&#x27;Slide 2 de 3&#x27;]; foco movido=False; conteudo novo na arvore=2 linhas.
+cumpriu: a regiao viva ja estava na pagina antes de o texto mudar (inserir regiao e texto juntos nao e confiavel). Observado: a regiao ja existia.</pre>
+<h3>Código</h3>
+<pre>&lt;section aria-roledescription=&quot;carousel&quot; aria-label=&quot;Chás em destaque&quot;&gt;&lt;div id=&quot;car-bom&quot;&gt;&lt;div class=&quot;slide-bom&quot; role=&quot;group&quot; aria-roledescription=&quot;slide&quot; aria-label=&quot;1 de 3&quot;&gt;Slide 1: chá verde&lt;/div&gt;&lt;div class=&quot;slide-bom&quot; role=&quot;group&quot; aria-roledescription=&quot;slide&quot; aria-label=&quot;2 de 3&quot; hidden&gt;Slide 2: chá preto&lt;/div&gt;&lt;div class=&quot;slide-bom&quot; role=&quot;group&quot; aria-roledescription=&quot;slide&quot; aria-label=&quot;3 de 3&quot; hidden&gt;Slide 3: chá branco&lt;/div&gt;&lt;/div&gt;&lt;button type=&quot;button&quot; id=&quot;car-bom-ant&quot; aria-controls=&quot;car-bom&quot;&gt;Slide anterior&lt;/button&gt; &lt;button type=&quot;button&quot; id=&quot;car-bom-prox&quot; aria-controls=&quot;car-bom&quot;&gt;Próximo slide&lt;/button&gt;&lt;div role=&quot;status&quot; id=&quot;car-bom-aviso&quot;&gt;&lt;/div&gt;&lt;/section&gt;&lt;script&gt;(function(){var s=Array.prototype.slice.call(document.querySelectorAll(&#x27;#car-bom .slide-bom&#x27;)),a=0;function ir(d){a=(a+d+s.length)%s.length;s.forEach(function(e,i){e.hidden=i!==a;});document.getElementById(&#x27;car-bom-aviso&#x27;).textContent=&#x27;Slide &#x27;+(a+1)+&#x27; de &#x27;+s.length;}document.getElementById(&#x27;car-bom-ant&#x27;).addEventListener(&#x27;click&#x27;,function(){ir(-1);});document.getElementById(&#x27;car-bom-prox&#x27;).addEventListener(&#x27;click&#x27;,function(){ir(1);});})();&lt;/script&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="mudanca-de-tela.html">Anterior: Mudança de tela em aplicação de uma página só</a>
+<a href="dica.html">Próximo: Dica (tooltip)</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

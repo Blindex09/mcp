@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Árvore (tree view) | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html">Carrossel</a></li>
+<li><a href="dica.html">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html" aria-current="page">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
+<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html">Svelte</a></li>
+<li><a href="pilha-angular.html">Angular</a></li>
+<li><a href="android.html">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Árvore (tree view)</h1>
+<p>Uma árvore de pastas e arquivos precisa de role=tree, itens treeitem, aria-expanded nos pais e as setas: para baixo e para cima andam, para a direita abre, para a esquerda fecha. Uma lista aninhada comum não faz nada disso.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Listas aninhadas abertas só com clique</a></li>
+<li><a href="#ex-2">Exemplo bom: Tree view no padrão do APG</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Listas aninhadas abertas só com clique</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Listas aninhadas abertas só com clique"><ul id="arv-ruim"><li><span class="pasta-ruim">Documentos</span><ul hidden><li>contrato.pdf</li><li>nota.txt</li></ul></li><li>leia-me.md</li></ul><script>Array.prototype.forEach.call(document.querySelectorAll('.pasta-ruim'),function(p){p.style.cursor='pointer';p.addEventListener('click',function(){var u=p.nextElementSibling;u.hidden=!u.hidden;});});</script></div>
+<h3>Por quê</h3>
+<p>Só o mouse abre a pasta. O leitor de tela ouve uma lista, a pasta não é um controle, não diz se está aberta e o teclado não alcança nada.</p>
+<h3>O que corrigir</h3>
+<p>Use role=tree, role=treeitem, aria-expanded nas pastas, tabindex rotativo e as setas (direita abre, esquerda fecha, Home e End).</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- list:
+  - listitem: Documentos
+  - listitem: leia-me.md</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda tree, medido)</h3>
+<pre>NÃO cumpriu: o elemento fica dentro de um role=tree. Observado: nao ha role=tree ao redor.
+NÃO cumpriu: os itens tem role=treeitem (pelo menos dois visiveis). Observado: 0 itens visiveis.</pre>
+<h3>Código</h3>
+<pre>&lt;ul id=&quot;arv-ruim&quot;&gt;&lt;li&gt;&lt;span class=&quot;pasta-ruim&quot;&gt;Documentos&lt;/span&gt;&lt;ul hidden&gt;&lt;li&gt;contrato.pdf&lt;/li&gt;&lt;li&gt;nota.txt&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;leia-me.md&lt;/li&gt;&lt;/ul&gt;&lt;script&gt;Array.prototype.forEach.call(document.querySelectorAll(&#x27;.pasta-ruim&#x27;),function(p){p.style.cursor=&#x27;pointer&#x27;;p.addEventListener(&#x27;click&#x27;,function(){var u=p.nextElementSibling;u.hidden=!u.hidden;});});&lt;/script&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Tree view no padrão do APG</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Tree view no padrão do APG"><style>#arv-bom [role=group]{display:none;list-style:none;padding-left:1.25rem}#arv-bom [aria-expanded=true]>[role=group]{display:block}#arv-bom,#arv-bom ul{list-style:none;padding-left:1rem}#arv-bom [role=treeitem]{padding:0.35rem 0.25rem}</style><ul id="arv-bom" role="tree" aria-label="Arquivos"><li role="treeitem" aria-expanded="false" tabindex="0" id="arv-bom-doc">Documentos<ul role="group"><li role="treeitem" tabindex="-1">contrato.pdf</li><li role="treeitem" tabindex="-1">nota.txt</li></ul></li><li role="treeitem" tabindex="-1">leia-me.md</li></ul><script>(function(){var t=document.getElementById('arv-bom');function vis(){return Array.prototype.slice.call(t.querySelectorAll('[role=treeitem]')).filter(function(e){var r=e.getBoundingClientRect();return r.width>0&&r.height>0;});}function ir(el){t.querySelectorAll('[role=treeitem]').forEach(function(e){e.tabIndex=-1;});el.tabIndex=0;el.focus();}t.addEventListener('keydown',function(e){var v=vis(),i=v.indexOf(document.activeElement),el=document.activeElement;e.stopPropagation();if(e.key==='ArrowDown'){e.preventDefault();ir(v[Math.min(i+1,v.length-1)]);}else if(e.key==='ArrowUp'){e.preventDefault();ir(v[Math.max(i-1,0)]);}else if(e.key==='Home'){e.preventDefault();ir(v[0]);}else if(e.key==='End'){e.preventDefault();ir(v[v.length-1]);}else if(e.key==='ArrowRight'&&el.getAttribute('aria-expanded')==='false'){e.preventDefault();el.setAttribute('aria-expanded','true');}else if(e.key==='ArrowRight'&&el.getAttribute('aria-expanded')==='true'){e.preventDefault();ir(v[i+1]);}else if(e.key==='ArrowLeft'&&el.getAttribute('aria-expanded')==='true'){e.preventDefault();el.setAttribute('aria-expanded','false');}});t.addEventListener('click',function(e){var it=e.target.closest('[role=treeitem]');if(it){ir(it);if(it.hasAttribute('aria-expanded')&&e.target===it)it.setAttribute('aria-expanded',String(it.getAttribute('aria-expanded')!=='true'));}});})();</script></div>
+<h3>Por quê</h3>
+<p>O leitor de tela anuncia árvore, item, nível e se está aberto ou fechado. As setas andam, abrem e fecham, e há uma única parada de Tab.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- tree &quot;Arquivos&quot;:
+  - treeitem &quot;Documentos&quot;
+  - treeitem &quot;leia-me.md&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda tree, medido)</h3>
+<pre>cumpriu: o elemento fica dentro de um role=tree. Observado: sim.
+cumpriu: os itens tem role=treeitem (pelo menos dois visiveis). Observado: 2 itens visiveis.
+cumpriu: a arvore tem nome (aria-label ou aria-labelledby). Observado: &#x27;Arquivos&#x27;.
+cumpriu: a arvore (ou um item) recebe o foco do teclado. Observado: li &#x27;Documentos&#x27;.
+cumpriu: todo item que tem filhos expoe aria-expanded true/false. Observado: 1 de 1 pais com estado.
+cumpriu: so uma parada de Tab na arvore (item atual com tabindex 0, ou a arvore com aria-activedescendant). Observado: 1 paradas de Tab.
+cumpriu: Seta para baixo move o foco para o proximo item visivel. Observado: item atual 0 -&gt; 1.
+cumpriu: Home vai ao primeiro item e End ao ultimo visivel. Observado: Home-&gt;0, End-&gt;1 de 2 visiveis.
+cumpriu: Seta para a direita abre um item fechado. Observado: aria-expanded false -&gt; true.
+cumpriu: Seta para a esquerda fecha um item aberto. Observado: aria-expanded true -&gt; false.</pre>
+<h3>Código</h3>
+<pre>&lt;style&gt;#arv-bom [role=group]{display:none;list-style:none;padding-left:1.25rem}#arv-bom [aria-expanded=true]&gt;[role=group]{display:block}#arv-bom,#arv-bom ul{list-style:none;padding-left:1rem}#arv-bom [role=treeitem]{padding:0.35rem 0.25rem}&lt;/style&gt;&lt;ul id=&quot;arv-bom&quot; role=&quot;tree&quot; aria-label=&quot;Arquivos&quot;&gt;&lt;li role=&quot;treeitem&quot; aria-expanded=&quot;false&quot; tabindex=&quot;0&quot; id=&quot;arv-bom-doc&quot;&gt;Documentos&lt;ul role=&quot;group&quot;&gt;&lt;li role=&quot;treeitem&quot; tabindex=&quot;-1&quot;&gt;contrato.pdf&lt;/li&gt;&lt;li role=&quot;treeitem&quot; tabindex=&quot;-1&quot;&gt;nota.txt&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li role=&quot;treeitem&quot; tabindex=&quot;-1&quot;&gt;leia-me.md&lt;/li&gt;&lt;/ul&gt;&lt;script&gt;(function(){var t=document.getElementById(&#x27;arv-bom&#x27;);function vis(){return Array.prototype.slice.call(t.querySelectorAll(&#x27;[role=treeitem]&#x27;)).filter(function(e){var r=e.getBoundingClientRect();return r.width&gt;0&amp;&amp;r.height&gt;0;});}function ir(el){t.querySelectorAll(&#x27;[role=treeitem]&#x27;).forEach(function(e){e.tabIndex=-1;});el.tabIndex=0;el.focus();}t.addEventListener(&#x27;keydown&#x27;,function(e){var v=vis(),i=v.indexOf(document.activeElement),el=document.activeElement;e.stopPropagation();if(e.key===&#x27;ArrowDown&#x27;){e.preventDefault();ir(v[Math.min(i+1,v.length-1)]);}else if(e.key===&#x27;ArrowUp&#x27;){e.preventDefault();ir(v[Math.max(i-1,0)]);}else if(e.key===&#x27;Home&#x27;){e.preventDefault();ir(v[0]);}else if(e.key===&#x27;End&#x27;){e.preventDefault();ir(v[v.length-1]);}else if(e.key===&#x27;ArrowRight&#x27;&amp;&amp;el.getAttribute(&#x27;aria-expanded&#x27;)===&#x27;false&#x27;){e.preventDefault();el.setAttribute(&#x27;aria-expanded&#x27;,&#x27;true&#x27;);}else if(e.key===&#x27;ArrowRight&#x27;&amp;&amp;el.getAttribute(&#x27;aria-expanded&#x27;)===&#x27;true&#x27;){e.preventDefault();ir(v[i+1]);}else if(e.key===&#x27;ArrowLeft&#x27;&amp;&amp;el.getAttribute(&#x27;aria-expanded&#x27;)===&#x27;true&#x27;){e.preventDefault();el.setAttribute(&#x27;aria-expanded&#x27;,&#x27;false&#x27;);}});t.addEventListener(&#x27;click&#x27;,function(e){var it=e.target.closest(&#x27;[role=treeitem]&#x27;);if(it){ir(it);if(it.hasAttribute(&#x27;aria-expanded&#x27;)&amp;&amp;e.target===it)it.setAttribute(&#x27;aria-expanded&#x27;,String(it.getAttribute(&#x27;aria-expanded&#x27;)!==&#x27;true&#x27;));}});})();&lt;/script&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="lista-de-opcoes.html">Anterior: Lista de opções (listbox)</a>
+<a href="tabela-ordenavel.html">Próximo: Tabela ordenável</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

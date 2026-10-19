@@ -33,6 +33,10 @@ native `<dialog>` opened with `showModal()` is modal without `aria-modal`; what 
 | `tabs` | roving tabindex, arrows, Home/End, selected tab linked to its panel, Tab enters the panel | 2.1.1, 2.4.3, 4.1.2 |
 | `combobox` | role, `aria-expanded`, active option exposed, arrows, Enter, Escape keeps focus | 2.1.1, 4.1.2 |
 | `form_errors` | submits by keyboard and measures: field marked invalid, error tied to the field, focus, announcement | 3.3.1, 3.3.3, 4.1.3 |
+| `status_update` | activates a button and measures whether the change reaches someone who cannot see it: pre-existing live region or moved focus, and that focus did not fall to the body | 4.1.3 Status Messages, 2.4.3 |
+| `listbox` | role, name, options, one Tab stop, arrows, Home/End, `aria-selected` | 2.1.1, 4.1.2 |
+| `tree` | role, name, `aria-expanded` on parents, one Tab stop, arrows, expand/collapse, Home/End | 2.1.1, 4.1.2 |
+| `tooltip` | appears on focus, tied by `aria-describedby`, Escape closes without moving focus | 1.4.13, 2.1.1, 4.1.2 |
 | `route_change` | activates a link and measures title, focus and announcement of the new screen | 2.4.2, 2.4.3, 4.1.3 |
 
 The contract probes return `checks` with `expected`, `observed` and `met` (true, false, or null when it could not be

@@ -188,9 +188,55 @@ async def run_axe(
     return result
 
 
+_AX_PROPS = ("checked", "expanded", "pressed", "selected", "disabled", "required", "invalid", "level")
+
+
+async def custom_element_roles(page: Any) -> list[str]:
+    """Papel, nome e estado que o CHROMIUM calcula para cada elemento personalizado (tag com hifen), inclusive dentro de Shadow DOM aberto.
+    O aria_snapshot do Playwright monta a arvore pelo proprio DOM e nao enxerga o papel que vem de ElementInternals; o CDP enxerga. Outros navegadores: lista vazia."""
+    try:
+        cdp = await page.context.new_cdp_session(page)
+    except Exception:  # noqa: BLE001 - Firefox e WebKit nao tem CDP
+        return []
+    try:
+        await cdp.send("DOM.enable")
+        await cdp.send("Accessibility.enable")
+        raiz = (await cdp.send("DOM.getDocument", {"depth": -1, "pierce": True}))["root"]
+        nos = (await cdp.send("Accessibility.getFullAXTree"))["nodes"]
+    finally:
+        await cdp.detach()
+    por_no = {n["backendDOMNodeId"]: n for n in nos if "backendDOMNodeId" in n and not n.get("ignored")}
+    linhas: list[str] = []
+
+    def andar(no: dict[str, Any]) -> None:
+        nome_tag = str(no.get("localName") or "")
+        if "-" in nome_tag and no.get("backendNodeId") in por_no:
+            ax = por_no[no["backendNodeId"]]
+            papel = (ax.get("role") or {}).get("value")
+            nome = ((ax.get("name") or {}).get("value") or "").strip()
+            estados = "".join(f" [{p['name']}={p['value'].get('value')}]" for p in ax.get("properties", []) if p["name"] in _AX_PROPS)
+            if papel and papel not in ("generic", "none"):
+                linhas.append(f'- {nome_tag}: {papel}' + (f' "{nome}"' if nome else "") + estados)
+        for filho in [*no.get("children", []), *no.get("shadowRoots", [])] + ([no["contentDocument"]] if no.get("contentDocument") else []):
+            andar(filho)
+
+    andar(raiz)
+    return linhas
+
+
+async def snapshot_com_papeis_do_navegador(page: Any, locator: Any) -> str:
+    """O snapshot do Playwright mais, no Chromium, os papeis calculados dos elementos personalizados (ver custom_element_roles)."""
+    texto = str(await locator.aria_snapshot())
+    extra = await custom_element_roles(page)
+    if not extra:
+        return texto
+    cabecalho = "# Elementos personalizados, como o Chromium calcula (o snapshot acima pode nao mostrar o papel que vem de ElementInternals):"
+    return "\n".join([texto, "", cabecalho, *extra])
+
+
 async def aria_snapshot(url: str | None = None, html: str | None = None, browser: str = "chromium") -> str:
     async def fn(page: Any) -> str:
-        return str(await page.locator("body").aria_snapshot())
+        return await snapshot_com_papeis_do_navegador(page, page.locator("body"))
 
     result: str = await _with_page(url, html, fn, browser)
     return result

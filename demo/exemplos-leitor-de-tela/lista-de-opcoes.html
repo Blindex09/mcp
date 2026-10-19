@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lista de opções (listbox) | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="css.html">CSS</a></li>
+<li><a href="ajax.html">AJAX (conteúdo que chega depois)</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+<li><a href="carrossel.html">Carrossel</a></li>
+<li><a href="dica.html">Dica (tooltip)</a></li>
+<li><a href="lista-de-opcoes.html" aria-current="page">Lista de opções (listbox)</a></li>
+<li><a href="arvore.html">Árvore (tree view)</a></li>
+<li><a href="tabela-ordenavel.html">Tabela ordenável</a></li>
+<li><a href="web-components.html">Web Components (elemento personalizado)</a></li>
+<li><a href="chat-ia.html">Resposta de IA em streaming</a></li>
+<li><a href="pilha-react.html">React</a></li>
+<li><a href="pilha-vue.html">Vue</a></li>
+<li><a href="pilha-svelte.html">Svelte</a></li>
+<li><a href="pilha-angular.html">Angular</a></li>
+<li><a href="android.html">Android (Jetpack Compose)</a></li>
+<li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Lista de opções (listbox)</h1>
+<p>Uma lista em que se escolhe uma opção precisa de role=listbox, opções com role=option, uma única parada de Tab e setas, Home e End para andar. Quem escolhe entre opções conhecidas usa as setas; nunca um campo para adivinhar.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Opções feitas de divs que só respondem ao mouse</a></li>
+<li><a href="#ex-2">Exemplo bom: Listbox no padrão do APG</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Opções feitas de divs que só respondem ao mouse</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Opções feitas de divs que só respondem ao mouse"><div id="lb-ruim"><div class="op-ruim">Curitiba</div><div class="op-ruim">Recife</div><div class="op-ruim">Salvador</div></div><script>Array.prototype.forEach.call(document.querySelectorAll('.op-ruim'),function(o){o.style.cursor='pointer';o.addEventListener('click',function(){o.style.fontWeight='700';});});</script></div>
+<h3>Por quê</h3>
+<p>Para quem vê é uma lista de opções. Para o leitor de tela são três linhas de texto, sem papel, sem nome, sem foco e sem teclado.</p>
+<h3>O que corrigir</h3>
+<p>Use role=listbox com nome, role=option nas opções, tabindex=0 na lista com aria-activedescendant (ou tabindex rotativo nas opções), setas, Home, End e aria-selected.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: Curitiba Recife Salvador</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda listbox, medido)</h3>
+<pre>NÃO cumpriu: o elemento tem role=listbox. Observado: div sem role=listbox.
+NÃO cumpriu: a lista tem nome (aria-label ou aria-labelledby). Observado: sem nome acessivel.
+NÃO cumpriu: as opcoes tem role=option (pelo menos duas). Observado: 0 opcoes com role=option.
+NÃO cumpriu: a lista (ou uma opcao) recebe o foco do teclado. Observado: nenhum elemento (corpo da pagina).</pre>
+<h3>Código</h3>
+<pre>&lt;div id=&quot;lb-ruim&quot;&gt;&lt;div class=&quot;op-ruim&quot;&gt;Curitiba&lt;/div&gt;&lt;div class=&quot;op-ruim&quot;&gt;Recife&lt;/div&gt;&lt;div class=&quot;op-ruim&quot;&gt;Salvador&lt;/div&gt;&lt;/div&gt;&lt;script&gt;Array.prototype.forEach.call(document.querySelectorAll(&#x27;.op-ruim&#x27;),function(o){o.style.cursor=&#x27;pointer&#x27;;o.addEventListener(&#x27;click&#x27;,function(){o.style.fontWeight=&#x27;700&#x27;;});});&lt;/script&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Listbox no padrão do APG</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Listbox no padrão do APG"><ul id="lb-bom" role="listbox" aria-label="Cidades" tabindex="0" aria-activedescendant="lb-bom-1" class="lista-opcoes"><li role="option" id="lb-bom-1" aria-selected="false">Curitiba</li><li role="option" id="lb-bom-2" aria-selected="false">Recife</li><li role="option" id="lb-bom-3" aria-selected="false">Salvador</li></ul><script>(function(){var lb=document.getElementById('lb-bom'),op=Array.prototype.slice.call(lb.children),a=0;function ir(i){a=i;lb.setAttribute('aria-activedescendant',op[i].id);}function marcar(i){op.forEach(function(o,j){o.setAttribute('aria-selected',String(j===i));});}lb.addEventListener('keydown',function(e){if(e.key==='ArrowDown'){e.preventDefault();ir(Math.min(a+1,op.length-1));}else if(e.key==='ArrowUp'){e.preventDefault();ir(Math.max(a-1,0));}else if(e.key==='Home'){e.preventDefault();ir(0);}else if(e.key==='End'){e.preventDefault();ir(op.length-1);}else if(e.key===' '||e.key==='Enter'){e.preventDefault();marcar(a);}});op.forEach(function(o,i){o.addEventListener('click',function(){ir(i);marcar(i);});});})();</script></div>
+<h3>Por quê</h3>
+<p>A lista é anunciada pelo nome, com a opção atual por aria-activedescendant; as setas andam, Home e End vão às pontas e Espaço ou Enter escolhem, com aria-selected.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- listbox &quot;Cidades&quot;:
+  - option &quot;Curitiba&quot;
+  - option &quot;Recife&quot;
+  - option &quot;Salvador&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda listbox, medido)</h3>
+<pre>cumpriu: o elemento tem role=listbox. Observado: ul role=listbox.
+cumpriu: a lista tem nome (aria-label ou aria-labelledby). Observado: &#x27;Cidades&#x27;.
+cumpriu: as opcoes tem role=option (pelo menos duas). Observado: 3 opcoes com role=option.
+cumpriu: a lista (ou uma opcao) recebe o foco do teclado. Observado: ul &#x27;Cidades&#x27;.
+cumpriu: so uma parada de Tab na lista (a lista com aria-activedescendant, ou a opcao atual com tabindex 0). Observado: 1 paradas de Tab.
+cumpriu: Seta para baixo move a opcao atual. Observado: opcao atual 0 -&gt; 1.
+cumpriu: Home vai a primeira opcao e End a ultima. Observado: Home-&gt;0, End-&gt;2.
+cumpriu: a opcao escolhida fica com aria-selected=true e as outras false. Observado: selecionadas: [1]; todas com aria-selected definido: True.</pre>
+<h3>Código</h3>
+<pre>&lt;ul id=&quot;lb-bom&quot; role=&quot;listbox&quot; aria-label=&quot;Cidades&quot; tabindex=&quot;0&quot; aria-activedescendant=&quot;lb-bom-1&quot; class=&quot;lista-opcoes&quot;&gt;&lt;li role=&quot;option&quot; id=&quot;lb-bom-1&quot; aria-selected=&quot;false&quot;&gt;Curitiba&lt;/li&gt;&lt;li role=&quot;option&quot; id=&quot;lb-bom-2&quot; aria-selected=&quot;false&quot;&gt;Recife&lt;/li&gt;&lt;li role=&quot;option&quot; id=&quot;lb-bom-3&quot; aria-selected=&quot;false&quot;&gt;Salvador&lt;/li&gt;&lt;/ul&gt;&lt;script&gt;(function(){var lb=document.getElementById(&#x27;lb-bom&#x27;),op=Array.prototype.slice.call(lb.children),a=0;function ir(i){a=i;lb.setAttribute(&#x27;aria-activedescendant&#x27;,op[i].id);}function marcar(i){op.forEach(function(o,j){o.setAttribute(&#x27;aria-selected&#x27;,String(j===i));});}lb.addEventListener(&#x27;keydown&#x27;,function(e){if(e.key===&#x27;ArrowDown&#x27;){e.preventDefault();ir(Math.min(a+1,op.length-1));}else if(e.key===&#x27;ArrowUp&#x27;){e.preventDefault();ir(Math.max(a-1,0));}else if(e.key===&#x27;Home&#x27;){e.preventDefault();ir(0);}else if(e.key===&#x27;End&#x27;){e.preventDefault();ir(op.length-1);}else if(e.key===&#x27; &#x27;||e.key===&#x27;Enter&#x27;){e.preventDefault();marcar(a);}});op.forEach(function(o,i){o.addEventListener(&#x27;click&#x27;,function(){ir(i);marcar(i);});});})();&lt;/script&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="dica.html">Anterior: Dica (tooltip)</a>
+<a href="arvore.html">Próximo: Árvore (tree view)</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

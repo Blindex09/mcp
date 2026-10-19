@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mudança de tela em aplicação de uma página só | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html" aria-current="page">Mudança de tela em aplicação de uma página só</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Mudança de tela em aplicação de uma página só</h1>
+<p>Quando o conteúdo troca sem recarregar a página, o navegador não anuncia nada. A aplicação precisa mudar o título da aba, levar o foco ao novo conteúdo e avisar o leitor de tela.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: A tela muda e ninguém é avisado</a></li>
+<li><a href="#ex-2">Exemplo bom: Título, foco e aviso acompanham a troca</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> A tela muda e ninguém é avisado</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: A tela muda e ninguém é avisado"><p><a href="rota-ruim.html">Abrir a aplicação de exemplo (ruim)</a></p></div>
+<h3>Por quê</h3>
+<p>O conteúdo vira Contato, mas o título da aba continua Início, o foco permanece no botão e não há aviso. Quem usa leitor de tela não sabe que a tela mudou.</p>
+<h3>O que corrigir</h3>
+<p>Ao trocar a tela: atualize document.title, mova o foco para o novo título (h1 com tabindex -1) e avise numa região role=status.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph:
+  - link &quot;Abrir a aplicação de exemplo (ruim)&quot;:
+    - /url: rota-ruim.html</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda route_change, medido)</h3>
+<pre>NÃO cumpriu: o titulo da pagina muda com a nova tela. Observado: &#x27;Início | Loja de chás&#x27; -&gt; &#x27;Início | Loja de chás&#x27;.
+cumpriu: o foco nao fica perdido no corpo da pagina. Observado: button &#x27;Contato&#x27;.
+NÃO cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido para o novo conteudo ou carga de pagina nova. Observado: anuncio=False; foco mudou=False; mesmo documento=True.</pre>
+<h3>Código</h3>
+<pre>&lt;p&gt;&lt;a href=&quot;rota-ruim.html&quot;&gt;Abrir a aplicação de exemplo (ruim)&lt;/a&gt;&lt;/p&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Título, foco e aviso acompanham a troca</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Título, foco e aviso acompanham a troca"><p><a href="rota-bom.html">Abrir a aplicação de exemplo (boa)</a></p></div>
+<h3>Por quê</h3>
+<p>O título da aba muda para Contato, o foco vai ao novo título e o leitor de tela ouve Página Contato carregada.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- paragraph:
+  - link &quot;Abrir a aplicação de exemplo (boa)&quot;:
+    - /url: rota-bom.html</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda route_change, medido)</h3>
+<pre>cumpriu: o titulo da pagina muda com a nova tela. Observado: &#x27;Início | Loja de chás&#x27; -&gt; &#x27;Contato | Loja de chás&#x27;.
+cumpriu: o foco nao fica perdido no corpo da pagina. Observado: h1 &#x27;Contato&#x27;.
+cumpriu: a troca e&#x27; perceptivel sem ver a tela: anuncio, foco movido para o novo conteudo ou carga de pagina nova. Observado: anuncio=True; foco mudou=True; mesmo documento=True.</pre>
+<h3>Código</h3>
+<pre>&lt;p&gt;&lt;a href=&quot;rota-bom.html&quot;&gt;Abrir a aplicação de exemplo (boa)&lt;/a&gt;&lt;/p&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="erros-de-formulario.html">Anterior: Erro de formulário</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

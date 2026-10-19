@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accessible menu button (action menu) - vanilla JS</title>
+  <style>
+    button { min-height: 44px; min-width: 44px; padding: 0.5rem 1rem; font: inherit; }
+    [role="menu"] { list-style: none; margin: 0.25rem 0 0; padding: 0.25rem; border: 2px solid #555; border-radius: 6px; max-width: 16rem; }
+    [role="menu"][hidden] { display: none; }
+    [role="menuitem"] { display: block; width: 100%; text-align: left; border: 0; background: transparent; cursor: pointer; }
+    [role="menuitem"]:focus-visible, button:focus-visible { outline: 3px solid #1a73e8; outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <!-- APG Menu Button. Use this for a menu of COMMANDS. A site-navigation submenu is a disclosure
+       (button + aria-expanded + a list of links), not role="menu".
+       Contract (a11y_probe kind=menu): aria-haspopup + aria-expanded on the button; Enter/Space/ArrowDown open;
+       focus goes to the first item; ArrowUp/Down move, Home/End jump; Escape closes and returns focus to the button;
+       Tab closes the menu. -->
+  <button type="button" id="menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-list">Actions</button>
+  <ul role="menu" id="menu-list" aria-labelledby="menu-btn" hidden>
+    <li role="none"><button type="button" role="menuitem" tabindex="-1">Rename</button></li>
+    <li role="none"><button type="button" role="menuitem" tabindex="-1">Duplicate</button></li>
+    <li role="none"><button type="button" role="menuitem" tabindex="-1">Delete</button></li>
+  </ul>
+
+  <script>
+    const btn = document.getElementById('menu-btn');
+    const list = document.getElementById('menu-list');
+    const items = Array.from(list.querySelectorAll('[role="menuitem"]'));
+
+    function open(index) {
+      list.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+      items[index].focus();
+    }
+    function close(returnFocus) {
+      list.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+      if (returnFocus) btn.focus();
+    }
+
+    btn.addEventListener('click', () => (list.hidden ? open(0) : close(true)));
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); open(0); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); open(items.length - 1); }
+    });
+    list.addEventListener('keydown', (e) => {
+      const i = items.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i + items.length - 1) % items.length].focus(); }
+      else if (e.key === 'Home') { e.preventDefault(); items[0].focus(); }
+      else if (e.key === 'End') { e.preventDefault(); items[items.length - 1].focus(); }
+      else if (e.key === 'Escape') { e.preventDefault(); close(true); }
+      else if (e.key === 'Tab') { close(false); } // let focus move on naturally
+    });
+    items.forEach((item) => item.addEventListener('click', () => close(true)));
+  </script>
+</body>
+</html>

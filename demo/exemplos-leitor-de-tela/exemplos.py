@@ -209,3 +209,7 @@ CENARIOS: list[dict[str, Any]] = [
         ],
     },
 ]
+
+from interativos import INTERATIVOS
+
+CENARIOS.extend(INTERATIVOS)

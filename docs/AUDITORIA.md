@@ -407,3 +407,29 @@ Erros meus, corrigidos:
 - Lição: afirmei "não precisa corrigir" sem conferir o guia do próprio MCP. A classificação de um exemplo precisa citar o guia que a sustenta.
 
 Correção no MCP: o guia `page-structure-review` ganhou, na seção de títulos, o aviso sobre títulos dentro de itens de lista ligado aos fatos `lists.details[].headings_in_items` e `items_with_heading` do `a11y_page_map`, com o que fazer (lista de links com descrição, ou títulos sem a lista, nunca os dois). Mudança numa instrução ao modelo tem portão (regra 15: conjunto amplo de avaliações em tentativas repetidas, ablação e período de observação). Isso NÃO foi feito: sem crédito de modelo, só os testes baratos rodaram. Fica registrado como pendência; o texto novo é uma frase e só reforça o que o guia `aria-rules-dos-and-donts` já dizia.
+
+## 23. Cenários interativos, auditoria ao vivo e guias de comportamento (outubro de 2026)
+
+Pedido do dono: terminar o que faltava (componentes interativos, outras personas e navegadores, o que cada componente deve e não deve fazer escrito no MCP), corrigindo o MCP e o site, e auditar o site vendo a página funcionar, sem NVDA ligado.
+
+O que foi feito, com prova:
+- O site de exemplos ganhou 7 cenários interativos (diálogo, acordeão, abas, menu de ações, combobox, erro de formulário, mudança de tela em aplicação de uma página só), com exemplo ruim e bom (e `details` como "não precisa corrigir"). O gerador roda a sonda do próprio MCP em cada exemplo e escreve na página o que ela mediu, esperado contra observado. Testes: `tests/test_demo_interativos.py` (o ruim reprova alguma verificação, o bom e o "ok" cumprem todas, ids únicos, alvos de pelo menos 24 px).
+- Auditoria ao vivo, página servida, persona só teclado: as 13 sondas deram o mesmo resultado do gerador. Firefox e WebKit: os exemplos bons cumprem; no Firefox o Tab dentro do diálogo não é mensurável (o foco sai para a interface do navegador) e a sonda diz isso em vez de aprovar. Personas `low_vision` (320 px e espaçamento de texto) e `mobile_touch` rodadas nas páginas; axe em claro e escuro nas 16 páginas, só com os dois achados esperados dos exemplos ruins.
+
+Defeitos do MCP achados e corrigidos, cada um com teste de regressão:
+1. A sonda `disclosure` reprovava `<details>/<summary>`, que é acessível (o estado é nativo, sem `aria-expanded`). Agora lê `details.open`. Teste: `test_disclosure_accepts_native_details_summary`.
+2. "O foco continua no botão" passava quando o foco estava no corpo da página (`None == None`) porque o gatilho era uma div que nunca recebe foco. Corrigido em disclosure, diálogo e menu; disclosure ganhou `gatilho_recebe_foco`. Teste: `test_disclosure_does_not_pass_focus_stays_when_nothing_was_ever_focused`.
+3. A sonda de erro de formulário não explicava o caso de campo sem restrição: agora lista o texto novo que apareceu na tela, ainda como "não deu para medir".
+4. O exemplo oficial `tabs-vanilla.html` reprovava a sonda de abas: o painel sem `tabindex="0"` impedia o Tab de entrar nele (o APG manda `tabindex="0"` quando não há nada focável dentro). A sonda estava certa; o exemplo foi corrigido. Teste: `test_the_servers_own_vanilla_examples_meet_the_contract_the_probe_measures`, que agora mantém `tabs-vanilla`, `menu-button-vanilla` e `combobox-vanilla` alinhados às sondas.
+
+Defeitos do site achados pela auditoria ao vivo: dois botões com o mesmo nome na mesma página ("Excluir projeto" nos exemplos ruim e bom), corrigidos com um grupo nomeado em volta de cada exemplo vivo; botões de 21 px de altura, corrigidos no CSS e protegidos por teste.
+
+Conhecimento no MCP, para a próxima IA saber o que fazer: dois guias novos, `component-behavior-matrix` (para cada componente: deve, não deve, o que o navegador entrega ao leitor de tela, qual sonda mede, e os defeitos típicos por pilha: HTML, CSS, JS, AJAX, React, Angular, Vue, Svelte, Web Components, Android Compose, iOS) e `testing-playbook-for-ai` (ordem das ferramentas, o que se pode e não se pode afirmar, regras do harness, erros já cometidos, como trabalhar no próprio servidor); dois exemplos novos, `menu-button-vanilla` e `combobox-vanilla`; `SKILL.md` e `catalog.json` atualizados.
+
+Fontes lidas em 2026-10-19: developer.android.com (semântica do Compose: liveRegion, stateDescription, heading, mergeDescendants) e angular.dev (foco após `NavigationEnd`, `LiveAnnouncer`, `cdkTrapFocus`, `ariaCurrentWhenActive`). Não foi possível ler as páginas oficiais de Vue e da Apple (a busca só devolveu artigos de terceiros); os pontos de Vue e de iOS ficaram marcados no guia como indicações a confirmar. A API `UIAccessibility.post` não foi confirmada em fonte oficial.
+
+Não feito, declarado:
+- Ferramentas que usam modelo (`a11y_find` com amostragem, `a11y_walkthrough`, `a11y_review`, fluxo `finding/report/export/diff` com modelo): sem crédito, não rodadas. Os dois guias novos e a mudança em `tabs-vanilla` são mudança de instrução ao modelo e o portão da regra 15 (conjunto amplo, tentativas repetidas, ablação) não foi rodado: pendente, junto com o do `page-structure-review`.
+- NVDA real e a VM: dependem do dono (fone fora, VM pronta). Nada de fala real foi afirmado.
+- Espelho no Qaaccessibility: aquele projeto guarda o conhecimento em outro formato (`backend/src/resources/leitor_de_tela_*.md`), sem arquivo equivalente aos guias novos. Pendente de decisão: converter o conteúdo dos dois guias para lá.
+- Web Components, Vue e Svelte não ganharam cenário vivo no site (só a matriz e os guias de especialista que já existiam); Android e iOS não têm executor aqui.

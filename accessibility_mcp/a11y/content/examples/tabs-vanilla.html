@@ -18,7 +18,7 @@
 </head>
 <body>
 
-  <!-- Tabs: role="tablist" contains role="tab" elements.
+  <!-- Tabs: role="tablist" contains role="tab" elements. Each panel has tabindex="0" because it holds no focusable content (APG), so Tab from the selected tab enters the panel.
        Each tab controls a role="tabpanel" via aria-controls (id match).
        aria-labelledby on the panel points back to the tab for an accessible name. -->
   <div role="tablist" aria-label="Account sections">
@@ -33,13 +33,13 @@
     </button>
   </div>
 
-  <div role="tabpanel" id="panel-profile" aria-labelledby="tab-profile">
+  <div role="tabpanel" id="panel-profile" aria-labelledby="tab-profile" tabindex="0">
     <p>Profile settings go here.</p>
   </div>
-  <div role="tabpanel" id="panel-security" aria-labelledby="tab-security" hidden>
+  <div role="tabpanel" id="panel-security" aria-labelledby="tab-security" tabindex="0" hidden>
     <p>Security settings go here.</p>
   </div>
-  <div role="tabpanel" id="panel-billing" aria-labelledby="tab-billing" hidden>
+  <div role="tabpanel" id="panel-billing" aria-labelledby="tab-billing" tabindex="0" hidden>
     <p>Billing settings go here.</p>
   </div>
 

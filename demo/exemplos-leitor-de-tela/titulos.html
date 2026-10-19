@@ -22,6 +22,13 @@
 <li><a href="imagens.html">Imagens</a></li>
 <li><a href="tabelas.html">Tabelas</a></li>
 <li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
 </ul>
 </nav>
 </div>
@@ -38,7 +45,7 @@
 </ol>
 </nav>
 <h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Títulos só no visual</h2>
-<div class="exemplo exemplo-ruim"><div class="vt1">Casa do Chá</div><div class="vt2">Chás verdes</div><p>Sencha, matcha e gyokuro.</p><div class="vt2">Chás pretos</div><p>Earl Grey e Assam.</p></div>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Títulos só no visual"><div class="vt1">Casa do Chá</div><div class="vt2">Chás verdes</div><p>Sencha, matcha e gyokuro.</p><div class="vt2">Chás pretos</div><p>Earl Grey e Assam.</p></div>
 <h3>Por quê</h3>
 <p>A pessoa que enxerga vê quatro blocos com cara de título. A árvore de acessibilidade não tem nenhum título: o leitor de tela não consegue listar os títulos nem pular entre eles.</p>
 <h3>O que corrigir</h3>
@@ -53,7 +60,7 @@
 <h3>Código</h3>
 <pre>&lt;div class=&quot;vt1&quot;&gt;Casa do Chá&lt;/div&gt;&lt;div class=&quot;vt2&quot;&gt;Chás verdes&lt;/div&gt;&lt;p&gt;Sencha, matcha e gyokuro.&lt;/p&gt;&lt;div class=&quot;vt2&quot;&gt;Chás pretos&lt;/div&gt;&lt;p&gt;Earl Grey e Assam.&lt;/p&gt;</pre>
 <h2 id="ex-2"><span class="etiqueta t-ruim">Exemplo ruim:</span> Títulos que pulam de nível</h2>
-<div class="exemplo exemplo-ruim"><h3>Casa do Chá</h3><h5>Chás verdes</h5><p>Sencha, matcha e gyokuro.</p><h5>Chás pretos</h5><p>Earl Grey e Assam.</p></div>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Títulos que pulam de nível"><h3>Casa do Chá</h3><h5>Chás verdes</h5><p>Sencha, matcha e gyokuro.</p><h5>Chás pretos</h5><p>Earl Grey e Assam.</p></div>
 <h3>Por quê</h3>
 <p>Os títulos são de verdade, mas o exemplo pula do nível 3 para o 5. Quem navega por nível fica sem saber se faltou um nível 4.</p>
 <h3>O que corrigir</h3>
@@ -69,7 +76,7 @@
 <h3>Código</h3>
 <pre>&lt;h3&gt;Casa do Chá&lt;/h3&gt;&lt;h5&gt;Chás verdes&lt;/h5&gt;&lt;p&gt;Sencha, matcha e gyokuro.&lt;/p&gt;&lt;h5&gt;Chás pretos&lt;/h5&gt;&lt;p&gt;Earl Grey e Assam.&lt;/p&gt;</pre>
 <h2 id="ex-3"><span class="etiqueta t-bom">Exemplo bom:</span> Hierarquia sem saltos</h2>
-<div class="exemplo exemplo-bom"><h3>Casa do Chá</h3><h4>Chás verdes</h4><p>Sencha, matcha e gyokuro.</p><h4>Chás pretos</h4><p>Earl Grey e Assam.</p></div>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Hierarquia sem saltos"><h3>Casa do Chá</h3><h4>Chás verdes</h4><p>Sencha, matcha e gyokuro.</p><h4>Chás pretos</h4><p>Earl Grey e Assam.</p></div>
 <h3>Por quê</h3>
 <p>Um título de nível 3 para o assunto do bloco e títulos de nível 4 para as partes, sem pular nível.</p>
 <h3>O que corrigir</h3>

@@ -22,6 +22,13 @@
 <li><a href="imagens.html">Imagens</a></li>
 <li><a href="tabelas.html" aria-current="page">Tabelas</a></li>
 <li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
 </ul>
 </nav>
 </div>
@@ -37,7 +44,7 @@
 </ol>
 </nav>
 <h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Tabela sem células de cabeçalho</h2>
-<div class="exemplo exemplo-ruim"><table><tr><td>Chá</td><td>Preço</td></tr><tr><td>Sencha</td><td>R$ 39,90</td></tr><tr><td>Matcha</td><td>R$ 59,90</td></tr></table></div>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Tabela sem células de cabeçalho"><table><tr><td>Chá</td><td>Preço</td></tr><tr><td>Sencha</td><td>R$ 39,90</td></tr><tr><td>Matcha</td><td>R$ 59,90</td></tr></table></div>
 <h3>Por quê</h3>
 <p>Visualmente a primeira linha parece cabeçalho. Para o leitor de tela, todas as células são iguais: ao ler R$ 39,90 não se ouve &quot;Preço&quot;.</p>
 <h3>O que corrigir</h3>
@@ -59,7 +66,7 @@
 <h3>Código</h3>
 <pre>&lt;table&gt;&lt;tr&gt;&lt;td&gt;Chá&lt;/td&gt;&lt;td&gt;Preço&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Sencha&lt;/td&gt;&lt;td&gt;R$ 39,90&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Matcha&lt;/td&gt;&lt;td&gt;R$ 59,90&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Tabela com cabeçalho e legenda</h2>
-<div class="exemplo exemplo-bom"><table><caption>Preço por chá</caption><thead><tr><th scope="col">Chá</th><th scope="col">Preço</th></tr></thead><tbody><tr><td>Sencha</td><td>R$ 39,90</td></tr><tr><td>Matcha</td><td>R$ 59,90</td></tr></tbody></table></div>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Tabela com cabeçalho e legenda"><table><caption>Preço por chá</caption><thead><tr><th scope="col">Chá</th><th scope="col">Preço</th></tr></thead><tbody><tr><td>Sencha</td><td>R$ 39,90</td></tr><tr><td>Matcha</td><td>R$ 59,90</td></tr></tbody></table></div>
 <h3>Por quê</h3>
 <p>A legenda dá o assunto e os th ligam cada preço à coluna &quot;Preço&quot;.</p>
 <h3>O que corrigir</h3>

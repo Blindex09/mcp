@@ -41,6 +41,8 @@ def test_the_bad_example_changes_what_the_browser_hands_to_the_screen_reader(sit
     """O ruim parece igual ao bom, mas a arvore de acessibilidade tem que ser diferente: e' essa a diferenca que o leitor de tela ouve."""
     mod, medidas = site
     for c in mod.CENARIOS:
+        if any(ex.get("sonda") for ex in c["exemplos"]):
+            continue  # componente interativo: a diferenca e' de comportamento (teclado), medida pelas sondas em test_demo_interativos.py
         bons = {m["arvore"] for m in _por_tipo(mod, medidas, c["slug"], "bom")}
         for ruim in _por_tipo(mod, medidas, c["slug"], "ruim"):
             assert ruim["arvore"] not in bons, c["slug"]

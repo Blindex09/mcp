@@ -22,6 +22,13 @@
 <li><a href="imagens.html">Imagens</a></li>
 <li><a href="tabelas.html">Tabelas</a></li>
 <li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
 </ul>
 </nav>
 </div>
@@ -38,7 +45,7 @@
 </ol>
 </nav>
 <h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Div que faz o papel de botão</h2>
-<div class="exemplo exemplo-ruim"><div class="fake-botao" onclick="this.textContent = 'Adicionado'">Comprar</div></div>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Div que faz o papel de botão"><div class="fake-botao" onclick="this.textContent = 'Adicionado'">Comprar</div></div>
 <h3>Por quê</h3>
 <p>O mouse funciona. Pelo teclado, o Tab passa direto, e o leitor de tela não anuncia botão: é um texto qualquer na página.</p>
 <h3>O que corrigir</h3>
@@ -50,7 +57,7 @@
 <h3>Código</h3>
 <pre>&lt;div class=&quot;fake-botao&quot; onclick=&quot;this.textContent = &#x27;Adicionado&#x27;&quot;&gt;Comprar&lt;/div&gt;</pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Botão de verdade</h2>
-<div class="exemplo exemplo-bom"><button type="button" class="botao" onclick="this.textContent = 'Adicionado'">Comprar</button></div>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Botão de verdade"><button type="button" class="botao" onclick="this.textContent = 'Adicionado'">Comprar</button></div>
 <h3>Por quê</h3>
 <p>O Tab chega nele, o leitor anuncia &quot;botão&quot; e o nome &quot;Comprar&quot;, e Enter e Espaço acionam.</p>
 <h3>O que corrigir</h3>
@@ -62,7 +69,7 @@
 <h3>Código</h3>
 <pre>&lt;button type=&quot;button&quot; class=&quot;botao&quot; onclick=&quot;this.textContent = &#x27;Adicionado&#x27;&quot;&gt;Comprar&lt;/button&gt;</pre>
 <h2 id="ex-3"><span class="etiqueta t-ok">Não precisa corrigir:</span> Botão só com ícone, com nome por aria-label</h2>
-<div class="exemplo exemplo-ok"><button type="button" class="botao" aria-label="Abrir o carrinho"><span aria-hidden="true">&#128722;</span></button></div>
+<div class="exemplo exemplo-ok" role="group" aria-label="Exemplo ao vivo, não precisa corrigir: Botão só com ícone, com nome por aria-label"><button type="button" class="botao" aria-label="Abrir o carrinho"><span aria-hidden="true">&#128722;</span></button></div>
 <h3>Por quê</h3>
 <p>O ícone é decorativo e fica escondido do leitor; o nome vem de aria-label. O leitor anuncia &quot;Abrir o carrinho, botão&quot;.</p>
 <h3>O que corrigir</h3>

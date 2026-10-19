@@ -22,6 +22,13 @@
 <li><a href="imagens.html">Imagens</a></li>
 <li><a href="tabelas.html">Tabelas</a></li>
 <li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
 </ul>
 </nav>
 </div>
@@ -38,7 +45,7 @@
 </ol>
 </nav>
 <h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Campo sem rótulo associado</h2>
-<div class="exemplo exemplo-ruim"><p>Seu e-mail</p><input type="email" name="email-ruim"></div>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Campo sem rótulo associado"><p>Seu e-mail</p><input type="email" name="email-ruim"></div>
 <h3>Por quê</h3>
 <p>O texto &quot;Seu e-mail&quot; está perto do campo, mas não está ligado a ele. Quando o foco chega, o leitor diz só &quot;campo de edição&quot;.</p>
 <h3>O que corrigir</h3>
@@ -51,7 +58,7 @@
 <h3>Código</h3>
 <pre>&lt;p&gt;Seu e-mail&lt;/p&gt;&lt;input type=&quot;email&quot; name=&quot;email-ruim&quot;&gt;</pre>
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Campo com label associado</h2>
-<div class="exemplo exemplo-bom"><label for="email-bom">Seu e-mail</label><br><input type="email" id="email-bom" name="email-bom" autocomplete="email"></div>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Campo com label associado"><label for="email-bom">Seu e-mail</label><br><input type="email" id="email-bom" name="email-bom" autocomplete="email"></div>
 <h3>Por quê</h3>
 <p>O foco chega e o leitor diz o nome do campo, &quot;Seu e-mail&quot;, e que é um campo de edição.</p>
 <h3>O que corrigir</h3>
@@ -64,7 +71,7 @@
 <h3>Código</h3>
 <pre>&lt;label for=&quot;email-bom&quot;&gt;Seu e-mail&lt;/label&gt;&lt;br&gt;&lt;input type=&quot;email&quot; id=&quot;email-bom&quot; name=&quot;email-bom&quot; autocomplete=&quot;email&quot;&gt;</pre>
 <h2 id="ex-3"><span class="etiqueta t-ok">Não precisa corrigir:</span> Label que envolve o campo</h2>
-<div class="exemplo exemplo-ok"><label>Seu nome <input type="text" name="nome-ok" autocomplete="name"></label></div>
+<div class="exemplo exemplo-ok" role="group" aria-label="Exemplo ao vivo, não precisa corrigir: Label que envolve o campo"><label>Seu nome <input type="text" name="nome-ok" autocomplete="name"></label></div>
 <h3>Por quê</h3>
 <p>Também é uma associação válida. O nome do campo é o texto do label.</p>
 <h3>O que corrigir</h3>

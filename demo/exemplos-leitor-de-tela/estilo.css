@@ -61,6 +61,19 @@ footer { border-top: 1px solid var(--borda); padding-block: 1rem 2rem; color: va
 .exemplo table { border-collapse: collapse; }
 .exemplo td, .exemplo th { border: 1px solid var(--borda); padding: 0.35rem 0.75rem; text-align: left; }
 .exemplo input { font: inherit; min-height: 44px; padding: 0.25rem 0.5rem; }
+.exemplo .caixa-falsa { margin-top: 0.75rem; padding: 0.75rem 1rem; border: 2px solid var(--borda); border-radius: 6px; background: var(--destaque); }
+.exemplo .abas-falsas { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+.exemplo .opcao-falsa { padding: 0.35rem 0.5rem; border: 1px solid var(--borda); }
+.exemplo [role="tablist"] { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+.exemplo [role="tab"] { min-height: 44px; padding: 0.55rem 1rem; border: 2px solid var(--link); border-radius: 6px; background: var(--fundo); color: var(--link); font: inherit; cursor: pointer; }
+.exemplo [role="tab"][aria-selected="true"] { background: var(--link); color: var(--fundo); }
+.exemplo [role="menu"], .exemplo [role="listbox"] { list-style: none; margin: 0.25rem 0; padding: 0.25rem; border: 2px solid var(--borda); border-radius: 6px; max-width: 16rem; }
+.exemplo [role="menuitem"], .exemplo [role="option"] { display: block; width: 100%; min-height: 44px; padding: 0.5rem 0.75rem; text-align: left; border: 0; background: transparent; color: var(--texto); font: inherit; cursor: pointer; }
+.exemplo [role="option"][aria-selected="true"] { background: var(--link); color: var(--fundo); }
+.exemplo dialog { max-width: 28rem; border: 2px solid var(--borda); border-radius: 8px; background: var(--fundo); color: var(--texto); }
+.exemplo .erro-visual { color: var(--ruim); font-weight: 700; }
+.exemplo summary { cursor: pointer; min-height: 44px; padding-block: 0.5rem; }
+.exemplo button { min-height: 44px; min-width: 44px; padding: 0.5rem 1rem; font: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abas | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html" aria-current="page">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Abas</h1>
+<p>Abas têm uma única parada de Tab; as setas, Home e End andam entre elas, e o Tab seguinte leva ao painel. O leitor de tela anuncia a aba e a posição, como segunda de três.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Abas feitas de divs</a></li>
+<li><a href="#ex-2">Exemplo bom: Abas no padrão do APG</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Abas feitas de divs</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Abas feitas de divs"><div class="abas-falsas"><div id="aba-ruim-1" class="fake-botao" data-p="painel-aba-ruim-1">Perfil</div><div id="aba-ruim-2" class="fake-botao" data-p="painel-aba-ruim-2">Segurança</div></div><div id="painel-aba-ruim-1"><p>Dados do perfil.</p></div><div id="painel-aba-ruim-2" hidden><p>Senha e acesso.</p></div><script>(function(){['aba-ruim-1','aba-ruim-2'].forEach(function(id){var a=document.getElementById(id);a.addEventListener('click',function(){['painel-aba-ruim-1','painel-aba-ruim-2'].forEach(function(p){document.getElementById(p).hidden=(p!==a.dataset.p);});});});})();</script></div>
+<h3>Por quê</h3>
+<p>Só o mouse troca de aba. Não há papel de aba, nem lista de abas, nem teclado.</p>
+<h3>O que corrigir</h3>
+<p>Use role=tablist, role=tab com aria-selected e aria-controls e role=tabpanel. Faça tabindex 0 só na aba ativa e as setas, Home e End movendo o foco.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: Perfil Segurança
+- paragraph: Dados do perfil.</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda tabs, medido)</h3>
+<pre>NÃO cumpriu: as abas ficam dentro de um elemento com role=tablist. Observado: nao ha role=tablist ao redor.</pre>
+<h3>Código</h3>
+<pre>&lt;div class=&quot;abas-falsas&quot;&gt;&lt;div id=&quot;aba-ruim-1&quot; class=&quot;fake-botao&quot; data-p=&quot;painel-aba-ruim-1&quot;&gt;Perfil&lt;/div&gt;&lt;div id=&quot;aba-ruim-2&quot; class=&quot;fake-botao&quot; data-p=&quot;painel-aba-ruim-2&quot;&gt;Segurança&lt;/div&gt;&lt;/div&gt;&lt;div id=&quot;painel-aba-ruim-1&quot;&gt;&lt;p&gt;Dados do perfil.&lt;/p&gt;&lt;/div&gt;&lt;div id=&quot;painel-aba-ruim-2&quot; hidden&gt;&lt;p&gt;Senha e acesso.&lt;/p&gt;&lt;/div&gt;&lt;script&gt;(function(){[&#x27;aba-ruim-1&#x27;,&#x27;aba-ruim-2&#x27;].forEach(function(id){var a=document.getElementById(id);a.addEventListener(&#x27;click&#x27;,function(){[&#x27;painel-aba-ruim-1&#x27;,&#x27;painel-aba-ruim-2&#x27;].forEach(function(p){document.getElementById(p).hidden=(p!==a.dataset.p);});});});})();&lt;/script&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Abas no padrão do APG</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Abas no padrão do APG"><div role="tablist" aria-label="Conta"><button type="button" role="tab" id="aba-bom-1" aria-selected="true" aria-controls="painel-aba-bom-1" tabindex="0">Perfil</button><button type="button" role="tab" id="aba-bom-2" aria-selected="false" aria-controls="painel-aba-bom-2" tabindex="-1">Segurança</button><button type="button" role="tab" id="aba-bom-3" aria-selected="false" aria-controls="painel-aba-bom-3" tabindex="-1">Cobrança</button></div><div role="tabpanel" id="painel-aba-bom-1" aria-labelledby="aba-bom-1" tabindex="0"><p>Dados do perfil.</p></div><div role="tabpanel" id="painel-aba-bom-2" aria-labelledby="aba-bom-2" tabindex="0" hidden><p>Senha e acesso.</p></div><div role="tabpanel" id="painel-aba-bom-3" aria-labelledby="aba-bom-3" tabindex="0" hidden><p>Forma de pagamento.</p></div><script>(function(){var abas=['aba-bom-1','aba-bom-2','aba-bom-3'].map(function(i){return document.getElementById(i);});function ativar(t){abas.forEach(function(a){var on=a===t;a.setAttribute('aria-selected',String(on));a.tabIndex=on?0:-1;document.getElementById(a.getAttribute('aria-controls')).hidden=!on;});t.focus();}abas.forEach(function(a,i){a.addEventListener('click',function(){ativar(a);});a.addEventListener('keydown',function(e){var n=null;if(e.key==='ArrowRight')n=(i+1)%abas.length;else if(e.key==='ArrowLeft')n=(i+abas.length-1)%abas.length;else if(e.key==='Home')n=0;else if(e.key==='End')n=abas.length-1;if(n!==null){e.preventDefault();ativar(abas[n]);}});});})();</script></div>
+<h3>Por quê</h3>
+<p>O leitor de tela anuncia aba, selecionada e a posição. Uma parada de Tab, setas, Home e End, e o Tab seguinte entra no painel.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- tablist &quot;Conta&quot;:
+  - tab &quot;Perfil&quot; [selected]
+  - tab &quot;Segurança&quot;
+  - tab &quot;Cobrança&quot;
+- tabpanel &quot;Perfil&quot;:
+  - paragraph: Dados do perfil.</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda tabs, medido)</h3>
+<pre>cumpriu: as abas ficam dentro de um elemento com role=tablist. Observado: sim.
+cumpriu: so a aba ativa fica na ordem de Tab (tabindex=0); as outras -1. Observado: 1 abas na ordem de Tab de 3.
+cumpriu: ArrowRight move o foco para a proxima aba. Observado: foco na aba 1 (era 0).
+não deu para medir: ativacao automatica (aria-selected acompanha o foco) ou manual (Enter/Espaco): ambas validas no APG. Observado: automatica: a selecao acompanhou o foco.
+cumpriu: Home vai a primeira aba e End a ultima. Observado: Home-&gt;0, End-&gt;2.
+cumpriu: a aba selecionada aponta o painel com aria-controls. Observado: aria-controls=painel-aba-bom-1.
+cumpriu: Tab a partir da aba selecionada leva o foco para o painel. Observado: o foco entrou no painel.</pre>
+<h3>Código</h3>
+<pre>&lt;div role=&quot;tablist&quot; aria-label=&quot;Conta&quot;&gt;&lt;button type=&quot;button&quot; role=&quot;tab&quot; id=&quot;aba-bom-1&quot; aria-selected=&quot;true&quot; aria-controls=&quot;painel-aba-bom-1&quot; tabindex=&quot;0&quot;&gt;Perfil&lt;/button&gt;&lt;button type=&quot;button&quot; role=&quot;tab&quot; id=&quot;aba-bom-2&quot; aria-selected=&quot;false&quot; aria-controls=&quot;painel-aba-bom-2&quot; tabindex=&quot;-1&quot;&gt;Segurança&lt;/button&gt;&lt;button type=&quot;button&quot; role=&quot;tab&quot; id=&quot;aba-bom-3&quot; aria-selected=&quot;false&quot; aria-controls=&quot;painel-aba-bom-3&quot; tabindex=&quot;-1&quot;&gt;Cobrança&lt;/button&gt;&lt;/div&gt;&lt;div role=&quot;tabpanel&quot; id=&quot;painel-aba-bom-1&quot; aria-labelledby=&quot;aba-bom-1&quot; tabindex=&quot;0&quot;&gt;&lt;p&gt;Dados do perfil.&lt;/p&gt;&lt;/div&gt;&lt;div role=&quot;tabpanel&quot; id=&quot;painel-aba-bom-2&quot; aria-labelledby=&quot;aba-bom-2&quot; tabindex=&quot;0&quot; hidden&gt;&lt;p&gt;Senha e acesso.&lt;/p&gt;&lt;/div&gt;&lt;div role=&quot;tabpanel&quot; id=&quot;painel-aba-bom-3&quot; aria-labelledby=&quot;aba-bom-3&quot; tabindex=&quot;0&quot; hidden&gt;&lt;p&gt;Forma de pagamento.&lt;/p&gt;&lt;/div&gt;&lt;script&gt;(function(){var abas=[&#x27;aba-bom-1&#x27;,&#x27;aba-bom-2&#x27;,&#x27;aba-bom-3&#x27;].map(function(i){return document.getElementById(i);});function ativar(t){abas.forEach(function(a){var on=a===t;a.setAttribute(&#x27;aria-selected&#x27;,String(on));a.tabIndex=on?0:-1;document.getElementById(a.getAttribute(&#x27;aria-controls&#x27;)).hidden=!on;});t.focus();}abas.forEach(function(a,i){a.addEventListener(&#x27;click&#x27;,function(){ativar(a);});a.addEventListener(&#x27;keydown&#x27;,function(e){var n=null;if(e.key===&#x27;ArrowRight&#x27;)n=(i+1)%abas.length;else if(e.key===&#x27;ArrowLeft&#x27;)n=(i+abas.length-1)%abas.length;else if(e.key===&#x27;Home&#x27;)n=0;else if(e.key===&#x27;End&#x27;)n=abas.length-1;if(n!==null){e.preventDefault();ativar(abas[n]);}});});})();&lt;/script&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="acordeao.html">Anterior: Acordeão (mostrar e ocultar)</a>
+<a href="menu.html">Próximo: Menu de ações</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

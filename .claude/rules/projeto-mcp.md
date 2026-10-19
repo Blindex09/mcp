@@ -40,3 +40,7 @@ um guia ou de um playbook é mudança de instrução ao modelo e segue o portão
 
 `a11y_set_workspace`, `a11y_read_file`, `a11y_edit_file` e `a11y_undo_edit` editam só dentro da pasta de trabalho escolhida pela pessoa (escolhida pela pessoa na conversa com `a11y_set_workspace`; nada para configurar antes), com cópia de
 segurança antes de cada edição, escrita atômica, conferência de sintaxe do que foi editado e aprovação quando a aprovação está ligada.
+
+### Antes de testar acessibilidade ou mexer nas sondas
+
+Ler o guia `testing-playbook-for-ai` (ordem das ferramentas, o que se pode e não se pode afirmar, erros já cometidos) e a matriz `component-behavior-matrix` (o que cada componente deve e não deve fazer, o que o leitor de tela recebe, qual sonda mede). Sonda nova ou alterada nasce com um par bom e ruim em `tests/test_probes.py` e no site `demo/exemplos-leitor-de-tela/`.

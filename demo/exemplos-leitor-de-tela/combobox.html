@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campo com lista de opções (combobox) | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html" aria-current="page">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Campo com lista de opções (combobox)</h1>
+<p>O campo precisa ser anunciado como caixa de combinação, dizer se a lista está aberta e expor qual opção está ativa enquanto as setas andam, sem tirar o foco do campo.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Campo com lista de divs que só responde ao mouse</a></li>
+<li><a href="#ex-2">Exemplo bom: Combobox com aria-activedescendant</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Campo com lista de divs que só responde ao mouse</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Campo com lista de divs que só responde ao mouse"><label for="cb-ruim">Cidade</label><input id="cb-ruim" type="text" autocomplete="off"><div id="cb-ruim-lista" hidden><div class="opcao-falsa">Curitiba</div><div class="opcao-falsa">Recife</div></div><script>(function(){var c=document.getElementById('cb-ruim'),l=document.getElementById('cb-ruim-lista');c.addEventListener('focus',function(){l.hidden=false;});Array.prototype.forEach.call(l.children,function(o){o.addEventListener('click',function(){c.value=o.textContent;l.hidden=true;});});})();</script></div>
+<h3>Por quê</h3>
+<p>O campo é só um texto. A lista abre ao receber o foco, mas não tem papel de listbox, o campo não diz que está aberto e as setas não escolhem nada.</p>
+<h3>O que corrigir</h3>
+<p>Dê role=combobox, aria-expanded, aria-controls e aria-activedescendant ao campo; a lista com role=listbox e as opções com role=option; setas, Enter e Escape.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: Cidade
+- textbox &quot;Cidade&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda combobox, medido)</h3>
+<pre>NÃO cumpriu: o navegador expoe o campo como combobox. Observado: papel calculado: textbox.
+NÃO cumpriu: aria-expanded no campo. Observado: aria-expanded=None.
+NÃO cumpriu: Seta para baixo abre a lista de opcoes. Observado: expanded=None lista_visivel=None.</pre>
+<h3>Código</h3>
+<pre>&lt;label for=&quot;cb-ruim&quot;&gt;Cidade&lt;/label&gt;&lt;input id=&quot;cb-ruim&quot; type=&quot;text&quot; autocomplete=&quot;off&quot;&gt;&lt;div id=&quot;cb-ruim-lista&quot; hidden&gt;&lt;div class=&quot;opcao-falsa&quot;&gt;Curitiba&lt;/div&gt;&lt;div class=&quot;opcao-falsa&quot;&gt;Recife&lt;/div&gt;&lt;/div&gt;&lt;script&gt;(function(){var c=document.getElementById(&#x27;cb-ruim&#x27;),l=document.getElementById(&#x27;cb-ruim-lista&#x27;);c.addEventListener(&#x27;focus&#x27;,function(){l.hidden=false;});Array.prototype.forEach.call(l.children,function(o){o.addEventListener(&#x27;click&#x27;,function(){c.value=o.textContent;l.hidden=true;});});})();&lt;/script&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Combobox com aria-activedescendant</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Combobox com aria-activedescendant"><label for="cb-bom">Cidade</label><input id="cb-bom" type="text" role="combobox" aria-expanded="false" aria-controls="cb-bom-lista" aria-autocomplete="list" autocomplete="off"><ul role="listbox" id="cb-bom-lista" aria-label="Cidades" hidden><li role="option" id="cb-bom-o1">Curitiba</li><li role="option" id="cb-bom-o2">Recife</li><li role="option" id="cb-bom-o3">Salvador</li></ul><script>(function(){var c=document.getElementById('cb-bom'),l=document.getElementById('cb-bom-lista');var op=Array.prototype.slice.call(l.children),a=-1;function marca(i){a=i;op.forEach(function(o,j){o.setAttribute('aria-selected',String(j===i));});if(i>=0)c.setAttribute('aria-activedescendant',op[i].id);else c.removeAttribute('aria-activedescendant');}function abre(){l.hidden=false;c.setAttribute('aria-expanded','true');}function fecha(){l.hidden=true;c.setAttribute('aria-expanded','false');marca(-1);}c.addEventListener('keydown',function(e){if(e.key==='ArrowDown'){e.preventDefault();if(l.hidden){abre();marca(0);}else marca((a+1)%op.length);}else if(e.key==='ArrowUp'){e.preventDefault();if(l.hidden){abre();marca(op.length-1);}else marca((a+op.length-1)%op.length);}else if(e.key==='Enter'&&!l.hidden&&a>=0){e.preventDefault();c.value=op[a].textContent;fecha();}else if(e.key==='Escape'&&!l.hidden){e.preventDefault();fecha();}});op.forEach(function(o,i){o.addEventListener('click',function(){c.value=o.textContent;fecha();c.focus();});});})();</script></div>
+<h3>Por quê</h3>
+<p>O leitor de tela anuncia caixa de combinação, recolhida ou expandida, e lê a opção ativa a cada seta, enquanto o foco continua no campo.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: Cidade
+- combobox &quot;Cidade&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda combobox, medido)</h3>
+<pre>cumpriu: o navegador expoe o campo como combobox. Observado: papel calculado: combobox.
+cumpriu: aria-expanded no campo. Observado: aria-expanded=false.
+cumpriu: Seta para baixo abre a lista de opcoes. Observado: expanded=true lista_visivel=True.
+cumpriu: a opcao ativa e&#x27; exposta (aria-activedescendant) ou recebe o foco. Observado: activedescendant=&#x27;cb-bom-o2 Recife&#x27;.
+cumpriu: Seta para baixo move a opcao ativa. Observado: mudou.
+cumpriu: Enter escolhe a opcao ativa e fecha a lista. Observado: valor &#x27;&#x27;-&gt;&#x27;Recife&#x27;; expanded=false.
+cumpriu: Escape fecha a lista e o foco continua no campo. Observado: fechou=True; foco no campo=True.</pre>
+<h3>Código</h3>
+<pre>&lt;label for=&quot;cb-bom&quot;&gt;Cidade&lt;/label&gt;&lt;input id=&quot;cb-bom&quot; type=&quot;text&quot; role=&quot;combobox&quot; aria-expanded=&quot;false&quot; aria-controls=&quot;cb-bom-lista&quot; aria-autocomplete=&quot;list&quot; autocomplete=&quot;off&quot;&gt;&lt;ul role=&quot;listbox&quot; id=&quot;cb-bom-lista&quot; aria-label=&quot;Cidades&quot; hidden&gt;&lt;li role=&quot;option&quot; id=&quot;cb-bom-o1&quot;&gt;Curitiba&lt;/li&gt;&lt;li role=&quot;option&quot; id=&quot;cb-bom-o2&quot;&gt;Recife&lt;/li&gt;&lt;li role=&quot;option&quot; id=&quot;cb-bom-o3&quot;&gt;Salvador&lt;/li&gt;&lt;/ul&gt;&lt;script&gt;(function(){var c=document.getElementById(&#x27;cb-bom&#x27;),l=document.getElementById(&#x27;cb-bom-lista&#x27;);var op=Array.prototype.slice.call(l.children),a=-1;function marca(i){a=i;op.forEach(function(o,j){o.setAttribute(&#x27;aria-selected&#x27;,String(j===i));});if(i&gt;=0)c.setAttribute(&#x27;aria-activedescendant&#x27;,op[i].id);else c.removeAttribute(&#x27;aria-activedescendant&#x27;);}function abre(){l.hidden=false;c.setAttribute(&#x27;aria-expanded&#x27;,&#x27;true&#x27;);}function fecha(){l.hidden=true;c.setAttribute(&#x27;aria-expanded&#x27;,&#x27;false&#x27;);marca(-1);}c.addEventListener(&#x27;keydown&#x27;,function(e){if(e.key===&#x27;ArrowDown&#x27;){e.preventDefault();if(l.hidden){abre();marca(0);}else marca((a+1)%op.length);}else if(e.key===&#x27;ArrowUp&#x27;){e.preventDefault();if(l.hidden){abre();marca(op.length-1);}else marca((a+op.length-1)%op.length);}else if(e.key===&#x27;Enter&#x27;&amp;&amp;!l.hidden&amp;&amp;a&gt;=0){e.preventDefault();c.value=op[a].textContent;fecha();}else if(e.key===&#x27;Escape&#x27;&amp;&amp;!l.hidden){e.preventDefault();fecha();}});op.forEach(function(o,i){o.addEventListener(&#x27;click&#x27;,function(){c.value=o.textContent;fecha();c.focus();});});})();&lt;/script&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="menu.html">Anterior: Menu de ações</a>
+<a href="erros-de-formulario.html">Próximo: Erro de formulário</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

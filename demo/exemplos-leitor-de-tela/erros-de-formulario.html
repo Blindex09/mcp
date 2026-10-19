@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Erro de formulário | Leitor de tela: exemplos bons e ruins</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header>
+<div class="coluna">
+<p class="marca">Leitor de tela: exemplos bons e ruins</p>
+<nav aria-label="Cenários">
+<ul>
+<li><a href="index.html">Início</a></li>
+<li><a href="titulos.html">Títulos</a></li>
+<li><a href="listas.html">Listas</a></li>
+<li><a href="links.html">Links</a></li>
+<li><a href="botoes.html">Botões</a></li>
+<li><a href="campos.html">Campos de formulário</a></li>
+<li><a href="imagens.html">Imagens</a></li>
+<li><a href="tabelas.html">Tabelas</a></li>
+<li><a href="avisos.html">Avisos que aparecem sem recarregar</a></li>
+<li><a href="dialogo.html">Diálogo (janela modal)</a></li>
+<li><a href="acordeao.html">Acordeão (mostrar e ocultar)</a></li>
+<li><a href="abas.html">Abas</a></li>
+<li><a href="menu.html">Menu de ações</a></li>
+<li><a href="combobox.html">Campo com lista de opções (combobox)</a></li>
+<li><a href="erros-de-formulario.html" aria-current="page">Erro de formulário</a></li>
+<li><a href="mudanca-de-tela.html">Mudança de tela em aplicação de uma página só</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="conteudo" tabindex="-1">
+<div class="coluna">
+<h1>Erro de formulário</h1>
+<p>Quem não vê a tela precisa ouvir que há erro, em qual campo e o que fazer. O campo inválido é marcado, o texto do erro fica ligado a ele e o foco vai para lá.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
+<ol>
+<li><a href="#ex-1">Exemplo ruim: Texto vermelho solto</a></li>
+<li><a href="#ex-2">Exemplo bom: Campo marcado, erro ligado e foco no campo</a></li>
+</ol>
+</nav>
+<h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Texto vermelho solto</h2>
+<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Texto vermelho solto"><form id="form-ruim" novalidate><label for="email-ruim">E-mail</label><input id="email-ruim" type="email" required> <span id="msg-ruim" class="erro-visual"></span><p><button type="submit" id="enviar-form-ruim">Enviar</button></p></form><script>(function(){var f=document.getElementById('form-ruim');f.addEventListener('submit',function(e){e.preventDefault();document.getElementById('msg-ruim').textContent=document.getElementById('email-ruim').value?'':'Informe o e-mail.';});})();</script></div>
+<h3>Por quê</h3>
+<p>Aparece uma frase vermelha ao lado. O campo não é marcado como inválido, a frase não está ligada a ele, o foco não se move e nada é anunciado. Quem usa leitor de tela fica sem saber que falhou.</p>
+<h3>O que corrigir</h3>
+<p>Marque o campo com aria-invalid=true, ligue o texto do erro com aria-describedby, mova o foco para o primeiro campo com erro e anuncie com role=alert.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: E-mail
+- textbox &quot;E-mail&quot;
+- paragraph:
+  - button &quot;Enviar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<h3>Comportamento com o teclado (sonda form_errors, medido)</h3>
+<pre>NÃO cumpriu: cada campo com erro tem aria-invalid=true. Observado: 0 de 1 marcados.
+NÃO cumpriu: o texto do erro esta ligado ao campo (aria-describedby). Observado: 0 de 1 com descricao.
+NÃO cumpriu: o foco vai ao primeiro campo com erro (ou a um resumo de erros). Observado: button &#x27;Enviar&#x27;.
+NÃO cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foco. Observado: anuncios=[] regioes=[].</pre>
+<h3>Código</h3>
+<pre>&lt;form id=&quot;form-ruim&quot; novalidate&gt;&lt;label for=&quot;email-ruim&quot;&gt;E-mail&lt;/label&gt;&lt;input id=&quot;email-ruim&quot; type=&quot;email&quot; required&gt; &lt;span id=&quot;msg-ruim&quot; class=&quot;erro-visual&quot;&gt;&lt;/span&gt;&lt;p&gt;&lt;button type=&quot;submit&quot; id=&quot;enviar-form-ruim&quot;&gt;Enviar&lt;/button&gt;&lt;/p&gt;&lt;/form&gt;&lt;script&gt;(function(){var f=document.getElementById(&#x27;form-ruim&#x27;);f.addEventListener(&#x27;submit&#x27;,function(e){e.preventDefault();document.getElementById(&#x27;msg-ruim&#x27;).textContent=document.getElementById(&#x27;email-ruim&#x27;).value?&#x27;&#x27;:&#x27;Informe o e-mail.&#x27;;});})();&lt;/script&gt;</pre>
+<h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Campo marcado, erro ligado e foco no campo</h2>
+<div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Campo marcado, erro ligado e foco no campo"><form id="form-bom" novalidate><label for="email-bom">E-mail</label><input id="email-bom" type="email" required aria-describedby="msg-bom"> <span id="msg-bom" class="erro-visual" role="alert"></span><p><button type="submit" id="enviar-form-bom">Enviar</button></p></form><script>(function(){var f=document.getElementById('form-bom'),c=document.getElementById('email-bom'),m=document.getElementById('msg-bom');f.addEventListener('submit',function(e){e.preventDefault();if(!c.value){c.setAttribute('aria-invalid','true');m.textContent='Informe o e-mail.';c.focus();}else{c.removeAttribute('aria-invalid');m.textContent='';}});})();</script></div>
+<h3>Por quê</h3>
+<p>O leitor de tela lê o campo, inválido, com a mensagem do erro junto, e o foco já está lá.</p>
+<h3>O que corrigir</h3>
+<p>Nada a corrigir.</p>
+<h3>O que o navegador entrega ao leitor de tela (medido)</h3>
+<pre>- text: E-mail
+- textbox &quot;E-mail&quot;
+- alert
+- paragraph:
+  - button &quot;Enviar&quot;</pre>
+<h3>O que o axe acha (medido)</h3>
+<p>O axe não achou nenhuma violação (nível AA).</p>
+<h3>Comportamento com o teclado (sonda form_errors, medido)</h3>
+<pre>cumpriu: cada campo com erro tem aria-invalid=true. Observado: 1 de 1 marcados.
+cumpriu: o texto do erro esta ligado ao campo (aria-describedby). Observado: 1 de 1 com descricao.
+cumpriu: o foco vai ao primeiro campo com erro (ou a um resumo de erros). Observado: input &#x27;E-mail&#x27;.
+cumpriu: o erro e&#x27; anunciado (regiao viva, role=alert) ou recebe o foco. Observado: anuncios=[&#x27;Informe o e-mail.&#x27;] regioes=[&#x27;Informe o e-mail.&#x27;].</pre>
+<h3>Código</h3>
+<pre>&lt;form id=&quot;form-bom&quot; novalidate&gt;&lt;label for=&quot;email-bom&quot;&gt;E-mail&lt;/label&gt;&lt;input id=&quot;email-bom&quot; type=&quot;email&quot; required aria-describedby=&quot;msg-bom&quot;&gt; &lt;span id=&quot;msg-bom&quot; class=&quot;erro-visual&quot; role=&quot;alert&quot;&gt;&lt;/span&gt;&lt;p&gt;&lt;button type=&quot;submit&quot; id=&quot;enviar-form-bom&quot;&gt;Enviar&lt;/button&gt;&lt;/p&gt;&lt;/form&gt;&lt;script&gt;(function(){var f=document.getElementById(&#x27;form-bom&#x27;),c=document.getElementById(&#x27;email-bom&#x27;),m=document.getElementById(&#x27;msg-bom&#x27;);f.addEventListener(&#x27;submit&#x27;,function(e){e.preventDefault();if(!c.value){c.setAttribute(&#x27;aria-invalid&#x27;,&#x27;true&#x27;);m.textContent=&#x27;Informe o e-mail.&#x27;;c.focus();}else{c.removeAttribute(&#x27;aria-invalid&#x27;);m.textContent=&#x27;&#x27;;}});})();&lt;/script&gt;</pre>
+<nav class="entre" aria-label="Entre os cenários">
+<a href="combobox.html">Anterior: Campo com lista de opções (combobox)</a>
+<a href="mudanca-de-tela.html">Próximo: Mudança de tela em aplicação de uma página só</a>
+</nav>
+</div>
+</main>
+<footer>
+<div class="coluna">
+<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+</div>
+</footer>
+</body>
+</html>

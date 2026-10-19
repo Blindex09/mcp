@@ -76,6 +76,20 @@ async def test_disclosure_good_vs_mouse_only():
     assert m["expoe_estado"] is False and m["enter_alterna"] is False and m["espaco_alterna"] is False
 
 
+async def test_disclosure_accepts_native_details_summary():
+    r = await probe("<details><summary id='s'>Prazo</summary><p>Cinco dias</p></details>", "disclosure", "css:#s")
+    assert r["unmet"] == [], r["checks"]
+    assert met(r)["expoe_estado"] is True and met(r)["enter_alterna"] is True and met(r)["espaco_alterna"] is True
+
+
+async def test_disclosure_does_not_pass_focus_stays_when_nothing_was_ever_focused():
+    # uma div sem tabindex nunca recebe foco: "o foco continua no botao" nao pode passar com None == None
+    r = await probe("<div id='b'>Detalhes</div><div id='p' hidden>x</div>", "disclosure", "css:#b")
+    m = met(r)
+    assert m["gatilho_recebe_foco"] is False
+    assert m["foco_fica_no_botao_apos_enter"] is False and m["foco_fica_no_botao_apos_space"] is False
+
+
 GOOD_MENU = """<button id="mb" aria-haspopup="menu" aria-expanded="false" aria-controls="mm">Acoes</button>
 <ul id="mm" role="menu" hidden><li role="menuitem" tabindex="-1">Um</li><li role="menuitem" tabindex="-1">Dois</li><li role="menuitem" tabindex="-1">Tres</li></ul>
 <script>const mb=document.getElementById('mb'),mm=document.getElementById('mm'),it=[...mm.children];
@@ -235,3 +249,24 @@ async def test_probe_validation_and_registry():
         assert "tab_walk" in SESSION.coverage_report()["probes_run"] and SESSION.trace[-1]["kind"] == "probe:tab_walk"
     finally:
         await SESSION.close()
+
+
+@pytest.mark.parametrize(
+    ("arquivo", "tipo", "alvo"),
+    [
+        ("tabs-vanilla.html", "tabs", "css:#tab-profile"),
+        ("menu-button-vanilla.html", "menu", "css:#menu-btn"),
+        ("combobox-vanilla.html", "combobox", "css:#city"),
+    ],
+)
+async def test_the_servers_own_vanilla_examples_meet_the_contract_the_probe_measures(arquivo, tipo, alvo):
+    """O exemplo que o MCP ensina a copiar precisa passar na sonda que o MCP usa para medir: se divergirem, um dos dois esta errado."""
+    from pathlib import Path
+
+    fonte = Path(__file__).resolve().parent.parent / "accessibility_mcp" / "a11y" / "content" / "examples" / arquivo
+    await SESSION.open(None, fonte.read_text(encoding="utf-8"))
+    try:
+        r = await run_probe(SESSION, tipo, alvo)
+    finally:
+        await SESSION.close()
+    assert r["unmet"] == [], r["checks"]

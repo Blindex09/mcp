@@ -19,6 +19,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent.parent))
 
 from exemplos import CENARIOS, ROTULO
+from interativos import ROTAS
 
 from accessibility_mcp.a11y import audit
 
@@ -88,6 +89,19 @@ footer { border-top: 1px solid var(--borda); padding-block: 1rem 2rem; color: va
 .exemplo table { border-collapse: collapse; }
 .exemplo td, .exemplo th { border: 1px solid var(--borda); padding: 0.35rem 0.75rem; text-align: left; }
 .exemplo input { font: inherit; min-height: 44px; padding: 0.25rem 0.5rem; }
+.exemplo .caixa-falsa { margin-top: 0.75rem; padding: 0.75rem 1rem; border: 2px solid var(--borda); border-radius: 6px; background: var(--destaque); }
+.exemplo .abas-falsas { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+.exemplo .opcao-falsa { padding: 0.35rem 0.5rem; border: 1px solid var(--borda); }
+.exemplo [role="tablist"] { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+.exemplo [role="tab"] { min-height: 44px; padding: 0.55rem 1rem; border: 2px solid var(--link); border-radius: 6px; background: var(--fundo); color: var(--link); font: inherit; cursor: pointer; }
+.exemplo [role="tab"][aria-selected="true"] { background: var(--link); color: var(--fundo); }
+.exemplo [role="menu"], .exemplo [role="listbox"] { list-style: none; margin: 0.25rem 0; padding: 0.25rem; border: 2px solid var(--borda); border-radius: 6px; max-width: 16rem; }
+.exemplo [role="menuitem"], .exemplo [role="option"] { display: block; width: 100%; min-height: 44px; padding: 0.5rem 0.75rem; text-align: left; border: 0; background: transparent; color: var(--texto); font: inherit; cursor: pointer; }
+.exemplo [role="option"][aria-selected="true"] { background: var(--link); color: var(--fundo); }
+.exemplo dialog { max-width: 28rem; border: 2px solid var(--borda); border-radius: 8px; background: var(--fundo); color: var(--texto); }
+.exemplo .erro-visual { color: var(--ruim); font-weight: 700; }
+.exemplo summary { cursor: pointer; min-height: 44px; padding-block: 0.5rem; }
+.exemplo button { min-height: 44px; min-width: 44px; padding: 0.5rem 1rem; font: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
@@ -125,11 +139,29 @@ async def medir(fragmento: str) -> dict[str, Any]:
     return resultado
 
 
+async def medir_sonda(fragmento: str, tipo: str, alvo: str, documento: str | None = None) -> list[dict[str, Any]]:
+    """Roda a sonda do MCP (teclado de verdade, no Chromium) contra o exemplo sozinho e devolve os checks esperado x observado."""
+    from accessibility_mcp.a11y.probes import run_probe
+    from accessibility_mcp.a11y.session import SESSION
+
+    if documento is None:
+        documento = '<!doctype html><html lang="pt-BR"><head><title>exemplo</title></head><body><main>' + fragmento + "</main></body></html>"
+    await SESSION.open(None, documento)
+    try:
+        resultado = await run_probe(SESSION, tipo, alvo)
+    finally:
+        await SESSION.close()
+    return list(resultado["checks"])
+
+
 async def medir_todos() -> dict[tuple[str, int], dict[str, Any]]:
     medidas: dict[tuple[str, int], dict[str, Any]] = {}
     for cenario in CENARIOS:
         for i, ex in enumerate(cenario["exemplos"]):
-            medidas[(cenario["slug"], i)] = await medir(ex["html"])
+            medida = await medir(ex["html"])
+            if ex.get("sonda"):
+                medida["sonda"] = await medir_sonda(ex["html"], *ex["sonda"], documento=ROTAS[ex["documento"]] if ex.get("documento") else None)
+            medidas[(cenario["slug"], i)] = medida
     return medidas
 
 
@@ -185,17 +217,30 @@ def texto_do_axe(tipo: str, violacoes: list[tuple[str, str]]) -> str:
     return "O axe não achou nenhuma violação (nível AA)."
 
 
+NL = chr(10)
+
+
+def texto_da_sonda(checks: list[dict[str, Any]]) -> str:
+    linhas = []
+    for c in checks:
+        estado = "não deu para medir" if c["met"] is None else ("cumpriu" if c["met"] else "NÃO cumpriu")
+        linhas.append(f"{estado}: {c['expected']}. Observado: {c['observed']}.")
+    return NL.join(linhas)
+
+
 def bloco_exemplo(cenario: dict[str, Any], i: int, medida: dict[str, Any]) -> str:
     ex = cenario["exemplos"][i]
     tipo = ex["tipo"]
     ident = f"ex-{i + 1}"
     return (
         f'<h2 id="{ident}"><span class="etiqueta t-{tipo}">{esc(ROTULO[tipo])}:</span> {esc(ex["titulo"])}</h2>\n'
-        f'<div class="exemplo exemplo-{tipo}">{ex["html"]}</div>\n'
+        f'<div class="exemplo exemplo-{tipo}" role="group" aria-label="Exemplo ao vivo, {esc(ROTULO[tipo].lower())}: {esc(ex["titulo"])}">{ex["html"]}</div>\n'
         f'<h3>Por quê</h3>\n<p>{esc(ex["porque"])}</p>\n'
         f'<h3>O que corrigir</h3>\n<p>{esc(ex["corrigir"])}</p>\n'
         f'<h3>O que o navegador entrega ao leitor de tela (medido)</h3>\n<pre>{esc(medida["arvore"])}</pre>\n'
         f'<h3>O que o axe acha (medido)</h3>\n<p>{esc(texto_do_axe(tipo, medida["violacoes"]))}</p>\n'
+        + (f'<h3>Comportamento com o teclado (sonda {esc(ex["sonda"][0])}, medido)</h3>\n<pre>{esc(texto_da_sonda(medida["sonda"]))}</pre>\n' if medida.get("sonda") else "")
+        +
         f'<h3>Código</h3>\n<pre>{esc(ex["html"])}</pre>\n'
     )
 
@@ -239,6 +284,8 @@ def main() -> int:
     medidas = asyncio.run(medir_todos())
     (HERE / "estilo.css").write_text(ESTILO, encoding="utf-8")
     (HERE / "index.html").write_text(pagina_inicial(), encoding="utf-8")
+    for nome, pagina in ROTAS.items():
+        (HERE / f"{nome}.html").write_text(pagina, encoding="utf-8")
     for i, c in enumerate(CENARIOS):
         (HERE / f"{c['slug']}.html").write_text(pagina_cenario(i, medidas), encoding="utf-8")
     total = sum(len(c["exemplos"]) for c in CENARIOS)

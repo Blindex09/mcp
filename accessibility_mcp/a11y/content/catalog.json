@@ -69,7 +69,9 @@
     "ui-components-apg": "Contratos de ARIA e teclado, com WCAG 2.2, para 11 componentes: modais, menus, acordeoes, texto alternativo e graficos, tooltips, comboboxes, abas, arvores, tabelas de dados, carrosseis e arrastar e soltar. Use ao implementar ou revisar qualquer um desses padroes.",
     "ux-persona-testing": "Como testar como um usuario de verdade com personas (teclado, leitor de tela, baixa visao, celular, menos movimento, cores forcadas): tarefa, passos, atritos, gravidade e o relatorio, incluindo o que NAO foi verificado. Use para conduzir um teste de usuario com as ferramentas de sessao.",
     "wcag-evidence-and-probes": "Como registrar um achado com criterio WCAG, gravidade, elemento e evidencia (e por que o que a evidencia nao sustenta vira 'nao sei dizer'), e qual sonda de comportamento prova qual criterio (varredura de Tab, foco coberto, tamanho de alvo, contrato de dialogo, menu, abas, combobox, erros de formulario, troca de tela). Use ao registrar achados ou ao decidir como provar um comportamento agindo.",
-    "web-components-a11y": "Web Components e Custom Elements: elementos associados a formularios (ElementInternals), superficie da API de acessibilidade, Shadow DOM entre raizes e padroes em Lit 3 e Stencil 4. Use ao criar componentes reutilizaveis nativos."
+    "web-components-a11y": "Web Components e Custom Elements: elementos associados a formularios (ElementInternals), superficie da API de acessibilidade, Shadow DOM entre raizes e padroes em Lit 3 e Stencil 4. Use ao criar componentes reutilizaveis nativos.",
+    "component-behavior-matrix": "Matriz do que cada componente deve e nao deve fazer (titulo, lista, link, botao, imagem, campo e erro, dialogo, acordeao, abas, menu, combobox, regiao viva, troca de rota, AJAX, tabela), o que o navegador entrega ao leitor de tela, qual sonda mede, e os defeitos tipicos por pilha (HTML, CSS, JS, AJAX, React, Angular, Vue, Svelte, Web Components, Android Compose, iOS). Use ao decidir se um componente esta certo.",
+    "testing-playbook-for-ai": "Roteiro para uma IA testar acessibilidade com este servidor: ordem das ferramentas, o que se pode e o que nao se pode afirmar, regras do harness, erros ja cometidos neste MCP e como trabalhar no proprio servidor. Leia antes de testar uma pagina ou mudar o MCP."
   },
   "example": {
     "accessible-video-player": "Player de video HTML5 acessivel com legendas WebVTT e controles de teclado.",
@@ -113,7 +115,9 @@
     "wcag22-forms-redundant-entry": "Formulario WCAG 2.2: entrada redundante (3.3.7) e autenticacao acessivel (3.3.8).",
     "web-audio-sonification": "Grafico com sonificacao via Web Audio API como alternativa nao visual.",
     "web-component-element-internals": "Web Component acessivel com ElementInternals: participa de formularios e expoe semantica.",
-    "webxr-spatial-a11y": "Canvas 3D e WebXR acessiveis com sonificacao e alternativas."
+    "webxr-spatial-a11y": "Canvas 3D e WebXR acessiveis com sonificacao e alternativas.",
+    "menu-button-vanilla": "Botao de menu de comandos em JavaScript puro, no padrao APG Menu Button: aria-haspopup e aria-expanded, foco no primeiro item, setas, Home, End, Escape devolve o foco ao botao. Use para menu de acoes; navegacao de site e disclosure, nao menu.",
+    "combobox-vanilla": "Combobox com autocompletar em JavaScript puro, no padrao APG: role=combobox, aria-expanded, aria-controls para um listbox, opcao ativa por aria-activedescendant com o foco no campo, setas, Enter e Escape. Use quando select ou input com datalist nativo nao basta."
   },
   "template": {
     "assets/accessible-ai-react/package.json": "Dependencias e scripts do template React de conversa com IA acessivel.",

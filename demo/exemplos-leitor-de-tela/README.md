@@ -1,6 +1,6 @@
 Leitor de tela: exemplos bons e ruins (feito e medido com o próprio MCP)
 
-Oito cenários (títulos, listas, links, botões, campos de formulário, imagens, tabelas e avisos que aparecem sem recarregar), cada um com um exemplo ruim, um bom e, quando existe, um que parece estranho mas não precisa de correção. Os exemplos estão vivos na página, para ouvir no seu leitor de tela e comparar. Embaixo de cada um: por que é ruim ou bom, o que corrigir, o que o navegador entrega ao leitor de tela e o que o axe acha.
+Quinze cenários: oito de estrutura (títulos, listas, links, botões, campos de formulário, imagens, tabelas e avisos que aparecem sem recarregar) e sete interativos (diálogo, acordeão, abas, menu de ações, combobox, erro de formulário e mudança de tela em aplicação de uma página só), cada um com um exemplo ruim, um bom e, quando existe, um que parece estranho mas não precisa de correção. Os exemplos estão vivos na página, para ouvir no seu leitor de tela e comparar. Embaixo de cada um: por que é ruim ou bom, o que corrigir, o que o navegador entrega ao leitor de tela e o que o axe acha.
 
 Como gerar: python demo/exemplos-leitor-de-tela/construir.py. O texto dos exemplos está em exemplos.py. A árvore de acessibilidade e o resultado do axe não são escritos à mão: o gerador abre cada exemplo no Chromium e mede com o código do próprio MCP.
 
@@ -9,3 +9,5 @@ O que os testes garantem (tests/test_demo_exemplos.py): todo cenário tem um exe
 O que se descobriu testando este site com o MCP, e já foi corrigido, está na seção 22 de docs/AUDITORIA.md. Nos exemplos de títulos os títulos vivos começam em h3, porque a própria página já usa h1 e h2.
 
 Não foi ouvido com o NVDA de verdade (depende da VM, nvda/vm/LEIAME.md). Os exemplos ruins são ruins de propósito: o rastreamento (a11y_crawl) acha neles só o esperado, label em campos, image-alt em imagens e o salto de nível nos títulos.
+
+Cenários interativos: cada exemplo traz o código com o próprio script e a sonda do MCP que o mede (interativos.py). Embaixo de cada exemplo aparece o que a sonda mediu apertando as teclas num navegador de verdade, esperado contra observado. Os testes estão em tests/test_demo_interativos.py. A auditoria ao vivo, com a página servida, as outras personas e o Firefox e o WebKit, está na seção 23 de docs/AUDITORIA.md.

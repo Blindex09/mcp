@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accessible combobox with list autocomplete - vanilla JS</title>
+  <style>
+    input { min-height: 44px; font: inherit; padding: 0.25rem 0.5rem; }
+    [role="listbox"] { list-style: none; margin: 0.25rem 0 0; padding: 0.25rem; border: 2px solid #555; border-radius: 6px; max-width: 16rem; }
+    [role="listbox"][hidden] { display: none; }
+    [role="option"] { padding: 0.5rem 0.75rem; min-height: 44px; cursor: pointer; }
+    [role="option"][aria-selected="true"] { background: #1a73e8; color: #fff; }
+    input:focus-visible { outline: 3px solid #1a73e8; outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <!-- APG Combobox (list autocomplete). Focus STAYS in the input; the active option is exposed with aria-activedescendant.
+       Contract (a11y_probe kind=combobox): role=combobox, aria-expanded, aria-controls -> listbox; ArrowDown opens and moves;
+       Enter picks and closes; Escape closes and keeps focus in the field. Add a polite status ("5 results") when the list is
+       filtered while typing. A native <input list> / <select> is already a combobox: prefer it when it is enough. -->
+  <label for="city">City</label>
+  <input id="city" type="text" role="combobox" aria-expanded="false" aria-controls="city-list" aria-autocomplete="list" autocomplete="off">
+  <ul role="listbox" id="city-list" aria-label="Cities" hidden>
+    <li role="option" id="opt-1">Curitiba</li>
+    <li role="option" id="opt-2">Recife</li>
+    <li role="option" id="opt-3">Salvador</li>
+  </ul>
+
+  <script>
+    const input = document.getElementById('city');
+    const list = document.getElementById('city-list');
+    const options = Array.from(list.children);
+    let active = -1;
+
+    function mark(i) {
+      active = i;
+      options.forEach((o, j) => o.setAttribute('aria-selected', String(j === i)));
+      if (i >= 0) input.setAttribute('aria-activedescendant', options[i].id);
+      else input.removeAttribute('aria-activedescendant');
+    }
+    function openList() { list.hidden = false; input.setAttribute('aria-expanded', 'true'); }
+    function closeList() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); mark(-1); }
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (list.hidden) { openList(); mark(0); } else mark((active + 1) % options.length);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (list.hidden) { openList(); mark(options.length - 1); } else mark((active + options.length - 1) % options.length);
+      } else if (e.key === 'Enter' && !list.hidden && active >= 0) {
+        e.preventDefault();
+        input.value = options[active].textContent;
+        closeList();
+      } else if (e.key === 'Escape' && !list.hidden) {
+        e.preventDefault();
+        closeList();
+      }
+    });
+    options.forEach((o) => o.addEventListener('click', () => { input.value = o.textContent; closeList(); input.focus(); }));
+  </script>
+</body>
+</html>

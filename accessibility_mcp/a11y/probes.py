@@ -221,7 +221,7 @@ async def dialog(s: Any, target: str | None, container: str | None = None, max_s
     checks.append(_check("escape_fecha", "Escape fecha o dialogo", "fechou" if closed else "continua aberto", closed, ["2.1.1"]))
     after_ident, after = await _ident(s)
     if closed:
-        checks.append(_check("foco_volta_ao_gatilho", "ao fechar, o foco volta ao elemento que abriu o dialogo", _where(after), after_ident == trig_ident, ["2.4.3"]))
+        checks.append(_check("foco_volta_ao_gatilho", "ao fechar, o foco volta ao elemento que abriu o dialogo", _where(after), trig_ident is not None and after_ident == trig_ident, ["2.4.3"]))
     else:
         checks.append(_check("foco_volta_ao_gatilho", "ao fechar, o foco volta ao elemento que abriu o dialogo", "nao testavel: o dialogo nao fechou com Escape", None, ["2.4.3"]))
     await page.evaluate("() => document.querySelectorAll('[data-a11y-probe-dialog]').forEach((e) => e.removeAttribute('data-a11y-probe-dialog'))")
@@ -237,7 +237,11 @@ async def disclosure(s: Any, target: str | None, container: str | None = None, m
     """Botao que mostra/oculta conteudo (acordeao, FAQ, submenu de navegacao): APG Disclosure e Accordion."""
     loc, (trig_ident, _t) = await _focus_target(s, str(target))
     f0 = await loc.evaluate(js.PROBE_EL_JS)
-    checks = [_check("expoe_estado", "aria-expanded (true/false) no botao", f"aria-expanded={f0['expanded']}", f0["expanded"] in ("true", "false"), ["4.1.2"])]
+    checks = [
+        _check("gatilho_recebe_foco", "o gatilho recebe o foco do teclado", _where(_t), trig_ident is not None, ["2.1.1"]),
+        _check("expoe_estado", "estado aberto/fechado exposto (aria-expanded no botao ou <summary> de <details>)",
+               f"{'estado nativo do <details>' if f0.get('native_disclosure') else 'aria-expanded'}={f0['expanded']}", f0["expanded"] in ("true", "false"), ["4.1.2"]),
+    ]
     for key, label in (("Enter", "enter_alterna"), ("Space", "espaco_alterna")):
         before = await loc.evaluate(js.PROBE_EL_JS)
         await _key(s, key)
@@ -245,7 +249,7 @@ async def disclosure(s: Any, target: str | None, container: str | None = None, m
         changed = _changed(before, after)
         ident, f = await _ident(s)
         checks.append(_check(label, f"{key} alterna o estado do botao e o conteudo controlado", f"expanded {before['expanded']}->{after['expanded']}; conteudo visivel {before['controls_visible']}->{after['controls_visible']}", changed, ["2.1.1"]))
-        checks.append(_check(f"foco_fica_no_botao_apos_{key.lower()}", "o foco continua no botao", _where(f), ident == trig_ident, ["2.4.3"]))
+        checks.append(_check(f"foco_fica_no_botao_apos_{key.lower()}", "o foco continua no botao", _where(f), trig_ident is not None and ident == trig_ident, ["2.4.3"]))
         if changed:
             await _key(s, key)  # volta ao estado original
         if label == "enter_alterna" and after["controls_present"] and after["expanded"] in ("true", "false"):
@@ -287,7 +291,7 @@ async def menu(s: Any, target: str | None, container: str | None = None, max_sto
     ident2, f_after = await _ident(s)
     closed = f2["expanded"] != "true" and not f2["controls_visible"]
     checks.append(_check("escape_fecha", "Escape fecha o menu", "fechou" if closed else "continua aberto", closed, ["2.1.1"]))
-    checks.append(_check("foco_volta_ao_botao", "ao fechar, o foco volta ao botao do menu", _where(f_after), ident2 == trig_ident if closed else None, ["2.4.3"]))
+    checks.append(_check("foco_volta_ao_botao", "ao fechar, o foco volta ao botao do menu", _where(f_after), (trig_ident is not None and ident2 == trig_ident) if closed else None, ["2.4.3"]))
     return _report("menu", target, checks, {"opened_with": opened_with}, "WAI-ARIA APG: padrao Menu Button")
 
 
@@ -398,7 +402,7 @@ async def form_errors(s: Any, target: str | None, container: str | None = None, 
         announced = bool(live) or bool(after.get("live_text"))
         checks.append(_check("erro_anunciado", "o erro e' anunciado (regiao viva, role=alert) ou recebe o foco", f"anuncios={[a['text'][:40] for a in live][:3]} regioes={after.get('live_text')}", announced or on_invalid, ["3.3.1", "4.1.3"]))
     else:
-        checks.append(_check("envio_sem_campo_invalido", "ha campos invalidos para a sonda medir", "todos os campos ja eram validos (preencha algo invalido ou deixe um obrigatorio vazio)", None, ["3.3.1"]))
+        checks.append(_check("envio_sem_campo_invalido", "ha campos invalidos para a sonda medir", "todos os campos ja eram validos para o navegador (preencha algo invalido ou deixe um obrigatorio vazio)" + (f"; texto novo na tela apos o envio: {added[:3]}" if added else ""), None, ["3.3.1"]))
     return _report("form_errors", target, checks, {"invalid_fields": invalid[:10], "tree_added": added[:8], "novalidate": after.get("novalidate")}, "WCAG 3.3.1/3.3.3 e WAI-ARIA (aria-invalid, aria-describedby)")
 
 

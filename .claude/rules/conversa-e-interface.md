@@ -1,6 +1,6 @@
 ---
 paths:
-  - "accessibility_mcp/a11y/agent.py"
+  - "accessibility_mcp/a11y/prompts.py"
   - "accessibility_mcp/a11y/tools.py"
   - "accessibility_mcp/a11y/tools_ux.py"
   - "accessibility_mcp/a11y/content/**"

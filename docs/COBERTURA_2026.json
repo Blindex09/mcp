@@ -1,5 +1,5 @@
 {
-  "data": "2026-10-19T16:05:44+00:00",
+  "data": "2026-10-20T23:33:10+00:00",
   "resultados": [
     {
       "conceito": "Regra 8: nenhum relogio fixo corta trabalho",
@@ -19,7 +19,7 @@
     {
       "conceito": "Laco agentico com ferramentas tipadas",
       "estado": "COBERTO",
-      "evidencia": "43 de 43 ferramentas com esquema de entrada e descricao pelo protocolo MCP"
+      "evidencia": "44 de 44 ferramentas com esquema de entrada e descricao pelo protocolo MCP"
     },
     {
       "conceito": "Aprovacao antes de acao com efeito (guardrail na chamada de ferramenta)",

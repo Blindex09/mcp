@@ -146,7 +146,7 @@ Toda decisão de sentido (que guia serve, o que uma tela mostra, o que um elemen
 
 O que o modelo precisa saber para testar bem está no próprio servidor: os guias `testing-playbook-for-ai` (ordem das ferramentas, o que pode e o que não pode afirmar, erros já cometidos) e `component-behavior-matrix` (o que cada componente deve e não deve fazer, o que o leitor de tela recebe e qual sonda mede), além dos fluxos prontos.
 
-A auditoria completa (pesquisa, o que foi removido por ser heurística e o que ficou, com justificativa) está em `docs/AUDITORIA.md`.
+O registro da arquitetura vigente, das evidências e das limitações está em `docs/AUDITORIA.md`.
 
 ## Instalação
 

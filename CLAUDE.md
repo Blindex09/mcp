@@ -87,4 +87,4 @@ NVDAStudio: ao mudá-la num, muda-se nos outros dois na mesma entrega.
 - A matriz de cobertura da regra 18 é `scripts/run_2026_coverage_matrix.py`; rode antes de dar por pronta qualquer mudança no servidor.
 - Uma única branch: `main`.
 - Antes de dizer "pronto" para qualquer mudança de código: `ruff check .`, `mypy` e `pytest`; se a mudança toca a costura entre dois módulos, ler os dois
-  lados. A auditoria de setembro de 2026 está em `docs/AUDITORIA.md`.
+  lados. O registro da arquitetura vigente e de suas limitações está em `docs/AUDITORIA.md`.

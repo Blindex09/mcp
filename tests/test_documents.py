@@ -199,6 +199,19 @@ async def test_external_validator_missing_is_not_a_pass(spec, monkeypatch):
     assert check["conformance"] == "not_determined"
 
 
+async def test_pdf_empty_title_is_missing_instead_of_the_string_none(spec, tmp_path):
+    from pypdf import PdfWriter
+
+    result = await documents.create(spec, "pdf")
+    writer = PdfWriter(clone_from=result["files"][0]["path"])
+    writer.add_metadata({"/Title": ""})
+    path = tmp_path / "sem-titulo.pdf"
+    writer.write(path)
+    check = validate_pdf(path)
+    assert check["facts"]["title"] == ""
+    assert "missing_title" in {issue["code"] for issue in check["issues"]}
+
+
 def test_docx_with_external_entities_is_rejected(spec, tmp_path):
     from defusedxml.common import DefusedXmlException
 

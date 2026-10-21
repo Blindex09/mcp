@@ -144,6 +144,8 @@ Do not infer that every visually separated block needs a region or heading. Land
 
 ## 5. Audit and retrofit workflow
 
+For Word DOCX and PDF, read [references/document-behavior-matrix.md](references/document-behavior-matrix.md). It follows the document examples gallery, separates measured structure from expected assistive-technology behavior, and explains the file generation and validation tools.
+
 1. Inventory target platforms, browsers, AT, input methods, and conformance level.
 2. Inspect DOM/native semantics and the computed accessibility tree for duplicate, missing, overridden, or hidden information.
 3. Run automated validation, axe/Lighthouse/platform checks, syntax/build checks, and framework linters (via the MCP: `a11y_audit`, `a11y_aria_snapshot`, `a11y_tab_order`, `a11y_contrast`).

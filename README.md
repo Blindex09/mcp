@@ -6,13 +6,15 @@ Servidor MCP somente de acessibilidade (web, mobile e interfaces de IA/agentes) 
 
 ## O que faz
 
--  Base de conhecimento embutida (`accessibility_mcp/a11y/content/`): 71 guias (WCAG 2.2, ARIA, NVDA/VoiceOver/TalkBack, o que o leitor de tela fala por elemento, tecla e evento, ordem de foco, títulos, listas e tabelas, checklist de auditoria, IA conversacional acessível, mobile, frameworks, XR, conformidade, e 28 playbooks de especialistas trazidos do Qaaccessibility), 44 exemplos de componentes acessíveis (modal, abas, combobox, treegrid, chat de IA…) e o template React (10 arquivos) de chat/agente acessível.
+-  Base de conhecimento embutida (`accessibility_mcp/a11y/content/`): 72 guias (WCAG 2.2, ARIA, NVDA/VoiceOver/TalkBack, o que o leitor de tela fala por elemento, tecla e evento, ordem de foco, títulos, listas e tabelas, checklist de auditoria, IA conversacional acessível, mobile, frameworks, XR, documentos, conformidade, e 28 playbooks de especialistas trazidos do Qaaccessibility), 44 exemplos de componentes acessíveis (modal, abas, combobox, treegrid, chat de IA…), os contratos da galeria de documentos e o template React (10 arquivos) de chat/agente acessível.
 -  Escolha pelo modelo do cliente: `a11y_list_content` devolve o catálogo (cada item com a descrição de quando usar) e o modelo escolhe pelo sentido. Nada de palavra-chave, regex ou ranking lexical, e nenhuma chamada de modelo dentro do servidor.
 -  Medição de fatos: contraste WCAG, auditoria axe-core num navegador real, árvore de acessibilidade e ordem de foco por teclado.
 
 ## Ferramentas (47) e fluxos prontos
 
 ### Documentos e relatórios acessíveis
+
+A [galeria de documentos](demo/exemplos-leitor-de-tela/documentos.html) apresenta nove assuntos com 30 arquivos DOCX/PDF bons e ruins de propósito, medições e passos de revisão no aplicativo. O guia `document-behavior-matrix`, disponível pelo catálogo MCP, usa os mesmos contratos e fontes oficiais. Estrutura medida e comportamento esperado ficam separados da fala real do leitor de tela, ainda não capturada nesses documentos.
 
 O MCP gera arquivos DOCX e PDF, além de orientar a criação. O modelo do cliente escreve o conteúdo e chama as ferramentas abaixo; elas montam os arquivos, conferem a estrutura e devolvem caminhos locais e recursos MCP para leitura dos arquivos.
 

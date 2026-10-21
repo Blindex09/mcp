@@ -1,5 +1,13 @@
 Leitor de tela: exemplos bons e ruins (feito e medido com o próprio MCP)
 
+Documentos acessíveis
+
+A nova seção documentos.html reúne nove assuntos e 30 arquivos locais: 12 DOCX e 18 PDFs. Cada assunto explica o que fazer, evitar, como corrigir e como conferir no aplicativo, com fontes oficiais datadas. Os arquivos ruins têm defeitos intencionais. Bom indica somente a propriedade demonstrada, nunca certificação.
+
+Para regenerar apenas esta seção e atualizar a navegação das páginas existentes, rode python demo/exemplos-leitor-de-tela/documentos.py na raiz do projeto. O build completo construir.py também chama esse gerador. A fonte compartilhada é accessibility_mcp/a11y/content/assets/document-examples.json; o guia document-behavior-matrix é gerado a partir dela. A regeneração exige as dependências do projeto, Chromium, Java e veraPDF para comprovar os PDFs bons.
+
+As medições dos arquivos estão em documentos/medicoes.json. A navegação da página e os downloads por teclado estão em tests/test_demo_documents.py. Os PDFs bons passaram nas verificações automáticas PDF/UA-1; nenhum teste dessa seção capturou fala real do NVDA no Word ou leitor de PDF. A documentação da entrega está em docs/modules/galeria_documentos.md.
+
 Trinta cenários: oito de estrutura (títulos, listas, links, botões, campos de formulário, imagens, tabelas e avisos), CSS e AJAX, sete de comportamento (diálogo, acordeão, abas, menu de ações, combobox, erro de formulário e mudança de tela), sete de componentes (carrossel, dica, lista de opções, árvore, tabela ordenável, Web Components e resposta de IA em streaming), quatro frameworks reais (React, Vue, Svelte e Angular, os mesmos cinco componentes em cada um) e dois de mobile (Android Compose e iOS SwiftUI, só código e regra, não executados), cada um com um exemplo ruim, um bom e, quando existe, um que parece estranho mas não precisa de correção. Os exemplos estão vivos na página, para ouvir no seu leitor de tela e comparar. Embaixo de cada um: por que é ruim ou bom, o que corrigir, o que o navegador entrega ao leitor de tela e o que o axe acha.
 
 Como gerar: python demo/exemplos-leitor-de-tela/construir.py. O texto dos exemplos está em exemplos.py. A árvore de acessibilidade e o resultado do axe não são escritos à mão: o gerador abre cada exemplo no Chromium e mede com o código do próprio MCP.

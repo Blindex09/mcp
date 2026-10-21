@@ -320,12 +320,14 @@ GRUPOS: list[tuple[str, tuple[str, ...]]] = [
     ("Componentes", ("carrossel", "dica", "lista-de-opcoes", "arvore", "tabela-ordenavel", "web-components", "chat-ia")),
     ("Frameworks", ("pilha-react", "pilha-vue", "pilha-svelte", "pilha-angular")),
     ("Mobile (só código)", ("android", "ios")),
+    ("Documentos acessíveis", ("documentos",)),
 ]
 
 
 def cabecalho(titulo: str, atual: str | None) -> str:
     """Navegacao em grupos recolhiveis: so o grupo da pagina atual abre, para o teclado nao passar por 31 links antes do conteudo."""
     por_slug = {c["slug"]: c for c in CENARIOS}
+    por_slug["documentos"] = {"nome": "Word e PDF", "slug": "documentos"}
     grupos = ['<li><a href="index.html"' + (' aria-current="page"' if atual is None else "") + ">Início</a></li>"]
     for nome, slugs in GRUPOS:
         links = []
@@ -367,7 +369,7 @@ RODAPE = """</div>
 </main>
 <footer>
 <div class="coluna">
-<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+<p>Exemplos do projeto MCP de acessibilidade. Nos exemplos web, a árvore e o axe medem a página no Chromium. Na seção de documentos, as medidas inspecionam os arquivos DOCX e PDF. Nenhuma dessas medidas é captura da fala real. O resultado no leitor de tela varia com aplicativo, versão e configuração: compare no ambiente de destino.</p>
 </div>
 </footer>
 </body>
@@ -469,10 +471,11 @@ def pagina_inicial() -> str:
     for c in CENARIOS:
         tipos = ", ".join(sorted({ROTULO[ex["tipo"]].lower() for ex in c["exemplos"]}))
         secoes.append(f'<h2><a href="{c["slug"]}.html">{esc(c["nome"])}</a></h2>\n<p>{esc(c["resumo"])} ({esc(tipos)}.)</p>')
+    secoes.append('<h2><a href="documentos.html">Documentos acessíveis</a></h2><p>Word DOCX e PDF: arquivos bons e ruins para baixar, estrutura medida, orientações de correção e passos para conferir no aplicativo.</p>')
     return (
         cabecalho(NOME_DO_SITE, None)
         + f"""<h1>{esc(NOME_DO_SITE)}</h1>
-<p>Para cada assunto há um exemplo ruim, um bom e, quando existe, um que parece estranho mas não precisa de correção. Os exemplos estão vivos na página: ouça com o seu leitor de tela e compare. Embaixo de cada um estão o porquê, o que corrigir, o que o navegador entrega ao leitor de tela e o que o axe acha, medidos pelo próprio MCP.</p>
+<p>Nos assuntos web há exemplos vivos bons e ruins para experimentar na página, com estrutura e comportamento medidos pelo MCP. A seção de documentos oferece arquivos Word e PDF para baixar e conferir no aplicativo. Cada assunto explica o problema, a correção, o que foi medido e o que ainda precisa de revisão.</p>
 <p>Ruim e bom parecem iguais de propósito. A diferença está na estrutura, não no visual.</p>
 {chr(10).join(secoes)}
 """
@@ -492,6 +495,8 @@ def main() -> int:
             (HERE / f"{pilha}-rota-{tipo}.html").write_text(pilhas.pagina_rota(pilha, tipo), encoding="utf-8")
     for i, c in enumerate(CENARIOS):
         (HERE / f"{c['slug']}.html").write_text(pagina_cenario(i, medidas), encoding="utf-8")
+    from documentos import main as construir_documentos
+    asyncio.run(construir_documentos())
     total = sum(len(c["exemplos"]) for c in CENARIOS)
     print(f"site gerado em {HERE}: index.html + {len(CENARIOS)} cenarios, {total} exemplos medidos")
     return 0

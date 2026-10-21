@@ -1,0 +1,91 @@
+{
+  "reviewed": "2026-10-21",
+  "sources": {
+    "word": {"title": "Microsoft — Acessibilidade no Word", "url": "https://support.microsoft.com/en-gb/accessibility/word/make-your-word-documents-accessible-to-people-with-disabilities"},
+    "headings": {"title": "W3C — PDF9 Títulos", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF9"},
+    "images": {"title": "W3C — PDF1 Alternativas de imagens", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF1"},
+    "tables": {"title": "W3C — PDF6 Tabelas", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF6"},
+    "lists": {"title": "W3C — PDF21 Listas", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF21"},
+    "links": {"title": "W3C — PDF13 Propósito dos links", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF13"},
+    "language": {"title": "W3C — PDF16 Idioma", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF16"},
+    "title": {"title": "W3C — PDF18 Título do documento", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF18"},
+    "order": {"title": "W3C — PDF3 Ordem de leitura", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF3"},
+    "ocr": {"title": "W3C — PDF7 Texto e OCR", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF7"},
+    "acrobat": {"title": "Adobe — Criar e verificar PDFs acessíveis", "url": "https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html"},
+    "exercise": {"title": "Governo de Illinois — Exercício Word e PDF", "url": "https://doit.illinois.gov/initiatives/accessibility/guides/word/word-accessibility-exercise.html"}
+  },
+  "scenarios": [
+    {
+      "id": "titulos", "title": "Títulos que permitem navegar", "formats": ["docx", "pdf"], "sources": ["word", "headings"],
+      "do": "Dê estrutura às seções com estilos de título no Word e tags de título no PDF. Organize os níveis pelo conteúdo.",
+      "dont": "Não transforme parágrafos em falsos títulos apenas aumentando a fonte e aplicando negrito.",
+      "expected": "A estrutura deve expor os títulos e seus níveis para navegação. A frase anunciada depende do aplicativo e do leitor.",
+      "manual": "Compare os títulos visuais com o painel de navegação do Word ou a lista de títulos do leitor no PDF. Percorra cada seção e registre o resultado.",
+      "defect": "Os títulos visuais foram mantidos, mas sua estrutura foi trocada por parágrafos comuns.", "detected": "missing_heading_one"
+    },
+    {
+      "id": "imagens", "title": "Imagens com significado em texto", "formats": ["docx", "pdf"], "sources": ["word", "images"],
+      "do": "Descreva a informação relevante das imagens. Para gráficos complexos, ofereça também dados e explicação no corpo do documento.",
+      "dont": "Não deixe uma imagem informativa sem alternativa nem use o nome do arquivo como descrição. Conteúdo decorativo deve ser marcado como tal no aplicativo de autoria.",
+      "expected": "O leitor deve ter acesso ao significado da figura; encontrar um campo de alternativa preenchido não prova que a descrição seja adequada.",
+      "manual": "Chegue à imagem usando o leitor. Compare a descrição com a informação visual e confira se a informação continua compreensível sem enxergar a figura.",
+      "defect": "A alternativa da imagem informativa foi removida; a figura continua visível.", "detected": "image_missing_alt"
+    },
+    {
+      "id": "tabelas", "title": "Tabelas com cabeçalhos", "formats": ["docx", "pdf"], "sources": ["word", "tables"],
+      "do": "Use tabelas para dados, identifique os cabeçalhos e preserve suas relações com as células. Prefira estrutura simples; confira tabelas que atravessam páginas.",
+      "dont": "Não simule uma tabela com espaços nem confie só no negrito da primeira linha. Células mescladas ou estruturas complexas exigem revisão específica.",
+      "expected": "Ao percorrer os dados, a associação com o cabeçalho deve continuar disponível. A repetição visual do cabeçalho no Word não prova sozinha a experiência no leitor.",
+      "manual": "Entre na tabela e navegue por linhas e colunas com os comandos do leitor. Confira cabeçalhos, valores e transições de página no aplicativo escolhido.",
+      "defect": "O cabeçalho continua visualmente destacado, mas sua marcação foi removida.", "detected": "table_missing_header"
+    },
+    {
+      "id": "listas", "title": "Listas reconhecidas como listas", "formats": ["docx", "pdf"], "sources": ["word", "lists"],
+      "do": "Crie listas com o recurso de listas do editor e mantenha a estrutura de lista e itens ao exportar.",
+      "dont": "Não substitua a lista por parágrafos com números ou marcadores digitados à mão.",
+      "expected": "A relação entre os itens deve estar disponível à tecnologia assistiva. A lista de exemplo tem duas etapas em sequência.",
+      "manual": "Use a navegação de listas e itens disponível no leitor e aplicativo. Confira sequência, quantidade e conteúdo sem depender do marcador visual.",
+      "defect": "A numeração visual permanece, mas os itens foram convertidos em parágrafos comuns.", "detected": null
+    },
+    {
+      "id": "links", "title": "Links com destino compreensível", "formats": ["docx", "pdf"], "sources": ["word", "links"],
+      "do": "Escreva um nome que explique a finalidade do link, considerando o contexto. Mantenha o link utilizável pelo teclado.",
+      "dont": "Não use um link isolado chamado apenas Clique aqui sem contexto que explique o destino. Uma URL ou um texto preenchido não prova clareza.",
+      "expected": "A pessoa deve conseguir decidir se quer abrir o destino. Texto alternativo adicional para todo link PDF não é obrigatório por si só.",
+      "manual": "Percorra os links pelo teclado e consulte a lista de links do leitor. Leia também o contexto antes de decidir se o propósito é compreensível.",
+      "defect": "O link isolado perdeu seu nome descritivo e passou a se chamar Clique aqui.", "detected": null
+    },
+    {
+      "id": "metadados", "title": "Título e idioma do arquivo", "formats": ["docx", "pdf"], "sources": ["language", "title", "acrobat"],
+      "do": "Informe um título descritivo e o idioma principal correto. Marque mudanças de idioma quando necessário.",
+      "dont": "Não confunda o nome do arquivo com o título nos metadados nem marque texto em português como se fosse inglês.",
+      "expected": "O aplicativo e o leitor devem receber identificação e idioma coerentes com o conteúdo. A pronúncia também depende da voz e da configuração.",
+      "manual": "Confira propriedades e idioma do texto no editor; no PDF, confira título, idioma e preferências de exibição. Ouça trechos em cada idioma usado.",
+      "defect": "O título e o idioma padrão foram removidos dos metadados, mantendo o conteúdo visual.", "detected": "missing_language"
+    },
+    {
+      "id": "tags", "title": "PDF com estrutura preservada", "formats": ["pdf"], "sources": ["headings", "acrobat"],
+      "do": "Exporte PDF com tags e confira a estrutura resultante, além da aparência. Corrija o arquivo fonte sempre que possível.",
+      "dont": "Não suponha que um PDF seja acessível por ser selecionável, abrir no navegador ou ter sido produzido por uma impressora PDF.",
+      "expected": "Tags devem representar o conteúdo e suas relações. Presença de tags ou aprovação automática não garante qualidade semântica.",
+      "manual": "Inspecione a árvore de tags e percorra o PDF com teclado e leitor. Compare os elementos encontrados com o documento visível.",
+      "defect": "A árvore de tags foi retirada, sem alterar o texto que aparece na página.", "detected": "missing_tags"
+    },
+    {
+      "id": "ordem", "title": "Ordem de leitura com sentido", "formats": ["pdf"], "sources": ["order"],
+      "do": "Mantenha uma sequência lógica na estrutura do PDF e confira também a ordem de foco dos elementos interativos.",
+      "dont": "Não confie apenas na posição visual ou em copiar e colar o texto: a ordem das tags pode ser diferente da ordem de pintura.",
+      "expected": "Na lista deste exemplo, a leitura deve apresentar Primeiro prepare o documento antes de Depois revise o documento.",
+      "manual": "Leia continuamente e percorra os itens da lista com o leitor. Compare a sequência falada com o sentido das instruções. Registre aplicativo, versão e configuração.",
+      "defect": "Os dois itens foram invertidos apenas na árvore de tags; a sequência visual não mudou.", "detected": null
+    },
+    {
+      "id": "digitalizacao", "title": "PDF digitalizado com texto real", "formats": ["pdf"], "sources": ["ocr", "acrobat"],
+      "do": "Prefira o documento fonte com texto. Se só houver digitalização, aplique OCR, revise o reconhecimento e organize as tags e a ordem de leitura.",
+      "dont": "Não entregue uma fotografia de texto como único conteúdo nem considere que executar OCR resolve toda a acessibilidade.",
+      "expected": "As palavras devem estar disponíveis como texto correto e estruturado. Recursos de OCR do leitor podem variar e não corrigem o arquivo de origem.",
+      "manual": "Pesquise palavras, confira o texto reconhecido e leia o documento com tecnologia assistiva. Verifique números, acentos, ordem, títulos e tabelas.",
+      "defect": "O conteúdo foi rasterizado: o PDF contém somente a imagem da página, sem texto extraível nem estrutura.", "detected": "page_without_extractable_text"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "data": "2026-10-21T02:53:47+00:00",
+  "data": "2026-10-21T03:13:04+00:00",
   "resultados": [
     {
       "conceito": "Regra 8: nenhum relogio fixo corta trabalho",
@@ -14,7 +14,7 @@
     {
       "conceito": "Carregamento progressivo (indice leve, guia sob demanda)",
       "estado": "COBERTO",
-      "evidencia": "71 guias, 71 descricoes no catalogo; o guia so e lido por nome"
+      "evidencia": "72 guias, 72 descricoes no catalogo; o guia so e lido por nome"
     },
     {
       "conceito": "Laco agentico com ferramentas tipadas",
@@ -59,7 +59,7 @@
     {
       "conceito": "Portao da regra 15 para os guias e fluxos (instrucoes ao modelo do cliente)",
       "estado": "PARCIAL",
-      "evidencia": "VPAT avaliado no cliente Codex: 24/24 casos em tres rodadas, ablacao 18/24; geracao real no Codex e no MCP desta conversa. Demais guias, fluxos e modelos continuam sem avaliacao ampla; docs/modules/documentos_acessiveis.md"
+      "evidencia": "VPAT no Codex: 24/24, ablacao 18/24. Galeria de documentos: 48/48 em tres rodadas e 48/48 sem guia; sem ganho demonstrado. Geracao e leitura do guia pelo MCP real. Demais guias, fluxos e modelos sem avaliacao ampla; docs/modules/documentos_acessiveis.md e docs/modules/galeria_documentos.md"
     },
     {
       "conceito": "Cliente MCP e A2A",

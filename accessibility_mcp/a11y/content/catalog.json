@@ -1,6 +1,7 @@
 {
   "_nota": "Descricoes escritas por IA (texto corrido, 'quando usar') e revisadas junto com o conteudo. Nao sao geradas por regex: ao adicionar ou mudar um guia/exemplo, escreva a descricao aqui. O teste de consistencia falha se faltar ou sobrar entrada.",
   "reference": {
+    "document-behavior-matrix": "Word DOCX e PDF: o que fazer e evitar, estrutura, comportamento esperado, exemplos bons e ruins para baixar, limites da validação, OCR, tags e leitura no aplicativo. Use ao criar, corrigir ou testar documentos com este MCP; não confunda estrutura medida com fala real do NVDA.",
     "accessibility-statement": "Modelo de declaracao de acessibilidade para publicar no site: situacao de conformidade, o que ja foi feito, limitacoes conhecidas e como reportar problemas. Use ao preparar a pagina publica de acessibilidade de uma organizacao.",
     "accessible-ai-code-template": "Explica como adaptar o template React de conversa com IA acessivel (assets/accessible-ai-react): consome eventos neutros de provedor e mantem o contrato de apresentacao. Use ao construir ou adaptar uma interface de chat/agente para web ou Electron.",
     "agentic-ai-messaging-a11y": "Acessibilidade de interfaces de agentes: execucao de ferramentas, pedidos de permissao (human-in-the-loop), navegacao pelo fluxo de mensagens, blocos de codigo, diffs, matematica e artefatos. Use ao mostrar o trabalho de um agente ao usuario.",
@@ -120,6 +121,7 @@
     "combobox-vanilla": "Combobox com autocompletar em JavaScript puro, no padrao APG: role=combobox, aria-expanded, aria-controls para um listbox, opcao ativa por aria-activedescendant com o foco no campo, setas, Enter e Escape. Use quando select ou input com datalist nativo nao basta."
   },
   "template": {
+    "assets/document-examples.json": "Contratos e fontes oficiais dos nove pares didáticos de Word DOCX e PDF; fonte compartilhada pela galeria e pelo guia de comportamento de documentos.",
     "assets/accessible-ai-react/package.json": "Dependencias e scripts do template React de conversa com IA acessivel.",
     "assets/accessible-ai-react/src/accessible-ai.css": "Estilos do template: foco visivel, texto apenas para leitores de tela, alvos e movimento reduzido.",
     "assets/accessible-ai-react/src/ai/eventStream.js": "Le o fluxo de eventos do backend e o normaliza em eventos neutros de provedor.",

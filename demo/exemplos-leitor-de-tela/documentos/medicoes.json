@@ -1,0 +1,1453 @@
+{
+  "measured_at": "2026-10-21T03:03:35.888941+00:00",
+  "nvda": "Não executado no Word ou leitor de PDF",
+  "cases": {
+    "titulos": [
+      {
+        "file": "titulos-bom.docx",
+        "kind": "bom",
+        "format": "docx",
+        "bytes": 36910,
+        "validation": {
+          "format": "docx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Títulos que permitem navegar",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2
+            ],
+            "images": 0,
+            "tables": 0,
+            "links": 0
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": []
+        }
+      },
+      {
+        "file": "titulos-ruim.docx",
+        "kind": "ruim",
+        "format": "docx",
+        "bytes": 36867,
+        "validation": {
+          "format": "docx",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "missing_heading_one",
+              "location": "word/document.xml"
+            }
+          ],
+          "facts": {
+            "title": "Títulos que permitem navegar",
+            "language": "pt-BR",
+            "heading_levels": [],
+            "images": 0,
+            "tables": 0,
+            "links": 0
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": []
+        }
+      },
+      {
+        "file": "titulos-bom.pdf",
+        "kind": "bom",
+        "format": "pdf",
+        "bytes": 46397,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Títulos que permitem navegar",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 4,
+              "/P": 2,
+              "/H2": 1
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "passed",
+            "profile": "ua1",
+            "exit_code": 0,
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"46397\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\titulos-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"959\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552222700\" finish=\"1792552223451\">00:00:00.751</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552222604\" finish=\"1792552223487\">00:00:00.883</duration>\n  </batchSummary>\n</report>\r\n"
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 4,
+            "/P": 2,
+            "/H2": 1
+          },
+          "list_order_mcids": []
+        }
+      },
+      {
+        "file": "titulos-ruim.pdf",
+        "kind": "ruim",
+        "format": "pdf",
+        "bytes": 45441,
+        "validation": {
+          "format": "pdf",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "missing_heading_one",
+              "location": "StructTreeRoot"
+            }
+          ],
+          "facts": {
+            "title": "Títulos que permitem navegar",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/P": 4,
+              "/NonStruct": 4
+            },
+            "heading_levels": []
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "not_run",
+            "reason": "Nao solicitado."
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/P": 4,
+            "/NonStruct": 4
+          },
+          "list_order_mcids": []
+        }
+      }
+    ],
+    "imagens": [
+      {
+        "file": "imagens-bom.docx",
+        "kind": "bom",
+        "format": "docx",
+        "bytes": 42201,
+        "validation": {
+          "format": "docx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Imagens com significado em texto",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2
+            ],
+            "images": 1,
+            "tables": 0,
+            "links": 0
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": []
+        }
+      },
+      {
+        "file": "imagens-ruim.docx",
+        "kind": "ruim",
+        "format": "docx",
+        "bytes": 42148,
+        "validation": {
+          "format": "docx",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "image_missing_alt",
+              "location": "word/document.xml"
+            }
+          ],
+          "facts": {
+            "title": "Imagens com significado em texto",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2
+            ],
+            "images": 1,
+            "tables": 0,
+            "links": 0
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": []
+        }
+      },
+      {
+        "file": "imagens-bom.pdf",
+        "kind": "bom",
+        "format": "pdf",
+        "bytes": 47659,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Imagens com significado em texto",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 3,
+              "/P": 1,
+              "/H2": 1,
+              "/Figure": 1
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "passed",
+            "profile": "ua1",
+            "exit_code": 0,
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"47659\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\imagens-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"591\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552226013\" finish=\"1792552227344\">00:00:01.331</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552225917\" finish=\"1792552227386\">00:00:01.469</duration>\n  </batchSummary>\n</report>\r\n"
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 3,
+            "/P": 1,
+            "/H2": 1,
+            "/Figure": 1
+          },
+          "list_order_mcids": []
+        }
+      },
+      {
+        "file": "imagens-ruim.pdf",
+        "kind": "ruim",
+        "format": "pdf",
+        "bytes": 46545,
+        "validation": {
+          "format": "pdf",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "image_missing_alt",
+              "location": "Figure"
+            }
+          ],
+          "facts": {
+            "title": "Imagens com significado em texto",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 3,
+              "/P": 1,
+              "/H2": 1,
+              "/Figure": 1
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "not_run",
+            "reason": "Nao solicitado."
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 3,
+            "/P": 1,
+            "/H2": 1,
+            "/Figure": 1
+          },
+          "list_order_mcids": []
+        }
+      }
+    ],
+    "tabelas": [
+      {
+        "file": "tabelas-bom.docx",
+        "kind": "bom",
+        "format": "docx",
+        "bytes": 37097,
+        "validation": {
+          "format": "docx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Tabelas com cabeçalhos",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2
+            ],
+            "images": 0,
+            "tables": 1,
+            "links": 0
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": []
+        }
+      },
+      {
+        "file": "tabelas-ruim.docx",
+        "kind": "ruim",
+        "format": "docx",
+        "bytes": 37076,
+        "validation": {
+          "format": "docx",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "table_missing_header",
+              "location": "word/document.xml"
+            }
+          ],
+          "facts": {
+            "title": "Tabelas com cabeçalhos",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2
+            ],
+            "images": 0,
+            "tables": 1,
+            "links": 0
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": []
+        }
+      },
+      {
+        "file": "tabelas-bom.pdf",
+        "kind": "bom",
+        "format": "pdf",
+        "bytes": 49607,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Tabelas com cabeçalhos",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 10,
+              "/P": 1,
+              "/H2": 1,
+              "/Table": 1,
+              "/Caption": 1,
+              "/TR": 3,
+              "/TH": 2,
+              "/TD": 4
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "passed",
+            "profile": "ua1",
+            "exit_code": 0,
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"49607\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\tabelas-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"1119\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552230710\" finish=\"1792552231841\">00:00:01.131</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552230644\" finish=\"1792552231879\">00:00:01.235</duration>\n  </batchSummary>\n</report>\r\n"
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 10,
+            "/P": 1,
+            "/H2": 1,
+            "/Table": 1,
+            "/Caption": 1,
+            "/TR": 3,
+            "/TH": 2,
+            "/TD": 4
+          },
+          "list_order_mcids": []
+        }
+      },
+      {
+        "file": "tabelas-ruim.pdf",
+        "kind": "ruim",
+        "format": "pdf",
+        "bytes": 48612,
+        "validation": {
+          "format": "pdf",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "table_missing_header",
+              "location": "StructTreeRoot"
+            }
+          ],
+          "facts": {
+            "title": "Tabelas com cabeçalhos",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 10,
+              "/P": 1,
+              "/H2": 1,
+              "/Table": 1,
+              "/Caption": 1,
+              "/TR": 3,
+              "/TD": 6
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "not_run",
+            "reason": "Nao solicitado."
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 10,
+            "/P": 1,
+            "/H2": 1,
+            "/Table": 1,
+            "/Caption": 1,
+            "/TR": 3,
+            "/TD": 6
+          },
+          "list_order_mcids": []
+        }
+      }
+    ],
+    "listas": [
+      {
+        "file": "listas-bom.docx",
+        "kind": "bom",
+        "format": "docx",
+        "bytes": 36911,
+        "validation": {
+          "format": "docx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Listas reconhecidas como listas",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2
+            ],
+            "images": 0,
+            "tables": 0,
+            "links": 0
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 2,
+          "link_text": []
+        }
+      },
+      {
+        "file": "listas-ruim.docx",
+        "kind": "ruim",
+        "format": "docx",
+        "bytes": 36880,
+        "validation": {
+          "format": "docx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Listas reconhecidas como listas",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2
+            ],
+            "images": 0,
+            "tables": 0,
+            "links": 0
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": []
+        }
+      },
+      {
+        "file": "listas-bom.pdf",
+        "kind": "bom",
+        "format": "pdf",
+        "bytes": 44848,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Listas reconhecidas como listas",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 5,
+              "/P": 1,
+              "/H2": 1,
+              "/L": 1,
+              "/LI": 2,
+              "/Lbl": 2
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "passed",
+            "profile": "ua1",
+            "exit_code": 0,
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"44848\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\listas-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"945\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552234664\" finish=\"1792552235599\">00:00:00.935</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552234538\" finish=\"1792552235636\">00:00:01.098</duration>\n  </batchSummary>\n</report>\r\n"
+          }
+        },
+        "structure": {
+          "list_items": 2,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 5,
+            "/P": 1,
+            "/H2": 1,
+            "/L": 1,
+            "/LI": 2,
+            "/Lbl": 2
+          },
+          "list_order_mcids": [
+            [
+              [
+                3,
+                4
+              ],
+              [
+                5,
+                6
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "file": "listas-ruim.pdf",
+        "kind": "ruim",
+        "format": "pdf",
+        "bytes": 43995,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Listas reconhecidas como listas",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 5,
+              "/P": 6,
+              "/H2": 1
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "not_run",
+            "reason": "Nao solicitado."
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 5,
+            "/P": 6,
+            "/H2": 1
+          },
+          "list_order_mcids": []
+        }
+      }
+    ],
+    "links": [
+      {
+        "file": "links-bom.docx",
+        "kind": "bom",
+        "format": "docx",
+        "bytes": 37007,
+        "validation": {
+          "format": "docx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Links com destino compreensível",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2
+            ],
+            "images": 0,
+            "tables": 0,
+            "links": 1
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": [
+            "Guia de acessibilidade do Word da MicrosoftGuia de acessibilidade do Word da MicrosoftGuia de acessibilidade do Word da Microsoft"
+          ]
+        }
+      },
+      {
+        "file": "links-ruim.docx",
+        "kind": "ruim",
+        "format": "docx",
+        "bytes": 36982,
+        "validation": {
+          "format": "docx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Links com destino compreensível",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2
+            ],
+            "images": 0,
+            "tables": 0,
+            "links": 1
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": [
+            "Clique aquiClique aquiClique aqui"
+          ]
+        }
+      },
+      {
+        "file": "links-bom.pdf",
+        "kind": "bom",
+        "format": "pdf",
+        "bytes": 46041,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Links com destino compreensível",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 4,
+              "/P": 2,
+              "/H2": 1,
+              "/Link": 1
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "passed",
+            "profile": "ua1",
+            "exit_code": 0,
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"46041\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\links-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"790\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552238411\" finish=\"1792552239351\">00:00:00.940</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552238293\" finish=\"1792552239391\">00:00:01.098</duration>\n  </batchSummary>\n</report>\r\n"
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 4,
+            "/P": 2,
+            "/H2": 1,
+            "/Link": 1
+          },
+          "list_order_mcids": []
+        }
+      },
+      {
+        "file": "links-ruim.pdf",
+        "kind": "ruim",
+        "format": "pdf",
+        "bytes": 43325,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Links com destino compreensível",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 4,
+              "/P": 2,
+              "/H2": 1,
+              "/Link": 1
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "not_run",
+            "reason": "Nao solicitado."
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 4,
+            "/P": 2,
+            "/H2": 1,
+            "/Link": 1
+          },
+          "list_order_mcids": []
+        }
+      }
+    ],
+    "metadados": [
+      {
+        "file": "metadados-bom.docx",
+        "kind": "bom",
+        "format": "docx",
+        "bytes": 36901,
+        "validation": {
+          "format": "docx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Título e idioma do arquivo",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2
+            ],
+            "images": 0,
+            "tables": 0,
+            "links": 0
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": []
+        }
+      },
+      {
+        "file": "metadados-ruim.docx",
+        "kind": "ruim",
+        "format": "docx",
+        "bytes": 36853,
+        "validation": {
+          "format": "docx",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "missing_title",
+              "location": "docProps/core.xml"
+            },
+            {
+              "code": "missing_language",
+              "location": "word/styles.xml"
+            }
+          ],
+          "facts": {
+            "title": "",
+            "language": "",
+            "heading_levels": [
+              1,
+              2
+            ],
+            "images": 0,
+            "tables": 0,
+            "links": 0
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": []
+        }
+      },
+      {
+        "file": "metadados-bom.pdf",
+        "kind": "bom",
+        "format": "pdf",
+        "bytes": 45273,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Título e idioma do arquivo",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 4,
+              "/P": 2,
+              "/H2": 1
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "passed",
+            "profile": "ua1",
+            "exit_code": 0,
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"45273\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\metadados-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"944\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552242308\" finish=\"1792552243165\">00:00:00.857</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552242242\" finish=\"1792552243215\">00:00:00.973</duration>\n  </batchSummary>\n</report>\r\n"
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 4,
+            "/P": 2,
+            "/H2": 1
+          },
+          "list_order_mcids": []
+        }
+      },
+      {
+        "file": "metadados-ruim.pdf",
+        "kind": "ruim",
+        "format": "pdf",
+        "bytes": 44152,
+        "validation": {
+          "format": "pdf",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "missing_title",
+              "location": "catalogo"
+            },
+            {
+              "code": "missing_language",
+              "location": "catalogo"
+            }
+          ],
+          "facts": {
+            "title": "",
+            "language": "",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 4,
+              "/P": 2,
+              "/H2": 1
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "not_run",
+            "reason": "Nao solicitado."
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 4,
+            "/P": 2,
+            "/H2": 1
+          },
+          "list_order_mcids": []
+        }
+      }
+    ],
+    "tags": [
+      {
+        "file": "tags-bom.pdf",
+        "kind": "bom",
+        "format": "pdf",
+        "bytes": 45219,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "PDF com estrutura preservada",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 4,
+              "/P": 2,
+              "/H2": 1
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "passed",
+            "profile": "ua1",
+            "exit_code": 0,
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"45219\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\tags-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"949\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552245532\" finish=\"1792552246314\">00:00:00.782</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552245426\" finish=\"1792552246353\">00:00:00.927</duration>\n  </batchSummary>\n</report>\r\n"
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 4,
+            "/P": 2,
+            "/H2": 1
+          },
+          "list_order_mcids": []
+        }
+      },
+      {
+        "file": "tags-ruim.pdf",
+        "kind": "ruim",
+        "format": "pdf",
+        "bytes": 44187,
+        "validation": {
+          "format": "pdf",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "missing_tags",
+              "location": "catalogo"
+            },
+            {
+              "code": "missing_heading_one",
+              "location": "StructTreeRoot"
+            }
+          ],
+          "facts": {
+            "title": "PDF com estrutura preservada",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": false,
+            "tags": {},
+            "heading_levels": []
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "not_run",
+            "reason": "Nao solicitado."
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {},
+          "list_order_mcids": []
+        }
+      }
+    ],
+    "ordem": [
+      {
+        "file": "ordem-bom.pdf",
+        "kind": "bom",
+        "format": "pdf",
+        "bytes": 44719,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Ordem de leitura com sentido",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 5,
+              "/P": 1,
+              "/H2": 1,
+              "/L": 1,
+              "/LI": 2,
+              "/Lbl": 2
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "passed",
+            "profile": "ua1",
+            "exit_code": 0,
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"44719\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\ordem-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"945\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552248619\" finish=\"1792552249545\">00:00:00.926</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552248504\" finish=\"1792552249583\">00:00:01.079</duration>\n  </batchSummary>\n</report>\r\n"
+          }
+        },
+        "structure": {
+          "list_items": 2,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 5,
+            "/P": 1,
+            "/H2": 1,
+            "/L": 1,
+            "/LI": 2,
+            "/Lbl": 2
+          },
+          "list_order_mcids": [
+            [
+              [
+                3,
+                4
+              ],
+              [
+                5,
+                6
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "file": "ordem-ruim.pdf",
+        "kind": "ruim",
+        "format": "pdf",
+        "bytes": 43870,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Ordem de leitura com sentido",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 5,
+              "/P": 1,
+              "/H2": 1,
+              "/L": 1,
+              "/LI": 2,
+              "/Lbl": 2
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "not_run",
+            "reason": "Nao solicitado."
+          }
+        },
+        "structure": {
+          "list_items": 2,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 5,
+            "/P": 1,
+            "/H2": 1,
+            "/L": 1,
+            "/LI": 2,
+            "/Lbl": 2
+          },
+          "list_order_mcids": [
+            [
+              [
+                5,
+                6
+              ],
+              [
+                3,
+                4
+              ]
+            ]
+          ]
+        }
+      }
+    ],
+    "digitalizacao": [
+      {
+        "file": "digitalizacao-bom.pdf",
+        "kind": "bom",
+        "format": "pdf",
+        "bytes": 45696,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "PDF digitalizado com texto real",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 4,
+              "/P": 2,
+              "/H2": 1
+            },
+            "heading_levels": [
+              1,
+              2
+            ]
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "passed",
+            "profile": "ua1",
+            "exit_code": 0,
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"45696\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\digitalizacao-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"954\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552251594\" finish=\"1792552252401\">00:00:00.807</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552251519\" finish=\"1792552252435\">00:00:00.916</duration>\n  </batchSummary>\n</report>\r\n"
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 4,
+            "/P": 2,
+            "/H2": 1
+          },
+          "list_order_mcids": []
+        }
+      },
+      {
+        "file": "digitalizacao-ruim.pdf",
+        "kind": "ruim",
+        "format": "pdf",
+        "bytes": 47301,
+        "validation": {
+          "format": "pdf",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "missing_language",
+              "location": "catalogo"
+            },
+            {
+              "code": "missing_tags",
+              "location": "catalogo"
+            },
+            {
+              "code": "missing_heading_one",
+              "location": "StructTreeRoot"
+            },
+            {
+              "code": "page_without_extractable_text",
+              "location": "pagina 1"
+            }
+          ],
+          "facts": {
+            "title": "digitalizacao-ruim",
+            "language": "",
+            "pages": 1,
+            "marked": false,
+            "tags": {},
+            "heading_levels": []
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "not_run",
+            "reason": "Nao solicitado."
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {},
+          "list_order_mcids": []
+        }
+      }
+    ]
+  }
+}

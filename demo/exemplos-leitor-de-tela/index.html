@@ -22,6 +22,7 @@
 <li><details><summary>Componentes</summary><ul><li><a href="carrossel.html">Carrossel</a></li><li><a href="dica.html">Dica (tooltip)</a></li><li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li><li><a href="arvore.html">Árvore (tree view)</a></li><li><a href="tabela-ordenavel.html">Tabela ordenável</a></li><li><a href="web-components.html">Web Components (elemento personalizado)</a></li><li><a href="chat-ia.html">Resposta de IA em streaming</a></li></ul></details></li>
 <li><details><summary>Frameworks</summary><ul><li><a href="pilha-react.html">React</a></li><li><a href="pilha-vue.html">Vue</a></li><li><a href="pilha-svelte.html">Svelte</a></li><li><a href="pilha-angular.html">Angular</a></li></ul></details></li>
 <li><details><summary>Mobile (só código)</summary><ul><li><a href="android.html">Android (Jetpack Compose)</a></li><li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li></ul></details></li>
+<li><details><summary>Documentos acessíveis</summary><ul><li><a href="documentos.html">Word e PDF</a></li></ul></details></li>
 </ul>
 </nav>
 </div>
@@ -29,7 +30,7 @@
 <main id="conteudo" tabindex="-1">
 <div class="coluna">
 <h1>Leitor de tela: exemplos bons e ruins</h1>
-<p>Para cada assunto há um exemplo ruim, um bom e, quando existe, um que parece estranho mas não precisa de correção. Os exemplos estão vivos na página: ouça com o seu leitor de tela e compare. Embaixo de cada um estão o porquê, o que corrigir, o que o navegador entrega ao leitor de tela e o que o axe acha, medidos pelo próprio MCP.</p>
+<p>Nos assuntos web há exemplos vivos bons e ruins para experimentar na página, com estrutura e comportamento medidos pelo MCP. A seção de documentos oferece arquivos Word e PDF para baixar e conferir no aplicativo. Cada assunto explica o problema, a correção, o que foi medido e o que ainda precisa de revisão.</p>
 <p>Ruim e bom parecem iguais de propósito. A diferença está na estrutura, não no visual.</p>
 <h2><a href="titulos.html">Títulos</a></h2>
 <p>Quem usa leitor de tela navega a página de título em título. Sem título de verdade, não existe mapa. Nos exemplos vivos desta página os títulos começam em h3, porque a própria página já usa h1 e h2; a regra vale em qualquer nível: não pular. (exemplo bom, exemplo ruim.)</p>
@@ -91,11 +92,12 @@
 <p>No Compose a acessibilidade vem da árvore de semântica. clickable, toggleable e ListItem já juntam os filhos num só item; ícones precisam de descrição; mudanças que o usuário não vê precisam de liveRegion; títulos de seção usam heading(). (exemplo bom, exemplo ruim.)</p>
 <h2><a href="ios.html">iOS (SwiftUI e UIKit)</a></h2>
 <p>No iOS o VoiceOver lê o rótulo, o valor e os traços de cada elemento. Toque num texto ou imagem com onTapGesture não vira botão; imagens decorativas precisam sair da árvore; mudanças que o usuário não vê precisam ser anunciadas. (exemplo bom, exemplo ruim.)</p>
+<h2><a href="documentos.html">Documentos acessíveis</a></h2><p>Word DOCX e PDF: arquivos bons e ruins para baixar, estrutura medida, orientações de correção e passos para conferir no aplicativo.</p>
 </div>
 </main>
 <footer>
 <div class="coluna">
-<p>Exemplos do projeto MCP de acessibilidade. A árvore de acessibilidade e o resultado do axe foram medidos pelo próprio MCP, no Chromium, quando o site foi gerado. O que cada leitor de tela fala varia com o leitor, a versão, o navegador e a configuração: ouça os exemplos vivos no seu leitor e compare.</p>
+<p>Exemplos do projeto MCP de acessibilidade. Nos exemplos web, a árvore e o axe medem a página no Chromium. Na seção de documentos, as medidas inspecionam os arquivos DOCX e PDF. Nenhuma dessas medidas é captura da fala real. O resultado no leitor de tela varia com aplicativo, versão e configuração: compare no ambiente de destino.</p>
 </div>
 </footer>
 </body>

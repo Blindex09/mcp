@@ -102,7 +102,7 @@ def validate_pdf(path: Path) -> dict[str, Any]:
         issues.append({"code": code, "location": location})
 
     root = reader.root_object
-    title = reader.metadata.title if reader.metadata is not None else ""
+    title = (reader.metadata.title or "") if reader.metadata is not None else ""
     if not str(title).strip():
         issue("missing_title", "catalogo")
     language = root.get("/Lang", "")

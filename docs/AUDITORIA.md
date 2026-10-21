@@ -2,6 +2,14 @@
 
 Estado da arquitetura em 20/10/2026
 
+Atualização de 21/10/2026
+
+A demonstração agora inclui documentos.html, com nove assuntos, 12 DOCX e 18 PDFs bons e ruins de propósito. Os contratos e fontes oficiais ficam em content/assets/document-examples.json e geram o guia document-behavior-matrix, acessível no catálogo MCP. A base contém 72 guias. A página distingue medidas estruturais, comportamento esperado e fala real, que ainda não foi capturada nos aplicativos de documentos. A entrega e as evidências estão em docs/modules/galeria_documentos.md e galeria_documentos_evidencias.json.
+
+O uso real encontrou e corrigiu uma falha no validador de PDF: o retorno nulo de um título vazio era convertido no texto None e escapava da checagem. O caso agora está na regressão. A nova galeria foi conferida por teclado, download e inspeção visual dos arquivos, sem alterar as proteções de download do servidor.
+
+Verificação da atualização: ruff e mypy passaram; regressão conjunta com 345 testes aprovados e um ignorado; rodada específica final com 79 aprovados. A matriz permanece em 11 cobertos, um parcial e duas lacunas declaradas. O guia teve 48/48 decisões aceitas com ele e 48/48 sem ele no conjunto sintético, sem ganho demonstrado. O limite da tentativa adicional de Firefox pelo MCP e da navegação WebKit está documentado no módulo.
+
 O servidor fornece conhecimento, medições e operações de acessibilidade pelo protocolo MCP. O modelo do cliente escolhe os guias, conduz os testes, interpreta os fatos e propõe correções. O servidor não chama modelo e não exige chave de API.
 
 Arquitetura vigente

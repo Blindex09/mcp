@@ -293,7 +293,7 @@ def register_ux(mcp: Any) -> None:
             items = list(SESSION.findings)
             out = _export(format, items, page.url)
             if save and items:
-                run_id = runs.save(learn.host_of(page.url), {"url": page.url, "persona": SESSION.persona, "mode": "sessao", "goal": goal, "findings": items})
+                run_id = runs.save(learn.host_of(page.url), {"url": page.url, "persona": SESSION.persona, "mode": "sessao", "goal": goal, "findings": items, "coverage": SESSION.coverage_report()})
                 if run_id:
                     out = {**out, "run_id": run_id}
             return _json(out)

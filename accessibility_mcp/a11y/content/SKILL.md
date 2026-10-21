@@ -28,6 +28,10 @@ for `a11y_get_reference`, and every `examples/y.ext` is the example named `y` fo
 | Automated axe-core audit of a URL (http/https) or HTML string | `a11y_audit` |
 | Accessibility tree, i.e. what a screen reader receives | `a11y_aria_snapshot` |
 | Keyboard focus order, names, focus indicators | `a11y_tab_order` |
+| Actual accessible DOCX and PDF files, with validation | `a11y_create_document(document, formats)` and `a11y_validate_document(path)` |
+| A report file from measured session findings or a saved run | `a11y_create_report(formats, run_id)` |
+
+When the person asks for an accessible document or report, deliver actual files, not only advice or prose in chat. Follow the MCP prompt `a11y_accessible_document(task)` or the identical `a11y_workflow` text. Return local file paths and the generated document resource URIs. Read the validation results and disclose missing checks. No findings or low severity never establishes Supports; incomplete criterion evaluation stays Not Evaluated. Structural validation and automated PDF/UA checks do not establish complete human-reviewed accessibility.
 
 Selection of what to read is done by YOU (the client model), never by keyword: read the descriptions in `a11y_list_content` and choose by meaning. This server never calls a model. The measurement tools (`a11y_contrast`, `a11y_audit`,
 `a11y_aria_snapshot`, `a11y_tab_order`) report facts; interpreting them and deciding the fix stays with you.

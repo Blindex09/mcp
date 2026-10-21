@@ -10,6 +10,7 @@ from .compare import compare_browsers
 from .content_index import ContentIndex
 from .crawl import crawl
 from .prompts import FLUXOS, workflow_text
+from .tools_documents import register_documents
 from .tools_files import register_files
 from .tools_ux import register_ux
 
@@ -42,6 +43,7 @@ def register(mcp: Any) -> None:
     """Registra as ferramentas e recursos de acessibilidade no servidor FastMCP."""
     register_ux(mcp)
     register_files(mcp)
+    register_documents(mcp)
 
     @mcp.tool()
     async def a11y_list_content(kind: str = "") -> str:
@@ -69,7 +71,7 @@ def register(mcp: Any) -> None:
     ) -> str:
         """Ready-made workflow for YOU to follow with this server's tools (the same text as the MCP prompts, for clients that do not show prompts, such as some
         Codex versions). name: a11y_review (url, focus) | a11y_walkthrough (url, task, persona) | a11y_component (url, selector) | a11y_site_scan (url, max_pages) |
-        a11y_compare_runs (base_run_id, head_run_id) | a11y_write_accessible_code (task, stack). Returns instructions: which guides to read, which tools and probes to use,
+        a11y_compare_runs (base_run_id, head_run_id) | a11y_write_accessible_code (task, stack) | a11y_accessible_document (task). Returns instructions: which guides to read, which tools and probes to use,
         what you may and may not claim, and how to report. The server does not run the workflow and calls no model: you do."""
         try:
             return workflow_text(name, url=url, task=task, persona=persona, focus=focus, selector=selector, stack=stack, max_pages=max_pages,

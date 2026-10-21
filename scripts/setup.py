@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -79,16 +80,46 @@ def _already_registered(cliente: str) -> bool:
     return NOME in (out.stdout or "")
 
 
+def require_codex_server(config_path: Path) -> bool:
+    """Espera a inicializacao deste servidor antes de construir o catalogo inicial do Codex.
+
+    O padrao de servidores opcionais pode entregar o primeiro turno sem ferramentas.
+    Muda somente a chave required desta entrada; nao muda aprovacoes nem outros servidores.
+    """
+    if not config_path.is_file():
+        return False
+    text = config_path.read_text(encoding="utf-8")
+    match = re.search(r'(?m)^\[mcp_servers\.(?:accessibility|"accessibility")\][ \t]*\r?$', text)
+    if match is None:
+        return False
+    following = re.search(r"(?m)^\[", text[match.end():])
+    end = match.end() + following.start() if following else len(text)
+    section = text[match.end():end]
+    required = re.search(r"(?m)^required\s*=.*$", section)
+    if required:
+        section = section[:required.start()] + "required = true" + section[required.end():]
+    else:
+        section = "\nrequired = true" + section
+    changed = text[:match.end()] + section + text[end:]
+    if changed != text:
+        config_path.write_text(changed, encoding="utf-8")
+    return True
+
+
 def setup_cli(cliente: str, nome_humano: str) -> None:
     """Claude Code e Codex: usa o proprio comando do cliente (escreve no arquivo certo, na versao certa)."""
     if not shutil.which(cliente):
         print(f" {nome_humano}: o comando `{cliente}` nao esta no PATH; para cadastrar depois, rode:\n    {' '.join(cli_add_command(cliente))}")
         return
     if _already_registered(cliente):
+        if cliente == "codex":
+            require_codex_server(Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))) / "config.toml")
         print(f" {nome_humano}: a entrada '{NOME}' ja existe (nada a fazer).")
         return
     r = subprocess.run(cli_add_command(cliente), capture_output=True, text=True, check=False)
     if r.returncode == 0:
+        if cliente == "codex":
+            require_codex_server(Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))) / "config.toml")
         print(f" {nome_humano} configurado (entrada '{NOME}').")
     else:
         print(f" {nome_humano}: nao deu para cadastrar sozinho ({(r.stderr or r.stdout).strip()[:200]}). Rode:\n    {' '.join(cli_add_command(cliente))}")

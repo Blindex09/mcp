@@ -6,11 +6,29 @@ Servidor MCP somente de acessibilidade (web, mobile e interfaces de IA/agentes) 
 
 ## O que faz
 
--  Base de conhecimento embutida (`accessibility_mcp/a11y/content/`): 69 guias (WCAG 2.2, ARIA, NVDA/VoiceOver/TalkBack, o que o leitor de tela fala por elemento, tecla e evento, ordem de foco, títulos, listas e tabelas, checklist de auditoria, IA conversacional acessível, mobile, frameworks, XR, conformidade, e 28 playbooks de especialistas trazidos do Qaaccessibility), 42 exemplos de componentes acessíveis (modal, abas, combobox, treegrid, chat de IA…) e o template React (10 arquivos) de chat/agente acessível.
+-  Base de conhecimento embutida (`accessibility_mcp/a11y/content/`): 71 guias (WCAG 2.2, ARIA, NVDA/VoiceOver/TalkBack, o que o leitor de tela fala por elemento, tecla e evento, ordem de foco, títulos, listas e tabelas, checklist de auditoria, IA conversacional acessível, mobile, frameworks, XR, conformidade, e 28 playbooks de especialistas trazidos do Qaaccessibility), 44 exemplos de componentes acessíveis (modal, abas, combobox, treegrid, chat de IA…) e o template React (10 arquivos) de chat/agente acessível.
 -  Escolha pelo modelo do cliente: `a11y_list_content` devolve o catálogo (cada item com a descrição de quando usar) e o modelo escolhe pelo sentido. Nada de palavra-chave, regex ou ranking lexical, e nenhuma chamada de modelo dentro do servidor.
 -  Medição de fatos: contraste WCAG, auditoria axe-core num navegador real, árvore de acessibilidade e ordem de foco por teclado.
 
-## Ferramentas (44) e fluxos prontos
+## Ferramentas (47) e fluxos prontos
+
+### Documentos e relatórios acessíveis
+
+O MCP gera arquivos DOCX e PDF, além de orientar a criação. O modelo do cliente escreve o conteúdo e chama as ferramentas abaixo; elas montam os arquivos, conferem a estrutura e devolvem caminhos locais e recursos MCP para leitura dos arquivos.
+
+| Ferramenta | O que faz |
+|---|---|
+| `a11y_create_document(document, formats)` | Gera DOCX, PDF ou ambos com título, idioma, seções, listas, tabelas com cabeçalhos, links e imagens locais com texto alternativo. O conteúdo usa blocos estruturados, sem executar HTML do cliente |
+| `a11y_create_report(formats, run_id, title, language)` | Gera os arquivos do relatório com achados e cobertura da sessão atual ou de uma execução salva. Ausência de achados nunca vira aprovação |
+| `a11y_validate_document(path, external)` | Confere DOCX/PDF reais: metadados, hierarquia, alternativas, tabelas, marcação PDF, fontes e Unicode. No PDF, executa também o veraPDF com perfil PDF/UA-1 quando disponível |
+
+Os arquivos ficam em `~/.a11y-mcp/documents` (ou `A11Y_MCP_HOME/documents`), com identificador único; não sobrescrevem arquivos do projeto. Cada arquivo também tem um recurso `a11y://document/{document_id}/document.docx` ou `document.pdf`, com o tipo MIME correto. Imagens PNG/JPEG só são lidas dentro da pasta escolhida pela pessoa com `a11y_set_workspace`.
+
+O PDF é marcado e recebe metadados PDF/UA-1; declarar o perfil não prova conformidade. O veraPDF verifica os requisitos automáticos desse perfil. Ele é preparado na pasta do usuário a partir do instalador oficial com versão e SHA-256 fixos, se houver Java no PATH e a instalação automática estiver habilitada. Uma instalação existente pode ser indicada por `A11Y_MCP_VERAPDF` (executável ou JAR do CLI). Falta de Java, instalação recusada ou erro do validador aparece como verificação pendente ou falha, nunca como aprovação. Não se envia o documento a um serviço externo.
+
+Revisão visual, significado do texto alternativo, ordem de leitura e uso no leitor de tela continuam necessários. Nenhum retorno automático declara validação completa. Para relatórios de conformidade, o modelo informa explicitamente critério, situação, escopo, evidências e justificativa; avaliação incompleta permanece `Not Evaluated`, e gravidade baixa não apaga uma violação.
+
+Peça no chat: “Gere um guia acessível em DOCX e PDF sobre testes de teclado” ou “Gere os arquivos do relatório desta avaliação”. O fluxo `a11y_accessible_document(task)` está disponível como prompt MCP e pela ferramenta `a11y_workflow`. Detalhes, evidências e limites: [documentação do módulo](docs/modules/documentos_acessiveis.md).
 
 ### Conhecimento e escolha
 
@@ -58,6 +76,7 @@ O servidor não roda um "usuário autônomo": quem conduz é o modelo do seu cli
 | `a11y_site_scan(url, max_pages)` | Varrer várias páginas por fatos e revisar as que mais importam |
 | `a11y_compare_runs(base_run_id, head_run_id)` | Conferir que uma correção funcionou e nada piorou |
 | `a11y_write_accessible_code(task, stack)` | Escrever ou corrigir código acessível desde o começo e provar com as sondas |
+| `a11y_accessible_document(task)` | Gerar documentos e relatórios como arquivos DOCX/PDF, validar e entregar os arquivos com as limitações declaradas |
 
 Como chamar: no Claude Code, `/mcp__accessibility__a11y_review`; no VS Code, `/accessibility.a11y_review`; em qualquer cliente, peça "use a ferramenta a11y_workflow com name a11y_review". `a11y_status()` mostra a prontidão do navegador.
 

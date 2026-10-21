@@ -106,7 +106,20 @@ def texto_a11y_write_accessible_code(task: str, stack: str = "html") -> str:
 {REGRAS}"""
 
 
-FLUXOS = ("a11y_review", "a11y_walkthrough", "a11y_component", "a11y_site_scan", "a11y_compare_runs", "a11y_write_accessible_code")
+def texto_a11y_accessible_document(task: str) -> str:
+    """Documento entregue como arquivo, com verificacao e cobertura explicitas."""
+    return f"""Create the accessible document or report requested by the person: {task}.
+
+1. Read the relevant document guides using a11y_list_content and a11y_get_reference. For conformance reports read specialist-vpat-reporter.
+2. Write the content yourself, using only supported facts. For a session or saved-run report use a11y_create_report; for other documents use a11y_create_document with title, language and semantic blocks. Generate DOCX and PDF unless the person requests only one format. Images need meaningful alt and a local file in the chosen workspace; tables need captions and headers.
+3. A conformance assessment must state scope, method, evidence and coverage for each criterion. No findings or low severity does not establish Supports. Incomplete evaluation remains Not Evaluated. The model judges by meaning; the code only validates the contract.
+4. Read the returned validation, fix the reported defects and validate the actual files with a11y_validate_document. Automated PDF/UA validation uses veraPDF; not_run never means passed. Visual, semantic and screen-reader review remain separate.
+5. Deliver the actual file paths and a11y://document resource URIs, together with the checks performed and still pending. Advice, prose in chat or JSON alone is not the document requested.
+
+{REGRAS}"""
+
+
+FLUXOS = ("a11y_review", "a11y_walkthrough", "a11y_component", "a11y_site_scan", "a11y_compare_runs", "a11y_write_accessible_code", "a11y_accessible_document")
 
 
 def workflow_text(name: str, url: str = "", task: str = "", persona: str = "keyboard", focus: str = "", selector: str = "", stack: str = "html",
@@ -115,6 +128,7 @@ def workflow_text(name: str, url: str = "", task: str = "", persona: str = "keyb
     faltam = {
         "a11y_review": [("url", url)], "a11y_walkthrough": [("url", url), ("task", task)], "a11y_component": [("url", url), ("selector", selector)],
         "a11y_site_scan": [("url", url)], "a11y_compare_runs": [("base_run_id", base_run_id), ("head_run_id", head_run_id)], "a11y_write_accessible_code": [("task", task)],
+        "a11y_accessible_document": [("task", task)],
     }
     if name not in faltam:
         raise ValueError(f"fluxo invalido: {name}. Opcoes: {', '.join(FLUXOS)}")
@@ -131,6 +145,8 @@ def workflow_text(name: str, url: str = "", task: str = "", persona: str = "keyb
         return texto_a11y_site_scan(url, max_pages)
     if name == "a11y_compare_runs":
         return texto_a11y_compare_runs(base_run_id, head_run_id)
+    if name == "a11y_accessible_document":
+        return texto_a11y_accessible_document(task)
     return texto_a11y_write_accessible_code(task, stack)
 
 
@@ -166,3 +182,8 @@ def register_prompts(mcp: Any) -> None:
     def a11y_write_accessible_code(task: str, stack: str = "html") -> str:
         """Write or fix code so it is accessible from the start, then prove it with the probes."""
         return texto_a11y_write_accessible_code(task, stack)
+
+    @mcp.prompt()
+    def a11y_accessible_document(task: str) -> str:
+        """Create actual accessible DOCX/PDF documents and evidence-based reports, validate them and deliver the files."""
+        return texto_a11y_accessible_document(task)

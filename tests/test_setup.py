@@ -34,3 +34,20 @@ def test_json_clients_merge_without_erasing_other_servers(tmp_path):
     assert dado["extra"] == 1 and dado["mcpServers"]["outro"] == {"command": "x"} and dado["mcpServers"]["accessibility"]["command"] == "uv"
     setup._merge_mcp_servers(arquivo, "teste")  # rodar de novo nao duplica nem quebra
     assert list(json.loads(arquivo.read_text(encoding="utf-8"))["mcpServers"]) == ["outro", "accessibility"]
+
+
+def test_codex_waits_for_the_server_without_changing_approval_or_other_servers(tmp_path):
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib
+
+    path = tmp_path / "config.toml"
+    path.write_text('[mcp_servers.accessibility]\ncommand = "uv"\n[mcp_servers.outro]\ncommand = "outro"\n', encoding="utf-8")
+    assert setup.require_codex_server(path)
+    first = path.read_text(encoding="utf-8")
+    assert setup.require_codex_server(path)
+    assert path.read_text(encoding="utf-8") == first
+    parsed = tomllib.loads(first)
+    assert parsed["mcp_servers"]["accessibility"] == {"command": "uv", "required": True}
+    assert parsed["mcp_servers"]["outro"] == {"command": "outro"}

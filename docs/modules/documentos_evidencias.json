@@ -1,0 +1,136 @@
+{
+  "data_local": "2026-10-20",
+  "cliente": "codex-cli 0.163.0-alpha.10.2",
+  "modelos": [
+    "gpt-6.1-sol"
+  ],
+  "casos_por_rodada": 8,
+  "rodadas": [
+    {
+      "variant": "corrected",
+      "repetition": 1,
+      "passed": 8,
+      "total": 8,
+      "actual": {
+        "A": "Not Evaluated",
+        "B": "Partially Supports",
+        "C": "Supports",
+        "D": "Not Applicable",
+        "E": "Not Evaluated",
+        "F": "Not Evaluated",
+        "G": "Not Evaluated",
+        "H": "Not Evaluated"
+      }
+    },
+    {
+      "variant": "corrected",
+      "repetition": 2,
+      "passed": 8,
+      "total": 8,
+      "actual": {
+        "A": "Not Evaluated",
+        "B": "Partially Supports",
+        "C": "Supports",
+        "D": "Not Applicable",
+        "E": "Not Evaluated",
+        "F": "Not Evaluated",
+        "G": "Not Evaluated",
+        "H": "Not Evaluated"
+      }
+    },
+    {
+      "variant": "corrected",
+      "repetition": 3,
+      "passed": 8,
+      "total": 8,
+      "actual": {
+        "A": "Not Evaluated",
+        "B": "Partially Supports",
+        "C": "Supports",
+        "D": "Not Applicable",
+        "E": "Not Evaluated",
+        "F": "Not Evaluated",
+        "G": "Not Evaluated",
+        "H": "Not Evaluated"
+      }
+    },
+    {
+      "variant": "ablation",
+      "repetition": 1,
+      "passed": 6,
+      "total": 8,
+      "actual": {
+        "A": "Not Evaluated",
+        "B": "Supports",
+        "C": "Supports",
+        "D": "Not Applicable",
+        "E": "Partially Supports",
+        "F": "Not Evaluated",
+        "G": "Not Evaluated",
+        "H": "Not Evaluated"
+      }
+    },
+    {
+      "variant": "ablation",
+      "repetition": 2,
+      "passed": 6,
+      "total": 8,
+      "actual": {
+        "A": "Not Evaluated",
+        "B": "Supports",
+        "C": "Supports",
+        "D": "Not Applicable",
+        "E": "Partially Supports",
+        "F": "Not Evaluated",
+        "G": "Not Evaluated",
+        "H": "Not Evaluated"
+      }
+    },
+    {
+      "variant": "ablation",
+      "repetition": 3,
+      "passed": 6,
+      "total": 8,
+      "actual": {
+        "A": "Not Evaluated",
+        "B": "Supports",
+        "C": "Supports",
+        "D": "Not Applicable",
+        "E": "Partially Supports",
+        "F": "Not Evaluated",
+        "G": "Not Evaluated",
+        "H": "Not Evaluated"
+      }
+    }
+  ],
+  "geracao_mcp_real": {
+    "casos": [
+      "guia com imagem, listas, tabela e link",
+      "tabela em varias paginas",
+      "relatorio de sessao"
+    ],
+    "formatos": [
+      "docx",
+      "pdf"
+    ],
+    "pdf_ua_1_verapdf": "passed nos tres PDFs",
+    "recursos_mcp": "bytes reabertos e comparados aos arquivos"
+  },
+  "codex_linguagem_natural": {
+    "geracao_docx": "passed",
+    "geracao_pdf": "passed",
+    "validacao_pdf_ua_1": "passed"
+  },
+  "codex_nesta_conversa": {
+    "ferramentas_nativas": "geracao e validacao executadas",
+    "docx": "automated_checks_passed",
+    "pdf": "automated_checks_passed",
+    "pdf_ua_1": "passed"
+  },
+  "limites": [
+    "Conjunto de oito casos sinteticos, nao todos os criterios nem todos os modelos",
+    "Nenhum teste de leitura dos documentos com NVDA real nesta entrega",
+    "Revisao humana visual e semantica continua necessaria",
+    "Chats do Claude, Cursor e VS Code nao foram executados nesta entrega"
+  ]
+}

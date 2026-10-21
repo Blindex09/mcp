@@ -111,7 +111,7 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         assert any(c["name"] == "page-structure-review" for c in cat) and all(c["quando_usar"] for c in cat)
         assert "a11y_find" not in registered and "a11y_walkthrough" not in registered and "a11y_review" not in registered  # nada depende de modelo
         prompts = {p.name for p in (await s.list_prompts()).prompts}
-        assert prompts == {"a11y_review", "a11y_walkthrough", "a11y_component", "a11y_site_scan", "a11y_compare_runs", "a11y_write_accessible_code"}
+        assert prompts == {"a11y_review", "a11y_walkthrough", "a11y_component", "a11y_site_scan", "a11y_compare_runs", "a11y_write_accessible_code", "a11y_accessible_document"}
         guided = (await s.get_prompt("a11y_review", {"url": f"{base}/index.html"})).messages[0].content.text
         assert "testing-playbook-for-ai" in guided and "NOT verified" in guided and "a11y_probe" in guided
         assert (await call("a11y_workflow", name="a11y_review", url=f"{base}/index.html")).content[0].text == guided  # a mesma coisa por ferramenta (clientes sem prompts)
@@ -195,6 +195,16 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         assert js(await call("a11y_report", format="sarif", save=False))["runs"][0]["results"][0]["ruleId"] == "WCAG-2.1.1"
         first_run = js(await call("a11y_report", format="json", goal="comprar um item"))["run_id"]  # guarda a execucao para exportar e comparar
         assert js(await call("a11y_close"))["closed"] is True
+
+        # ---------- documentos reais e relatorio dos achados medidos, pelo mesmo protocolo
+        generated = js(await call("a11y_create_document", document={"title": "Guia de teclado", "blocks": [{"kind": "paragraph", "text": "Percorra os controles e registre o foco."}]}, formats="docx"))
+        assert "error" not in generated
+        output = generated["files"][0]
+        assert js(await call("a11y_validate_document", path=output["path"], external=False))["status"] == "automated_checks_passed"
+        resource = await s.read_resource(output["uri"])
+        assert resource.contents[0].mimeType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        report_file = js(await call("a11y_create_report", formats="docx", run_id=first_run))
+        assert report_file["files"][0]["validation"]["status"] == "automated_checks_passed"
 
         # ---------- persona imposta pelo servidor (sem mouse)
         js(await call("a11y_open", url=index, persona="keyboard"))

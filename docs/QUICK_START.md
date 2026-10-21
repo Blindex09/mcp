@@ -61,6 +61,10 @@ Para não precisar explicar o método toda vez, o servidor traz fluxos prontos. 
 
 ### Se não funcionar
 
+Documentos: peça “gere um documento acessível em DOCX e PDF sobre este assunto”. O assistente usa `a11y_create_document`, devolve os arquivos e informa as verificações pendentes. Para achados já medidos, peça “gere os arquivos do relatório desta avaliação”; ele usa `a11y_create_report`. O fluxo `a11y_accessible_document`, também acessível por `a11y_workflow`, conduz essa entrega.
+
+Codex: o instalador registra o MCP como obrigatório (`required = true`) para o cliente aguardar suas ferramentas no primeiro turno. Depois de cadastrar ou atualizar, reinicie a sessão do Codex. As aprovações do cliente continuam valendo; ambientes que negam qualquer aprovação precisam de uma autorização explícita para as ferramentas de geração. O servidor grava documentos novos na sua pasta de documentos, sem sobrescrever arquivos do projeto.
+
 ```bash
 python "C:\projetos IA\mcp\scripts\test.py"          # confere dependências, conteúdo embutido e inicialização
 python "C:\projetos IA\mcp\mcp_server.py"    # roda o servidor e mostra o log no stderr

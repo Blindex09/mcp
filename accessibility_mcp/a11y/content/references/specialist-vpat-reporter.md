@@ -13,20 +13,23 @@ Generate a WCAG 2.2 Edition VPAT based on accessibility audit findings.
 
 ## Conformance declarations (compliance-auditor.md)
 For each criterion declare ONE of:
-- "Supports": No issues; product meets this criterion
+- "Supports": Evaluation of the entire declared scope is complete and positive evidence supports meeting this criterion
 - "Partially Supports": Some issues or criterion partially met
-- "Does Not Support": Critical/high issues blocking conformance
+- "Does Not Support": Evidence establishes that the criterion is not supported in the evaluated scope
 - "Not Applicable": Criterion does not apply to this content type
 - "Not Evaluated": Requires manual testing not yet performed
 
-## Decision rules based on issues
-- Criterion has CRITICAL issues -> "Does Not Support"
-- Criterion has HIGH issues -> "Partially Supports" or "Does Not Support"
-- Criterion has MEDIUM issues -> "Partially Supports"
-- Criterion has LOW issues only -> "Supports" with caveat note
-- No issues for this criterion -> "Supports"
-- Criterion requires AT/human testing (1.2.x audio/video, 2.3.1 flashes) -> "Not Evaluated"
-- Criterion clearly not applicable -> "Not Applicable"
+## Evidence and evaluation coverage
+- Absence of findings is not positive evidence. A clean scanner result does not establish Supports.
+- Severity is prioritization, not a conformance decision. An unresolved violation cannot become Supports because its severity is low.
+- Assess each criterion by meaning, using the actual scope, evidence, test methods and remaining gaps. Never map severity mechanically to a status.
+- Incomplete or missing evaluation remains Not Evaluated; describe any observed failures and the missing checks in remarks.
+- Supports requires complete evaluation of the declared scope and positive evidence, including necessary manual and assistive-technology checks.
+- Not Applicable requires an explicit applicability assessment with a documented reason; missing tests are not inapplicability.
+- Partially Supports and Does Not Support require contextual evidence of the extent of the failure, not just a severity label.
+- Do not automatically mark whole families of criteria Not Evaluated if actual evaluation evidence is available.
+
+Correction on 2026-10-20, also applied to both source prompts in Qaaccessibility: removed automatic approval based on no findings or low severity. Preserve this correction when synchronizing this playbook.
 
 ## Remarks format (evidence-based, per compliance-auditor.md)
 Each remarks must:
@@ -36,7 +39,7 @@ Each remarks must:
 4. Be concise: 1-3 sentences max
 
 ## Overall conformance summary
-2-3 sentences: % Level A met, % Level AA met, most critical remediation areas.
+State scope, methods, criteria evaluated, criteria not evaluated and remediation priorities. Do not turn a percentage of tested criteria into a product conformance claim.
 
 ## Output schema (JSON object, no markdown):
 {
@@ -63,4 +66,4 @@ Each remarks must:
   "total_not_applicable": <number>
 }
 
-Return ONLY valid JSON. No markdown fences.
+When the person requests a document, use a11y_create_document with explicit assessments to generate actual DOCX/PDF files. Map criterion_id to criterion and conformance to status, and include coverage, evidence and remarks. Return the file paths and disclose validation gaps; a JSON response alone is not a document deliverable.

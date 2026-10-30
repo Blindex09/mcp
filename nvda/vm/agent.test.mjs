@@ -105,8 +105,12 @@ test("esperar a fala assentar acompanha o NVDA em vez de um tempo fixo por passo
 
 test("percorrer: Tab e leitura gravam a fala de cada passo, avisam o andamento e sempre desligam o NVDA e o navegador", async () => {
   const eventos = [];
+  let marcador;
   let falas = [];
+
   const nvda = {
+    keyboardCommands: { reportTitle: "titulo" },
+    perform: async () => { falas = [marcador]; },
     start: async (o) => eventos.push(["start", o]),
     stop: async () => eventos.push(["stop"]),
     clearSpokenPhraseLog: async () => { falas = []; },
@@ -114,7 +118,7 @@ test("percorrer: Tab e leitura gravam a fala de cada passo, avisam o andamento e
     press: async (k) => { eventos.push(["press", k]); falas = [`fala de ${k}`]; },
     next: async () => { eventos.push(["next"]); falas = ["proximo item"]; },
   };
-  const page = { goto: async () => {}, reload: async () => {}, bringToFront: async () => {}, title: async () => "Casa do Chá" };
+  const page = { goto: async () => {}, reload: async () => {}, bringToFront: async () => {}, evaluate: async (_, id) => { marcador = id; } };
   const chromium = { launch: async () => ({ newPage: async () => page, close: async () => eventos.push(["fechou navegador"]) }) };
   const avancos = [];
   const r = await percorrer({ url: "http://exemplo.com", tabs: 2, leituras: 1, silencio: "volume" }, { nvda, chromium, windowsActivate: async () => {}, pause: async () => {} }, (n) => avancos.push(n));
@@ -128,13 +132,17 @@ test("percorrer: Tab e leitura gravam a fala de cada passo, avisam o andamento e
 
 test("percorrer: se algo falhar no meio, devolve o que ja foi falado, o erro, e ainda desliga tudo", async () => {
   const eventos = [];
+  let marcador;
+  let falas = [];
   const nvda = {
-    start: async () => {}, stop: async () => eventos.push("stop"), clearSpokenPhraseLog: async () => {},
-    spokenPhraseLog: async () => ["x"],
-    press: async () => { if (eventos.length >= 1) throw new Error("NVDA parou de responder"); eventos.push("press"); },
+    keyboardCommands: { reportTitle: "titulo" },
+    perform: async () => { falas = [marcador]; },
+    start: async () => {}, stop: async () => eventos.push("stop"), clearSpokenPhraseLog: async () => { falas = []; },
+    spokenPhraseLog: async () => falas,
+    press: async () => { if (eventos.length >= 1) throw new Error("NVDA parou de responder"); eventos.push("press"); falas = ["x"]; },
     next: async () => {},
   };
-  const page = { goto: async () => {}, reload: async () => {}, bringToFront: async () => {}, title: async () => "T" };
+  const page = { goto: async () => {}, reload: async () => {}, bringToFront: async () => {}, evaluate: async (_, id) => { marcador = id; } };
   const chromium = { launch: async () => ({ newPage: async () => page, close: async () => eventos.push("fechou") }) };
   const r = await percorrer({ url: "http://exemplo.com", tabs: 3, leituras: 0 }, { nvda, chromium, windowsActivate: async () => {}, pause: async () => {} });
   assert.equal(r.tab.length, 1);

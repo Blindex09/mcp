@@ -1,5 +1,7 @@
 // Percorre uma pagina com o NVDA real e devolve o que ele FALA, em texto. Sem modelo de IA.
 // As dependencias (NVDA, navegador, janela) entram por parametro: o teste automatico usa simulacoes e nunca liga o NVDA.
+import { criarControleDeFoco, esperarFalaAssentar } from "./focus.mjs";
+export { esperarFalaAssentar } from "./focus.mjs";
 
 export const LIMITES = { tabs: 60, leituras: 80 };
 
@@ -30,22 +32,6 @@ export async function carregarDependencias() {
   return { nvda, windowsActivate, chromium, pause: dormir };
 }
 
-// Espera a fala assentar: no minimo `minimo` ms, e depois ate o log ficar parado por `estavel` ms
-// (ou ate `maximo`, que so existe para nao ficar preso se o NVDA nunca falar). Nao e um tempo fixo por passo.
-export async function esperarFalaAssentar(nvda, pause, { minimo = 500, estavel = 400, maximo = 5000, passo = 100 } = {}) {
-  let gasto = 0;
-  let ultimo = (await nvda.spokenPhraseLog()).length;
-  let parado = 0;
-  while (gasto < maximo) {
-    await pause(passo);
-    gasto += passo;
-    const agora = (await nvda.spokenPhraseLog()).length;
-    parado = agora === ultimo ? parado + passo : 0;
-    ultimo = agora;
-    if (gasto >= minimo && parado >= estavel) return;
-  }
-}
-
 async function falasDoPasso(nvda, pause) {
   await esperarFalaAssentar(nvda, pause);
   const frases = await nvda.spokenPhraseLog();
@@ -60,45 +46,48 @@ export async function percorrer({ url, tabs = 15, leituras = 20, silencio } = {}
     throw new Error(`leituras deve ser um inteiro de 0 a ${LIMITES.leituras}`);
   }
   const settings = settingsDeSilencio(silencio);
-  const { nvda, windowsActivate, chromium, pause } = deps;
+  const { nvda, chromium, pause } = deps;
 
   const resultado = { url: alvo, silencio: silencio ?? null, iniciado: new Date().toISOString(), tab: [], leitura: [], erro: null };
   let navegador;
   let nvdaLigado = false;
-  const focarJanela = async (page) => {
-    await page.bringToFront();
-    const parte = ((await page.title()).split(/[^ -~]/)[0] || "Edge").trim();
-    await windowsActivate("msedge.exe", parte);
-    await pause(1200);
-  };
 
   try {
     navegador = await chromium.launch({ channel: "msedge", headless: false, args: ["--force-renderer-accessibility"] });
     const page = await navegador.newPage();
     await page.goto(alvo, { waitUntil: "load" });
+    const foco = criarControleDeFoco(deps, page);
+    resultado.foco = foco.registros;
+    resultado.tituloTemporario = true;
     await nvda.start(settings ? { settings } : undefined);
     nvdaLigado = true;
     await pause(2500);
-    await focarJanela(page);
+    await foco.ativar();
     await nvda.clearSpokenPhraseLog();
 
     // 1) como quem usa so o teclado: Tab, e o que o NVDA fala a cada parada
     for (let i = 1; i <= tabs; i++) {
+      await foco.exigir();
       await nvda.press("Tab");
-      resultado.tab.push({ passo: i, fala: await falasDoPasso(nvda, pause) });
+      const fala = await falasDoPasso(nvda, pause);
+      await foco.exigir();
+      resultado.tab.push({ passo: i, fala });
       aoAvancar(resultado.tab.length + resultado.leitura.length);
     }
 
     // 2) como quem le a pagina com o leitor de tela (modo leitura), do topo, item a item
     if (leituras > 0) {
       await page.reload({ waitUntil: "load" });
-      await focarJanela(page);
+      await foco.ativar();
       await nvda.press("Control+Home");
       await pause(1000);
       await nvda.clearSpokenPhraseLog();
       for (let i = 1; i <= leituras; i++) {
+        await foco.exigir();
         await nvda.next();
-        resultado.leitura.push({ passo: i, fala: await falasDoPasso(nvda, pause) });
+        const fala = await falasDoPasso(nvda, pause);
+        await foco.exigir();
+        resultado.leitura.push({ passo: i, fala });
         aoAvancar(resultado.tab.length + resultado.leitura.length);
       }
     }

@@ -1,5 +1,11 @@
 # NVDA de verdade numa máquina virtual
 
+Atualização de 30/10/2026: o executor agora confere a janela pelo comando de
+título do NVDA antes e depois dos passos. A recuperação automática tem testes
+simulados, mas a execução real corrigida ainda não foi autorizada pela revisão
+automática do ambiente. Detalhes e limites em
+[controle de foco](../../docs/modules/nvda_foco.md).
+
 Por que uma VM. O NVDA só tem uma cópia por vez e o Guidepup fecha a do usuário ao iniciar (ele chama `quit()` antes de começar). Numa VM, o seu NVDA, a sua voz e os seus complementos nunca são tocados, e você continua usando o computador e ouvindo a IA normalmente. A fala do NVDA da VM chega ao MCP como texto.
 
 ## O que você precisa fazer, uma vez só

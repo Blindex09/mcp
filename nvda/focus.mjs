@@ -19,7 +19,7 @@ export async function esperarFalaAssentar(nvda, pause, { minimo = 500, estavel =
 
 // Um identificador ASCII evita ambiguidades entre janelas e impede que o titulo
 // fornecido pelo site seja interpolado no VBS/PowerShell do Guidepup.
-export function criarControleDeFoco({ nvda, windowsActivate, pause }, page) {
+export function criarControleDeFoco({ nvda, windowsActivate, pause }, page, prepararJanela = async () => {}) {
   const marcador = `A11yNvda${randomUUID().replaceAll("-", "")}`;
   const registros = [];
   const confirmar = async () => {
@@ -41,11 +41,13 @@ export function criarControleDeFoco({ nvda, windowsActivate, pause }, page) {
     await page.bringToFront();
     // windowsActivate usa Get-Process internamente, que espera o nome sem .exe.
     await windowsActivate("msedge", marcador);
+    await prepararJanela();
     if (await confirmar()) return;
     // Recuperacao unica, sem laço: ALT permite ao Windows aceitar uma nova
     // ativacao de janela. Nenhuma tecla de navegacao e enviada antes da prova.
     await nvda.press("Alt");
     await windowsActivate("msedge", marcador);
+    await prepararJanela();
     await exigir();
   };
   return { ativar, exigir, registros };

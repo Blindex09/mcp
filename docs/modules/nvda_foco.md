@@ -56,6 +56,29 @@ alto-falantes Realtek, mantendo a configuração de áudio do NVDA instalado.
 Essa confirmação prova o roteamento de áudio naquela execução, não o foco.
 Os documentos do BlindHelp não foram substituídos com resultados desta correção.
 
+## Janela maximizada, 30/10/2026
+
+O executor de NVDA no Edge inicia com `--start-maximized` e `viewport: null`,
+para que a área da página acompanhe a janela, em vez do viewport emulado de
+1280 por 720 que o Playwright usa por padrão. Após cada tentativa de ativação,
+inclusive a recuperação e a ativação depois de recarregar a página, o executor
+solicita maximização pelo protocolo do próprio navegador e confere o estado.
+Se a janela não confirmar `maximized`, o teste termina com erro. A sessão de
+controle é desconectada mesmo em caso de falha.
+
+O resultado bruto registra em `janela` o estado e a área interna real em pixels
+CSS, além da escala de pixels do dispositivo. Isso não altera o zoom do site ou
+as preferências do Windows. Não modifica os testes específicos de reflow ou de
+telas menores do servidor Python, nem tenta maximizar navegadores sem interface.
+
+Verificação: 15 testes Node passaram, incluindo contrato de inicialização com
+viewport livre, maximização da janela correta, dimensões e desconexão na falha.
+Ruff, mypy e os oito testes Python da integração também passaram. A matriz foi
+executada novamente: 12 conceitos cobertos, um parcial e uma lacuna já descritos.
+A execução real continua pendente pelo bloqueio de segurança anterior; não foi
+tentada uma rota alternativa. Esses testes não comprovam a maximização na tela
+do usuário nem a correção do foco ao vivo.
+
 Referências consultadas: [ativação no Guidepup](https://www.guidepup.dev/docs/api/class-windows-activate),
 [testes com NVDA](https://www.guidepup.dev/docs/screen-reader-testing/testing-nvda)
 e [restrições de SetForegroundWindow](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setforegroundwindow).

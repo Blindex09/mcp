@@ -20,7 +20,7 @@ function ambiente({ ativacoesNecessarias = 1, perderNoTab = false } = {}) {
   };
   const page = {
     goto: async () => {}, reload: async () => {}, bringToFront: async () => {},
-    evaluate: async (_, id) => { marcador = id; },
+    context: () => ({ newCDPSession: async () => ({ send: async (method) => method === "Browser.getWindowForTarget" ? { windowId: 1 } : { bounds: { windowState: "maximized" } }, detach: async () => {} }) }), evaluate: async (_, id) => { if (id) marcador = id; else return { width: 1920, height: 980, deviceScaleFactor: 1 }; },
     title: async () => "Titulo com ' aspas e comandos $(nao executar)",
   };
   const deps = {

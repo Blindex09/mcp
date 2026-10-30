@@ -118,11 +118,15 @@ test("percorrer: Tab e leitura gravam a fala de cada passo, avisam o andamento e
     press: async (k) => { eventos.push(["press", k]); falas = [`fala de ${k}`]; },
     next: async () => { eventos.push(["next"]); falas = ["proximo item"]; },
   };
-  const page = { goto: async () => {}, reload: async () => {}, bringToFront: async () => {}, evaluate: async (_, id) => { marcador = id; } };
-  const chromium = { launch: async () => ({ newPage: async () => page, close: async () => eventos.push(["fechou navegador"]) }) };
+  const page = { goto: async () => {}, reload: async () => {}, bringToFront: async () => {}, context: () => ({ newCDPSession: async () => ({ send: async (method) => method === "Browser.getWindowForTarget" ? { windowId: 1 } : { bounds: { windowState: "maximized" } }, detach: async () => {} }) }), evaluate: async (_, id) => { if (id) marcador = id; else return { width: 1920, height: 980, deviceScaleFactor: 1 }; } };
+  const chromium = { launch: async (options) => {
+    assert.ok(options.args.includes("--start-maximized"));
+    return { newPage: async (contextOptions) => { assert.equal(contextOptions.viewport, null); return page; }, close: async () => eventos.push(["fechou navegador"]) };
+  } };
   const avancos = [];
   const r = await percorrer({ url: "http://exemplo.com", tabs: 2, leituras: 1, silencio: "volume" }, { nvda, chromium, windowsActivate: async () => {}, pause: async () => {} }, (n) => avancos.push(n));
   assert.equal(r.erro, null);
+  assert.deepEqual(r.janela, { state: "maximized", viewport: { width: 1920, height: 980, deviceScaleFactor: 1 } });
   assert.deepEqual(r.tab.map((x) => x.fala), ["fala de Tab", "fala de Tab"]);
   assert.deepEqual(r.leitura.map((x) => x.fala), ["proximo item"]);
   assert.deepEqual(avancos, [1, 2, 3]);
@@ -142,7 +146,7 @@ test("percorrer: se algo falhar no meio, devolve o que ja foi falado, o erro, e 
     press: async () => { if (eventos.length >= 1) throw new Error("NVDA parou de responder"); eventos.push("press"); falas = ["x"]; },
     next: async () => {},
   };
-  const page = { goto: async () => {}, reload: async () => {}, bringToFront: async () => {}, evaluate: async (_, id) => { marcador = id; } };
+  const page = { goto: async () => {}, reload: async () => {}, bringToFront: async () => {}, context: () => ({ newCDPSession: async () => ({ send: async (method) => method === "Browser.getWindowForTarget" ? { windowId: 1 } : { bounds: { windowState: "maximized" } }, detach: async () => {} }) }), evaluate: async (_, id) => { if (id) marcador = id; else return { width: 1920, height: 980, deviceScaleFactor: 1 }; } };
   const chromium = { launch: async () => ({ newPage: async () => page, close: async () => eventos.push("fechou") }) };
   const r = await percorrer({ url: "http://exemplo.com", tabs: 3, leituras: 0 }, { nvda, chromium, windowsActivate: async () => {}, pause: async () => {} });
   assert.equal(r.tab.length, 1);

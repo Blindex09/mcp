@@ -1,6 +1,7 @@
 // Percorre uma pagina com o NVDA real e devolve o que ele FALA, em texto. Sem modelo de IA.
 // As dependencias (NVDA, navegador, janela) entram por parametro: o teste automatico usa simulacoes e nunca liga o NVDA.
 import { criarControleDeFoco, esperarFalaAssentar } from "./focus.mjs";
+import { maximizarJanela } from "./window.mjs";
 export { esperarFalaAssentar } from "./focus.mjs";
 
 export const LIMITES = { tabs: 60, leituras: 80 };
@@ -53,10 +54,10 @@ export async function percorrer({ url, tabs = 15, leituras = 20, silencio } = {}
   let nvdaLigado = false;
 
   try {
-    navegador = await chromium.launch({ channel: "msedge", headless: false, args: ["--force-renderer-accessibility"] });
-    const page = await navegador.newPage();
+    navegador = await chromium.launch({ channel: "msedge", headless: false, args: ["--force-renderer-accessibility", "--start-maximized"] });
+    const page = await navegador.newPage({ viewport: null });
     await page.goto(alvo, { waitUntil: "load" });
-    const foco = criarControleDeFoco(deps, page);
+    const foco = criarControleDeFoco(deps, page, async () => { resultado.janela = await maximizarJanela(page); });
     resultado.foco = foco.registros;
     resultado.tituloTemporario = true;
     await nvda.start(settings ? { settings } : undefined);

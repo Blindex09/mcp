@@ -15,7 +15,7 @@
     const pointer = cs.cursor === 'pointer';
     if (!focusable && !listener && !pointer) continue;
     total++;
-    if (out.length >= limit) continue;
+    if (limit >= 0 && out.length >= limit) continue;
     if (!el.getAttribute('data-a11y-id')) el.setAttribute('data-a11y-id', 'e' + (++n));
     out.push({id: el.getAttribute('data-a11y-id'), focusable: focusable, listener: listener, pointer_cursor: pointer});
   }

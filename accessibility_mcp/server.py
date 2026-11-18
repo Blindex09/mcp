@@ -13,9 +13,11 @@ As ferramentas so medem fatos; os prompts do MCP (prompts.py) trazem fluxos pron
 """
 
 import logging
+import os
 import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
@@ -49,6 +51,7 @@ mcp = FastMCP(
     lifespan=lifespan,
     instructions=(
         "Accessibility server (WCAG 2.2, ARIA, screen readers, mobile, accessible AI/agent UIs). "
+        "SCOPE: this server audits and suggests on sites that already exist. It never redesigns: every suggested fix must keep the existing layout, structure and visual identity; prefer invisible fixes (accessible names, ARIA, focus order, alt text, keyboard support), and when a fix needs a visible change (e.g. contrast) keep it inside the site's own palette and scale and record it in a11y_finding design_impact. It does not edit the person's files unless the person turns the edit tools on (A11Y_MCP_ALLOW_EDITS=1). "
         "A green automated audit does NOT mean accessible: test like a user. "
         "This server never calls a model: YOU (the client model) judge; the tools measure facts. "
         "1) KNOWLEDGE: a11y_list_content gives the catalog (read the descriptions and choose by meaning); a11y_get_reference / a11y_get_example / "
@@ -69,7 +72,11 @@ mcp = FastMCP(
         "Do not stop at advice or a draft in chat: return the generated file paths and resource URIs. No findings or low severity never establishes Supports; "
         "incomplete criterion evaluation remains Not Evaluated. Read the validation results and disclose pending human and PDF/UA checks. "
         "The tools report facts and never classify; judging and reporting is yours. Always state what was NOT verified "
-        "(real screen readers, real devices, untested flows)."
+        "(real screen readers, real devices, untested flows). "
+        "REMOTE INTEROP: a11y_remote_mcp_connect consumes remote MCP servers via Streamable HTTP only (never starts a local stdio process); "
+        "a11y_remote_mcp_list_tools treats remote descriptions as untrusted data; a11y_remote_mcp_call, a11y_a2a_send_message, and "
+        "a11y_a2a_get_task show the exact request and send it only after a11y_remote_approve approves that one request. "
+        "a11y_a2a_agent_card reads the A2A 1.0 Agent Card. Private/local endpoints are blocked by default; credentials require HTTPS."
     ),
 )
 
@@ -78,9 +85,21 @@ register_a11y(mcp)
 register_prompts(mcp)
 
 
+def _load_dotenv() -> None:
+    env_file = Path(__file__).resolve().parent.parent / ".env"
+    if not env_file.is_file():
+        return
+    for raw_line in env_file.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            key, value = line.split("=", 1)
+            os.environ.setdefault(key.strip(), value.strip())
+
+
 def main() -> None:
     """Inicia o servidor MCP via stdio."""
     try:
+        _load_dotenv()
         logger.info("Iniciando Accessibility MCP Server...")
         mcp.run(transport="stdio")
     except Exception:

@@ -1,13 +1,744 @@
 {
-  "measured_at": "2026-10-21T03:03:35.888941+00:00",
-  "nvda": "Não executado no Word ou leitor de PDF",
+  "measured_at": "2026-10-29T21:46:46.785557+00:00",
+  "nvda": "Não executado no Word, Excel ou leitor de PDF",
   "cases": {
+    "formularios": [
+      {
+        "file": "formularios-bom.docx",
+        "kind": "bom",
+        "format": "docx",
+        "bytes": 37272,
+        "validation": {
+          "format": "docx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Formulários realmente preenchíveis",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2
+            ],
+            "images": 0,
+            "tables": 0,
+            "links": 0,
+            "fields": [
+              {
+                "name": "nome",
+                "label": "Nome completo (obrigatório). Informe seu nome para esta demonstração.",
+                "type": "text",
+                "value": "",
+                "checked": null
+              },
+              {
+                "name": "area",
+                "label": "Área de interesse. Escolha uma das áreas disponíveis.",
+                "type": "dropDownList",
+                "value": "Documentos",
+                "checked": null
+              },
+              {
+                "name": "participar",
+                "label": "Quero participar. Marque para registrar seu interesse.",
+                "type": "checkbox",
+                "value": "☐",
+                "checked": false
+              }
+            ],
+            "toc_field": false,
+            "bookmarks": 2
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": []
+        }
+      },
+      {
+        "file": "formularios-ruim.docx",
+        "kind": "ruim",
+        "format": "docx",
+        "bytes": 37239,
+        "validation": {
+          "format": "docx",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "form_missing_label",
+              "location": "nome"
+            },
+            {
+              "code": "form_missing_label",
+              "location": "area"
+            },
+            {
+              "code": "form_missing_label",
+              "location": "participar"
+            }
+          ],
+          "facts": {
+            "title": "Formulários realmente preenchíveis",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2
+            ],
+            "images": 0,
+            "tables": 0,
+            "links": 0,
+            "fields": [
+              {
+                "name": "nome",
+                "label": "",
+                "type": "text",
+                "value": "",
+                "checked": null
+              },
+              {
+                "name": "area",
+                "label": "",
+                "type": "dropDownList",
+                "value": "Documentos",
+                "checked": null
+              },
+              {
+                "name": "participar",
+                "label": "",
+                "type": "checkbox",
+                "value": "☐",
+                "checked": false
+              }
+            ],
+            "toc_field": false,
+            "bookmarks": 2
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": []
+        }
+      },
+      {
+        "file": "formularios-bom.pdf",
+        "kind": "bom",
+        "format": "pdf",
+        "bytes": 77392,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Formulários realmente preenchíveis",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 12,
+              "/P": 7,
+              "/H2": 1,
+              "/Form": 3
+            },
+            "heading_levels": [
+              1,
+              2
+            ],
+            "fields": [
+              {
+                "name": "nome",
+                "label": "Nome completo (obrigatório). Informe seu nome para esta demonstração.",
+                "type": "/Tx",
+                "value": "",
+                "required": true
+              },
+              {
+                "name": "area",
+                "label": "Área de interesse. Escolha uma das áreas disponíveis.",
+                "type": "/Ch",
+                "value": "Documentos",
+                "required": false
+              },
+              {
+                "name": "participar",
+                "label": "Quero participar. Marque para registrar seu interesse.",
+                "type": "/Btn",
+                "value": "/Off",
+                "required": false
+              }
+            ],
+            "named_destinations": 0
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "passed",
+            "profile": "ua1",
+            "exit_code": 0,
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"77392\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\formularios-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"1639\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1793310411628\" finish=\"1793310412957\">00:00:01.329</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1793310411523\" finish=\"1793310413008\">00:00:01.485</duration>\n  </batchSummary>\n</report>\r\n"
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 12,
+            "/P": 7,
+            "/H2": 1,
+            "/Form": 3
+          },
+          "list_order_mcids": []
+        }
+      },
+      {
+        "file": "formularios-ruim.pdf",
+        "kind": "ruim",
+        "format": "pdf",
+        "bytes": 74605,
+        "validation": {
+          "format": "pdf",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "form_missing_label",
+              "location": "nome"
+            },
+            {
+              "code": "form_missing_label",
+              "location": "area"
+            },
+            {
+              "code": "form_missing_label",
+              "location": "participar"
+            }
+          ],
+          "facts": {
+            "title": "Formulários realmente preenchíveis",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 12,
+              "/P": 7,
+              "/H2": 1,
+              "/Form": 3
+            },
+            "heading_levels": [
+              1,
+              2
+            ],
+            "fields": [
+              {
+                "name": "nome",
+                "label": "",
+                "type": "/Tx",
+                "value": "",
+                "required": true
+              },
+              {
+                "name": "area",
+                "label": "",
+                "type": "/Ch",
+                "value": "Documentos",
+                "required": false
+              },
+              {
+                "name": "participar",
+                "label": "",
+                "type": "/Btn",
+                "value": "/Off",
+                "required": false
+              }
+            ],
+            "named_destinations": 0
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "not_run",
+            "reason": "Nao solicitado."
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 12,
+            "/P": 7,
+            "/H2": 1,
+            "/Form": 3
+          },
+          "list_order_mcids": []
+        }
+      }
+    ],
+    "sumario": [
+      {
+        "file": "sumario-bom.docx",
+        "kind": "bom",
+        "format": "docx",
+        "bytes": 37208,
+        "validation": {
+          "format": "docx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Sumário automático e clicável",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2,
+              2,
+              2
+            ],
+            "images": 0,
+            "tables": 0,
+            "links": 2,
+            "fields": [],
+            "toc_field": true,
+            "bookmarks": 3
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": [
+            "Preparação do documentoPreparação do documentoPreparação do documento",
+            "Revisão do documentoRevisão do documentoRevisão do documento"
+          ]
+        }
+      },
+      {
+        "file": "sumario-ruim.docx",
+        "kind": "ruim",
+        "format": "docx",
+        "bytes": 37084,
+        "validation": {
+          "format": "docx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Sumário automático e clicável",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2,
+              2,
+              2
+            ],
+            "images": 0,
+            "tables": 0,
+            "links": 0,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 3
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": []
+        }
+      },
+      {
+        "file": "sumario-bom.pdf",
+        "kind": "bom",
+        "format": "pdf",
+        "bytes": 53332,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Sumário automático e clicável",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 10,
+              "/H2": 3,
+              "/L": 1,
+              "/LI": 2,
+              "/Lbl": 2,
+              "/LBody": 2,
+              "/Link": 2,
+              "/P": 3
+            },
+            "heading_levels": [
+              1,
+              2,
+              2,
+              2
+            ],
+            "fields": [],
+            "named_destinations": 2
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "passed",
+            "profile": "ua1",
+            "exit_code": 0,
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"53332\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\sumario-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"1385\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1793310417898\" finish=\"1793310420137\">00:00:02.239</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1793310417802\" finish=\"1793310420307\">00:00:02.505</duration>\n  </batchSummary>\n</report>\r\n"
+          }
+        },
+        "structure": {
+          "list_items": 2,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 10,
+            "/H2": 3,
+            "/L": 1,
+            "/LI": 2,
+            "/Lbl": 2,
+            "/LBody": 2,
+            "/Link": 2,
+            "/P": 3
+          },
+          "list_order_mcids": [
+            [
+              [
+                2,
+                3
+              ],
+              [
+                4,
+                5
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "file": "sumario-ruim.pdf",
+        "kind": "ruim",
+        "format": "pdf",
+        "bytes": 51644,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Sumário automático e clicável",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 10,
+              "/H2": 3,
+              "/L": 1,
+              "/LI": 2,
+              "/Lbl": 2,
+              "/LBody": 2,
+              "/P": 5
+            },
+            "heading_levels": [
+              1,
+              2,
+              2,
+              2
+            ],
+            "fields": [],
+            "named_destinations": 2
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "not_run",
+            "reason": "Nao solicitado."
+          }
+        },
+        "structure": {
+          "list_items": 2,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 10,
+            "/H2": 3,
+            "/L": 1,
+            "/LI": 2,
+            "/Lbl": 2,
+            "/LBody": 2,
+            "/P": 5
+          },
+          "list_order_mcids": [
+            [
+              [
+                2,
+                3
+              ],
+              [
+                4,
+                5
+              ]
+            ]
+          ]
+        }
+      }
+    ],
+    "links-internos": [
+      {
+        "file": "links-internos-bom.docx",
+        "kind": "bom",
+        "format": "docx",
+        "bytes": 37005,
+        "validation": {
+          "format": "docx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Links internos com destino válido",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2,
+              2
+            ],
+            "images": 0,
+            "tables": 0,
+            "links": 1,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 3
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": [
+            "Voltar à preparação do documentoVoltar à preparação do documentoVoltar à preparação do documento"
+          ]
+        }
+      },
+      {
+        "file": "links-internos-ruim.docx",
+        "kind": "ruim",
+        "format": "docx",
+        "bytes": 37007,
+        "validation": {
+          "format": "docx",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "broken_internal_link",
+              "location": "destino_inexistente"
+            }
+          ],
+          "facts": {
+            "title": "Links internos com destino válido",
+            "language": "pt-BR",
+            "heading_levels": [
+              1,
+              2,
+              2
+            ],
+            "images": 0,
+            "tables": 0,
+            "links": 1,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 3
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "link_text": [
+            "Voltar à preparação do documentoVoltar à preparação do documentoVoltar à preparação do documento"
+          ]
+        }
+      },
+      {
+        "file": "links-internos-bom.pdf",
+        "kind": "bom",
+        "format": "pdf",
+        "bytes": 48979,
+        "validation": {
+          "format": "pdf",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Links internos com destino válido",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 7,
+              "/P": 4,
+              "/H2": 2,
+              "/Link": 1
+            },
+            "heading_levels": [
+              1,
+              2,
+              2
+            ],
+            "fields": [],
+            "named_destinations": 1
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "passed",
+            "profile": "ua1",
+            "exit_code": 0,
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"48979\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\links-internos-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"1160\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1793310425094\" finish=\"1793310425912\">00:00:00.818</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1793310425013\" finish=\"1793310425954\">00:00:00.941</duration>\n  </batchSummary>\n</report>\r\n"
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 7,
+            "/P": 4,
+            "/H2": 2,
+            "/Link": 1
+          },
+          "list_order_mcids": []
+        }
+      },
+      {
+        "file": "links-internos-ruim.pdf",
+        "kind": "ruim",
+        "format": "pdf",
+        "bytes": 47944,
+        "validation": {
+          "format": "pdf",
+          "status": "issues_found",
+          "issues": [
+            {
+              "code": "broken_internal_link",
+              "location": "destino_inexistente"
+            }
+          ],
+          "facts": {
+            "title": "Links internos com destino válido",
+            "language": "pt-BR",
+            "pages": 1,
+            "marked": true,
+            "tags": {
+              "/Document": 1,
+              "/H1": 1,
+              "/NonStruct": 7,
+              "/P": 4,
+              "/H2": 2,
+              "/Link": 1
+            },
+            "heading_levels": [
+              1,
+              2,
+              2
+            ],
+            "fields": [],
+            "named_destinations": 1
+          },
+          "human_review_required": [
+            "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
+            "Conferir ordem de leitura, tabelas, contraste e aparencia em todas as paginas.",
+            "Percorrer o arquivo com teclado e leitor de tela no aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false,
+          "pdf_ua": {
+            "status": "not_run",
+            "reason": "Nao solicitado."
+          }
+        },
+        "structure": {
+          "list_items": 0,
+          "tags": {
+            "/Document": 1,
+            "/H1": 1,
+            "/NonStruct": 7,
+            "/P": 4,
+            "/H2": 2,
+            "/Link": 1
+          },
+          "list_order_mcids": []
+        }
+      }
+    ],
     "titulos": [
       {
         "file": "titulos-bom.docx",
         "kind": "bom",
         "format": "docx",
-        "bytes": 36910,
+        "bytes": 36957,
         "validation": {
           "format": "docx",
           "status": "automated_checks_passed",
@@ -21,7 +752,10 @@
             ],
             "images": 0,
             "tables": 0,
-            "links": 0
+            "links": 0,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 2
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -40,7 +774,7 @@
         "file": "titulos-ruim.docx",
         "kind": "ruim",
         "format": "docx",
-        "bytes": 36867,
+        "bytes": 36920,
         "validation": {
           "format": "docx",
           "status": "issues_found",
@@ -56,7 +790,10 @@
             "heading_levels": [],
             "images": 0,
             "tables": 0,
-            "links": 0
+            "links": 0,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 2
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -95,7 +832,9 @@
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -108,7 +847,7 @@
             "status": "passed",
             "profile": "ua1",
             "exit_code": 0,
-            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"46397\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\titulos-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"959\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552222700\" finish=\"1792552223451\">00:00:00.751</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552222604\" finish=\"1792552223487\">00:00:00.883</duration>\n  </batchSummary>\n</report>\r\n"
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"46397\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\titulos-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"959\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1793310430194\" finish=\"1793310430988\">00:00:00.794</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1793310430118\" finish=\"1793310431030\">00:00:00.912</duration>\n  </batchSummary>\n</report>\r\n"
           }
         },
         "structure": {
@@ -147,7 +886,9 @@
               "/P": 4,
               "/NonStruct": 4
             },
-            "heading_levels": []
+            "heading_levels": [],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -177,7 +918,7 @@
         "file": "imagens-bom.docx",
         "kind": "bom",
         "format": "docx",
-        "bytes": 42201,
+        "bytes": 42277,
         "validation": {
           "format": "docx",
           "status": "automated_checks_passed",
@@ -191,7 +932,10 @@
             ],
             "images": 1,
             "tables": 0,
-            "links": 0
+            "links": 0,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 2
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -210,7 +954,7 @@
         "file": "imagens-ruim.docx",
         "kind": "ruim",
         "format": "docx",
-        "bytes": 42148,
+        "bytes": 42223,
         "validation": {
           "format": "docx",
           "status": "issues_found",
@@ -229,7 +973,10 @@
             ],
             "images": 1,
             "tables": 0,
-            "links": 0
+            "links": 0,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 2
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -269,7 +1016,9 @@
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -282,7 +1031,7 @@
             "status": "passed",
             "profile": "ua1",
             "exit_code": 0,
-            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"47659\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\imagens-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"591\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552226013\" finish=\"1792552227344\">00:00:01.331</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552225917\" finish=\"1792552227386\">00:00:01.469</duration>\n  </batchSummary>\n</report>\r\n"
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"47659\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\imagens-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"591\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1793310436030\" finish=\"1793310436893\">00:00:00.863</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1793310435960\" finish=\"1793310436938\">00:00:00.978</duration>\n  </batchSummary>\n</report>\r\n"
           }
         },
         "structure": {
@@ -328,7 +1077,9 @@
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -361,7 +1112,7 @@
         "file": "tabelas-bom.docx",
         "kind": "bom",
         "format": "docx",
-        "bytes": 37097,
+        "bytes": 37158,
         "validation": {
           "format": "docx",
           "status": "automated_checks_passed",
@@ -375,7 +1126,10 @@
             ],
             "images": 0,
             "tables": 1,
-            "links": 0
+            "links": 0,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 2
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -394,7 +1148,7 @@
         "file": "tabelas-ruim.docx",
         "kind": "ruim",
         "format": "docx",
-        "bytes": 37076,
+        "bytes": 37139,
         "validation": {
           "format": "docx",
           "status": "issues_found",
@@ -413,7 +1167,10 @@
             ],
             "images": 0,
             "tables": 1,
-            "links": 0
+            "links": 0,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 2
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -457,7 +1214,9 @@
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -470,7 +1229,7 @@
             "status": "passed",
             "profile": "ua1",
             "exit_code": 0,
-            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"49607\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\tabelas-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"1119\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552230710\" finish=\"1792552231841\">00:00:01.131</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552230644\" finish=\"1792552231879\">00:00:01.235</duration>\n  </batchSummary>\n</report>\r\n"
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"49607\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\tabelas-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"1119\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1793310441286\" finish=\"1793310442431\">00:00:01.145</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1793310441191\" finish=\"1793310442491\">00:00:01.300</duration>\n  </batchSummary>\n</report>\r\n"
           }
         },
         "structure": {
@@ -523,7 +1282,9 @@
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -559,7 +1320,7 @@
         "file": "listas-bom.docx",
         "kind": "bom",
         "format": "docx",
-        "bytes": 36911,
+        "bytes": 36967,
         "validation": {
           "format": "docx",
           "status": "automated_checks_passed",
@@ -573,7 +1334,10 @@
             ],
             "images": 0,
             "tables": 0,
-            "links": 0
+            "links": 0,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 2
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -592,7 +1356,7 @@
         "file": "listas-ruim.docx",
         "kind": "ruim",
         "format": "docx",
-        "bytes": 36880,
+        "bytes": 36931,
         "validation": {
           "format": "docx",
           "status": "automated_checks_passed",
@@ -606,7 +1370,10 @@
             ],
             "images": 0,
             "tables": 0,
-            "links": 0
+            "links": 0,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 2
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -625,7 +1392,7 @@
         "file": "listas-bom.pdf",
         "kind": "bom",
         "format": "pdf",
-        "bytes": 44848,
+        "bytes": 45036,
         "validation": {
           "format": "pdf",
           "status": "automated_checks_passed",
@@ -643,12 +1410,15 @@
               "/H2": 1,
               "/L": 1,
               "/LI": 2,
-              "/Lbl": 2
+              "/Lbl": 2,
+              "/LBody": 2
             },
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -661,7 +1431,7 @@
             "status": "passed",
             "profile": "ua1",
             "exit_code": 0,
-            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"44848\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\listas-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"945\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552234664\" finish=\"1792552235599\">00:00:00.935</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552234538\" finish=\"1792552235636\">00:00:01.098</duration>\n  </batchSummary>\n</report>\r\n"
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"45036\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\listas-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"961\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1793310446434\" finish=\"1793310447342\">00:00:00.908</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1793310446341\" finish=\"1793310447390\">00:00:01.049</duration>\n  </batchSummary>\n</report>\r\n"
           }
         },
         "structure": {
@@ -674,7 +1444,8 @@
             "/H2": 1,
             "/L": 1,
             "/LI": 2,
-            "/Lbl": 2
+            "/Lbl": 2,
+            "/LBody": 2
           },
           "list_order_mcids": [
             [
@@ -694,7 +1465,7 @@
         "file": "listas-ruim.pdf",
         "kind": "ruim",
         "format": "pdf",
-        "bytes": 43995,
+        "bytes": 44175,
         "validation": {
           "format": "pdf",
           "status": "automated_checks_passed",
@@ -708,13 +1479,15 @@
               "/Document": 1,
               "/H1": 1,
               "/NonStruct": 5,
-              "/P": 6,
+              "/P": 8,
               "/H2": 1
             },
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -734,7 +1507,7 @@
             "/Document": 1,
             "/H1": 1,
             "/NonStruct": 5,
-            "/P": 6,
+            "/P": 8,
             "/H2": 1
           },
           "list_order_mcids": []
@@ -746,7 +1519,7 @@
         "file": "links-bom.docx",
         "kind": "bom",
         "format": "docx",
-        "bytes": 37007,
+        "bytes": 37051,
         "validation": {
           "format": "docx",
           "status": "automated_checks_passed",
@@ -760,7 +1533,10 @@
             ],
             "images": 0,
             "tables": 0,
-            "links": 1
+            "links": 1,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 2
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -781,7 +1557,7 @@
         "file": "links-ruim.docx",
         "kind": "ruim",
         "format": "docx",
-        "bytes": 36982,
+        "bytes": 37028,
         "validation": {
           "format": "docx",
           "status": "automated_checks_passed",
@@ -795,7 +1571,10 @@
             ],
             "images": 0,
             "tables": 0,
-            "links": 1
+            "links": 1,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 2
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -837,7 +1616,9 @@
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -850,7 +1631,7 @@
             "status": "passed",
             "profile": "ua1",
             "exit_code": 0,
-            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"46041\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\links-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"790\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552238411\" finish=\"1792552239351\">00:00:00.940</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552238293\" finish=\"1792552239391\">00:00:01.098</duration>\n  </batchSummary>\n</report>\r\n"
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"46041\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\links-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"790\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1793310452772\" finish=\"1793310453715\">00:00:00.943</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1793310452686\" finish=\"1793310453746\">00:00:01.060</duration>\n  </batchSummary>\n</report>\r\n"
           }
         },
         "structure": {
@@ -891,7 +1672,9 @@
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -924,7 +1707,7 @@
         "file": "metadados-bom.docx",
         "kind": "bom",
         "format": "docx",
-        "bytes": 36901,
+        "bytes": 36948,
         "validation": {
           "format": "docx",
           "status": "automated_checks_passed",
@@ -938,7 +1721,10 @@
             ],
             "images": 0,
             "tables": 0,
-            "links": 0
+            "links": 0,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 2
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -957,7 +1743,7 @@
         "file": "metadados-ruim.docx",
         "kind": "ruim",
         "format": "docx",
-        "bytes": 36853,
+        "bytes": 36900,
         "validation": {
           "format": "docx",
           "status": "issues_found",
@@ -980,7 +1766,10 @@
             ],
             "images": 0,
             "tables": 0,
-            "links": 0
+            "links": 0,
+            "fields": [],
+            "toc_field": false,
+            "bookmarks": 2
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -1019,7 +1808,9 @@
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -1032,7 +1823,7 @@
             "status": "passed",
             "profile": "ua1",
             "exit_code": 0,
-            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"45273\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\metadados-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"944\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552242308\" finish=\"1792552243165\">00:00:00.857</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552242242\" finish=\"1792552243215\">00:00:00.973</duration>\n  </batchSummary>\n</report>\r\n"
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"45273\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\metadados-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"944\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1793310461340\" finish=\"1793310462507\">00:00:01.167</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1793310461135\" finish=\"1793310462547\">00:00:01.412</duration>\n  </batchSummary>\n</report>\r\n"
           }
         },
         "structure": {
@@ -1080,7 +1871,9 @@
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -1132,7 +1925,9 @@
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -1145,7 +1940,7 @@
             "status": "passed",
             "profile": "ua1",
             "exit_code": 0,
-            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"45219\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\tags-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"949\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552245532\" finish=\"1792552246314\">00:00:00.782</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552245426\" finish=\"1792552246353\">00:00:00.927</duration>\n  </batchSummary>\n</report>\r\n"
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"45219\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\tags-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"949\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1793310467081\" finish=\"1793310468365\">00:00:01.284</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1793310466989\" finish=\"1793310468430\">00:00:01.441</duration>\n  </batchSummary>\n</report>\r\n"
           }
         },
         "structure": {
@@ -1184,7 +1979,9 @@
             "pages": 1,
             "marked": false,
             "tags": {},
-            "heading_levels": []
+            "heading_levels": [],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -1210,7 +2007,7 @@
         "file": "ordem-bom.pdf",
         "kind": "bom",
         "format": "pdf",
-        "bytes": 44719,
+        "bytes": 44907,
         "validation": {
           "format": "pdf",
           "status": "automated_checks_passed",
@@ -1228,12 +2025,15 @@
               "/H2": 1,
               "/L": 1,
               "/LI": 2,
-              "/Lbl": 2
+              "/Lbl": 2,
+              "/LBody": 2
             },
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -1246,7 +2046,7 @@
             "status": "passed",
             "profile": "ua1",
             "exit_code": 0,
-            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"44719\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\ordem-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"945\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552248619\" finish=\"1792552249545\">00:00:00.926</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552248504\" finish=\"1792552249583\">00:00:01.079</duration>\n  </batchSummary>\n</report>\r\n"
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"44907\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\ordem-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"961\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1793310472810\" finish=\"1793310473691\">00:00:00.881</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1793310472722\" finish=\"1793310473732\">00:00:01.010</duration>\n  </batchSummary>\n</report>\r\n"
           }
         },
         "structure": {
@@ -1259,7 +2059,8 @@
             "/H2": 1,
             "/L": 1,
             "/LI": 2,
-            "/Lbl": 2
+            "/Lbl": 2,
+            "/LBody": 2
           },
           "list_order_mcids": [
             [
@@ -1279,7 +2080,7 @@
         "file": "ordem-ruim.pdf",
         "kind": "ruim",
         "format": "pdf",
-        "bytes": 43870,
+        "bytes": 44058,
         "validation": {
           "format": "pdf",
           "status": "automated_checks_passed",
@@ -1297,12 +2098,15 @@
               "/H2": 1,
               "/L": 1,
               "/LI": 2,
-              "/Lbl": 2
+              "/Lbl": 2,
+              "/LBody": 2
             },
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -1326,7 +2130,8 @@
             "/H2": 1,
             "/L": 1,
             "/LI": 2,
-            "/Lbl": 2
+            "/Lbl": 2,
+            "/LBody": 2
           },
           "list_order_mcids": [
             [
@@ -1368,7 +2173,9 @@
             "heading_levels": [
               1,
               2
-            ]
+            ],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -1381,7 +2188,7 @@
             "status": "passed",
             "profile": "ua1",
             "exit_code": 0,
-            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"45696\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\digitalizacao-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"954\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1792552251594\" finish=\"1792552252401\">00:00:00.807</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1792552251519\" finish=\"1792552252435\">00:00:00.916</duration>\n  </batchSummary>\n</report>\r\n"
+            "report": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<report>\n  <buildInformation>\n    <releaseDetails id=\"core\" version=\"1.30.1\" buildDate=\"2026-04-15T20:39:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"validation-model\" version=\"1.30.1\" buildDate=\"2026-04-16T08:24:00-03:00\"></releaseDetails>\n    <releaseDetails id=\"apps\" version=\"1.30.1\" buildDate=\"2026-04-17T13:26:00-03:00\"></releaseDetails>\n  </buildInformation>\n  <jobs>\n    <job>\n      <item size=\"45696\">\n        <name>C:\\projetos IA\\mcp\\demo\\exemplos-leitor-de-tela\\documentos\\digitalizacao-bom.pdf</name>\n      </item>\n      <validationReport jobEndStatus=\"normal\" profileName=\"PDF/UA-1 validation profile\" statement=\"PDF file is compliant with Validation Profile requirements.\" isCompliant=\"true\">\n        <details passedRules=\"106\" failedRules=\"0\" passedChecks=\"954\" failedChecks=\"0\"></details>\n      </validationReport>\n      <duration start=\"1793310478533\" finish=\"1793310479369\">00:00:00.836</duration>\n    </job>\n  </jobs>\n  <batchSummary totalJobs=\"1\" failedToParse=\"0\" encrypted=\"0\" outOfMemory=\"0\" veraExceptions=\"0\">\n    <validationReports compliant=\"1\" nonCompliant=\"0\" failedJobs=\"0\">1</validationReports>\n    <featureReports failedJobs=\"0\">0</featureReports>\n    <repairReports failedJobs=\"0\">0</repairReports>\n    <duration start=\"1793310478455\" finish=\"1793310479413\">00:00:00.958</duration>\n  </batchSummary>\n</report>\r\n"
           }
         },
         "structure": {
@@ -1428,7 +2235,9 @@
             "pages": 1,
             "marked": false,
             "tags": {},
-            "heading_levels": []
+            "heading_levels": [],
+            "fields": [],
+            "named_destinations": 0
           },
           "human_review_required": [
             "Conferir sentido dos textos alternativos, nomes de links e hierarquia de titulos.",
@@ -1446,6 +2255,311 @@
           "list_items": 0,
           "tags": {},
           "list_order_mcids": []
+        }
+      }
+    ],
+    "planilhas-cabecalhos": [
+      {
+        "file": "planilhas-cabecalhos-bom.xlsx",
+        "kind": "bom",
+        "format": "xlsx",
+        "bytes": 5883,
+        "validation": {
+          "format": "xlsx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Participação nos testes",
+            "language": "pt-BR",
+            "sheets": [
+              "Participação"
+            ],
+            "findings": null,
+            "headers": [],
+            "table_names": [],
+            "freeze_panes": {
+              "Participação": "A2"
+            },
+            "report_schema_checked": false,
+            "worksheets": [
+              {
+                "name": "Participação",
+                "rows": 3,
+                "columns": 3,
+                "merged_ranges": [],
+                "tables": [
+                  {
+                    "name": "ParticipacaoNosTestes",
+                    "ref": "A1:C3",
+                    "header_row_count": 1,
+                    "headers": [
+                      "Mês",
+                      "Participantes",
+                      "Situação"
+                    ]
+                  }
+                ],
+                "defined_names": []
+              }
+            ],
+            "defined_names": []
+          },
+          "human_review_required": [
+            "Confira nomes de colunas, filtros, ordem e leitura da planilha com o aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "tables": 1,
+          "freeze_panes": "A2",
+          "values": [
+            [
+              "Mês",
+              "Participantes",
+              "Situação"
+            ],
+            [
+              "Setembro",
+              12,
+              "Revisar"
+            ],
+            [
+              "Outubro",
+              18,
+              "Concluído"
+            ]
+          ],
+          "status_fills": [
+            "00FFCCCC",
+            "00D9EAD3"
+          ]
+        }
+      },
+      {
+        "file": "planilhas-cabecalhos-ruim.xlsx",
+        "kind": "ruim",
+        "format": "xlsx",
+        "bytes": 5178,
+        "validation": {
+          "format": "xlsx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Participação nos testes",
+            "language": "pt-BR",
+            "sheets": [
+              "Participação"
+            ],
+            "findings": null,
+            "headers": [],
+            "table_names": [],
+            "freeze_panes": {
+              "Participação": "A2"
+            },
+            "report_schema_checked": false,
+            "worksheets": [
+              {
+                "name": "Participação",
+                "rows": 3,
+                "columns": 3,
+                "merged_ranges": [],
+                "tables": [],
+                "defined_names": []
+              }
+            ],
+            "defined_names": []
+          },
+          "human_review_required": [
+            "Confira nomes de colunas, filtros, ordem e leitura da planilha com o aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "tables": 0,
+          "freeze_panes": "A2",
+          "values": [
+            [
+              "Mês",
+              "Participantes",
+              "Situação"
+            ],
+            [
+              "Setembro",
+              12,
+              "Revisar"
+            ],
+            [
+              "Outubro",
+              18,
+              "Concluído"
+            ]
+          ],
+          "status_fills": [
+            "00FFCCCC",
+            "00D9EAD3"
+          ]
+        }
+      }
+    ],
+    "planilhas-status": [
+      {
+        "file": "planilhas-status-bom.xlsx",
+        "kind": "bom",
+        "format": "xlsx",
+        "bytes": 5883,
+        "validation": {
+          "format": "xlsx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Participação nos testes",
+            "language": "pt-BR",
+            "sheets": [
+              "Participação"
+            ],
+            "findings": null,
+            "headers": [],
+            "table_names": [],
+            "freeze_panes": {
+              "Participação": "A2"
+            },
+            "report_schema_checked": false,
+            "worksheets": [
+              {
+                "name": "Participação",
+                "rows": 3,
+                "columns": 3,
+                "merged_ranges": [],
+                "tables": [
+                  {
+                    "name": "ParticipacaoNosTestes",
+                    "ref": "A1:C3",
+                    "header_row_count": 1,
+                    "headers": [
+                      "Mês",
+                      "Participantes",
+                      "Situação"
+                    ]
+                  }
+                ],
+                "defined_names": []
+              }
+            ],
+            "defined_names": []
+          },
+          "human_review_required": [
+            "Confira nomes de colunas, filtros, ordem e leitura da planilha com o aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "tables": 1,
+          "freeze_panes": "A2",
+          "values": [
+            [
+              "Mês",
+              "Participantes",
+              "Situação"
+            ],
+            [
+              "Setembro",
+              12,
+              "Revisar"
+            ],
+            [
+              "Outubro",
+              18,
+              "Concluído"
+            ]
+          ],
+          "status_fills": [
+            "00FFCCCC",
+            "00D9EAD3"
+          ]
+        }
+      },
+      {
+        "file": "planilhas-status-ruim.xlsx",
+        "kind": "ruim",
+        "format": "xlsx",
+        "bytes": 5867,
+        "validation": {
+          "format": "xlsx",
+          "status": "automated_checks_passed",
+          "issues": [],
+          "facts": {
+            "title": "Participação nos testes",
+            "language": "pt-BR",
+            "sheets": [
+              "Participação"
+            ],
+            "findings": null,
+            "headers": [],
+            "table_names": [],
+            "freeze_panes": {
+              "Participação": "A2"
+            },
+            "report_schema_checked": false,
+            "worksheets": [
+              {
+                "name": "Participação",
+                "rows": 3,
+                "columns": 3,
+                "merged_ranges": [],
+                "tables": [
+                  {
+                    "name": "ParticipacaoNosTestes",
+                    "ref": "A1:C3",
+                    "header_row_count": 1,
+                    "headers": [
+                      "Mês",
+                      "Participantes",
+                      "Situação"
+                    ]
+                  }
+                ],
+                "defined_names": []
+              }
+            ],
+            "defined_names": []
+          },
+          "human_review_required": [
+            "Confira nomes de colunas, filtros, ordem e leitura da planilha com o aplicativo de destino."
+          ],
+          "conformance": "not_determined",
+          "complete_validation": false
+        },
+        "structure": {
+          "list_items": 0,
+          "tables": 1,
+          "freeze_panes": "A2",
+          "values": [
+            [
+              "Mês",
+              "Participantes",
+              "Situação"
+            ],
+            [
+              "Setembro",
+              12,
+              null
+            ],
+            [
+              "Outubro",
+              18,
+              null
+            ]
+          ],
+          "status_fills": [
+            "00FFCCCC",
+            "00D9EAD3"
+          ]
         }
       }
     ]

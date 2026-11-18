@@ -33,6 +33,9 @@ def register_files(mcp: Any) -> None:
         except files.FileError as e:
             return _json({"error": str(e)})
 
+    if not files.edits_allowed():
+        return  # o MCP so audita e sugere: sem A11Y_MCP_ALLOW_EDITS=1 as ferramentas de edicao nem existem
+
     @mcp.tool()
     async def a11y_edit_file(path: str, old_string: str, new_string: str, replace_all: bool = False) -> str:
         """Edit a file of the person's project by replacing an EXACT piece of text (old_string must appear once, or use replace_all), or

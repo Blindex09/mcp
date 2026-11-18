@@ -1,0 +1,1176 @@
+{
+  "date": "2026-10-28",
+  "client": "Codex CLI, configuração padrão; sem modelo no servidor MCP",
+  "candidate_sha256": "7f5357e4c2ba9056701a0cbda270376a7904e81ec27ab5ef97da50c5e10819b8",
+  "scope": "24 cenários de calibração normativa; três repetições e três ablações. Não cobre todos os guias, clientes ou modelos.",
+  "review": "O avaliador estrito inicial esperava insufficient em sete situações cuja propriedade já estava confirmada. As justificativas rejeitam a falha automática, sem certificar a página. property_satisfied foi aceito nesses casos após revisão semântica. No select não medido, insufficient e needs_review expressam a mesma falta de conclusão. Nenhum defeito confirmado passou a ser aceito. Preservados os resultados estritos e sua saída de falha.",
+  "raw_summary": [
+    {
+      "variant": "guide",
+      "repetition": 1,
+      "passed": 16,
+      "total": 24,
+      "actual": {
+        "h1": "property_satisfied",
+        "salto": "needs_review",
+        "titulo_visual": "repair_and_retest",
+        "main": "property_satisfied",
+        "foco": "property_satisfied",
+        "foco_invisivel": "repair_and_retest",
+        "parcial": "property_satisfied",
+        "integral": "repair_and_retest",
+        "pontos": "insufficient",
+        "inline": "property_satisfied",
+        "alvo": "repair_and_retest",
+        "erro": "property_satisfied",
+        "erro_vermelho": "repair_and_retest",
+        "select": "insufficient",
+        "fala": "not_tested",
+        "modal": "property_satisfied",
+        "teclado": "repair_and_retest",
+        "status": "repair_and_retest",
+        "amostra": "insufficient",
+        "sem_achados": "insufficient",
+        "inconclusivo": "insufficient",
+        "metodo": "property_satisfied",
+        "atributo": "repair_and_retest",
+        "prioridade": "insufficient"
+      }
+    },
+    {
+      "variant": "guide",
+      "repetition": 2,
+      "passed": 16,
+      "total": 24,
+      "actual": {
+        "h1": "property_satisfied",
+        "salto": "needs_review",
+        "titulo_visual": "repair_and_retest",
+        "main": "property_satisfied",
+        "foco": "property_satisfied",
+        "foco_invisivel": "repair_and_retest",
+        "parcial": "property_satisfied",
+        "integral": "repair_and_retest",
+        "pontos": "insufficient",
+        "inline": "property_satisfied",
+        "alvo": "repair_and_retest",
+        "erro": "property_satisfied",
+        "erro_vermelho": "repair_and_retest",
+        "select": "insufficient",
+        "fala": "not_tested",
+        "modal": "property_satisfied",
+        "teclado": "repair_and_retest",
+        "status": "repair_and_retest",
+        "amostra": "insufficient",
+        "sem_achados": "insufficient",
+        "inconclusivo": "insufficient",
+        "metodo": "property_satisfied",
+        "atributo": "repair_and_retest",
+        "prioridade": "insufficient"
+      }
+    },
+    {
+      "variant": "guide",
+      "repetition": 3,
+      "passed": 16,
+      "total": 24,
+      "actual": {
+        "h1": "property_satisfied",
+        "salto": "needs_review",
+        "titulo_visual": "repair_and_retest",
+        "main": "property_satisfied",
+        "foco": "property_satisfied",
+        "foco_invisivel": "repair_and_retest",
+        "parcial": "property_satisfied",
+        "integral": "repair_and_retest",
+        "pontos": "insufficient",
+        "inline": "property_satisfied",
+        "alvo": "repair_and_retest",
+        "erro": "property_satisfied",
+        "erro_vermelho": "repair_and_retest",
+        "select": "insufficient",
+        "fala": "not_tested",
+        "modal": "property_satisfied",
+        "teclado": "repair_and_retest",
+        "status": "repair_and_retest",
+        "amostra": "insufficient",
+        "sem_achados": "insufficient",
+        "inconclusivo": "insufficient",
+        "metodo": "property_satisfied",
+        "atributo": "repair_and_retest",
+        "prioridade": "insufficient"
+      }
+    },
+    {
+      "variant": "ablation",
+      "repetition": 1,
+      "passed": 17,
+      "total": 24,
+      "actual": {
+        "h1": "property_satisfied",
+        "salto": "needs_review",
+        "titulo_visual": "repair_and_retest",
+        "main": "property_satisfied",
+        "foco": "property_satisfied",
+        "foco_invisivel": "repair_and_retest",
+        "parcial": "property_satisfied",
+        "integral": "repair_and_retest",
+        "pontos": "insufficient",
+        "inline": "property_satisfied",
+        "alvo": "repair_and_retest",
+        "erro": "property_satisfied",
+        "erro_vermelho": "repair_and_retest",
+        "select": "needs_review",
+        "fala": "not_tested",
+        "modal": "property_satisfied",
+        "teclado": "repair_and_retest",
+        "status": "repair_and_retest",
+        "amostra": "insufficient",
+        "sem_achados": "insufficient",
+        "inconclusivo": "insufficient",
+        "metodo": "property_satisfied",
+        "atributo": "repair_and_retest",
+        "prioridade": "insufficient"
+      }
+    },
+    {
+      "variant": "ablation",
+      "repetition": 2,
+      "passed": 16,
+      "total": 24,
+      "actual": {
+        "h1": "property_satisfied",
+        "salto": "needs_review",
+        "titulo_visual": "repair_and_retest",
+        "main": "property_satisfied",
+        "foco": "property_satisfied",
+        "foco_invisivel": "repair_and_retest",
+        "parcial": "property_satisfied",
+        "integral": "repair_and_retest",
+        "pontos": "insufficient",
+        "inline": "property_satisfied",
+        "alvo": "repair_and_retest",
+        "erro": "property_satisfied",
+        "erro_vermelho": "repair_and_retest",
+        "select": "insufficient",
+        "fala": "not_tested",
+        "modal": "property_satisfied",
+        "teclado": "repair_and_retest",
+        "status": "repair_and_retest",
+        "amostra": "insufficient",
+        "sem_achados": "insufficient",
+        "inconclusivo": "insufficient",
+        "metodo": "property_satisfied",
+        "atributo": "repair_and_retest",
+        "prioridade": "insufficient"
+      }
+    },
+    {
+      "variant": "ablation",
+      "repetition": 3,
+      "passed": 16,
+      "total": 24,
+      "actual": {
+        "h1": "property_satisfied",
+        "salto": "needs_review",
+        "titulo_visual": "repair_and_retest",
+        "main": "property_satisfied",
+        "foco": "property_satisfied",
+        "foco_invisivel": "repair_and_retest",
+        "parcial": "property_satisfied",
+        "integral": "repair_and_retest",
+        "pontos": "insufficient",
+        "inline": "property_satisfied",
+        "alvo": "repair_and_retest",
+        "erro": "property_satisfied",
+        "erro_vermelho": "repair_and_retest",
+        "select": "insufficient",
+        "fala": "not_tested",
+        "modal": "property_satisfied",
+        "teclado": "repair_and_retest",
+        "status": "repair_and_retest",
+        "amostra": "insufficient",
+        "sem_achados": "insufficient",
+        "inconclusivo": "insufficient",
+        "metodo": "property_satisfied",
+        "atributo": "repair_and_retest",
+        "prioridade": "insufficient"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "h1",
+      "question": "Dois h1 representam topicos de mesmo nivel e estrutura foi confirmada coerente. A contagem sozinha prova violacao WCAG?",
+      "original_expected": "insufficient",
+      "accepted_after_review": [
+        "insufficient",
+        "property_satisfied"
+      ]
+    },
+    {
+      "id": "salto",
+      "question": "Ha h2 seguido de h4. Nao foi verificada a relacao estrutural. Apenas esse salto basta para falha?",
+      "original_expected": "needs_review",
+      "accepted_after_review": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "titulo_visual",
+      "question": "Titulo que comunica uma secao foi confirmado como div sem qualquer semantica ou equivalente textual de estrutura. Corrigir?",
+      "original_expected": "repair_and_retest",
+      "accepted_after_review": [
+        "repair_and_retest"
+      ]
+    },
+    {
+      "id": "main",
+      "question": "Pagina nao tem main mas tem mecanismo de pular blocos repetidos confirmado e relacoes corretas. Ausencia de main sozinha comprova falha?",
+      "original_expected": "insufficient",
+      "accepted_after_review": [
+        "insufficient",
+        "property_satisfied"
+      ]
+    },
+    {
+      "id": "foco",
+      "question": "Indicador muda fundo e borda de maneira visivel e contraste aplicavel foi confirmado. Outline none sozinho prova falha?",
+      "original_expected": "insufficient",
+      "accepted_after_review": [
+        "insufficient",
+        "property_satisfied"
+      ]
+    },
+    {
+      "id": "foco_invisivel",
+      "question": "Tab chega ao controle mas nenhuma indicacao visual aparece, confirmado por inspecao em modo teclado. Corrigir?",
+      "original_expected": "repair_and_retest",
+      "accepted_after_review": [
+        "repair_and_retest"
+      ]
+    },
+    {
+      "id": "parcial",
+      "question": "Banner cobre 20% do componente focado; restante visivel. Isso sozinho prova falha 2.4.11 AA?",
+      "original_expected": "insufficient",
+      "accepted_after_review": [
+        "insufficient",
+        "property_satisfied"
+      ]
+    },
+    {
+      "id": "integral",
+      "question": "Banner do autor esconde inteiramente componente que recebe foco; usuario nao consegue revela-lo sem avancar foco. Corrigir?",
+      "original_expected": "repair_and_retest",
+      "accepted_after_review": [
+        "repair_and_retest"
+      ]
+    },
+    {
+      "id": "pontos",
+      "question": "Cinco pontos amostrados estao cobertos, sem exame da area restante. Isso prova area inteiramente oculta?",
+      "original_expected": "insufficient",
+      "accepted_after_review": [
+        "insufficient"
+      ]
+    },
+    {
+      "id": "inline",
+      "question": "Link pequeno em frase continua; excecao inline foi confirmada. Tamanho isolado exige reparo 2.5.8?",
+      "original_expected": "insufficient",
+      "accepted_after_review": [
+        "insufficient",
+        "property_satisfied"
+      ]
+    },
+    {
+      "id": "alvo",
+      "question": "Botoes independentes 10x10 sem espacamento, alternativa equivalente ou outra excecao. Corrigir?",
+      "original_expected": "repair_and_retest",
+      "accepted_after_review": [
+        "repair_and_retest"
+      ]
+    },
+    {
+      "id": "erro",
+      "question": "Erro identificado em texto e associado programaticamente ao campo; foco no resumo vinculado. Nao ha aria-invalid. Ausencia isolada prova falha 3.3.1?",
+      "original_expected": "insufficient",
+      "accepted_after_review": [
+        "insufficient",
+        "property_satisfied"
+      ]
+    },
+    {
+      "id": "erro_vermelho",
+      "question": "Erro e informado apenas por borda vermelha, sem texto nem identificacao acessivel. Corrigir?",
+      "original_expected": "repair_and_retest",
+      "accepted_after_review": [
+        "repair_and_retest"
+      ]
+    },
+    {
+      "id": "select",
+      "question": "Popup nativo select nao pode ser inspecionado pelo DOM dessa sonda. Declarar aprovado?",
+      "original_expected": "not_tested|needs_review",
+      "accepted_after_review": [
+        "insufficient",
+        "needs_review",
+        "not_tested"
+      ]
+    },
+    {
+      "id": "fala",
+      "question": "Arvore de acessibilidade tem nome e papel; NVDA nao foi executado. Podemos transcrever fala real?",
+      "original_expected": "not_tested",
+      "accepted_after_review": [
+        "not_tested"
+      ]
+    },
+    {
+      "id": "modal",
+      "question": "Dialog nativo aberto com showModal, nome acessivel e comportamento confirmado. Ausencia aria-modal sozinha prova falha?",
+      "original_expected": "insufficient",
+      "accepted_after_review": [
+        "insufficient",
+        "property_satisfied"
+      ]
+    },
+    {
+      "id": "teclado",
+      "question": "Div com acao exclusiva de clique nao pode receber foco nem operar por teclado e nao tem equivalente. Corrigir?",
+      "original_expected": "repair_and_retest",
+      "accepted_after_review": [
+        "repair_and_retest"
+      ]
+    },
+    {
+      "id": "status",
+      "question": "Resultados mudam silenciosamente sem mover foco; mensagem de status confirmada nao e exposta programaticamente. Corrigir?",
+      "original_expected": "repair_and_retest",
+      "accepted_after_review": [
+        "repair_and_retest"
+      ]
+    },
+    {
+      "id": "amostra",
+      "question": "Somente a home inicial foi examinada. Podemos declarar conformidade do site todo e checkout?",
+      "original_expected": "insufficient",
+      "accepted_after_review": [
+        "insufficient"
+      ]
+    },
+    {
+      "id": "sem_achados",
+      "question": "Axe nao encontrou erros, mas imagens, fluxos e teclado nao foram avaliados. Podemos declarar tudo acessivel?",
+      "original_expected": "insufficient",
+      "accepted_after_review": [
+        "insufficient"
+      ]
+    },
+    {
+      "id": "inconclusivo",
+      "question": "Medicao nao foi completada; usuario exige resposta definitiva. Devemos inventar passed ou failed?",
+      "original_expected": "insufficient",
+      "accepted_after_review": [
+        "insufficient"
+      ]
+    },
+    {
+      "id": "metodo",
+      "question": "Busca antes bloqueada pelo harness. Depois de corrigido, teste real chegou a resultados. Isso prova que o envio funcionou nesse teste, sem aprovar acessibilidade inteira?",
+      "original_expected": "property_satisfied",
+      "accepted_after_review": [
+        "property_satisfied"
+      ]
+    },
+    {
+      "id": "atributo",
+      "question": "Nome de botao foi confirmado vazio na arvore e nao ha texto ou alternativa. Corrigir?",
+      "original_expected": "repair_and_retest",
+      "accepted_after_review": [
+        "repair_and_retest"
+      ]
+    },
+    {
+      "id": "prioridade",
+      "question": "Recomendacao de alta prioridade comprova prazo SLA obrigatorio sem acordo?",
+      "original_expected": "insufficient",
+      "accepted_after_review": [
+        "insufficient"
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "variant": "guide",
+      "repetition": 1,
+      "accepted_after_review": 24,
+      "total": 24,
+      "responses": [
+        {
+          "id": "h1",
+          "decision": "property_satisfied",
+          "reason": "A estrutura foi confirmada coerente; dois h1, isoladamente, não comprovam violação."
+        },
+        {
+          "id": "salto",
+          "decision": "needs_review",
+          "reason": "O salto isolado não basta; é necessário verificar as relações estruturais."
+        },
+        {
+          "id": "titulo_visual",
+          "decision": "repair_and_retest",
+          "reason": "A estrutura comunicada visualmente não tem equivalente programático; corrigir e testar."
+        },
+        {
+          "id": "main",
+          "decision": "property_satisfied",
+          "reason": "O mecanismo de pular blocos e as relações foram confirmados; main não é obrigatório por si só."
+        },
+        {
+          "id": "foco",
+          "decision": "property_satisfied",
+          "reason": "O indicador visível e seu contraste foram confirmados; outline não é a única técnica válida."
+        },
+        {
+          "id": "foco_invisivel",
+          "decision": "repair_and_retest",
+          "reason": "A ausência confirmada de indicação visual de foco exige correção e novo teste."
+        },
+        {
+          "id": "parcial",
+          "decision": "property_satisfied",
+          "reason": "A cobertura parcial descrita não caracteriza ocultação integral exigida para falha em 2.4.11 AA."
+        },
+        {
+          "id": "integral",
+          "decision": "repair_and_retest",
+          "reason": "O componente focado fica inteiramente oculto pelo banner do autor sem poder ser revelado; corrigir e testar."
+        },
+        {
+          "id": "pontos",
+          "decision": "insufficient",
+          "reason": "Cinco pontos cobertos não demonstram que toda a área esteja oculta."
+        },
+        {
+          "id": "inline",
+          "decision": "property_satisfied",
+          "reason": "A exceção inline foi confirmada; o tamanho isolado não exige reparo em 2.5.8."
+        },
+        {
+          "id": "alvo",
+          "decision": "repair_and_retest",
+          "reason": "Os alvos de 10×10 não atendem ao tamanho mínimo nem às exceções descritas; corrigir e testar."
+        },
+        {
+          "id": "erro",
+          "decision": "property_satisfied",
+          "reason": "A identificação textual, associação e resumo vinculado foram confirmados; aria-invalid não é obrigatório isoladamente."
+        },
+        {
+          "id": "erro_vermelho",
+          "decision": "repair_and_retest",
+          "reason": "A borda vermelha é o único sinal de erro; fornecer identificação textual acessível e testar."
+        },
+        {
+          "id": "select",
+          "decision": "insufficient",
+          "reason": "A sonda não consegue medir o popup nativo; isso não constitui aprovação."
+        },
+        {
+          "id": "fala",
+          "decision": "not_tested",
+          "reason": "O NVDA não foi executado; nome e papel na árvore não comprovam fala real."
+        },
+        {
+          "id": "modal",
+          "decision": "property_satisfied",
+          "reason": "showModal fornece modalidade nativa; nome e comportamento foram confirmados sem exigir aria-modal."
+        },
+        {
+          "id": "teclado",
+          "decision": "repair_and_retest",
+          "reason": "A ação não pode ser operada por teclado e não tem equivalente; corrigir e testar."
+        },
+        {
+          "id": "status",
+          "decision": "repair_and_retest",
+          "reason": "A mensagem de status não é exposta programaticamente; corrigir o anúncio e testar."
+        },
+        {
+          "id": "amostra",
+          "decision": "insufficient",
+          "reason": "A home inicial não sustenta conclusão sobre todo o site ou o checkout."
+        },
+        {
+          "id": "sem_achados",
+          "decision": "insufficient",
+          "reason": "A ausência de achados no axe não cobre imagens, fluxos e operação por teclado."
+        },
+        {
+          "id": "inconclusivo",
+          "decision": "insufficient",
+          "reason": "A medição incompleta não permite conclusão definitiva; não inventar aprovação ou falha."
+        },
+        {
+          "id": "metodo",
+          "decision": "property_satisfied",
+          "reason": "O teste real confirmou o envio e a chegada aos resultados nesse cenário, sem certificar toda a acessibilidade."
+        },
+        {
+          "id": "atributo",
+          "decision": "repair_and_retest",
+          "reason": "O botão tem nome acessível vazio e nenhuma alternativa; fornecer nome e testar."
+        },
+        {
+          "id": "prioridade",
+          "decision": "insufficient",
+          "reason": "Alta prioridade não estabelece prazo SLA obrigatório sem acordo que o determine."
+        }
+      ]
+    },
+    {
+      "variant": "guide",
+      "repetition": 2,
+      "accepted_after_review": 24,
+      "total": 24,
+      "responses": [
+        {
+          "id": "h1",
+          "decision": "property_satisfied",
+          "reason": "A estrutura foi confirmada coerente; dois h1, isoladamente, não comprovam violação WCAG."
+        },
+        {
+          "id": "salto",
+          "decision": "needs_review",
+          "reason": "O salto isolado não comprova falha; é necessário inspecionar as relações estruturais."
+        },
+        {
+          "id": "titulo_visual",
+          "decision": "repair_and_retest",
+          "reason": "A seção comunica estrutura visual sem equivalente programático; corrigir e retestar."
+        },
+        {
+          "id": "main",
+          "decision": "property_satisfied",
+          "reason": "O mecanismo de bypass e as relações foram confirmados; a ausência de main isoladamente não comprova falha."
+        },
+        {
+          "id": "foco",
+          "decision": "property_satisfied",
+          "reason": "O indicador alternativo é visível e tem contraste confirmado; outline:none isoladamente não comprova falha."
+        },
+        {
+          "id": "foco_invisivel",
+          "decision": "repair_and_retest",
+          "reason": "A ausência confirmada de indicação visual de foco exige correção e reteste."
+        },
+        {
+          "id": "parcial",
+          "decision": "property_satisfied",
+          "reason": "A cobertura parcial descrita não configura, isoladamente, ocultação integral exigida para falha em 2.4.11 AA."
+        },
+        {
+          "id": "integral",
+          "decision": "repair_and_retest",
+          "reason": "O componente focado fica inteiramente oculto por conteúdo do autor, sem possibilidade de revelá-lo mantendo o foco."
+        },
+        {
+          "id": "pontos",
+          "decision": "insufficient",
+          "reason": "Cinco pontos cobertos não demonstram ocultação de toda a área do componente."
+        },
+        {
+          "id": "inline",
+          "decision": "property_satisfied",
+          "reason": "A exceção inline foi confirmada; o tamanho isolado não exige reparo por 2.5.8."
+        },
+        {
+          "id": "alvo",
+          "decision": "repair_and_retest",
+          "reason": "Os alvos medem 10×10 CSS px, sem espaçamento suficiente ou exceção aplicável."
+        },
+        {
+          "id": "erro",
+          "decision": "property_satisfied",
+          "reason": "O erro está identificado e associado ao campo; aria-invalid não é requisito universal de 3.3.1."
+        },
+        {
+          "id": "erro_vermelho",
+          "decision": "repair_and_retest",
+          "reason": "A borda vermelha sozinha não identifica nem descreve o erro em texto acessível."
+        },
+        {
+          "id": "select",
+          "decision": "insufficient",
+          "reason": "A sonda não conseguiu medir o popup nativo; isso não permite aprovação."
+        },
+        {
+          "id": "fala",
+          "decision": "not_tested",
+          "reason": "O NVDA não foi executado; nome e papel na árvore não comprovam fala real."
+        },
+        {
+          "id": "modal",
+          "decision": "property_satisfied",
+          "reason": "showModal fornece modalidade nativa; nome e comportamento foram confirmados, sem necessidade de aria-modal explícito."
+        },
+        {
+          "id": "teclado",
+          "decision": "repair_and_retest",
+          "reason": "A ação não pode ser operada por teclado e não possui equivalente acessível."
+        },
+        {
+          "id": "status",
+          "decision": "repair_and_retest",
+          "reason": "A mensagem de status confirmada não é exposta programaticamente; corrigir e retestar."
+        },
+        {
+          "id": "amostra",
+          "decision": "insufficient",
+          "reason": "Examinar somente a home inicial não sustenta conformidade do site inteiro ou do checkout."
+        },
+        {
+          "id": "sem_achados",
+          "decision": "insufficient",
+          "reason": "A ausência de achados no axe não cobre imagens, fluxos e operação por teclado não avaliados."
+        },
+        {
+          "id": "inconclusivo",
+          "decision": "insufficient",
+          "reason": "A medição incompleta não sustenta passed ou failed; não se deve inventar resultado."
+        },
+        {
+          "id": "metodo",
+          "decision": "property_satisfied",
+          "reason": "O teste real confirmou que o envio funcionou nessa execução; não certifica a acessibilidade inteira."
+        },
+        {
+          "id": "atributo",
+          "decision": "repair_and_retest",
+          "reason": "O botão tem nome acessível vazio e nenhuma alternativa; corrigir e retestar."
+        },
+        {
+          "id": "prioridade",
+          "decision": "insufficient",
+          "reason": "Alta prioridade não estabelece prazo de SLA obrigatório sem acordo aplicável."
+        }
+      ]
+    },
+    {
+      "variant": "guide",
+      "repetition": 3,
+      "accepted_after_review": 24,
+      "total": 24,
+      "responses": [
+        {
+          "id": "h1",
+          "decision": "property_satisfied",
+          "reason": "A estrutura foi confirmada coerente; dois h1, isoladamente, não comprovam violação WCAG."
+        },
+        {
+          "id": "salto",
+          "decision": "needs_review",
+          "reason": "O salto isolado não comprova falha; é necessário verificar a relação estrutural entre os títulos."
+        },
+        {
+          "id": "titulo_visual",
+          "decision": "repair_and_retest",
+          "reason": "A seção comunica estrutura visual sem equivalente programático; corrigir a semântica e testar."
+        },
+        {
+          "id": "main",
+          "decision": "property_satisfied",
+          "reason": "O mecanismo de pular blocos e as relações foram confirmados; ausência de main isolada não comprova falha."
+        },
+        {
+          "id": "foco",
+          "decision": "property_satisfied",
+          "reason": "O indicador visível e seu contraste foram confirmados; outline não é obrigatório."
+        },
+        {
+          "id": "foco_invisivel",
+          "decision": "repair_and_retest",
+          "reason": "A ausência confirmada de indicação visual de foco exige correção e novo teste."
+        },
+        {
+          "id": "parcial",
+          "decision": "property_satisfied",
+          "reason": "A sobreposição parcial descrita não configura ocultação integral em 2.4.11 AA; isso não certifica outros critérios."
+        },
+        {
+          "id": "integral",
+          "decision": "repair_and_retest",
+          "reason": "O componente focado fica inteiramente oculto por conteúdo do autor, sem possibilidade de revelá-lo mantendo o foco."
+        },
+        {
+          "id": "pontos",
+          "decision": "insufficient",
+          "reason": "Cinco pontos cobertos não demonstram que toda a área do componente está oculta."
+        },
+        {
+          "id": "inline",
+          "decision": "property_satisfied",
+          "reason": "A exceção inline foi confirmada; o tamanho isolado não exige reparo por 2.5.8."
+        },
+        {
+          "id": "alvo",
+          "decision": "repair_and_retest",
+          "reason": "Os alvos de 10×10 CSS px não atendem ao tamanho mínimo nem às exceções descritas."
+        },
+        {
+          "id": "erro",
+          "decision": "property_satisfied",
+          "reason": "O erro está identificado e associado ao campo, com resumo vinculado; aria-invalid não é requisito universal de 3.3.1."
+        },
+        {
+          "id": "erro_vermelho",
+          "decision": "repair_and_retest",
+          "reason": "A borda vermelha é o único sinal de erro; fornecer identificação textual acessível e testar."
+        },
+        {
+          "id": "select",
+          "decision": "insufficient",
+          "reason": "A sonda não conseguiu medir o popup nativo; usar um método apropriado antes de concluir."
+        },
+        {
+          "id": "fala",
+          "decision": "not_tested",
+          "reason": "NVDA não foi executado; nome e papel na árvore não comprovam fala real."
+        },
+        {
+          "id": "modal",
+          "decision": "property_satisfied",
+          "reason": "showModal fornece modalidade nativa; nome e comportamento foram confirmados, sem necessidade de aria-modal explícito."
+        },
+        {
+          "id": "teclado",
+          "decision": "repair_and_retest",
+          "reason": "A ação não pode ser alcançada nem operada por teclado e não possui equivalente."
+        },
+        {
+          "id": "status",
+          "decision": "repair_and_retest",
+          "reason": "A mensagem de status não é exposta programaticamente; corrigir sua exposição e testar a atualização."
+        },
+        {
+          "id": "amostra",
+          "decision": "insufficient",
+          "reason": "A home inicial não fornece evidência sobre o restante do site ou o processo completo de checkout."
+        },
+        {
+          "id": "sem_achados",
+          "decision": "insufficient",
+          "reason": "A ausência de achados no axe não cobre imagens, fluxos e operação por teclado não avaliados."
+        },
+        {
+          "id": "inconclusivo",
+          "decision": "insufficient",
+          "reason": "A medição incompleta não sustenta aprovação nem reprovação; registrar a limitação sem inventar resultados."
+        },
+        {
+          "id": "metodo",
+          "decision": "property_satisfied",
+          "reason": "O teste real confirmou que o envio chegou a resultados naquele cenário; não certifica a acessibilidade inteira."
+        },
+        {
+          "id": "atributo",
+          "decision": "repair_and_retest",
+          "reason": "O botão tem nome acessível vazio e nenhuma alternativa; fornecer nome e testar novamente."
+        },
+        {
+          "id": "prioridade",
+          "decision": "insufficient",
+          "reason": "Uma recomendação de alta prioridade não estabelece prazo SLA obrigatório sem acordo aplicável."
+        }
+      ]
+    },
+    {
+      "variant": "ablation",
+      "repetition": 1,
+      "accepted_after_review": 24,
+      "total": 24,
+      "responses": [
+        {
+          "id": "h1",
+          "decision": "property_satisfied",
+          "reason": "A estrutura foi confirmada coerente; múltiplos h1 não comprovam violação pela contagem."
+        },
+        {
+          "id": "salto",
+          "decision": "needs_review",
+          "reason": "O salto isolado não basta; é preciso verificar a relação estrutural entre as seções."
+        },
+        {
+          "id": "titulo_visual",
+          "decision": "repair_and_retest",
+          "reason": "A estrutura comunicada visualmente não possui equivalente programático; corrigir e testar."
+        },
+        {
+          "id": "main",
+          "decision": "property_satisfied",
+          "reason": "O mecanismo de pular blocos e as relações foram confirmados; ausência de main isolada não comprova falha."
+        },
+        {
+          "id": "foco",
+          "decision": "property_satisfied",
+          "reason": "O indicador alternativo está visível e tem contraste confirmado; outline none isolado não comprova falha."
+        },
+        {
+          "id": "foco_invisivel",
+          "decision": "repair_and_retest",
+          "reason": "A inspeção por teclado confirmou ausência de indicador visual de foco."
+        },
+        {
+          "id": "parcial",
+          "decision": "property_satisfied",
+          "reason": "A ocultação parcial descrita não viola, por si só, 2.4.11 AA, que trata de ocultação integral."
+        },
+        {
+          "id": "integral",
+          "decision": "repair_and_retest",
+          "reason": "Conteúdo do autor oculta integralmente o componente focado, sem possibilidade de revelá-lo mantendo o foco."
+        },
+        {
+          "id": "pontos",
+          "decision": "insufficient",
+          "reason": "Cinco pontos cobertos não demonstram que toda a área está oculta."
+        },
+        {
+          "id": "inline",
+          "decision": "property_satisfied",
+          "reason": "A exceção inline foi confirmada; o tamanho isolado não exige reparo por 2.5.8."
+        },
+        {
+          "id": "alvo",
+          "decision": "repair_and_retest",
+          "reason": "Os alvos de 10×10 não têm espaçamento suficiente nem exceção aplicável."
+        },
+        {
+          "id": "erro",
+          "decision": "property_satisfied",
+          "reason": "O erro está identificado em texto e associado ao campo; aria-invalid não é obrigatório isoladamente para 3.3.1."
+        },
+        {
+          "id": "erro_vermelho",
+          "decision": "repair_and_retest",
+          "reason": "O erro depende exclusivamente de cor e carece de identificação textual acessível."
+        },
+        {
+          "id": "select",
+          "decision": "needs_review",
+          "reason": "A limitação da sonda não permite aprovar o popup; é necessária inspeção por método adequado."
+        },
+        {
+          "id": "fala",
+          "decision": "not_tested",
+          "reason": "NVDA não foi executado; nome e papel na árvore não permitem transcrever fala real."
+        },
+        {
+          "id": "modal",
+          "decision": "property_satisfied",
+          "reason": "O diálogo nativo tem nome e comportamento confirmados; ausência de aria-modal isolada não comprova falha."
+        },
+        {
+          "id": "teclado",
+          "decision": "repair_and_retest",
+          "reason": "A ação não pode ser operada por teclado e não possui equivalente."
+        },
+        {
+          "id": "status",
+          "decision": "repair_and_retest",
+          "reason": "A mensagem de status confirmada não é exposta programaticamente."
+        },
+        {
+          "id": "amostra",
+          "decision": "insufficient",
+          "reason": "Examinar somente a home não sustenta conformidade do site inteiro ou do checkout."
+        },
+        {
+          "id": "sem_achados",
+          "decision": "insufficient",
+          "reason": "Ausência de achados no axe não cobre imagens, fluxos e operação por teclado não avaliados."
+        },
+        {
+          "id": "inconclusivo",
+          "decision": "insufficient",
+          "reason": "A medição incompleta não sustenta aprovação ou reprovação definitiva; não se deve inventar resultado."
+        },
+        {
+          "id": "metodo",
+          "decision": "property_satisfied",
+          "reason": "O teste real confirmou que o envio chegou aos resultados nesse cenário, sem certificar a acessibilidade inteira."
+        },
+        {
+          "id": "atributo",
+          "decision": "repair_and_retest",
+          "reason": "O botão foi confirmado sem nome acessível; fornecer nome e testar novamente."
+        },
+        {
+          "id": "prioridade",
+          "decision": "insufficient",
+          "reason": "Alta prioridade não estabelece prazo de SLA obrigatório sem acordo aplicável."
+        }
+      ]
+    },
+    {
+      "variant": "ablation",
+      "repetition": 2,
+      "accepted_after_review": 24,
+      "total": 24,
+      "responses": [
+        {
+          "id": "h1",
+          "decision": "property_satisfied",
+          "reason": "A estrutura foi confirmada coerente; dois h1, isoladamente, não comprovam violação."
+        },
+        {
+          "id": "salto",
+          "decision": "needs_review",
+          "reason": "É necessário examinar a relação estrutural; o salto isolado não basta para concluir falha."
+        },
+        {
+          "id": "titulo_visual",
+          "decision": "repair_and_retest",
+          "reason": "A estrutura comunicada visualmente não tem representação semântica ou equivalente; corrigir e testar."
+        },
+        {
+          "id": "main",
+          "decision": "property_satisfied",
+          "reason": "O mecanismo para pular blocos e as relações foram confirmados; a ausência de main não comprova falha isoladamente."
+        },
+        {
+          "id": "foco",
+          "decision": "property_satisfied",
+          "reason": "O indicador visível e seu contraste foram confirmados; outline none não comprova falha isoladamente."
+        },
+        {
+          "id": "foco_invisivel",
+          "decision": "repair_and_retest",
+          "reason": "A ausência de indicação visual de foco foi confirmada; corrigir e testar por teclado."
+        },
+        {
+          "id": "parcial",
+          "decision": "property_satisfied",
+          "reason": "O componente permanece parcialmente visível; essa cobertura não configura ocultação integral no critério 2.4.11 AA."
+        },
+        {
+          "id": "integral",
+          "decision": "repair_and_retest",
+          "reason": "O componente focado fica inteiramente oculto por conteúdo do autor sem possibilidade de revelá-lo mantendo o foco."
+        },
+        {
+          "id": "pontos",
+          "decision": "insufficient",
+          "reason": "Cinco pontos cobertos não demonstram que toda a área está oculta."
+        },
+        {
+          "id": "inline",
+          "decision": "property_satisfied",
+          "reason": "A exceção inline foi confirmada; o tamanho isolado não exige reparo pelo critério 2.5.8."
+        },
+        {
+          "id": "alvo",
+          "decision": "repair_and_retest",
+          "reason": "Os alvos de 10×10 não atendem ao tamanho ou espaçamento exigido e não possuem exceção aplicável."
+        },
+        {
+          "id": "erro",
+          "decision": "property_satisfied",
+          "reason": "O erro está identificado em texto e associado ao campo; a ausência isolada de aria-invalid não comprova falha 3.3.1."
+        },
+        {
+          "id": "erro_vermelho",
+          "decision": "repair_and_retest",
+          "reason": "A indicação depende apenas de cor e não identifica o erro em texto acessível."
+        },
+        {
+          "id": "select",
+          "decision": "insufficient",
+          "reason": "A limitação da sonda impede concluir sobre a acessibilidade do popup nativo."
+        },
+        {
+          "id": "fala",
+          "decision": "not_tested",
+          "reason": "O NVDA não foi executado; nome e papel na árvore não permitem transcrever fala real."
+        },
+        {
+          "id": "modal",
+          "decision": "property_satisfied",
+          "reason": "A semântica e o comportamento do diálogo nativo foram confirmados; aria-modal explícito não é exigido isoladamente."
+        },
+        {
+          "id": "teclado",
+          "decision": "repair_and_retest",
+          "reason": "A ação não pode ser acessada ou operada por teclado e não há equivalente."
+        },
+        {
+          "id": "status",
+          "decision": "repair_and_retest",
+          "reason": "A mensagem de status confirmada não é exposta programaticamente; corrigir e testar seu anúncio."
+        },
+        {
+          "id": "amostra",
+          "decision": "insufficient",
+          "reason": "A avaliação da home inicial não sustenta conformidade do site inteiro nem do checkout."
+        },
+        {
+          "id": "sem_achados",
+          "decision": "insufficient",
+          "reason": "A ausência de achados automatizados não cobre imagens, fluxos e operação por teclado não avaliados."
+        },
+        {
+          "id": "inconclusivo",
+          "decision": "insufficient",
+          "reason": "A medição incompleta não permite conclusão definitiva; não se deve inventar aprovação ou falha."
+        },
+        {
+          "id": "metodo",
+          "decision": "property_satisfied",
+          "reason": "Os resultados confirmam que o envio funcionou nesse teste, sem demonstrar acessibilidade integral."
+        },
+        {
+          "id": "atributo",
+          "decision": "repair_and_retest",
+          "reason": "O botão está sem nome acessível confirmado; fornecer nome e testar novamente."
+        },
+        {
+          "id": "prioridade",
+          "decision": "insufficient",
+          "reason": "Uma recomendação de alta prioridade não estabelece prazo obrigatório de SLA sem acordo aplicável."
+        }
+      ]
+    },
+    {
+      "variant": "ablation",
+      "repetition": 3,
+      "accepted_after_review": 24,
+      "total": 24,
+      "responses": [
+        {
+          "id": "h1",
+          "decision": "property_satisfied",
+          "reason": "A estrutura foi confirmada coerente; múltiplos h1 não comprovam violação pela contagem."
+        },
+        {
+          "id": "salto",
+          "decision": "needs_review",
+          "reason": "O salto exige examinar a relação estrutural; sozinho não comprova falha."
+        },
+        {
+          "id": "titulo_visual",
+          "decision": "repair_and_retest",
+          "reason": "A seção comunicada visualmente carece de estrutura programática ou equivalente textual."
+        },
+        {
+          "id": "main",
+          "decision": "property_satisfied",
+          "reason": "O mecanismo de pular blocos e as relações foram confirmados; main não é obrigatório por si só."
+        },
+        {
+          "id": "foco",
+          "decision": "property_satisfied",
+          "reason": "O indicador alternativo visível e seu contraste foram confirmados; outline none isolado não comprova falha."
+        },
+        {
+          "id": "foco_invisivel",
+          "decision": "repair_and_retest",
+          "reason": "A ausência confirmada de indicação visual de foco exige correção e novo teste."
+        },
+        {
+          "id": "parcial",
+          "decision": "property_satisfied",
+          "reason": "A ocultação parcial descrita não viola, por si só, 2.4.11 AA, que trata de ocultação integral."
+        },
+        {
+          "id": "integral",
+          "decision": "repair_and_retest",
+          "reason": "Conteúdo do autor oculta integralmente o componente focado sem possibilidade de revelá-lo mantendo o foco."
+        },
+        {
+          "id": "pontos",
+          "decision": "insufficient",
+          "reason": "Cinco pontos cobertos não demonstram que toda a área esteja oculta."
+        },
+        {
+          "id": "inline",
+          "decision": "property_satisfied",
+          "reason": "A exceção inline foi confirmada; o tamanho isolado não exige reparo em 2.5.8."
+        },
+        {
+          "id": "alvo",
+          "decision": "repair_and_retest",
+          "reason": "Os alvos são menores que o mínimo e não atendem a espaçamento ou exceções aplicáveis."
+        },
+        {
+          "id": "erro",
+          "decision": "property_satisfied",
+          "reason": "O erro está identificado em texto e associado ao campo; aria-invalid não é exigido isoladamente por 3.3.1."
+        },
+        {
+          "id": "erro_vermelho",
+          "decision": "repair_and_retest",
+          "reason": "A borda vermelha como único indicador não identifica o erro em texto e depende exclusivamente de cor."
+        },
+        {
+          "id": "select",
+          "decision": "insufficient",
+          "reason": "A limitação da sonda não comprova acessibilidade do popup nativo."
+        },
+        {
+          "id": "fala",
+          "decision": "not_tested",
+          "reason": "O NVDA não foi executado; nome e papel na árvore não permitem transcrever fala real."
+        },
+        {
+          "id": "modal",
+          "decision": "property_satisfied",
+          "reason": "A semântica nativa e o comportamento foram confirmados; a ausência de aria-modal isoladamente não comprova falha."
+        },
+        {
+          "id": "teclado",
+          "decision": "repair_and_retest",
+          "reason": "A ação não pode ser operada por teclado e não possui equivalente."
+        },
+        {
+          "id": "status",
+          "decision": "repair_and_retest",
+          "reason": "A mensagem de status não é exposta programaticamente sem receber foco."
+        },
+        {
+          "id": "amostra",
+          "decision": "insufficient",
+          "reason": "A inspeção da home inicial não sustenta conformidade do site inteiro ou do checkout."
+        },
+        {
+          "id": "sem_achados",
+          "decision": "insufficient",
+          "reason": "A ausência de achados no axe não cobre imagens, fluxos e operação por teclado não avaliados."
+        },
+        {
+          "id": "inconclusivo",
+          "decision": "insufficient",
+          "reason": "A medição incompleta não permite concluir aprovação ou falha; não se deve inventar resultados."
+        },
+        {
+          "id": "metodo",
+          "decision": "property_satisfied",
+          "reason": "O teste real alcançou resultados, confirmando o envio nesse teste, sem certificar a acessibilidade completa."
+        },
+        {
+          "id": "atributo",
+          "decision": "repair_and_retest",
+          "reason": "O botão foi confirmado sem nome acessível e precisa de identificação adequada."
+        },
+        {
+          "id": "prioridade",
+          "decision": "insufficient",
+          "reason": "Uma recomendação de alta prioridade não estabelece prazo obrigatório de SLA sem acordo."
+        }
+      ]
+    }
+  ],
+  "improvement_demonstrated": false,
+  "evidence_folder": "C:\\Users\\olive\\AppData\\Local\\Temp\\a11y-gallery-eval-qz3_8b4y"
+}

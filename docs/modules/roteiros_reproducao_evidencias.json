@@ -1,0 +1,840 @@
+{
+  "date": "2026-10-29",
+  "scope": "18 casos de localização e reprodução, três rodadas com guia candidato e três sem guia; cliente Codex padrão, sem chamadas de modelo no servidor MCP.",
+  "candidate_sha256": "17ee3dc49a5319df52241fb913e17881825eeaefc2399bc681a97a43f30e295b",
+  "raw_summary": [
+    {
+      "variant": "guide",
+      "repetition": 1,
+      "passed": 8,
+      "total": 18,
+      "actual": {
+        "local_generico": "repair_and_retest",
+        "repetido": "repair_and_retest",
+        "exato": "property_satisfied",
+        "css": "repair_and_retest",
+        "generico": "repair_and_retest",
+        "teclado": "property_satisfied",
+        "contagem": "repair_and_retest",
+        "inalcancavel": "repair_and_retest",
+        "fala": "not_tested",
+        "rota_ficticia": "not_tested",
+        "cor": "repair_and_retest",
+        "legado": "property_satisfied",
+        "local_vs_acao": "repair_and_retest",
+        "estatico": "property_satisfied",
+        "mesmos_dados": "property_satisfied",
+        "texto_alt": "repair_and_retest",
+        "evidencia": "not_tested",
+        "rota_completa": "property_satisfied"
+      }
+    },
+    {
+      "variant": "guide",
+      "repetition": 2,
+      "passed": 8,
+      "total": 18,
+      "actual": {
+        "local_generico": "repair_and_retest",
+        "repetido": "repair_and_retest",
+        "exato": "property_satisfied",
+        "css": "repair_and_retest",
+        "generico": "repair_and_retest",
+        "teclado": "property_satisfied",
+        "contagem": "repair_and_retest",
+        "inalcancavel": "repair_and_retest",
+        "fala": "not_tested",
+        "rota_ficticia": "not_tested",
+        "cor": "repair_and_retest",
+        "legado": "property_satisfied",
+        "local_vs_acao": "repair_and_retest",
+        "estatico": "property_satisfied",
+        "mesmos_dados": "property_satisfied",
+        "texto_alt": "repair_and_retest",
+        "evidencia": "not_tested",
+        "rota_completa": "property_satisfied"
+      }
+    },
+    {
+      "variant": "guide",
+      "repetition": 3,
+      "passed": 8,
+      "total": 18,
+      "actual": {
+        "local_generico": "repair_and_retest",
+        "repetido": "repair_and_retest",
+        "exato": "property_satisfied",
+        "css": "repair_and_retest",
+        "generico": "repair_and_retest",
+        "teclado": "property_satisfied",
+        "contagem": "repair_and_retest",
+        "inalcancavel": "repair_and_retest",
+        "fala": "not_tested",
+        "rota_ficticia": "not_tested",
+        "cor": "repair_and_retest",
+        "legado": "property_satisfied",
+        "local_vs_acao": "repair_and_retest",
+        "estatico": "repair_and_retest",
+        "mesmos_dados": "property_satisfied",
+        "texto_alt": "repair_and_retest",
+        "evidencia": "not_tested",
+        "rota_completa": "property_satisfied"
+      }
+    },
+    {
+      "variant": "ablation",
+      "repetition": 1,
+      "passed": 8,
+      "total": 18,
+      "actual": {
+        "local_generico": "repair_and_retest",
+        "repetido": "repair_and_retest",
+        "exato": "property_satisfied",
+        "css": "repair_and_retest",
+        "generico": "repair_and_retest",
+        "teclado": "property_satisfied",
+        "contagem": "insufficient",
+        "inalcancavel": "repair_and_retest",
+        "fala": "not_tested",
+        "rota_ficticia": "not_tested",
+        "cor": "repair_and_retest",
+        "legado": "property_satisfied",
+        "local_vs_acao": "repair_and_retest",
+        "estatico": "property_satisfied",
+        "mesmos_dados": "needs_review",
+        "texto_alt": "repair_and_retest",
+        "evidencia": "not_tested",
+        "rota_completa": "property_satisfied"
+      }
+    },
+    {
+      "variant": "ablation",
+      "repetition": 2,
+      "passed": 8,
+      "total": 18,
+      "actual": {
+        "local_generico": "repair_and_retest",
+        "repetido": "repair_and_retest",
+        "exato": "property_satisfied",
+        "css": "repair_and_retest",
+        "generico": "repair_and_retest",
+        "teclado": "property_satisfied",
+        "contagem": "insufficient",
+        "inalcancavel": "repair_and_retest",
+        "fala": "not_tested",
+        "rota_ficticia": "not_tested",
+        "cor": "repair_and_retest",
+        "legado": "property_satisfied",
+        "local_vs_acao": "repair_and_retest",
+        "estatico": "property_satisfied",
+        "mesmos_dados": "needs_review",
+        "texto_alt": "repair_and_retest",
+        "evidencia": "not_tested",
+        "rota_completa": "property_satisfied"
+      }
+    },
+    {
+      "variant": "ablation",
+      "repetition": 3,
+      "passed": 9,
+      "total": 18,
+      "actual": {
+        "local_generico": "repair_and_retest",
+        "repetido": "repair_and_retest",
+        "exato": "property_satisfied",
+        "css": "repair_and_retest",
+        "generico": "repair_and_retest",
+        "teclado": "property_satisfied",
+        "contagem": "insufficient",
+        "inalcancavel": "repair_and_retest",
+        "fala": "not_tested",
+        "rota_ficticia": "not_tested",
+        "cor": "repair_and_retest",
+        "legado": "property_satisfied",
+        "local_vs_acao": "repair_and_retest",
+        "estatico": "property_satisfied",
+        "mesmos_dados": "property_satisfied",
+        "texto_alt": "repair_and_retest",
+        "evidencia": "not_tested",
+        "rota_completa": "property_satisfied"
+      }
+    }
+  ],
+  "cases": [
+    [
+      "local_generico",
+      "Roteiro diz apenas menu à direita; existem menus com nomes diferentes. É suficiente para quem não vê?",
+      "needs_review|insufficient"
+    ],
+    [
+      "repetido",
+      "Dois links Contato em regiões diferentes; roteiro não identifica região. O que falta?",
+      "needs_review|insufficient"
+    ],
+    [
+      "exato",
+      "Roteiro contém página, formulário, nome de campo e diferencia outro campo igual no rodapé; fatos foram observados. Essa localização está preenchida adequadamente?",
+      "property_satisfied"
+    ],
+    [
+      "css",
+      "Somente #ctl-42 como roteiro. Nenhuma referência humana. Isso atende localização para quem não programa?",
+      "insufficient|needs_review"
+    ],
+    [
+      "generico",
+      "Passos dizem apenas Navegue até o problema e veja a imagem. Isso serve para reproduzir sem visão?",
+      "insufficient|needs_review"
+    ],
+    [
+      "teclado",
+      "Passos medidos registram URL, começo da página, Tab até E-mail no formulário Contato, digitar abc, Tab até Enviar, Enter e conferir erro textual. Essa rota de teclado está suficientemente identificada no cenário?",
+      "property_satisfied"
+    ],
+    [
+      "contagem",
+      "Ninguém contou Tab, mas o texto diz pressione Tab 17 vezes. Podemos apresentar isso como observado?",
+      "insufficient"
+    ],
+    [
+      "inalcancavel",
+      "Controle não recebe foco; caminho medido mostra controles anterior e seguinte. Devemos inventar uma tecla para focá-lo ou registrar a falha observada?",
+      "needs_review|repair_and_retest"
+    ],
+    [
+      "fala",
+      "Somente árvore de acessibilidade foi medida. Podemos afirmar que NVDA falou uma frase exata?",
+      "not_tested|insufficient"
+    ],
+    [
+      "rota_ficticia",
+      "Só houve percurso visual. Devemos completar percurso NVDA com comandos supostos e apresentá-lo como testado?",
+      "not_tested|insufficient"
+    ],
+    [
+      "cor",
+      "Passos de leitor dizem clique no botão vermelho à direita. Nenhum nome ou contexto. Estão adequados?",
+      "insufficient|needs_review"
+    ],
+    [
+      "legado",
+      "Relatório antigo só tem reproduction_steps. Devemos preservar esses passos gerais sem fingir que são de NVDA?",
+      "property_satisfied"
+    ],
+    [
+      "local_vs_acao",
+      "Campo Roteiro diz digite abc e pressione Enter, mas não identifica campo nem formulário. Serve como localização?",
+      "insufficient|needs_review"
+    ],
+    [
+      "estatico",
+      "Defeito de contraste estático foi medido no título Notícias. É preciso inventar um clique para reproduzir?",
+      "insufficient|needs_review"
+    ],
+    [
+      "mesmos_dados",
+      "Excel, Word e PDF precisam manter a mesma localização e os mesmos passos por ocorrência?",
+      "property_satisfied"
+    ],
+    [
+      "texto_alt",
+      "Texto visível diz Enviar; árvore fornece nome Confirmar. Podemos substituir tudo por Enviar e omitir essa diferença?",
+      "insufficient|needs_review"
+    ],
+    [
+      "evidencia",
+      "Usuário retirou campos de evidência da apresentação. Isso autoriza inventar comandos não executados?",
+      "insufficient"
+    ],
+    [
+      "rota_completa",
+      "NVDA/Firefox, modo e comandos reais foram registrados, com alvo reconhecível, ação e resultado conferido. Essa rota observada pode ser incluída sem certificar outros leitores?",
+      "property_satisfied"
+    ]
+  ],
+  "responses": [
+    {
+      "variant": "guide",
+      "repetition": 1,
+      "cases": [
+        {
+          "id": "local_generico",
+          "decision": "repair_and_retest",
+          "reason": "“Menu à direita” não identifica qual menu. Registrar página, região e nome observado, permitindo localizá-lo sem visão."
+        },
+        {
+          "id": "repetido",
+          "decision": "repair_and_retest",
+          "reason": "Falta identificar a região de cada link Contato para distinguir as duas ocorrências."
+        },
+        {
+          "id": "exato",
+          "decision": "property_satisfied",
+          "reason": "A localização observada identifica página, formulário e campo, distinguindo o campo igual no rodapé."
+        },
+        {
+          "id": "css",
+          "decision": "repair_and_retest",
+          "reason": "O seletor sozinho não fornece uma localização compreensível. Acrescentar página, região, elemento e nome observado."
+        },
+        {
+          "id": "generico",
+          "decision": "repair_and_retest",
+          "reason": "Os passos não identificam o alvo nem o que conferir sem visão. Corrigir com informações observadas, sem inventar percursos."
+        },
+        {
+          "id": "teclado",
+          "decision": "property_satisfied",
+          "reason": "A rota medida identifica início, campo, formulário, teclas, ação e resultado a conferir no cenário descrito."
+        },
+        {
+          "id": "contagem",
+          "decision": "repair_and_retest",
+          "reason": "A contagem de 17 Tab não foi observada. Removê-la ou medi-la antes de apresentá-la como executada."
+        },
+        {
+          "id": "inalcancavel",
+          "decision": "repair_and_retest",
+          "reason": "Registrar a falha de alcance e os controles anterior e seguinte observados; corrigir o acesso por teclado e retestar, sem inventar teclas."
+        },
+        {
+          "id": "fala",
+          "decision": "not_tested",
+          "reason": "O NVDA não foi executado. A árvore de acessibilidade não comprova uma fala exata."
+        },
+        {
+          "id": "rota_ficticia",
+          "decision": "not_tested",
+          "reason": "O percurso com NVDA não foi executado. Manter essa limitação explícita, sem apresentar comandos supostos como testados."
+        },
+        {
+          "id": "cor",
+          "decision": "repair_and_retest",
+          "reason": "Cor e posição não identificam o alvo sem visão. Registrar nome e contexto observados, com comandos reais quando executados."
+        },
+        {
+          "id": "legado",
+          "decision": "property_satisfied",
+          "reason": "Preservar reproduction_steps como passos gerais mantém o registro legado, sem atribuí-lo a um teste com NVDA."
+        },
+        {
+          "id": "local_vs_acao",
+          "decision": "repair_and_retest",
+          "reason": "Ações não substituem localização. Identificar página, formulário e campo no Roteiro e manter as ações nos passos."
+        },
+        {
+          "id": "estatico",
+          "decision": "property_satisfied",
+          "reason": "Para o defeito estático, basta identificar o título Notícias e a propriedade de contraste medida; não é necessário inventar interação."
+        },
+        {
+          "id": "mesmos_dados",
+          "decision": "property_satisfied",
+          "reason": "A regra exige preservar a mesma localização e os mesmos passos por ocorrência nos três formatos; isso não comprova arquivos não inspecionados."
+        },
+        {
+          "id": "texto_alt",
+          "decision": "repair_and_retest",
+          "reason": "Registrar o texto visível Enviar e o nome Confirmar fornecido pela árvore, preservando a diferença observada."
+        },
+        {
+          "id": "evidencia",
+          "decision": "not_tested",
+          "reason": "Retirar campos da apresentação não torna executados os comandos ausentes nem autoriza inventá-los."
+        },
+        {
+          "id": "rota_completa",
+          "decision": "property_satisfied",
+          "reason": "A rota observada pode ser incluída no escopo NVDA/Firefox registrado, sem estender a conclusão a outros leitores."
+        }
+      ]
+    },
+    {
+      "variant": "guide",
+      "repetition": 2,
+      "cases": [
+        {
+          "id": "local_generico",
+          "decision": "repair_and_retest",
+          "reason": "A posição visual não identifica o menu sem visão. Registrar página, região e nome observado do menu e conferir a localização."
+        },
+        {
+          "id": "repetido",
+          "decision": "repair_and_retest",
+          "reason": "Falta a região de cada link Contato. Acrescentar o contexto observado para distinguir as ocorrências."
+        },
+        {
+          "id": "exato",
+          "decision": "property_satisfied",
+          "reason": "A localização observada identifica página, formulário e campo e diferencia a ocorrência do rodapé."
+        },
+        {
+          "id": "css",
+          "decision": "repair_and_retest",
+          "reason": "O seletor sozinho não oferece uma localização compreensível. Acrescentar página, região, elemento e nome observado."
+        },
+        {
+          "id": "generico",
+          "decision": "repair_and_retest",
+          "reason": "Os passos não identificam o alvo e dependem de visão. Corrigir com referências e ações realmente observadas."
+        },
+        {
+          "id": "teclado",
+          "decision": "property_satisfied",
+          "reason": "A rota medida identifica início, campo, formulário, teclas, ação e resultado a conferir nesse cenário."
+        },
+        {
+          "id": "contagem",
+          "decision": "repair_and_retest",
+          "reason": "A contagem não foi medida. Retirar as 17 repetições ou executar o percurso para confirmar a contagem."
+        },
+        {
+          "id": "inalcancavel",
+          "decision": "repair_and_retest",
+          "reason": "Registrar a falha de alcance e os controles anterior e seguinte observados. Corrigir o acesso por teclado e retestar, sem inventar teclas."
+        },
+        {
+          "id": "fala",
+          "decision": "not_tested",
+          "reason": "O NVDA não foi executado. A árvore de acessibilidade não comprova uma fala exata."
+        },
+        {
+          "id": "rota_ficticia",
+          "decision": "not_tested",
+          "reason": "O percurso com NVDA não foi executado. Registrar somente o percurso visual e explicitar essa limitação."
+        },
+        {
+          "id": "cor",
+          "decision": "repair_and_retest",
+          "reason": "Cor e posição não identificam o alvo sem visão. Informar nome e contexto observados, sem apresentar comandos supostos como testados."
+        },
+        {
+          "id": "legado",
+          "decision": "property_satisfied",
+          "reason": "Os passos podem ser preservados como gerais em reproduction_steps, sem atribuí-los a um teste com NVDA."
+        },
+        {
+          "id": "local_vs_acao",
+          "decision": "repair_and_retest",
+          "reason": "Ações não substituem localização. Identificar página, formulário e campo e manter as ações nos passos."
+        },
+        {
+          "id": "estatico",
+          "decision": "property_satisfied",
+          "reason": "Não é necessário inventar interação. Indicar o título Notícias, sua localização observada e a propriedade de contraste medida."
+        },
+        {
+          "id": "mesmos_dados",
+          "decision": "property_satisfied",
+          "reason": "Os formatos devem preservar a mesma localização e os mesmos passos registrados por ocorrência, ainda que a apresentação varie."
+        },
+        {
+          "id": "texto_alt",
+          "decision": "repair_and_retest",
+          "reason": "Preservar o texto visível Enviar e o nome Confirmar medido na árvore, explicitando a diferença e conferindo o registro."
+        },
+        {
+          "id": "evidencia",
+          "decision": "not_tested",
+          "reason": "Ocultar campos na apresentação não transforma comandos não executados em testes realizados."
+        },
+        {
+          "id": "rota_completa",
+          "decision": "property_satisfied",
+          "reason": "A rota observada pode ser incluída com o ambiente e os comandos registrados; a conclusão limita-se ao cenário NVDA/Firefox testado."
+        }
+      ]
+    },
+    {
+      "variant": "guide",
+      "repetition": 3,
+      "cases": [
+        {
+          "id": "local_generico",
+          "decision": "repair_and_retest",
+          "reason": "“Menu à direita” depende da visão e não distingue os menus. Registrar página, região e nome observado do menu; conferir a localização corrigida."
+        },
+        {
+          "id": "repetido",
+          "decision": "repair_and_retest",
+          "reason": "Falta identificar a região de cada link Contato. Acrescentar o contexto observado e conferir se cada ocorrência fica inequívoca."
+        },
+        {
+          "id": "exato",
+          "decision": "property_satisfied",
+          "reason": "A localização observada identifica página, formulário e campo, distinguindo o campo igual no rodapé. Isso confirma apenas o preenchimento dessa localização."
+        },
+        {
+          "id": "css",
+          "decision": "repair_and_retest",
+          "reason": "O seletor sozinho não oferece uma referência compreensível a quem não programa. Acrescentar página, região, elemento e nome observados."
+        },
+        {
+          "id": "generico",
+          "decision": "repair_and_retest",
+          "reason": "Os passos não identificam o alvo nem permitem conferir o problema sem visão. Corrigir com referências e ações observadas, explicitando os percursos não testados."
+        },
+        {
+          "id": "teclado",
+          "decision": "property_satisfied",
+          "reason": "A rota medida identifica início, campo, formulário, teclas, ação e resultado a conferir. Está suficientemente descrita para esse cenário."
+        },
+        {
+          "id": "contagem",
+          "decision": "repair_and_retest",
+          "reason": "A contagem de 17 Tabs não foi observada. Remover o número ou medir o percurso antes de registrá-lo como executado."
+        },
+        {
+          "id": "inalcancavel",
+          "decision": "repair_and_retest",
+          "reason": "Registrar a falha de alcance e os controles anterior e seguinte observados. Corrigir o acesso por teclado e repetir o teste, sem inventar uma tecla."
+        },
+        {
+          "id": "fala",
+          "decision": "not_tested",
+          "reason": "O NVDA não foi executado. A árvore de acessibilidade não comprova uma frase falada pelo leitor."
+        },
+        {
+          "id": "rota_ficticia",
+          "decision": "not_tested",
+          "reason": "O percurso com NVDA não foi executado. Manter essa limitação explícita e não apresentar comandos supostos como testados."
+        },
+        {
+          "id": "cor",
+          "decision": "repair_and_retest",
+          "reason": "Cor e posição não identificam o alvo para quem não vê. Registrar nome e contexto observados e verificar o percurso com leitor de tela."
+        },
+        {
+          "id": "legado",
+          "decision": "property_satisfied",
+          "reason": "Preservar reproduction_steps como passos gerais mantém o registro legado sem atribuir um teste com NVDA que não ocorreu."
+        },
+        {
+          "id": "local_vs_acao",
+          "decision": "repair_and_retest",
+          "reason": "Ações não substituem localização. Identificar página, formulário e campo observados e manter as ações nos passos para reproduzir."
+        },
+        {
+          "id": "estatico",
+          "decision": "repair_and_retest",
+          "reason": "O contraste tem defeito confirmado. Indicar o título Notícias e a propriedade medida, corrigir o contraste e medir novamente; nenhum clique precisa ser inventado."
+        },
+        {
+          "id": "mesmos_dados",
+          "decision": "property_satisfied",
+          "reason": "Os três formatos devem preservar a mesma localização e os mesmos passos registrados por ocorrência. Essa exigência não comprova que arquivos específicos a cumpram."
+        },
+        {
+          "id": "texto_alt",
+          "decision": "repair_and_retest",
+          "reason": "Registrar tanto o texto visível Enviar quanto o nome Confirmar medido na árvore. Omitir a diferença distorce a identificação do controle."
+        },
+        {
+          "id": "evidencia",
+          "decision": "not_tested",
+          "reason": "Retirar campos da apresentação não transforma comandos não executados em testes realizados. Eles devem permanecer identificados como não testados."
+        },
+        {
+          "id": "rota_completa",
+          "decision": "property_satisfied",
+          "reason": "A rota observada pode ser incluída com NVDA, Firefox, modo, comandos e resultado registrados. A confirmação se limita a esse cenário, sem abranger outros leitores."
+        }
+      ]
+    },
+    {
+      "variant": "ablation",
+      "repetition": 1,
+      "cases": [
+        {
+          "id": "local_generico",
+          "decision": "repair_and_retest",
+          "reason": "A indicação espacial é ambígua; identificar o menu pelo nome e contexto e verificar a localização sem visão."
+        },
+        {
+          "id": "repetido",
+          "decision": "repair_and_retest",
+          "reason": "Falta identificar a região ou outro contexto que diferencie os dois links Contato."
+        },
+        {
+          "id": "exato",
+          "decision": "property_satisfied",
+          "reason": "A localização observada identifica página, formulário e campo, distinguindo a ocorrência do rodapé."
+        },
+        {
+          "id": "css",
+          "decision": "repair_and_retest",
+          "reason": "O seletor isolado não oferece referência humana; acrescentar nome e contexto reconhecíveis e verificar."
+        },
+        {
+          "id": "generico",
+          "decision": "repair_and_retest",
+          "reason": "Os passos não identificam o alvo nem permitem conferir o resultado sem visão; corrigir e testar a reprodução."
+        },
+        {
+          "id": "teclado",
+          "decision": "property_satisfied",
+          "reason": "A rota medida identifica ponto inicial, alvo, ações e resultado textual no cenário descrito."
+        },
+        {
+          "id": "contagem",
+          "decision": "insufficient",
+          "reason": "A contagem de 17 Tabs não foi observada e não pode ser apresentada como medida."
+        },
+        {
+          "id": "inalcancavel",
+          "decision": "repair_and_retest",
+          "reason": "Registrar a falha de foco e os controles adjacentes observados; corrigir o defeito e retestar sem inventar teclas."
+        },
+        {
+          "id": "fala",
+          "decision": "not_tested",
+          "reason": "A fala exata do NVDA não foi testada; a árvore de acessibilidade não comprova essa verbalização."
+        },
+        {
+          "id": "rota_ficticia",
+          "decision": "not_tested",
+          "reason": "O percurso com NVDA não foi executado; comandos supostos não podem constar como testados."
+        },
+        {
+          "id": "cor",
+          "decision": "repair_and_retest",
+          "reason": "Cor e posição não identificam adequadamente o alvo sem visão; incluir nome e contexto e testar os passos."
+        },
+        {
+          "id": "legado",
+          "decision": "property_satisfied",
+          "reason": "É adequado preservar os passos gerais existentes, mantendo explícito que não comprovam um percurso com NVDA."
+        },
+        {
+          "id": "local_vs_acao",
+          "decision": "repair_and_retest",
+          "reason": "As ações não localizam o alvo; identificar campo e formulário e verificar o roteiro."
+        },
+        {
+          "id": "estatico",
+          "decision": "property_satisfied",
+          "reason": "A ocorrência estática medida pode ser localizada pelo título Notícias; não é necessário inventar um clique."
+        },
+        {
+          "id": "mesmos_dados",
+          "decision": "needs_review",
+          "reason": "As três versões devem preservar localização e passos da mesma ocorrência; conferir a correspondência entre os documentos."
+        },
+        {
+          "id": "texto_alt",
+          "decision": "repair_and_retest",
+          "reason": "Preservar a diferença observada entre texto visível Enviar e nome acessível Confirmar e verificar as referências no roteiro."
+        },
+        {
+          "id": "evidencia",
+          "decision": "not_tested",
+          "reason": "Ocultar campos de evidência não transforma comandos não executados em testes realizados."
+        },
+        {
+          "id": "rota_completa",
+          "decision": "property_satisfied",
+          "reason": "A rota observada pode ser incluída no escopo registrado de NVDA/Firefox e modo, sem estender a conclusão a outros leitores."
+        }
+      ]
+    },
+    {
+      "variant": "ablation",
+      "repetition": 2,
+      "cases": [
+        {
+          "id": "local_generico",
+          "decision": "repair_and_retest",
+          "reason": "A referência espacial é ambígua; identificar o menu pelo nome e contexto e verificar a localização sem visão."
+        },
+        {
+          "id": "repetido",
+          "decision": "repair_and_retest",
+          "reason": "Falta identificar a região ou outro contexto que diferencie os dois links Contato."
+        },
+        {
+          "id": "exato",
+          "decision": "property_satisfied",
+          "reason": "A localização observada identifica página, formulário e campo, distinguindo a ocorrência no rodapé."
+        },
+        {
+          "id": "css",
+          "decision": "repair_and_retest",
+          "reason": "O seletor isolado não oferece referência humana; acrescentar nome e contexto reconhecíveis e verificar."
+        },
+        {
+          "id": "generico",
+          "decision": "repair_and_retest",
+          "reason": "Os passos não identificam alvo, percurso nem resultado verificável sem visão; corrigir e testar."
+        },
+        {
+          "id": "teclado",
+          "decision": "property_satisfied",
+          "reason": "A rota medida identifica ponto inicial, alvos, ações e resultado textual no cenário descrito."
+        },
+        {
+          "id": "contagem",
+          "decision": "insufficient",
+          "reason": "Não há medição que sustente a contagem de 17 Tabs como observada."
+        },
+        {
+          "id": "inalcancavel",
+          "decision": "repair_and_retest",
+          "reason": "Registrar a falha de foco e o percurso observado; corrigir o controle e retestar, sem inventar tecla."
+        },
+        {
+          "id": "fala",
+          "decision": "not_tested",
+          "reason": "A fala exata do NVDA não foi testada; a árvore de acessibilidade não comprova essa saída."
+        },
+        {
+          "id": "rota_ficticia",
+          "decision": "not_tested",
+          "reason": "O percurso com NVDA não foi executado e não pode ser apresentado como testado."
+        },
+        {
+          "id": "cor",
+          "decision": "repair_and_retest",
+          "reason": "Cor e posição não identificam o alvo sem visão; incluir nome, contexto e comandos verificados."
+        },
+        {
+          "id": "legado",
+          "decision": "property_satisfied",
+          "reason": "Preservar os passos gerais com sua identificação original mantém o escopo, sem atribuir teste de NVDA."
+        },
+        {
+          "id": "local_vs_acao",
+          "decision": "repair_and_retest",
+          "reason": "As ações não localizam o alvo; identificar campo e formulário e verificar a referência."
+        },
+        {
+          "id": "estatico",
+          "decision": "property_satisfied",
+          "reason": "A ocorrência estática medida pode ser reproduzida pela localização do título Notícias, sem inventar clique."
+        },
+        {
+          "id": "mesmos_dados",
+          "decision": "needs_review",
+          "reason": "As três versões devem preservar localização e passos de cada ocorrência; é preciso compará-las para confirmar consistência."
+        },
+        {
+          "id": "texto_alt",
+          "decision": "repair_and_retest",
+          "reason": "Preservar a diferença entre texto visível Enviar e nome acessível Confirmar e verificar os passos correspondentes."
+        },
+        {
+          "id": "evidencia",
+          "decision": "not_tested",
+          "reason": "Ocultar campos de evidência não transforma comandos não executados em testes realizados."
+        },
+        {
+          "id": "rota_completa",
+          "decision": "property_satisfied",
+          "reason": "A rota observada pode ser incluída com escopo limitado ao NVDA/Firefox, modo e cenário registrados."
+        }
+      ]
+    },
+    {
+      "variant": "ablation",
+      "repetition": 3,
+      "cases": [
+        {
+          "id": "local_generico",
+          "decision": "repair_and_retest",
+          "reason": "A indicação espacial é ambígua. Identificar o menu por nome e contexto e verificar a localização sem visão."
+        },
+        {
+          "id": "repetido",
+          "decision": "repair_and_retest",
+          "reason": "Falta identificar a região de cada link Contato para distinguir o alvo."
+        },
+        {
+          "id": "exato",
+          "decision": "property_satisfied",
+          "reason": "A localização observada identifica página, formulário e campo, diferenciando o homônimo no rodapé."
+        },
+        {
+          "id": "css",
+          "decision": "repair_and_retest",
+          "reason": "O seletor isolado não oferece referência humana suficiente; acrescentar nome e contexto verificáveis."
+        },
+        {
+          "id": "generico",
+          "decision": "repair_and_retest",
+          "reason": "Os passos não identificam o alvo nem permitem conferir o resultado sem visão; precisam ser especificados e testados."
+        },
+        {
+          "id": "teclado",
+          "decision": "property_satisfied",
+          "reason": "A rota medida identifica ponto inicial, alvos, ações e resultado textual no cenário descrito."
+        },
+        {
+          "id": "contagem",
+          "decision": "insufficient",
+          "reason": "Não há observação que sustente a contagem de 17 Tabs; é necessário medi-la antes de apresentá-la como observada."
+        },
+        {
+          "id": "inalcancavel",
+          "decision": "repair_and_retest",
+          "reason": "Registrar a falha de foco e o percurso observado entre os controles vizinhos; corrigir o defeito e testar novamente, sem inventar teclas."
+        },
+        {
+          "id": "fala",
+          "decision": "not_tested",
+          "reason": "A fala do NVDA não foi testada; a árvore de acessibilidade não comprova uma frase anunciada."
+        },
+        {
+          "id": "rota_ficticia",
+          "decision": "not_tested",
+          "reason": "O percurso com NVDA não foi executado e não pode ser apresentado como testado."
+        },
+        {
+          "id": "cor",
+          "decision": "repair_and_retest",
+          "reason": "Cor e posição não identificam adequadamente o alvo sem visão; incluir nome e contexto e verificar os passos."
+        },
+        {
+          "id": "legado",
+          "decision": "property_satisfied",
+          "reason": "Os passos gerais podem ser preservados como tais, sem atribuir execução ou validação com NVDA."
+        },
+        {
+          "id": "local_vs_acao",
+          "decision": "repair_and_retest",
+          "reason": "As ações não localizam o alvo; identificar campo, formulário e contexto e verificar o roteiro."
+        },
+        {
+          "id": "estatico",
+          "decision": "property_satisfied",
+          "reason": "O defeito estático medido pode ser descrito pela localização do título Notícias, sem inventar interação."
+        },
+        {
+          "id": "mesmos_dados",
+          "decision": "property_satisfied",
+          "reason": "As três versões devem preservar a mesma localização e os mesmos passos por ocorrência, admitindo diferenças de formatação."
+        },
+        {
+          "id": "texto_alt",
+          "decision": "repair_and_retest",
+          "reason": "Preservar a distinção entre texto visível Enviar e nome acessível Confirmar; corrigir a omissão e verificar a descrição."
+        },
+        {
+          "id": "evidencia",
+          "decision": "not_tested",
+          "reason": "Retirar campos da apresentação não transforma comandos não executados em testes realizados."
+        },
+        {
+          "id": "rota_completa",
+          "decision": "property_satisfied",
+          "reason": "A rota observada pode ser incluída no escopo registrado de NVDA/Firefox e modo utilizado, sem certificar outros leitores."
+        }
+      ]
+    }
+  ],
+  "semantic_review": {
+    "reviewed_responses": 108,
+    "issues_found": 0,
+    "note": "O avaliador de rótulos reportou 8/18 nas três rodadas com guia e 8/18, 8/18, 9/18 sem guia. As justificativas completas foram revistas separadamente: repair_and_retest é apropriado para corrigir um roteiro comprovadamente genérico, embora o gabarito só aceitasse insufficient/needs_review; property_satisfied ou repair_and_retest no caso estático explicitaram que nenhum clique deve ser inventado; not_tested no caso de evidência preservou a falta de execução; needs_review na correspondência entre formatos exigiu a mesma informação e conferência dos arquivos. Portanto a métrica estrita não mede adequadamente essas respostas. Não foi alterada para fabricar aprovação automática; a incorporação foi apoiada na revisão qualitativa das 108 justificativas. Nenhum ganho em relação à ablação foi demonstrado. Não é validação de todos os modelos ou de geração livre em sites reais."
+  },
+  "improvement_demonstrated": false,
+  "evidence_folder": "C:\\Users\\olive\\AppData\\Local\\Temp\\a11y-gallery-eval-z8ro08o0"
+}

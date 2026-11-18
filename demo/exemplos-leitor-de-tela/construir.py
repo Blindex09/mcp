@@ -267,7 +267,7 @@ async def medir_extra(ex: dict[str, Any], arvore_chromium: str) -> str:
             r = await run_probe(SESSION, "status_update", alvo)
             ditos = r["facts"].get("announced", [])
             return (
-                f"Anúncios que o leitor de tela receberia depois de apertar Enter no botão: {len(ditos)} (o MCP guarda no máximo 20 por ação)."
+                f"Atualizações observadas em regiões vivas após Enter no botão: {len(ditos)}."
                 + (NL + NL.join(f"{n + 1}. [{a['role']}] {a['text'][:60]}" for n, a in enumerate(ditos[:12])) if ditos else "")
             )
         if tipo == "movimento":
@@ -327,7 +327,7 @@ GRUPOS: list[tuple[str, tuple[str, ...]]] = [
 def cabecalho(titulo: str, atual: str | None) -> str:
     """Navegacao em grupos recolhiveis: so o grupo da pagina atual abre, para o teclado nao passar por 31 links antes do conteudo."""
     por_slug = {c["slug"]: c for c in CENARIOS}
-    por_slug["documentos"] = {"nome": "Word e PDF", "slug": "documentos"}
+    por_slug["documentos"] = {"nome": "Word, PDF e Excel", "slug": "documentos"}
     grupos = ['<li><a href="index.html"' + (' aria-current="page"' if atual is None else "") + ">Início</a></li>"]
     for nome, slugs in GRUPOS:
         links = []
@@ -471,11 +471,11 @@ def pagina_inicial() -> str:
     for c in CENARIOS:
         tipos = ", ".join(sorted({ROTULO[ex["tipo"]].lower() for ex in c["exemplos"]}))
         secoes.append(f'<h2><a href="{c["slug"]}.html">{esc(c["nome"])}</a></h2>\n<p>{esc(c["resumo"])} ({esc(tipos)}.)</p>')
-    secoes.append('<h2><a href="documentos.html">Documentos acessíveis</a></h2><p>Word DOCX e PDF: arquivos bons e ruins para baixar, estrutura medida, orientações de correção e passos para conferir no aplicativo.</p>')
+    secoes.append('<h2><a href="documentos.html">Documentos acessíveis</a></h2><p>Word DOCX, PDF e Excel XLSX: arquivos bons e ruins para baixar, estrutura medida, orientações de correção e passos para conferir no aplicativo.</p>')
     return (
         cabecalho(NOME_DO_SITE, None)
         + f"""<h1>{esc(NOME_DO_SITE)}</h1>
-<p>Nos assuntos web há exemplos vivos bons e ruins para experimentar na página, com estrutura e comportamento medidos pelo MCP. A seção de documentos oferece arquivos Word e PDF para baixar e conferir no aplicativo. Cada assunto explica o problema, a correção, o que foi medido e o que ainda precisa de revisão.</p>
+<p>Nos assuntos web há exemplos vivos bons e ruins para experimentar na página, com estrutura e comportamento medidos pelo MCP. A seção de documentos oferece arquivos Word, PDF e Excel XLSX para baixar e conferir no aplicativo. Cada assunto explica o problema, a correção, o que foi medido e o que ainda precisa de revisão.</p>
 <p>Ruim e bom parecem iguais de propósito. A diferença está na estrutura, não no visual.</p>
 {chr(10).join(secoes)}
 """

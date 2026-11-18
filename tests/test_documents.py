@@ -7,17 +7,30 @@ from zipfile import ZipFile
 
 import pytest
 from docx import Document
+from openpyxl import load_workbook
 from PIL import Image
+from pptx import Presentation
 from pydantic import ValidationError
 from pypdf import PdfReader, PdfWriter
 
-from accessibility_mcp.a11y import documents, files
+from accessibility_mcp.a11y import documents, files, report_artifacts
 from accessibility_mcp.a11y.document_schema import Assessment, Block, DocumentSpec
 from accessibility_mcp.a11y.document_validation import (
     validate,
     validate_docx,
     validate_pdf,
 )
+
+
+def finding_sheet(workbook):
+    """Primeira aba de tela com achados (a planilha tem uma aba por tela; a de achados é a que começa em 'Site')."""
+    return next(sheet for sheet in workbook.worksheets if sheet["A1"].value == "Site")
+
+
+def test_pdf_html_keeps_numbered_step_line_breaks_and_escapes_text():
+    spec = DocumentSpec(title='Passos', blocks=[Block(kind='paragraph', text='Por teclado\n1. Abra a página.\n2. Localize <Enviar>.')])
+    html = documents.build_html(spec, {})
+    assert '<p>Por teclado<br>1. Abra a página.<br>2. Localize &lt;Enviar&gt;.</p>' in html
 
 
 @pytest.fixture(autouse=True)
@@ -76,6 +89,7 @@ async def test_docx_is_an_actual_semantic_document_and_mutations_are_caught(spec
     assert not doc.styles["Title"].element.xpath("./w:pPr/w:pBdr")
     assert doc.tables[0].cell(1, 1).text == "Não avaliado"
     assert all(row._tr.xpath("./w:trPr/w:cantSplit") for row in doc.tables[0].rows)
+    assert all(p.paragraph_format.keep_with_next for cell in doc.tables[0].rows[0].cells for p in cell.paragraphs)
     doc.core_properties.title = ""
     row_properties = doc.tables[0].rows[0]._tr.trPr
     row_properties.remove(row_properties[0])
@@ -133,8 +147,11 @@ async def test_tall_image_fits_the_docx_page(spec, tmp_path, monkeypatch):
     Image.new("RGB", (50, 1000), "white").save(tmp_path / "alta.png")
     spec.blocks.append(Block(kind="image", source="alta.png", alt="Figura vertical"))
     result = await documents.create(spec, "docx")
-    shape = Document(result["files"][0]["path"]).inline_shapes[0]
+    doc = Document(result["files"][0]["path"])
+    shape = doc.inline_shapes[0]
     assert shape.width <= Cm(12) and shape.height <= Cm(20)
+    from docx.shared import Pt
+    assert doc.paragraphs[-1].paragraph_format.space_before == Pt(12)
 
 
 def test_text_is_escaped_and_no_untrusted_html_can_run(spec):
@@ -174,17 +191,140 @@ def test_empty_report_never_invents_conformance_or_passes():
         documents.report_spec({}, "Report", "en")
 
 
+def test_spreadsheet_and_presentation_group_pages_and_keep_exact_locations(tmp_path):
+    finding = {
+        "criterion": "1.1.1",
+        "severity": "moderate",
+        "priority": "P2",
+        "claim": "=HYPERLINK(\"https://example.invalid\", \"Imagem sem texto alternativo\")",
+        "impact": "A pessoa que usa leitor de tela não recebe a informação da imagem.",
+        "recommendation": "Adicione um texto alternativo que descreva a imagem.",
+        "outcome": "failed",
+        "element": {"tag": "img", "role": "img", "name": "Marca"},
+        "target": "css:img.logo",
+        "location": {"css": "img.logo", "attrs": {"src": "/logo.svg"}},
+        "evidence_steps": [2],
+    }
+    second = {
+        **finding,
+        "severity": "serious",
+        "priority": "P1",
+        "element": {"tag": "img", "role": "img", "name": "Marca alternativa"},
+        "target": "css:header img.logo",
+        "location": {"css": "header img.logo", "attrs": {"src": "/logo.svg"}},
+        "page_url": "https://example.test/sobre",
+        "evidence_steps": [4],
+    }
+    record = {
+        "url": "https://example.test/",
+        "findings": [{**finding, "page_url": "https://example.test/"}, second],
+    }
+    findings = report_artifacts.normalize_findings(record)
+    assert len(findings) == 1
+    assert findings[0]["page_urls"] == ["https://example.test/", "https://example.test/sobre"]
+    assert findings[0]["severity"] == "serious" and findings[0]["priority"] == "P1"
+    assert findings[0]["evidence_steps"] == [2, 4]
+    assert {location["selector"] for location in findings[0]["locations"]} == {
+        "CSS: img.logo; arquivo: /logo.svg",
+        "CSS: header img.logo; arquivo: /logo.svg",
+    }
+    uncertain = report_artifacts.normalize_findings({
+        "findings": [{**finding, "outcome": "cantTell", "page_url": "https://example.test/confirmar"}],
+    })
+    assert len(uncertain) == 1 and uncertain[0]["outcome"] == "cantTell"
+    assert len(report_artifacts.normalize_findings({**record, "findings": [*record["findings"], uncertain[0]]})) == 2
+
+    files = report_artifacts.create(record, "=HYPERLINK(\"https://example.invalid\", \"Resumo\")", ("xlsx", "pptx"), tmp_path)
+    assert all(not entry["validation"]["issues"] for entry in files)
+    assert all(entry["validation"]["conformance"] == "not_determined" for entry in files)
+
+    workbook = load_workbook(tmp_path / "report.xlsx", data_only=False)
+    try:
+        sheet = finding_sheet(workbook)
+        assert "Resumo" not in workbook.sheetnames
+        assert all(cell.data_type != "f" for row in workbook.worksheets[0].iter_rows() for cell in row)
+        assert sheet["A1"].value == "Site"
+        assert sheet["A2"].value == "example.test"
+        rows = [dict(zip(report_artifacts._XLSX_HEADERS, row)) for ws in workbook.worksheets if ws["A1"].value == "Site"
+                for row in ws.iter_rows(min_row=2, values_only=True)]
+        assert len(rows) == 2
+        assert rows[0]["ID"] == "F1"
+        assert rows[0]["Prioridade"] == "P2 — prioridade média" and rows[1]["Prioridade"] == "P1 — prioridade alta"
+        assert rows[0]["Página (URL)"] == "https://example.test/"
+        assert rows[1]["Página (URL)"] == "https://example.test/sobre"
+        assert "header img.logo" in rows[1]["Localização (seletor)"]
+        assert rows[0]["Problema"].startswith("'=")
+        assert all(cell.data_type != "f" for row in sheet.iter_rows() for cell in row)
+        assert rows[0]["Critério WCAG"].startswith("1.1.1")
+        assert list(report_artifacts.FIRST_SHEETS) == []
+        assert list(report_artifacts.LAST_SHEETS) == []
+        assert workbook.sheetnames == ["Home", "Sobre"]
+    finally:
+        workbook.close()
+
+    presentation = Presentation(tmp_path / "report.pptx")
+    text = "\n".join(shape.text for slide in presentation.slides for shape in slide.shapes if shape.has_text_frame)
+    assert "Problemas confirmados: 1" in text
+    assert "Mesmo problema em 2 páginas" in text
+    assert "header img.logo" in text
+
+
+async def test_report_run_ids_generate_xlsx_and_resource_download(tmp_path, monkeypatch):
+    from accessibility_mcp.a11y import runs
+    from accessibility_mcp.server import mcp
+
+    records = {
+        "first": {
+            "url": "https://example.test/",
+            "findings": [{
+                "criterion": "2.1.1", "severity": "serious", "priority": "P1",
+                "claim": "O botão não funciona pelo teclado", "outcome": "failed",
+                "element": {"tag": "button", "role": "button", "name": "Abrir"},
+                "location": {"css": "button#abrir", "attrs": {"id": "abrir"}},
+            }],
+        },
+        "second": {
+            "url": "https://example.test/contato",
+            "findings": [{
+                "criterion": "2.1.1", "severity": "serious", "priority": "P1",
+                "claim": "O botão não funciona pelo teclado", "outcome": "failed",
+                "element": {"tag": "button", "role": "button", "name": "Abrir"},
+                "location": {"css": "button#abrir", "attrs": {"id": "abrir"}},
+            }],
+        },
+    }
+    monkeypatch.setattr(documents, "folder", lambda: tmp_path)
+    monkeypatch.setattr(runs, "load", records.get)
+    tool = mcp._tool_manager.get_tool("a11y_create_report")
+    result = json.loads(await tool.fn(formats="xlsx", run_ids=["first", "second"]))
+    assert "error" not in result
+    downloaded = await mcp.read_resource(f"a11y://document/{result['document_id']}/report.xlsx")
+    assert next(iter(downloaded)).content[:2] == b"PK"
+    workbook = load_workbook(tmp_path / result["document_id"] / "report.xlsx")
+    try:
+        rows = [dict(zip(report_artifacts._XLSX_HEADERS, row)) for ws in workbook.worksheets if ws["A1"].value == "Site"
+                for row in ws.iter_rows(min_row=2, values_only=True)]
+        assert len(rows) == 2
+        assert rows[1]["Página (URL)"] == "https://example.test/contato"
+    finally:
+        workbook.close()
+
+
 async def test_report_from_saved_run_keeps_evidence_and_coverage():
     from accessibility_mcp.a11y import runs
     from accessibility_mcp.server import mcp
 
-    run_id = runs.save("exemplo.test", {"url": "https://exemplo.test", "findings": [{"criterion": "2.1.1", "claim": "Controle sem teclado", "outcome": "failed", "evidence_steps": [3]}], "coverage": {"gaps": ["NVDA não executado"]}})
+    run_id = runs.save("exemplo.test", {"url": "https://exemplo.test", "findings": [{"criterion": "2.1.1", "claim": "Controle sem teclado", "outcome": "failed", "evidence_steps": [3]}], "coverage": {"gaps": ["NVDA não executado"], "probes_run": ["keyboard_contract"], "actions_taken": 9}})
     tool = mcp._tool_manager.get_tool("a11y_create_report")
     result = json.loads(await tool.fn(formats="docx", run_id=run_id))
     assert "error" not in result
     path = Path(result["files"][0]["path"])
-    text = " ".join(p.text for p in Document(str(path)).paragraphs)
-    assert "Controle sem teclado" in text and "[3]" in text and "NVDA não executado" in text
+    document = Document(str(path))
+    paragraphs = " ".join(p.text for p in document.paragraphs)
+    cells = " ".join(cell.text for table in document.tables for row in table.rows for cell in row.cells)
+    text = paragraphs + " " + cells
+    assert "Controle sem teclado" in text and "[3]" not in text and "NVDA não executado" in text
+    assert "9 ações" in text
 
 
 async def test_external_validator_missing_is_not_a_pass(spec, monkeypatch):

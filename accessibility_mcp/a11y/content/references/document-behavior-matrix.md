@@ -1,7 +1,7 @@
-# Document behavior matrix: Word DOCX and PDF examples
+# Document behavior matrix: Word DOCX, PDF and Excel XLSX examples
 
 Origem: este MCP. Contratos dos exemplos de documentos e uso das ferramentas deste servidor.
-Fontes oficiais consultadas em 2026-10-21. Textos sintetizados; arquivos de terceiros não foram incorporados.
+Fontes oficiais consultadas em 2026-10-29. Textos sintetizados; arquivos de terceiros não foram incorporados.
 
 ## Como usar e o que pode afirmar
 
@@ -9,10 +9,40 @@ Escolha os assuntos pelo significado da tarefa. A galeria está em demo/exemplos
 Para produzir arquivos, escreva o conteúdo e use a11y_create_document; para relatório dos achados, a11y_create_report. Valide o arquivo efetivo com a11y_validate_document.
 O MCP mede estrutura; o modelo do cliente julga significado, qualidade e cobertura. Não escolha casos por palavras-chave nem converta ausência de erros em conformidade.
 As técnicas W3C são formas de atender critérios, não uma lista de implementações obrigatórias. A galeria ensina casos delimitados; Bom significa que a propriedade exemplificada foi preservada, não certificação do arquivo.
-A inspeção DOCX verifica metadados, títulos, alternativas, cabeçalhos de tabela e links sem texto. PDF acrescenta tags, fontes, Unicode e texto extraível. Listas simuladas, propósito de links, sentido da alternativa e ordem lógica exigem julgamento e revisão no aplicativo.
+A inspeção XLSX genérica mede tabelas, cabeçalhos declarados, congelamento, células mescladas e nomes definidos sem exigir as abas de um relatório de auditoria; o significado dos valores e as associações efetivas no leitor exigem revisão. A inspeção DOCX verifica metadados, títulos, alternativas, cabeçalhos de tabela e links sem texto. PDF acrescenta tags, fontes, Unicode e texto extraível. Listas simuladas, propósito de links, sentido da alternativa e ordem lógica exigem julgamento e revisão no aplicativo.
 Uma imagem decorativa corretamente marcada não exige a mesma descrição de uma figura informativa. O validador DOCX atual não distingue decoração e pode pedir revisão; o gerador exige alt para as imagens que aceita.
 PDF/UA-1 e PDF/UA-2 são perfis distintos. O gerador atual é verificado automaticamente com veraPDF PDF/UA-1; não declare PDF/UA-2. Aprovação automática não comprova todos os requisitos nem WCAG.
 A sonda a11y_nvda_speech é para páginas na VM configurada, não abre Word ou leitor de PDF. Não invente fala literal nem declare teste real de documentos sem capturar o leitor no aplicativo. Registre versões, comandos, resultado e limitações. OCR do leitor não torna o arquivo acessível.
+
+## Formulários realmente preenchíveis
+
+Fazer: Use controles preenchíveis com nome, rótulo, tipo, estado, instruções e sequência lógica. Indique campos obrigatórios em texto e nas propriedades que o formato oferece.
+Evitar: Não simule campos com linhas de sublinhado nem use somente cor ou asterisco sem explicação. Não confunda uma caixa desenhada com um controle de formulário.
+Comportamento esperado, não fala capturada: A pessoa deve reconhecer o campo, entender como preenchê-lo e consultar seu valor ou estado. No PDF, os widgets precisam estar na estrutura de formulário e ligados às tags. No Word, os controles têm título e instruções; isso ainda exige conferir a experiência no aplicativo.
+Verificação no aplicativo: Percorra os campos pelo teclado no aplicativo, preencha texto, selecione uma opção e alterne a caixa de seleção. Salve, reabra e confira valores e anúncios. Obrigatório no Word é uma indicação textual; não há envio nem validação programada por macros.
+Defeito demonstrado: Os campos mantêm aparência e valores, mas perderam seus nomes acessíveis nas propriedades dos controles.
+Medição automática: form_missing_label.
+Fontes: [Microsoft — Formulários preenchíveis no Word](https://support.microsoft.com/en-us/word/create-a-form-in-word-that-users-can-complete-or-print); [W3C — PDF12 Nome papel valor dos campos](https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF12); [W3C — PDF5 Campos obrigatórios](https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF5)
+
+## Sumário automático e clicável
+
+Fazer: Gere o sumário a partir dos títulos e use links que levem às seções corretas. No Word, atualize o campo depois de editar títulos ou páginas.
+Evitar: Não apresente apenas uma lista de títulos como se fosse navegação clicável. Não confunda o sumário no corpo com os marcadores laterais do PDF.
+Comportamento esperado, não fala capturada: As entradas devem permitir chegar à seção indicada. O DOCX tem campo de sumário com links iniciais; o PDF tem entradas clicáveis e marcadores. A atualização posterior do campo depende do editor.
+Verificação no aplicativo: Ative cada entrada pelo teclado e confira o título de chegada. No Word, edite um título em uma cópia, atualize o sumário e confira novamente. No PDF, teste também os marcadores separadamente.
+Defeito demonstrado: As entradas continuam visíveis, mas foram convertidas em texto sem links; o campo automático do Word foi retirado.
+Medição automática: o validador estrutural pode não detectar este defeito; revisar o conteúdo e a estrutura específica.
+Fontes: [Microsoft — Sumário automático no Word](https://support.microsoft.com/en-us/word/training/insert-a-table-of-contents); [W3C — PDF2 Marcadores](https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF2); [W3C — PDF11 Links e estrutura](https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF11)
+
+## Links internos com destino válido
+
+Fazer: Vincule o texto descritivo a um marcador ou seção existente e confira a chegada no arquivo final.
+Evitar: Não deixe links apontando para marcadores removidos nem suponha que a navegação interna sobrevive a qualquer exportação.
+Comportamento esperado, não fala capturada: A ativação deve levar ao trecho indicado. A posição do cursor e o anúncio ao chegar variam com o leitor e o aplicativo; a existência do destino não prova o foco real.
+Verificação no aplicativo: Percorra e ative os links pelo teclado, confira a seção de destino e continue a leitura a partir dela. Teste novamente depois de exportar.
+Defeito demonstrado: O link foi alterado para apontar a um destino que não existe no documento.
+Medição automática: broken_internal_link.
+Fontes: [W3C — PDF11 Links e estrutura](https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF11); [W3C — PDF2 Marcadores](https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF2)
 
 ## Títulos que permitem navegar
 
@@ -104,7 +134,29 @@ Defeito demonstrado: O conteúdo foi rasterizado: o PDF contém somente a imagem
 Medição automática: page_without_extractable_text.
 Fontes: [W3C — PDF7 Texto e OCR](https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF7); [Adobe — Criar e verificar PDFs acessíveis](https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html)
 
+## Planilhas com cabeçalhos associados aos dados
+
+Fazer: Use estrutura tabular simples, nomes claros e cabeçalhos associados aos dados. Confira no Excel e no leitor escolhido como os cabeçalhos são identificados; podem ser necessários recursos e configurações específicos.
+Evitar: Não trate congelamento visual como definição semântica de cabeçalho, nem considere o uso de Tabela a única solução possível.
+Comportamento esperado, não fala capturada: O exemplo bom define uma Tabela do Excel com linha de cabeçalhos. O ruim mantém os mesmos textos e o mesmo congelamento, mas remove a definição da Tabela. A fala real e as associações no leitor não foram executadas; intervalos nomeados ou outras soluções precisam ser avaliados em contexto.
+Verificação no aplicativo: Abra cada arquivo no Excel, confira a existência da Tabela e da linha de cabeçalhos e navegue entre os dados. Com NVDA real, confira a configuração de anúncio de cabeçalhos; quando necessário, defina os cabeçalhos com os comandos documentados e registre a combinação usada.
+Defeito demonstrado: O vínculo explícito da Tabela com sua linha de cabeçalhos foi retirado. A aparência e o congelamento permanecem; isso não comprova falha WCAG universal de todo intervalo que não seja uma Tabela.
+Medição automática: o validador estrutural pode não detectar este defeito; revisar o conteúdo e a estrutura específica.
+Fontes: [Microsoft — Boas práticas de acessibilidade no Excel](https://support.microsoft.com/en-us/accessibility/excel/accessibility-best-practices-with-excel-spreadsheets); [NV Access — Cabeçalhos no Microsoft Excel](https://download.nvaccess.org/documentation/en/userGuide.html#MicrosoftExcel)
+
+## Situação da planilha disponível além da cor
+
+Fazer: Mantenha um valor textual que identifique a situação de cada registro, além das cores.
+Evitar: Não dependa exclusivamente de vermelho e verde para transmitir a situação.
+Comportamento esperado, não fala capturada: Nos arquivos os registros de participação são iguais. O bom escreve Revisar e Concluído na coluna Situação, além das cores; no ruim esses valores foram removidos e só a cor permanece.
+Verificação no aplicativo: Confira os valores da coluna Situação sem usar as cores. No Excel e com o leitor escolhido, navegue até cada célula e registre se a informação está disponível em texto.
+Defeito demonstrado: Os textos da coluna Situação foram retirados, mantendo os preenchimentos vermelho e verde. O significado da cor é o conteúdo declarado deste exemplo, não uma regra automática baseada em nomes de cor.
+Medição automática: o validador estrutural pode não detectar este defeito; revisar o conteúdo e a estrutura específica.
+Fontes: [Microsoft — Boas práticas de acessibilidade no Excel](https://support.microsoft.com/en-us/accessibility/excel/accessibility-best-practices-with-excel-spreadsheets)
+
 ## Limites complementares
 
-Confira contraste e uso de cor sem depender apenas da cor; texto pequeno ou layout que não reflui podem impedir o uso com ampliação. Formulários precisam de nomes, instruções, estados e ordem de foco; o gerador atual não cria formulários interativos. Valide essas propriedades separadamente, sem afirmar que foram cobertas pelos pares desta galeria.
+O gerador oferece campos text, checkbox e choice em blocos field, com field_name, text como rótulo, help_text, required, value ou checked e options nas escolhas. DOCX usa controles nativos de conteúdo; PDF usa AcroForm e widgets ligados às tags. Não há macros, envio automático, campos de assinatura ou grupos de rádio. A indicação de obrigatório no Word não é validação automática; no PDF há sinalizador Required, mas envio e avisos dependem do aplicativo e não foram programados aqui.
+toc=true gera campo TOC com resultado inicial clicável no Word e sumário clicável no PDF; atualize o campo no Word após editar. Títulos aceitam id, e links aceitam url=#id. O destino deve existir. Sumário e marcadores PDF são recursos distintos. Aparências iniciais dos campos PDF usam fonte incorporada Windows-1252; o corpo do documento aceita Unicode. Não afirme suporte a todos os alfabetos e aplicativos sem verificar.
+Confira também contraste, uso de cor, ampliação, instruções de erros e comportamento real ao preencher. Os pares são exemplos delimitados; não comprovam toda experiência de formulário com tecnologia assistiva.
 Não envie documentos privados a serviços externos sem autorização. Trabalhe no arquivo dentro da pasta escolhida pela pessoa e prefira corrigir a fonte, reexportar e conferir o resultado. Um DOCX correto não garante que qualquer exportação PDF preserve a estrutura.

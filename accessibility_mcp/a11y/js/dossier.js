@@ -85,7 +85,7 @@ function (scope) {
     behavior_hints: {click_listeners: listeners, handler_properties: handlerProps, hover_reveals_rule: hover},
     context: {landmark: landmarkOf(el), heading: headingOf(el), form: el.form ? (el.form.getAttribute('aria-label') || el.form.id || 'form') : null,
       ancestors: (() => { const a = []; for (let p = el.parentElement; p && p !== doc.body && a.length < 4; p = p.parentElement) a.push(p.tagName.toLowerCase() + (p.getAttribute('role') ? '[' + p.getAttribute('role') + ']' : '')); return a; })()},
-    tabindex: g('tabindex'), rect: {x: Math.round(r.x), y: Math.round(r.y + window.scrollY), w: Math.round(r.width), h: Math.round(r.height)},
+    tabindex: g('tabindex'), rect: {x: r.x, y: r.y + window.scrollY, w: r.width, h: r.height},
     style: {font: cs.fontFamily.split(',')[0].replace(/["']/g, '').trim(), size: cs.fontSize, weight: cs.fontWeight, line_height: cs.lineHeight,
       letter_spacing: cs.letterSpacing, color: cs.color, background: effBg(el), radius: cs.borderRadius, padding: cs.padding, cursor: cs.cursor},
   };

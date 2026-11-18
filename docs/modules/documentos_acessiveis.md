@@ -2,9 +2,11 @@
 
 Entrega de 20 de outubro de 2026
 
-Versão do pacote: 2.2.0. Catálogo medido: 47 ferramentas, sete prompts, 71 guias e 44 exemplos de componentes.
+Atualização de 21/10: a versão 2.3.0 implementa formulários preenchíveis, sumário e links internos. O contrato atual e suas limitações estão em [formularios_sumario.md](formularios_sumario.md). As restrições descritas nesta entrega registram a versão 2.2.0.
 
-O servidor gera arquivos DOCX e PDF a partir do conteúdo escrito pelo modelo do cliente. Não chama outro modelo, não exige chave de IA e não depende de Word ou LibreOffice para gerar os documentos. A mesma ferramenta MCP atende IDEs, Claude e Codex; não há um gerador diferente por cliente.
+Versão do pacote: 2.2.0. Catálogo medido à época: 47 ferramentas, sete prompts, 71 guias e 44 exemplos de componentes. O servidor passou a expor 56 ferramentas após a integração remota MCP/A2A, documentada em [interop_remota.md](./interop_remota.md).
+
+O servidor gera documentos DOCX e PDF e relatórios de avaliação em DOCX, PDF, XLSX e PPTX a partir dos achados registrados pelo modelo do cliente. Não chama outro modelo, não exige chave de IA e não depende de Word ou LibreOffice para gerar os documentos. A mesma ferramenta MCP atende IDEs, Claude e Codex; não há um gerador diferente por cliente.
 
 Contrato das ferramentas
 
@@ -12,7 +14,22 @@ a11y_create_document recebe document e formats. Document contém title, language
 
 O DOCX usa estilos de título e seções, idioma padrão, listas numeradas reais, cabeçalho de tabela repetido, legenda, texto alternativo e links com nome. O PDF preserva a estrutura de títulos, listas, tabelas, figuras e links. O gerador completa metadados XMP, descrição dos links e marcação de pintura decorativa que o exportador Chromium deixa incompletos. Texto não é convertido em artefato. As fontes são incorporadas pelo navegador e sua presença é verificada.
 
-a11y_create_report usa os achados e a cobertura da sessão atual ou de uma execução salva. O relatório inclui escopo, resultados registrados, passos de evidência e lacunas. Execuções antigas que não guardaram cobertura são identificadas dessa forma. Nenhum achado registrado não significa aprovação dos critérios. Para uma avaliação por critério, o cliente escreve assessments e usa a ferramenta de criação de documento.
+a11y_create_report usa os achados e a cobertura da sessão atual, de uma execução salva ou de várias execuções informadas em run_ids. Aceita docx, pdf, both, xlsx, pptx e all. Quando o mesmo problema aparece em mais de uma página, agrupa a descrição e informa quantas páginas foram afetadas, com cada URL, elemento e seletor observado. Cada item apresenta criticidade, prioridade, princípio, diretriz e critério WCAG, evidências e recomendação, em uma ficha narrativa de cinco partes: onde está, o que foi medido, por que reprova, como reproduzir e como corrigir. Dados que não foram registrados aparecem como não informados; o relatório não inventa localização nem correção. Execuções antigas sem cobertura são identificadas dessa forma. Nenhum achado registrado não significa aprovação dos critérios. Para uma avaliação por critério, o cliente escreve assessments e usa a ferramenta de criação de documento.
+
+A estrutura do relatório segue fontes publicadas, não um formato inventado aqui:
+
+- Template for Accessibility Evaluation Reports (W3C WAI) define a ordem narrativa: resumo, escopo, revisores, processo, resultados e ações recomendadas, referências e apêndices. O relatório gerado segue essa ordem, com o agrupamento por princípio POUR dentro de "Problemas encontrados" e uma tabela de conformidade por critério A/AA.
+- WCAG-EM Step 5 pede para documentar o resultado de cada etapa, registrar as especificidades da avaliação, emitir uma declaração de avaliação e alerta que amostra não gera declaração de conformidade do produto inteiro, e que nota agregada é opcional e pode enganar. Por isso o relatório não emite índice de conformidade e diz explicitamente que não é uma declaração.
+- VPAT/ACR define as declarações por critério (Suportado, Parcialmente suportado, Não suportado, Não aplicável, Não avaliado). O relatório usa "Não suportado" apenas com evidência de falha e mantém "Não avaliado" quando falta teste; ausência de achado nunca vira "Suportado".
+- ISO/IEC/IEEE 29119-3 (que substituiu o IEEE 829) orienta o relatório de teste e o relatório de anomalia: identificação, ambiente, resultado esperado versus observado, severidade e evidência. O registro de achados da planilha materializa esses campos.
+
+O DOCX/PDF entrega: resumo com veredito e distribuição por prioridade, o que já está certo, escopo (páginas incluídas e excluídas, data, nível pretendido, objetivo), método e ambiente, problemas agrupados por princípio com uma ficha por achado (critério, nível, severidade com significado, prioridade, situação, onde está, o que foi medido, por que reprova, como reproduzir, como corrigir e reteste), tabela de conformidade por critério A/AA, o que corrigir primeiro, como confirmar a correção, limites, ficha técnica e referências.
+
+Se a pessoa não indicar prioridade, o relatório usa esta correspondência entre criticidade e ordem de trabalho: bloqueadora vira P0, séria P1, moderada P2 e leve P3. Uma prioridade informada explicitamente no achado é preservada. Essa ordem ajuda a planejar correções, mas não substitui a avaliação do contexto do produto.
+
+O XLSX tem seis abas. Resumo traz identificação, resultado em números, método, cobertura, como ler as colunas e o que o relatório não prova. Achados é o registro de defeitos com cabeçalho em negrito, filtro, congelamento, validação da coluna Situação e 35 colunas, com um dado por célula. A ordem começa pelo que a pessoa precisa ler: ID, problema, correção recomendada, justificativa da falha, roteiro, criticidade, prioridade e situação; depois vêm site, página, título da página, princípio, diretriz, critério, nível, sistema operacional, navegadores, ambiente, método, área, elemento, seletor, resultado observado, resultado esperado, passos, pré-condições, evidência, código, responsável, prazo, ticket, data, grupo, execução e passos do trace. Na impressão, a aba usa paisagem em A4, ajuste à largura e repete o cabeçalho e o bloco ID–Roteiro em cada folha. Matriz WCAG agrupa os achados por critério e mostra a prioridade mais alta. Correções e retestes acompanha o que foi corrigido. Evidências e referências reúne os anexos e as fontes normativas. O PPTX cria um slide de resumo e um slide por problema. Os dois formatos passam por verificações estruturais automáticas; essas verificações não comprovam acessibilidade completa. Ainda é necessário conferir a ordem de leitura, o conteúdo, o visual e o uso com leitor de tela no aplicativo de destino. O resultado da validação mantém conformidade como não determinada.
+
+O que evitar, segundo as mesmas fontes: nota ou percentual de conformidade sem metodologia declarada, listar somente o que a ferramenta automática achou, apresentar "nenhum problema" como aprovado, e relatório que não diz o que ficou fora do escopo.
 
 Em assessments, criterion deve ser um identificador WCAG existente; status deve ser Supports, Partially Supports, Does Not Support, Not Applicable ou Not Evaluated; coverage indica complete, partial ou not_evaluated. Uma conclusão diferente de Not Evaluated exige cobertura completa declarada e evidência. O modelo decide o significado e a situação normativa; o código apenas confere esse contrato. A qualidade ou a veracidade da justificativa não pode ser provada pela existência de texto no campo.
 
@@ -20,7 +37,7 @@ Validação
 
 O gerador de DOCX mantém cada linha de tabela na mesma página e limita as imagens à área útil, preservando a proporção. O relatório automático usa texto em português e restringe seus metadados a variantes desse idioma. Para outros idiomas, o modelo escreve o conteúdo na ferramenta de documentos, evitando marcar texto português como se fosse inglês.
 
-a11y_validate_document confere arquivos efetivos, gerados pelo servidor ou dentro da pasta escolhida pela pessoa. No DOCX verifica título, idioma, títulos e saltos de nível, alternativas das imagens, cabeçalhos de tabela, tabelas complexas e links sem texto. No PDF verifica título, idioma, presença e conteúdo da árvore de tags, títulos, figuras, tabelas, fontes incorporadas, mapeamento Unicode, texto extraível e associação de links à estrutura.
+a11y_validate_document confere arquivos efetivos, gerados pelo servidor ou dentro da pasta escolhida pela pessoa. No DOCX verifica título, idioma, títulos e saltos de nível, alternativas das imagens, cabeçalhos de tabela, tabelas complexas e links sem texto. No PDF verifica título, idioma, presença e conteúdo da árvore de tags, títulos, figuras, tabelas, fontes incorporadas, mapeamento Unicode, texto extraível e associação de links à estrutura. No XLSX verifica as abas, os cabeçalhos, a tabela de problemas e os recursos de navegação registrados. No PPTX verifica títulos dos slides, texto e metadados de idioma.
 
 A validação externa usa o veraPDF 1.30.1 com perfil PDF/UA-1. Havendo Java no PATH, a instalação automática baixa o pacote oficial fixado por SHA-256 e instala na pasta do usuário. A11Y_MCP_AUTO_INSTALL=0 desliga o preparo automático. A11Y_MCP_VERAPDF pode indicar outra instalação confiável. O processo não usa shell para validar arquivos, inclusive no Windows. Ausência, falha de instalação ou saída inválida não vira aprovação. O relatório XML original fica no resultado de validação.
 
@@ -61,5 +78,7 @@ Uma futura galeria pode comparar títulos navegáveis, alternativas de imagens, 
 Limites ainda não comprovados
 
 O guia de conformidade foi avaliado com gpt-6.1-sol no Codex CLI 0.163.0-alpha.10.2, conforme os registros do cliente. A correção correspondente na fonte Qaaccessibility está no commit local 4aa7bd0; não foi enviada ao remoto daquele projeto.
+
+A organização editorial dos relatórios de QA foi revisada em 27/10/2026: Word/PDF seguem identificação inicial e as oito seções do modelo W3C; a planilha separa resumo, escopo, registro completo por ocorrência, matriz, correções/retestes e evidências/referências. Conteúdo, ordem das informações, comparativo e verificações estão em [relatórios de QA de acessibilidade](relatorios_qa_acessibilidade.md).
 
 Não houve leitura dos arquivos finais com NVDA real ou outro leitor de tela nesta entrega. Não foram executados os chats do Claude, Cursor e VS Code; foram conferidos os contratos MCP compartilhados e o cliente Codex real. A avaliação de instruções cobre oito casos sintéticos, não todos os critérios WCAG nem todos os modelos. A observação de regressões em uso real continua necessária. A validação normativa depende de Java e do veraPDF disponível. Tabelas complexas, formulários de documento e arquivos protegidos não são gerados pelo contrato atual.

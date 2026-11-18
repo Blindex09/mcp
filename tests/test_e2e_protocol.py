@@ -4,6 +4,7 @@
 - o servidor NAO chama modelo: nenhum modelo e' configurado aqui, e o fluxo de achados, execucoes salvas e aprendizado e' conduzido pelo cliente;
 - no fim, a matriz: toda ferramenta registrada precisa ter sido exercitada.
 """
+import base64
 import http.server
 import json
 import os
@@ -17,6 +18,11 @@ from typing import ClassVar
 import pytest
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+
+
+def finding_sheet(workbook):
+    """Primeira aba de tela com achados (a planilha tem uma aba por tela; a de achados é a que começa em 'Site')."""
+    return next(sheet for sheet in workbook.worksheets if sheet["A1"].value == "Site")
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "tests" / "fixtures" / "mini_site"
@@ -91,10 +97,11 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
     ws_dir = tmp_path / "projeto"
     ws_dir.mkdir()
     (ws_dir / "pagina.html").write_text("<img src=a.png>\n", encoding="utf-8")
-    env.update({"A11Y_MCP_EDIT_APPROVAL": "1"})  # nenhuma pasta configurada: a pessoa a escolhe na conversa
+    env.update({"A11Y_MCP_EDIT_APPROVAL": "1", "A11Y_MCP_ALLOW_EDITS": "1"})  # nenhuma pasta configurada: a pessoa a escolhe na conversa
     vm_token = "token-de-teste-com-mais-de-16"
     node, vm, vm_env = start_vm_agent(vm_token)  # agente da VM de verdade (Node), com NVDA SIMULADO por tras
     env.update(vm_env)
+    env["A11Y_MCP_NVDA_HOST_ADDR"] = ""  # vazio, nao ausente: o servidor le o .env de quem desenvolve com setdefault, e o endereco da VM real nao pode mudar o 127.0.0.1 esperado
     params = StdioServerParameters(command=sys.executable, args=[str(ROOT / "mcp_server.py")], env=env)
     called: set[str] = set()
 
@@ -105,6 +112,17 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         async def call(tool, /, **args):
             called.add(tool)
             return await s.call_tool(tool, args)
+
+        # ---------- interop remota: ferramentas MCP/A2A expostas pelo servidor
+        assert js(await call("a11y_remote_mcp_connections"))["connections"] == []
+        assert "error" in js(await call("a11y_remote_mcp_connect", name="nome inválido", endpoint=""))
+        assert "error" in js(await call("a11y_remote_mcp_list_tools", server_id="missing"))
+        assert "error" in js(await call("a11y_remote_mcp_call", server_id="missing", tool_name="echo"))
+        assert "error" in js(await call("a11y_remote_approve", approval_id="missing", decision="allow"))
+        assert "error" in js(await call("a11y_remote_mcp_disconnect", server_id="missing"))
+        assert "error" in js(await call("a11y_a2a_agent_card", agent_url="http://127.0.0.1:1"))
+        assert "error" in js(await call("a11y_a2a_send_message", endpoint="http://127.0.0.1:1", message="mensagem"))
+        assert "error" in js(await call("a11y_a2a_get_task", endpoint="http://127.0.0.1:1", task_id="task"))
 
         # ---------- conhecimento e escolha
         cat = js(await call("a11y_list_content"))
@@ -132,7 +150,10 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         # o Firefox faz o proprio iframe ser uma parada de Tab antes do conteudo dele; o Chromium vai direto ao conteudo.
         tabs = cmp["differences"]["firefox"]["tab_order"]
         assert tabs != "identica" and len(tabs["chromium"]) >= 8
-        assert [t for t in tabs["firefox"] if not t.startswith("iframe:")] == tabs["chromium"]
+        firefox_non_iframe = [t for t in tabs["firefox"] if not t.startswith("iframe:")]
+        shared_chromium = [t for t in tabs["chromium"] if t in firefox_non_iframe]
+        shared_firefox = [t for t in firefox_non_iframe if t in tabs["chromium"]]
+        assert shared_firefox == shared_chromium  # cada motor pode expor controles de mídia diferentes
         assert any(t.startswith("iframe:") for t in tabs["firefox"]) and not any(t.startswith("iframe:") for t in tabs["chromium"])
 
         # ---------- varias paginas
@@ -188,8 +209,10 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         trace = js(await call("a11y_trace"))
         n_probe = trace["steps"][-1]["n"]
         assert trace["steps"][-1]["kind"] == "probe:tab_walk"
-        rec = js(await call("a11y_finding", claim="o botao Comprar so funciona com mouse", criterion="2.1.1", severity="blocker", target=by_text["Comprar"]["id"], evidence_steps=str(n_probe)))
+        rec = js(await call("a11y_finding", claim="o botao Comprar so funciona com mouse", criterion="2.1.1", severity="blocker", target=by_text["Comprar"]["id"], evidence_steps=str(n_probe),
+                            reproduction_steps_screen_reader_proposed=["NVDA, modo de navegação: B até Comprar; orientação não executada."]))
         assert rec["recorded"]["outcome"] == "failed" and rec["recorded"]["element"]["name"] == "Comprar"
+        assert rec["recorded"]["report_details"]["reproduction_steps_screen_reader_proposed"] == ["NVDA, modo de navegação: B até Comprar; orientação não executada."]
         earl = js(await call("a11y_report", format="earl", save=False))
         assert earl["@graph"][0]["earl:result"]["earl:outcome"] == {"@id": "earl:failed"} and "run_id" not in earl
         assert js(await call("a11y_report", format="sarif", save=False))["runs"][0]["results"][0]["ruleId"] == "WCAG-2.1.1"
@@ -256,6 +279,19 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         else:
             assert "A11Y_MCP_NVDA_VM" in spoken["error"]
 
+        # ---------- sessao aberta do NVDA (VM): abrir, conduzir passo a passo e fechar, com o mesmo agente e o NVDA simulado
+        if node:
+            aberta = js(await call("a11y_nvda_open", url=base + "/index.html"))
+            assert aberta.get("aberta") is True
+            teclas = js(await call("a11y_nvda_do", action="key", key="H", repeat=2))
+            assert [x["fala"] for x in teclas["passos"]] == ["titulo 1", "titulo 2"]
+            fechada = js(await call("a11y_nvda_close"))
+            assert fechada.get("fechada") is True
+            assert vm_token not in json.dumps([aberta, teclas, fechada])
+        else:
+            for nome, args in (("a11y_nvda_open", {"url": base + "/index.html"}), ("a11y_nvda_do", {"action": "state"}), ("a11y_nvda_close", {})):
+                assert "A11Y_MCP_NVDA_VM" in js(await call(nome, **args))["error"]
+
         # ---------- editor de arquivos: ler, editar (retido ate a resposta), aprovar, desfazer
         assert "a11y_set_workspace" in js(await call("a11y_read_file", path="pagina.html"))["error"]
         assert js(await call("a11y_set_workspace", path=str(ws_dir)))["workspace"]
@@ -280,3 +316,119 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
     missing = registered - called
     assert not missing, f"ferramentas nao exercitadas pelo protocolo: {sorted(missing)}"
     assert registered == called  # a matriz fecha: nada registrado ficou sem prova pelo protocolo
+
+
+async def test_accessibility_reports_are_generated_and_downloaded_over_mcp(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    monkeypatch.setenv("A11Y_MCP_HOME", str(home))
+    from accessibility_mcp.a11y import runs
+
+    run_id = runs.save("example.test", {
+        "url": "https://example.test/",
+        "persona": "keyboard",
+        "findings": [{
+            "id": "f1",
+            "criterion": "2.1.1",
+            "severity": "serious",
+            "priority": "P1",
+            "claim": "O botão não funciona pelo teclado",
+            "impact": "A pessoa que navega pelo teclado não consegue abrir o painel.",
+            "recommendation": "Permita ativar o botão com Enter e Espaço.",
+            "outcome": "failed",
+            "element": {"tag": "button", "role": "button", "name": "Abrir painel"},
+            "location": {"css": "button#abrir-painel", "attrs": {"id": "abrir-painel"}},
+            "page_url": "https://example.test/",
+            "evidence_steps": [2],
+        }, {
+            "id": "f2",
+            "criterion": "2.1.1",
+            "severity": "serious",
+            "priority": "P1",
+            "claim": "O botão não funciona pelo teclado",
+            "impact": "A pessoa que navega pelo teclado não consegue abrir o painel.",
+            "recommendation": "Permita ativar o botão com Enter e Espaço.",
+            "outcome": "failed",
+            "element": {"tag": "button", "role": "button", "name": "Abrir painel"},
+            "location": {"css": "footer button#abrir-painel", "attrs": {"id": "abrir-painel"}},
+            "page_url": "https://example.test/contato",
+            "evidence_steps": [4],
+        }],
+    })
+    assert run_id is not None
+    env = {
+        **os.environ,
+        "A11Y_MCP_HOME": str(home),
+        "A11Y_MCP_AUTO_INSTALL": "0",
+        "PYTHONIOENCODING": "utf-8",
+    }
+    params = StdioServerParameters(command=sys.executable, args=[str(ROOT / "mcp_server.py")], env=env)
+
+    async with stdio_client(params) as (reader, writer), ClientSession(reader, writer) as session:
+        await session.initialize()
+        for kind in ("xlsx", "pptx", "docx", "pdf"):
+            result = js(await session.call_tool("a11y_create_report", {
+                "formats": kind,
+                "run_id": run_id,
+                "title": "Exemplo didático de relatório de QA de acessibilidade",
+                "report_context": {
+                    "product_name": "Produto fictício para teste do relatório",
+                    "product_version": "build de demonstração",
+                    "report_version": "1.0 didática",
+                    "evaluation_goal": "Demonstrar a organização da documentação de QA; não é uma auditoria de site externo",
+                    "evaluator": "Equipe QA de integração",
+                    "evaluator_organization": "Equipe de demonstração",
+                    "evaluator_contact": "qa@example.test",
+                    "methodology": "Teste de contrato com achados didáticos",
+                    "sampling": "Duas páginas de exemplo; não representa auditoria externa",
+                    "samples": [{"url": "https://example.test/", "title": "Página inicial", "journey": "Abrir painel",
+                                 "selection_reason": "Cenário didático de interação", "testing_method": "Teclado (dados de exemplo)"}],
+                    "findings": [{"finding_id": "f1", "page_title": "Página inicial", "page_area": "Conteúdo principal",
+                                  "journey": "Abrir painel", "testing_method": "Teclado (dados de exemplo)",
+                                  "problem_location": "Página inicial > conteúdo principal > botão Abrir painel",
+                                  "preconditions": "Painel fechado", "reproduction_steps": ["Focar o botão Abrir painel", "Pressionar Enter"],
+                                  "expected_result": "Painel aberto", "actual_result": "Painel permanece fechado",
+                                  "criterion_rationale": "A funcionalidade precisa operar pelo teclado",
+                                  "evidence": "Captura didática 01", "owner": "Equipe de interface", "status": "Em correção",
+                                  "retest": "Ainda não executado"}],
+                },
+            }))
+            assert "error" not in result
+            assert result["document_ids"][kind] == result["document_id"]
+            entry = result["files"][0]
+            resource = await session.read_resource(entry["uri"])
+            downloaded = base64.b64decode(resource.contents[0].blob)
+            assert downloaded.startswith(b"%PDF" if kind == "pdf" else b"PK")
+            checked = js(await session.call_tool("a11y_validate_document", {
+                "path": entry["path"],
+                "external": False,
+            }))
+            assert checked["status"] == "automated_checks_passed"
+            assert checked["conformance"] == "not_determined"
+            assert checked["complete_validation"] is False
+            if kind == "xlsx":
+                from openpyxl import load_workbook
+
+                workbook = load_workbook(entry["path"])
+                try:
+                    assert "Correções e retestes" not in workbook.sheetnames
+                    assert "Página inicial > conteúdo principal > botão Abrir painel" in {
+                        cell.value for cell in finding_sheet(workbook)["H"]
+                    }
+                finally:
+                    workbook.close()
+            if kind == "docx":
+                from docx import Document
+
+                document = Document(entry["path"])
+                assert [p.text for p in document.paragraphs if p.style.name == "Heading 2"] == [
+                    "Resumo", "O que já está certo",
+                    "Como a avaliação foi feita", "Problemas encontrados",
+                    "Tabela de conformidade com a WCAG 2.2", "O que corrigir primeiro",
+                    "Como confirmar que foi corrigido", "Limites desta avaliação", "Ficha técnica",
+                    "Referências",
+                ]
+            if kind == "pdf":
+                from pypdf import PdfReader
+
+                text = " ".join(page.extract_text() for page in PdfReader(entry["path"]).pages)
+                assert "Painel permanece fechado" in text and "Captura didática 01" not in text

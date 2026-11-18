@@ -51,13 +51,25 @@ def translate_url(url: str) -> str:
     return url.strip()
 
 
-async def run(url: str, tabs: int = 15, reads: int = 20, silence: str | None = None, poll: float = 1.0) -> dict[str, Any]:
+async def run(
+    url: str,
+    tabs: int = 15,
+    reads: int = 20,
+    silence: str | None = None,
+    poll: float = 1.0,
+    shortcuts: dict[str, int] | None = None,
+    keys: list[str] | None = None,
+) -> dict[str, Any]:
     cfg = configured()
     if cfg is None:
         raise NvdaVmError(HELP)
     base, token = cfg
     target = translate_url(url)
     body: dict[str, Any] = {"url": target, "tabs": tabs, "leituras": reads}
+    if shortcuts:
+        body["atalhos"] = {k: v for k, v in shortcuts.items() if v > 0}
+    if keys:
+        body["teclas"] = list(keys)
     if silence is not None:
         body["silencio"] = silence
     headers = {"authorization": f"Bearer {token}"}
@@ -113,16 +125,61 @@ async def _wait(client: httpx.AsyncClient, base: str, job: str, poll: float) -> 
 
 def facts(result: dict[str, Any], url: str) -> dict[str, Any]:
     """Moldura em fatos: o que o NVDA falou, e de onde veio (para ninguem confundir com o NVDA da pessoa)."""
-    return {
+    out: dict[str, Any] = {
         "source": "NVDA real (Guidepup) numa VM Windows",
         "url": url,
         "tab_walk": result.get("tab", []),
         "reading_mode": result.get("leitura", []),
+        "shortcuts": result.get("atalhos", {}),
+        "key_sequence": result.get("teclas", []),
         "error": result.get("erro"),
         "muted": result.get("silencio"),
         "notes": [
             "A fala e' a do NVDA da VM: a voz, a velocidade e os complementos NAO sao os do NVDA da pessoa.",
-            "O teste so aperta Tab e navega no modo leitura; nao ativa botoes nem envia formularios.",
+            "O teste navega com Tab, modo leitura (Seta para baixo) e atalhos de uma letra do modo de navegacao do NVDA (H, D, K, F, B, L, T, G ou teclas pedidas); nao envia formularios.",
             "Cobre estreito e fundo (cerca de 6 de 55 criterios WCAG sozinho): complementa o teste como usuario, nao o substitui.",
         ],
     }
+    return out
+
+
+async def _post_job(path: str, body: dict[str, Any], poll: float = 1.0) -> dict[str, Any]:
+    """Envia um comando da sessao aberta e espera o resultado (mesmo acompanhamento do percurso fixo)."""
+    cfg = configured()
+    if cfg is None:
+        raise NvdaVmError(HELP)
+    base, token = cfg
+    headers = {"authorization": f"Bearer {token}"}
+    async with httpx.AsyncClient(headers=headers, timeout=30) as client:
+        try:
+            resp = await client.post(f"{base}{path}", json=body)
+        except httpx.HTTPError as e:
+            raise NvdaVmError(f"nao consegui falar com a VM em {base} ({type(e).__name__}). Ela esta ligada, com o agente rodando e o firewall liberado?") from e
+        if resp.status_code == 401:
+            raise NvdaVmError("a VM recusou o token (A11Y_MCP_NVDA_TOKEN).")
+        if resp.status_code in (400, 409):
+            raise NvdaVmError(resp.json().get("erro", resp.text[:200]))
+        if resp.status_code != 202:
+            raise NvdaVmError(f"a VM recusou o pedido: {resp.text[:200]}")
+        result = await _wait(client, base, resp.json()["id"], poll)
+        if result.get("erro"):
+            raise NvdaVmError(str(result["erro"]))
+        return result
+
+
+async def session_open(url: str, silence: str | None = None, poll: float = 1.0) -> dict[str, Any]:
+    body: dict[str, Any] = {"url": translate_url(url)}
+    if silence is not None:
+        body["silencio"] = silence
+    return await _post_job("/sessao/abrir", body, poll)
+
+
+async def session_command(command: dict[str, Any], poll: float = 1.0) -> dict[str, Any]:
+    body = dict(command)
+    if body.get("url"):
+        body["url"] = translate_url(str(body["url"]))
+    return await _post_job("/sessao/comando", body, poll)
+
+
+async def session_close(poll: float = 1.0) -> dict[str, Any]:
+    return await _post_job("/sessao/fechar", {}, poll)

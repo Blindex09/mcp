@@ -8,6 +8,31 @@ from accessibility_mcp.a11y.session import SESSION, SessionError
 HEAD = '<!doctype html><html lang="pt"><head><title>Teste</title></head><body>'
 
 
+async def test_large_page_preserves_every_keyboard_stop():
+    result = await probe("".join(f'<button>Controle {i}</button>' for i in range(75)), "tab_walk")
+    assert result["stops_total"] == 75
+    assert len(result["stops"]) == 75
+    assert result["stops"][-1]["name"] == "Controle 74"
+
+
+@pytest.mark.parametrize("width,small", [(23.75, True), (24, False)])
+async def test_target_size_does_not_round_a_small_target_up_to_twenty_four(width, small):
+    html = f'<style>button{{width:{width}px;height:24px;padding:0;border:0;margin:0}}</style>'
+    result = await probe(html + '<button>A</button><button>B</button>', "target_size")
+    assert result['smaller_than_24px'] == (2 if small else 0)
+    assert len(result['fail_spacing_exception']) == (2 if small else 0)
+
+
+@pytest.mark.parametrize("size,small", [(10, True), (30, False)])
+async def test_target_measurement_covers_beyond_two_hundred_controls(size, small):
+    html = f'<style>button{{width:{size}px;height:{size}px;padding:0;border:0;margin:0}}</style>'
+    html += "".join(f'<button aria-label="Alvo {i}"></button>' for i in range(205))
+    result = await probe(html, "target_size")
+    assert result["targets_measured"] == 205
+    assert result["smaller_than_24px"] == (205 if small else 0)
+    assert len(result["fail_spacing_exception"]) == (205 if small else 0)
+
+
 async def probe(html, kind, target=None, container=None):
     await SESSION.open(None, HEAD + html + "</body></html>")
     try:

@@ -203,3 +203,14 @@ async def test_tab_walk_says_when_the_browser_did_not_stop_on_links():
         assert "links_sem_parada" not in r
     else:
         assert r["links_sem_parada"] == {"no_codigo": 3, "com_parada": 0}, r
+
+
+async def test_browser_comparison_measures_after_sixtieth_stop():
+    from accessibility_mcp.a11y.compare import compare_browsers
+
+    html = "<!doctype html><html lang='pt'><title>Grande</title><body><main>"
+    html += ''.join(f'<button>Botao {i}</button>' for i in range(65))
+    result = await compare_browsers(html=html + '</main></body></html>', browsers=['chromium', 'firefox'])
+    for browser in result['per_browser'].values():
+        assert len(browser['tab_stops']) == 65
+        assert browser['tab_stops'][-1] == 'button:Botao 64'

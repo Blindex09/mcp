@@ -20,8 +20,7 @@ SHEET STRUCTURE (WCAG 1.3.1, 2.4.6):
   - Sheet named with a default/non-descriptive name ("Sheet1", "Planilha1") when the
     workbook has multiple sheets -- screen reader users navigating between sheets by name
     get no context
-  - Data starting directly at row/column 1 with no header row, or a header row not
-    marked/frozen (so meaning is lost when navigating far down a long sheet)
+  - Tabular data whose row/column header relationships are missing or cannot be determined from the inspected structure. Do not infer a failure merely from the absence of frozen panes; inspect table headers, defined names and the actual reader configuration.
   - Merged cells in the middle of a data range (not just a title/header band) --
     breaks the row/column relationship for screen reader table navigation, same failure
     mode as an unheadered HTML table
@@ -30,8 +29,7 @@ READING ORDER AND NAVIGATION (WCAG 1.3.2, 2.4.3):
   - Data laid out with large numbers of blank rows/columns between logical
     sections on the same sheet without any heading/label announcing the next
     section (screen reader users navigating cell-by-cell lose track of context)
-  - Very wide or very tall sheet (hundreds of columns/rows) with no frozen
-    header row/column, making orientation while scrolling effectively impossible
+  - Very wide or tall sheets need orientation review. Frozen panes can help visual navigation, but their absence alone is not a WCAG failure and does not determine screen-reader header announcements.
 
 IMAGES AND CHARTS (WCAG 1.1.1):
   - Embedded image or chart with no alt text set
@@ -58,12 +56,12 @@ find in the input; never copy this example verbatim):
     "confidence": "high",
     "level": "A",
     "element": "Sheet 'Sheet1', row 1",
-    "description": "This spreadsheet has no header row marked, so a screen reader user scrolling to row 500 has no idea what each column means anymore.",
-    "description_technical": "Row 1 contains column labels but is not set as a frozen/repeating header row, and there is no defined table/header range in the sheet, violating WCAG 2.2 SC 1.3.1.",
-    "why_simple": "A screen reader user navigating cell-by-cell down a long sheet loses track of which column is which after the header scrolls out of view/context.",
-    "why_technical": "Without a frozen header row or a formally defined Table with header row semantics, screen readers re-announce only the raw cell reference (e.g. 'B542') with no associated column label when reading rows far from the top.",
-    "suggestion": "Freeze the header row and/or define the data range as a proper Excel Table with headers.",
-    "suggestion_technical": "Select row 1, use View > Freeze Panes > Freeze Top Row, and/or convert the range to an Excel Table (Insert > Table) with 'My table has headers' checked.",
+    "description": "The inspected data-table region has no identifiable column-header relationship; the purpose of its columns is not available from the recorded structure.",
+    "description_technical": "The inspected data-table region has labels without a recorded header association. Check table definitions and supported named header ranges before concluding a failure of SC 1.3.1; absence of frozen panes alone is not evidence.",
+    "why_simple": "Without an identifiable relationship between data cells and their headers, the user may not know what each value represents. Verify the actual header association and reader behavior, independently of visual scrolling.",
+    "why_technical": "Header announcements depend on header relationships, the application and reader settings. Freezing panes affects visual display and does not establish these relationships. Verify the actual combination before claiming what it announces.",
+    "suggestion": "Provide appropriate table/header relationships and verify them in the intended application and reader. Frozen panes are an optional visual navigation aid.",
+    "suggestion_technical": "Define the data range as a Table with its header row, or use supported header names when appropriate; verify reader settings and navigation. Do not treat Freeze Panes as a semantic fix.",
     "wcag_url": "https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html"
   }
 ]
@@ -88,3 +86,5 @@ Return a JSON array. Each issue must follow this exact schema:
   "wcag_url": "https://www.w3.org/WAI/WCAG22/Understanding/<slug>"
 }
 Return ONLY valid JSON array. No markdown, no preamble. Empty array [] if no issues.
+
+Revisão de 29/10/2026: congelamento visual separado de associação de cabeçalhos. Fontes: https://support.microsoft.com/en-us/accessibility/excel/accessibility-best-practices-with-excel-spreadsheets e https://download.nvaccess.org/documentation/en/userGuide.html#MicrosoftExcel . Não foi capturada fala real nesta revisão.

@@ -30,7 +30,9 @@ No JSON do cliente MCP, na entrada do servidor, em `env`:
 - `A11Y_MCP_NVDA_TOKEN`: o token que o instalador mostrou
 - `A11Y_MCP_NVDA_HOST_ADDR` (opcional): o endereço do seu computador visto pela VM. Com ele, um site seu em `localhost` é aberto na VM pelo endereço certo. O site precisa escutar nessa rede (por exemplo, `python -m http.server --bind 0.0.0.0`) e o firewall do seu computador precisa deixar a VM entrar.
 
-Depois, a ferramenta `a11y_nvda_speech(url)` devolve o que o NVDA falou.
+Depois, a ferramenta `a11y_nvda_speech(url)` devolve o que o NVDA falou num percurso fixo (Tab, leitura e atalhos de uma letra como H, K, F, B).
+
+Para explorar página grande, vários formulários, menus e conteúdo dinâmico, use a sessão aberta: `a11y_nvda_open`, vários `a11y_nvda_do` (Tab, atalhos, setas, espera, modo, ativar, digitar) e `a11y_nvda_close`. Detalhes em [sessão aberta](../../docs/modules/nvda_sessao.md). Ativar e digitar mudam o site e exigem autorização explícita.
 
 ## O que ainda não foi testado com o NVDA de verdade
 

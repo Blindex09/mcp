@@ -41,7 +41,64 @@ _SAFE_CSS_PROP = re.compile(r"^[a-z-]+$")
 _ALLOWED_SCHEMES = ("http:", "https:", "data:", "blob:", "about:")
 _SAFE_METHODS = ("GET", "HEAD", "OPTIONS")
 _MUTATION_MODES = ("auto", "ask", "allow", "block")
-_MAX_TREE_LINES = 400
+_FORM_GUARD_JS = """(() => {
+    if (window.__a11yFormGuardInstalled) return;
+    window.__a11yFormGuardInstalled = true;
+    const nativeSubmit = HTMLFormElement.prototype.submit;
+    window.__a11yFormCounter = 0;
+    HTMLFormElement.prototype.submit = function() {
+        if (window.__a11yProgrammaticSubmitOnce) {
+            window.__a11yProgrammaticSubmitOnce = false;
+            return nativeSubmit.call(this);
+        }
+        const form = this;
+        const method = String(form.method || "get").toUpperCase();
+        if (["GET", "HEAD", "OPTIONS"].includes(method) || window.__a11yMutationPolicy === "allow") {
+            return nativeSubmit.call(form);
+        }
+        const formId = String(++window.__a11yFormCounter);
+        form.dataset.a11yFormId = formId;
+        const fields = [...new FormData(form).entries()].map(([name, value]) => ({
+            name: String(name),
+            length: String(value).length
+        }));
+        window.__a11yHoldFormSubmit({
+            method,
+            url: form.action || location.href,
+            fields,
+            form_id: formId
+        });
+    };
+    document.addEventListener("submit", event => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement)) return;
+        const submitter = event.submitter;
+        const method = String(submitter?.getAttribute("formmethod") || form.method || "get").toUpperCase();
+        if (["GET", "HEAD", "OPTIONS"].includes(method)) return;
+        if (window.__a11yMutationPolicy === "allow") return;
+        if (window.__a11ySubmitOnce) {
+            window.__a11ySubmitOnce = false;
+            return;
+        }
+        event.preventDefault();
+        // A pagina so pode tratar o envio quando ele for realmente liberado.
+        // Caso contrario um handler pode desabilitar o botao antes do replay.
+        event.stopImmediatePropagation();
+        const fields = [...new FormData(form).entries()].map(([name, value]) => ({
+            name: String(name),
+            length: String(value).length
+        }));
+        if (submitter?.name) {
+            fields.push({name: submitter.name, length: String(submitter.value || "").length});
+        }
+        window.__a11yHoldFormSubmit({
+            method,
+            url: (submitter?.getAttribute("formaction") && new URL(submitter.getAttribute("formaction"), document.baseURI).href)
+                || form.action || location.href,
+            fields
+        });
+    }, true);
+})();"""
 
 # Personas: emulacao de navegador + o que o harness PERMITE fazer.
 PERSONAS: dict[str, dict[str, Any]] = {
@@ -104,6 +161,10 @@ def effective_policy(mode: str, url: str | None) -> str:
     return mode
 
 
+def _form_guard_script(policy: str) -> str:
+    return f"window.__a11yMutationPolicy = {json.dumps(policy)};\n{_FORM_GUARD_JS}"
+
+
 def payload_summary(method: str, url: str, post_data: str | None, content_type: str, navigation: bool) -> dict[str, Any]:
     """O QUE a requisicao mudaria, sem vazar valores: nomes dos campos e tamanhos, nunca o conteudo (pode ter senha)."""
     fields: list[str] = []
@@ -130,11 +191,13 @@ def _key_of(lines: list[str]) -> Counter[str]:
     return Counter(line.rstrip() for line in lines)
 
 
-def tree_diff(before: list[str], after: list[str], cap: int = 40) -> dict[str, list[str]]:
+def tree_diff(before: list[str], after: list[str], cap: int = 0) -> dict[str, list[str]]:
     """Linhas da arvore de acessibilidade que sumiram/apareceram (fato objetivo)."""
     b, a = _key_of(before), _key_of(after)
-    removed = list((b - a).elements())[:cap]
-    added = list((a - b).elements())[:cap]
+    removed = list((b - a).elements())
+    added = list((a - b).elements())
+    if cap > 0:
+        removed, added = removed[:cap], added[:cap]
     return {"removed": removed, "added": added}
 
 
@@ -233,11 +296,14 @@ class Session:
                 await self.context.add_init_script(js.LIVE_OBSERVER_JS)
                 await self.context.add_init_script(js.LISTENER_HOOK_JS)
                 await self.context.add_init_script(js.ACTIVITY_JS)
+                if url:
+                    await self.context.add_init_script(_form_guard_script(self.mutation_policy))
                 self.context.on("page", self._on_popup)
                 self.context.on("request", self._request_started)
                 self.context.on("requestfinished", self._request_done)
                 self.context.on("requestfailed", self._request_done)
                 self.page = await self.context.new_page()
+                await self.page.expose_binding("__a11yHoldFormSubmit", self._hold_form_submit)
                 if browser == "chromium":
                     self.cdp = await self.context.new_cdp_session(self.page)
                     await self.cdp.send("DOM.enable")
@@ -249,6 +315,8 @@ class Session:
                     await self.page.goto(url.strip(), wait_until="load", timeout=nav_ms)
                 else:
                     await self.page.set_content(html or "", wait_until="load", timeout=nav_ms)
+                    await self.page.evaluate(_form_guard_script(self.mutation_policy))
+                    await self.context.add_init_script(_form_guard_script(self.mutation_policy))
             except Exception:
                 await self.close()  # descarta o que esta tentativa criou antes da proxima (com mais tempo)
                 raise
@@ -342,7 +410,7 @@ class Session:
             if navigation:
                 # Reter uma NAVEGACAO deixaria a pagina "navegando" (qualquer leitura travaria). A pagina fica onde esta e, se a pessoa
                 # aprovar, a acao dela e refeita UMA vez com esta requisicao liberada.
-                await route.fulfill(status=204, body="")
+                await route.abort("blockedbyclient")
                 return
             item["future"] = asyncio.get_running_loop().create_future()
             decision = await item["future"]  # chamada da pagina (fetch/XHR): retida ate a pessoa decidir, sem relogio
@@ -355,9 +423,40 @@ class Session:
             return
         self.blocked.append(f"{req.method} {req.url[:100]}")  # block: modo estrito escolhido pela pessoa
         if navigation:
-            await route.fulfill(status=204, body="")  # a pagina continua onde esta (abortar levaria a uma pagina de erro)
+            await route.abort("blockedbyclient")
         else:
             await route.abort()
+
+    async def _hold_form_submit(self, _source: Any, details: dict[str, Any]) -> None:
+        """Retem o submit antes da navegacao, sem levar valores dos campos ao processo MCP."""
+        method = str(details.get("method", "")).upper()
+        url = str(details.get("url", ""))
+        if method in _SAFE_METHODS or self.mutation_policy == "allow":
+            return
+        fields = details.get("fields", [])
+        summary = {
+            "method": method,
+            "url": url[:120],
+            "kind": "envio de formulario",
+            "fields": [
+                f"{field.get('name', 'campo')!s} ({max(0, int(field.get('length', 0)))} caracteres)"
+                for field in fields[:20]
+                if isinstance(field, dict)
+            ],
+        }
+        if self.mutation_policy == "block":
+            self.blocked.append(f"{method} {url[:100]}")
+            return
+        self._approval_seq += 1
+        aid = f"a{self._approval_seq}"
+        self.pending[aid] = {
+            "id": aid,
+            **summary,
+            "replay": {**self._last, "form_submit": True, "form_id": details.get("form_id")},
+            "navigation": True,
+            "form_submit": True,
+            "full_url": url,
+        }
 
     @staticmethod
     def _full_url(item: dict[str, Any]) -> str:
@@ -366,6 +465,11 @@ class Session:
     async def _replay(self, last: dict[str, Any]) -> None:
         page = self._need()
         action, target, value = last.get("action"), last.get("target"), last.get("value") or ""
+        if last.get("form_submit"):
+            if last.get("form_id"):
+                await page.evaluate("() => { window.__a11yProgrammaticSubmitOnce = true; }")
+            else:
+                await page.evaluate("() => { window.__a11ySubmitOnce = true; }")
         if action == "click" and target:
             await self._locator(target).click(timeout=ACTION_TIMEOUT_MS * PATIENCE_FACTOR, no_wait_after=True)
         elif action == "press":
@@ -378,10 +482,11 @@ class Session:
         """Aprovacao da pessoa: allow (esses pedidos) | deny | allow_all (aprovacao desligada para o resto da sessao)."""
         if decision not in ("allow", "deny", "allow_all"):
             raise SessionError("decision deve ser allow, deny ou allow_all")
-        self._need()
+        page = self._need()
         before = await self._state()
         if decision == "allow_all":
             self.mutation_policy = "allow"
+            await page.evaluate("() => { window.__a11yMutationPolicy = 'allow'; }")
         targets = list(self.pending) if (decision == "allow_all" or not ids) else [i for i in ids if i in self.pending]
         if ids and not targets:
             raise SessionError(f"nenhum pedido pendente com esses ids: {', '.join(ids)}")
@@ -510,14 +615,14 @@ class Session:
             snap = str(await page.locator("body").aria_snapshot())
         except Exception:  # noqa: BLE001 - pagina em transicao
             return []
-        return snap.splitlines()[:_MAX_TREE_LINES]
+        return snap.splitlines()
 
     async def _live_new(self) -> list[dict[str, str]]:
         page = self._need()
         items = await page.evaluate("() => window.__a11yLive || []")
         new = items[self._live_seen :]
         self._live_seen = len(items)
-        return new[:20]
+        return new
 
     async def _state(self) -> dict[str, Any]:
         page = self._need()
@@ -580,7 +685,8 @@ class Session:
                 if focusable or is_clickable:
                     found.append({"backend": bid, "focusable": focusable, "clickable": is_clickable, "ax": ax, "document": di})
         total = len(found)
-        found = found[:limit]
+        if limit > 0:
+            found = found[:limit]
         pushed = await cdp.send("DOM.pushNodesByBackendIdsToFrontend", {"backendNodeIds": [f["backend"] for f in found]})
 
         async def tag(item: dict[str, Any], node_id: int) -> None:
@@ -615,7 +721,7 @@ class Session:
         counter = 0
         for fi, fr in enumerate(page.frames):
             try:
-                res = await fr.evaluate(js.DISCOVER_JS, {"start": counter, "limit": max(0, limit - len(found))})
+                res = await fr.evaluate(js.DISCOVER_JS, {"start": counter, "limit": max(0, limit - len(found)) if limit > 0 else -1})
             except Exception:  # noqa: BLE001, S112 - frame fechado/inacessivel
                 continue
             counter = int(res["next"])
@@ -670,12 +776,12 @@ class Session:
         idx = self._frame_of.get(eid, 0)
         return (frames[idx] if idx < len(frames) else page).locator(f'[data-a11y-id="{eid}"]').first
 
-    async def dossier(self, scope: str = "", max_elements: int = 60) -> dict[str, Any]:
+    async def dossier(self, scope: str = "", max_elements: int = 0) -> dict[str, Any]:
         """FATOS dos elementos que o navegador aponta como focaveis/clicaveis (pagina, Shadow DOM, iframes), com papel e
         nome COMPUTADOS por ele quando ha CDP (Chromium)."""
         page = self._need()
-        limit = max(1, min(max_elements, 200))
-        found, total = await self._discover()
+        limit = max(0, int(max_elements))
+        found, total = await self._discover(0)
         found = [f for f in found if "id" in f]
         elements: list[dict[str, Any]] = []
         outside_scope = 0
@@ -687,7 +793,7 @@ class Session:
                 if isinstance(fact, BaseException) or fact is None:
                     outside_scope += 1
                     continue
-                if len(elements) >= limit:
+                if limit > 0 and len(elements) >= limit:
                     over_limit += 1
                     continue
                 fact["focusable"], fact["clickable"] = f["focusable"], f["clickable"]
@@ -791,10 +897,10 @@ class Session:
         return {
             "browser": self.browser_name, "persona": self.persona,
             "interactive": {"discovered": c.discovered_total, "listed": len(c.described), "probed_by_behavior": len(c.described & c.probed),
-                            "listed_never_probed": never_probed[:40]},
+                            "listed_never_probed": never_probed},
             "page_map": c.page_map, "frames": {"total": len(page.frames), "mapped": c.frames_mapped},
             "design_measured": c.design_measured, "stress_run": sorted(c.stress_kinds), "probes_run": sorted(c.probes),
-            "actions_taken": c.actions, "pages_visited": sorted(c.urls)[:20], "gaps": gaps,
+            "actions_taken": c.actions, "pages_visited": sorted(c.urls), "gaps": gaps,
         }
 
     async def design_tokens(self) -> dict[str, Any]:
@@ -960,7 +1066,7 @@ class Session:
                 return {"reached": False, "tab_presses": i, "reason": "o foco parou de mover (fim da pagina) sem passar pelo alvo", "path": path[-15:]}
             previous = ident
             path.append({"stop": i, "tag": f["tag"], "role": f["role"], "name": f["name"], "focus_style": f["focus_style"]})
-            if want and f["id"] == want:
+            if (want and f["id"] == want) or (not want and await loc.evaluate("el => el.getRootNode().activeElement === el")):
                 return {"reached": True, "tab_presses": i, "path": path[-15:]}
         return {"reached": False, "tab_presses": max_tabs, "reason": "limite de Tab atingido", "path": path[-15:]}
 

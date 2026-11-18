@@ -11,7 +11,7 @@ Facts: `headings.outline` (level, text, size), `level_jumps`, `h1_count`, `first
 - Do heading **sizes** match their levels visually? A visual heading that is not a heading (bold `div`) is invisible to the outline; a heading used for its size is noise.
 - One `h1` per page is the norm for a page's main topic; several can be legitimate in unusual layouts — decide by content.
 - Headings inside Shadow DOM or iframes appear in the same outline with their own frame; check they continue the logic.
-- **Headings inside list items** (`lists.details[].headings_in_items`, `items_with_heading`): the screen reader announces the list ("list with N items") and then a heading in each item, so the same thing is exposed twice, and a user navigating by headings finds card labels instead of page structure. Usually these are visual card titles: prefer a list of links with a description (`li > a + p`), or real section headings without the list, never both. Keep the heading only when each item really is a section of the page.
+- **Headings inside list items** (`lists.details[].headings_in_items`, `items_with_heading`): a list item may contain a meaningful section heading. The list exposes collection membership; the heading exposes structure inside that item. These are different relationships, not automatic duplication. Check whether the headings describe real sections and form a useful outline. If they were chosen only for font size, correct their semantics or style; do not remove a valid list or heading solely because they are combined. See https://html.spec.whatwg.org/multipage/grouping-content.html#the-li-element .
 
 ## 2. Landmarks
 Facts: `landmarks.items`, `repeated_without_distinct_name`, `text_chars_outside_landmarks`.

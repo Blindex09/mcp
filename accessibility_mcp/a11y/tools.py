@@ -5,13 +5,14 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from . import audit
+from . import audit, evidence
 from .compare import compare_browsers
 from .content_index import ContentIndex
 from .crawl import crawl
 from .prompts import FLUXOS, workflow_text
 from .tools_documents import register_documents
 from .tools_files import register_files
+from .tools_interop import register_interop
 from .tools_ux import register_ux
 
 _MAX_CHARS = 40_000
@@ -44,6 +45,7 @@ def register(mcp: Any) -> None:
     register_ux(mcp)
     register_files(mcp)
     register_documents(mcp)
+    register_interop(mcp)
 
     @mcp.tool()
     async def a11y_list_content(kind: str = "") -> str:
@@ -120,7 +122,8 @@ def register(mcp: Any) -> None:
         """Check WCAG 2.2 color contrast between two hex colors (#rgb or #rrggbb).
         Returns the ratio and AA/AAA pass/fail for text (size-aware) and UI components."""
         try:
-            return _json(audit.contrast_report(foreground, background, size_px, bold))
+            report = audit.contrast_report(foreground, background, size_px, bold)
+            return _json(evidence.with_step(report, evidence.contrast(report)))
         except ValueError as e:
             return _error(e)
 
@@ -129,11 +132,13 @@ def register(mcp: Any) -> None:
         """Run an automated axe-core WCAG audit in headless Chromium. Provide EITHER url
         (http/https only) OR html (a full HTML string). level: A | AA | AAA. browser: chromium | firefox | webkit (installed automatically on first use).
         color_scheme: light | dark (optional; emulates prefers-color-scheme, so contrast in the dark theme is audited too).
-        Returns violations sorted by impact, items needing manual review, and pass count.
+        Returns violations sorted by impact, items needing manual review, and pass count. It also writes one step to the session trace
+        (returned as `trace_step`): cite it in a11y_finding evidence_steps to confirm an axe-measured failure (for example a contrast ratio).
         Automated checks catch only part of WCAG - always follow up with keyboard and
         screen-reader testing (see a11y_get_reference "audit-checklist")."""
         try:
-            return _json(await audit.run_axe(url or None, html or None, level, browser, color_scheme or None))
+            result = await audit.run_axe(url or None, html or None, level, browser, color_scheme or None)
+            return _json(evidence.with_step(result, evidence.axe(result, url or "(html)", level)))
         except Exception as e:  # noqa: BLE001 - fronteira da ferramenta: devolve erro ao cliente
             return _error(e)
 
@@ -148,12 +153,15 @@ def register(mcp: Any) -> None:
             return _error(e)
 
     @mcp.tool()
-    async def a11y_tab_order(url: str = "", html: str = "", max_steps: int = 0, browser: str = "chromium") -> str:
+    async def a11y_tab_order(url: str = "", html: str = "", max_steps: int = 0, browser: str = "chromium", check_reverse: bool = True) -> str:
         """Press Tab repeatedly and report the keyboard focus order: element, role, accessible
         name, visibility and whether a focus indicator is present. Provide EITHER url (http/https)
-        OR html. Useful to detect keyboard traps, illogical order, and invisible focus."""
+        OR html. Useful to detect keyboard traps, illogical order, and invisible focus.
+        check_reverse (default true): at each stop after the first it also presses Shift+Tab and then Tab, and reports facts in
+        `shift_tab_back` (did focus go back to the PREVIOUS stop? if not, where it landed) and `tab_after_shift_tab` (did Tab return to this stop?).
+        A mismatch means the backward order differs from the forward order (positive tabindex, focus scripts, traps); you judge it."""
         try:
-            return _json(await audit.tab_order(url or None, html or None, max_steps, browser))
+            return _json(await audit.tab_order(url or None, html or None, max_steps, browser, check_reverse))
         except Exception as e:  # noqa: BLE001 - fronteira da ferramenta: devolve erro ao cliente
             return _error(e)
 

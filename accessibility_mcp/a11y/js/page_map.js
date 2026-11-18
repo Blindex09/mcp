@@ -26,7 +26,7 @@
   const byId = (e, ids) => (ids || '').split(/\s+/).filter(Boolean).map(i => (e.getRootNode().getElementById ? e.getRootNode().getElementById(i) : document.getElementById(i))).filter(Boolean);
   const nameOf = (e) => e.getAttribute('aria-label') || clean(byId(e, e.getAttribute('aria-labelledby')).map(x => x.textContent).join(' ')) || null;
   const rectOf = (e) => { const r = e.getBoundingClientRect(); return {x: Math.round(r.x), y: Math.round(r.y + window.scrollY), w: Math.round(r.width), h: Math.round(r.height)}; };
-  const cap = (arr, n) => ({total: arr.length, items: arr.slice(0, n)});
+  const cap = (arr) => ({total: arr.length, items: arr});
   const LANDMARK = '[role=banner],[role=navigation],[role=main],[role=contentinfo],[role=complementary],[role=search],[role=form],[role=region],header,nav,main,footer,aside,search,form,section[aria-label],section[aria-labelledby]';
   const insideLandmark = (e) => !!e.closest(LANDMARK);
 
@@ -40,12 +40,12 @@
     text: clean(e.textContent).slice(0, 80), visible: visible(e), in_landmark: insideLandmark(e), size: getComputedStyle(e).fontSize}));
   const jumps = []; let prev = null;
   for (const h of hs) { if (h.level && prev && h.level > prev + 1) jumps.push({from: prev, to: h.level, text: h.text}); if (h.level) prev = h.level; }
-  const headings = {total: hs.length, h1_count: hs.filter(h => h.level === 1).length, first_level: hs.length ? hs[0].level : null, level_jumps: jumps, outline: hs.slice(0, 80)};
+  const headings = {total: hs.length, h1_count: hs.filter(h => h.level === 1).length, first_level: hs.length ? hs[0].level : null, level_jumps: jumps, outline: hs};
 
   // --- landmarks
   const lms = q(LANDMARK).map(e => ({role: e.getAttribute('role') || tag(e), name: nameOf(e), tag: tag(e)}));
   const counts = {}; lms.forEach(l => { const k = l.role + '|' + (l.name || ''); counts[k] = (counts[k] || 0) + 1; });
-  const landmarks = {total: lms.length, items: lms.slice(0, 40), repeated_without_distinct_name: Object.entries(counts).filter(([, n]) => n > 1).map(([k, n]) => ({role_and_name: k, count: n}))};
+  const landmarks = {total: lms.length, items: lms, repeated_without_distinct_name: Object.entries(counts).filter(([, n]) => n > 1).map(([k, n]) => ({role_and_name: k, count: n}))};
   let textAll = 0, textOut = 0;
   for (const el of all) { for (const n of el.childNodes) if (n.nodeType === 3) { const l = clean(n.textContent).length; if (l && visible(el)) { textAll += l; if (!insideLandmark(el)) textOut += l; } } }
   landmarks.text_chars_total = textAll; landmarks.text_chars_outside_landmarks = textOut;
@@ -56,14 +56,14 @@
     alt: e.hasAttribute('alt') ? e.getAttribute('alt') : null, aria_label: e.getAttribute('aria-label'), aria_hidden: e.getAttribute('aria-hidden'),
     title_attr: tag(e) === 'svg' ? clean((e.querySelector('title') || {}).textContent || '') || null : e.getAttribute('title'),
     src: (e.currentSrc || e.getAttribute('src') || '').split('/').pop().slice(0, 50) || null, natural: e.naturalWidth ? [e.naturalWidth, e.naturalHeight] : null,
-    in_link_or_button: !!e.closest('a,button'), figcaption: !!(e.closest('figure') && e.closest('figure').querySelector('figcaption')), visible: visible(e), rect: rectOf(e)})), 80);
+    in_link_or_button: !!e.closest('a,button'), figcaption: !!(e.closest('figure') && e.closest('figure').querySelector('figcaption')), visible: visible(e), rect: rectOf(e)})));
 
   // --- links
   const links = q('a[href]').map(e => ({text: clean(e.textContent).slice(0, 60), aria_label: e.getAttribute('aria-label'), href: (e.getAttribute('href') || '').slice(0, 80),
     target: e.getAttribute('target'), rel: e.getAttribute('rel'), has_img_only: !clean(e.textContent) && !!e.querySelector('img,svg'), visible: visible(e)}));
   const byText = {}; links.forEach(l => { const k = (l.aria_label || l.text).toLowerCase(); if (k) (byText[k] = byText[k] || new Set()).add(l.href); });
   const dupText = Object.entries(byText).filter(([, s]) => s.size > 1).map(([text, s]) => ({text, distinct_destinations: s.size}));
-  const linkInfo = {total: links.length, items: links.slice(0, 60), same_text_different_destination: dupText.slice(0, 20), empty_text: links.filter(l => !l.text && !l.aria_label).length};
+  const linkInfo = {total: links.length, items: links, same_text_different_destination: dupText, empty_text: links.filter(l => !l.text && !l.aria_label).length};
 
   // --- formularios e campos
   const fieldOf = (e) => ({tag: tag(e), type: e.getAttribute('type'), name: e.getAttribute('name'), id: e.id || null,
@@ -73,15 +73,15 @@
     invalid: e.getAttribute('aria-invalid'), describedby: clean(byId(e, e.getAttribute('aria-describedby')).map(x => x.textContent).join(' ')).slice(0, 80) || null,
     fieldset_legend: e.closest('fieldset') && e.closest('fieldset').querySelector('legend') ? clean(e.closest('fieldset').querySelector('legend').textContent) : null});
   const fieldSel = 'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]),select,textarea';
-  const forms = q('form,[role=form]').map(f => ({name: nameOf(f) || f.id || null, method: f.getAttribute('method'), fields: Array.from(f.querySelectorAll(fieldSel)).map(fieldOf).slice(0, 30)}));
+  const forms = q('form,[role=form]').map(f => ({name: nameOf(f) || f.id || null, method: f.getAttribute('method'), fields: Array.from(f.querySelectorAll(fieldSel)).map(fieldOf)}));
   const outside = q(fieldSel).filter(e => !e.closest('form,[role=form]')).map(fieldOf);
-  const formInfo = {forms: forms.slice(0, 12), fields_outside_forms: outside.slice(0, 30), fields_total: q(fieldSel).length,
+  const formInfo = {forms: forms, fields_outside_forms: outside, fields_total: q(fieldSel).length,
     fields_without_any_name: q(fieldSel).map(fieldOf).filter(f => !f.label && !f.aria_label && !f.labelledby).length};
 
   // --- tabelas
   const tables = cap(q('table').map(t => ({caption: t.caption ? clean(t.caption.textContent).slice(0, 60) : null, aria_label: nameOf(t), role: t.getAttribute('role'),
     rows: t.rows.length, header_cells: t.querySelectorAll('th').length, scoped_headers: t.querySelectorAll('th[scope]').length, has_thead: !!t.tHead,
-    cols: t.rows[0] ? t.rows[0].cells.length : 0, nested_tables: t.querySelectorAll('table').length, visible: visible(t)})), 20);
+    cols: t.rows[0] ? t.rows[0].cells.length : 0, nested_tables: t.querySelectorAll('table').length, visible: visible(t)})));
 
   // --- listas
   // Cada lista com os fatos que mudam o que o leitor de tela fala: quantos itens, que titulos moram dentro dos itens (o leitor diz
@@ -89,9 +89,9 @@
   const listItemsOf = (l) => Array.from(l.children).filter(c => tag(c) === 'li' || c.getAttribute('role') === 'listitem');
   const headingsIn = (li) => Array.from(li.querySelectorAll('h1,h2,h3,h4,h5,h6,[role=heading]')).map(h => ({
     level: parseInt(h.getAttribute('aria-level') || (/^h[1-6]$/.test(tag(h)) ? tag(h).slice(1) : ''), 10) || 2, text: clean(h.textContent).slice(0, 40)}));
-  const listDetails = q('ul,ol,[role=list]').filter(visible).slice(0, 30).map(l => {
+  const listDetails = q('ul,ol,[role=list]').filter(visible).map(l => {
     const items = listItemsOf(l); const heads = items.flatMap(headingsIn);
-    return {tag: tag(l), items: items.length, items_with_heading: items.filter(li => headingsIn(li).length).length, headings_in_items: heads.slice(0, 8),
+    return {tag: tag(l), items: items.length, items_with_heading: items.filter(li => headingsIn(li).length).length, headings_in_items: heads,
       marker_removed: getComputedStyle(l).listStyleType === 'none', aria_label: nameOf(l)};
   });
   const lists = {ul: q('ul').length, ol: q('ol').length, dl: q('dl').length, role_list: q('[role=list]').length,
@@ -113,7 +113,7 @@
   // inline na mesma linha podem ter alturas bem diferentes (padding, fonte), e um bucket fixo os separa em
   // "linhas" diferentes mesmo estando lado a lado - foi o que um teste ao vivo achou (bug real, nao suposicao).
   const ownText = (e) => Array.from(e.childNodes).some(n => n.nodeType === 3 && clean(n.textContent));
-  const flow = all.filter(e => visible(e) && (ownText(e) || e.matches('img,input,select,textarea,button,a[href],[role=button],[role=img]'))).slice(0, 400);
+  const flow = all.filter(e => visible(e) && (ownText(e) || e.matches('img,input,select,textarea,button,a[href],[role=button],[role=img]')));
   const rtl = (document.documentElement.getAttribute('dir') || getComputedStyle(document.body).direction) === 'rtl';
   const byTop = flow.map((e, i) => ({e, i, r: e.getBoundingClientRect()})).sort((a, b) => (a.r.top - b.r.top) || (a.r.left - b.r.left));
   const lines = [];
@@ -146,7 +146,7 @@
     hover.push({rule: r.selectorText.slice(0, 80), changes: touches, trigger_selector: trigger.slice(0, 60), triggers_in_page: trigCount, targets_in_page: n});
   } };
   try { for (const sheet of Array.from(document.styleSheets)) { try { scan(sheet.cssRules); } catch (e) {} } } catch (e) {}
-  const hoverRules = {total: hover.length, items: hover.slice(0, 20), note: 'regras CSS :hover que mudam exibicao/visibilidade; o gatilho pode nao ser focavel nem ter listener'};
+  const hoverRules = {total: hover.length, items: hover, note: 'regras CSS :hover que mudam exibicao/visibilidade; o gatilho pode nao ser focavel nem ter listener'};
 
   return {url: location.href, document: doc, headings, landmarks, images, links: linkInfo, forms: formInfo, tables, lists, media, iframes, live_regions: live, reading_order: reading, hover_reveals: hoverRules};
 }

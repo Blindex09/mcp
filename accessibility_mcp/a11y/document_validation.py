@@ -57,6 +57,34 @@ def validate_docx(path: Path) -> dict[str, Any]:
             if outline is not None:
                 outlines[style.get(W + "styleId", "")] = int(outline.get(W + "val", "9")) + 1
         headings, images, tables, links = [], 0, 0, 0
+        bookmarks = {node.get(W + "name", "") for node in document.findall(f".//{W}bookmarkStart")}
+        controls: list[dict[str, Any]] = []
+        field_names: set[str] = set()
+        for node in document.findall(f".//{W}sdt"):
+            properties = node.find(W + "sdtPr")
+            if properties is None:
+                issue("form_missing_properties", "controle Word")
+                continue
+            alias = properties.find(W + "alias")
+            label = alias.get(W + "val", "") if alias is not None else ""
+            tag = properties.find(W + "tag")
+            name = tag.get(W + "val", "") if tag is not None else ""
+            kind = next((kind for kind in ("text", "dropDownList", "comboBox", "checkbox") if any(child.tag.rsplit("}",1)[-1] == kind for child in properties)), "other")
+            if kind == "other":
+                continue  # SDT tambem pode conter sumario e outros conteudos, sem ser campo.
+            if not label.strip():
+                issue("form_missing_label", name or "controle Word")
+            if not name or name in field_names:
+                issue("form_name_missing_or_duplicate", name or "controle Word")
+            field_names.add(name)
+            content = node.find(W + "sdtContent")
+            value = "".join(content.itertext()) if content is not None and properties.find(W + "showingPlcHdr") is None else ""
+            checkbox = next((child for child in properties if child.tag.rsplit("}",1)[-1] == "checkbox"), None)
+            checked = None
+            if checkbox is not None:
+                state = next((child for child in checkbox if child.tag.rsplit("}",1)[-1] == "checked"), None)
+                checked = any(val in ("1", "true", "on") for val in state.attrib.values()) if state is not None else False
+            controls.append({"name": name, "label": label, "type": kind, "value": value, "checked": checked})
         previous = 0
         for index, para in enumerate(document.findall(f".//{W}p"), 1):
             pstyle = para.find(f"{W}pPr/{W}pStyle")
@@ -88,8 +116,13 @@ def validate_docx(path: Path) -> dict[str, Any]:
                 links += 1
                 if not "".join(link.itertext()).strip():
                     issue("link_missing_text", member)
+                target = link.get(W + "anchor")
+                if target and target not in bookmarks:
+                    issue("broken_internal_link", target)
+        toc = any((node.text or "").strip().split()[:1] == ["TOC"] for node in document.findall(f".//{W}instrText"))
         return _result("docx", issues, {"title": title, "language": language, "heading_levels": headings,
-                                       "images": images, "tables": tables, "links": links})
+                                       "images": images, "tables": tables, "links": links, "fields": controls,
+                                       "toc_field": toc, "bookmarks": len(bookmarks)})
 
 
 def validate_pdf(path: Path) -> dict[str, Any]:
@@ -145,6 +178,7 @@ def validate_pdf(path: Path) -> dict[str, Any]:
         issue("missing_heading_one", "StructTreeRoot")
     if tags["/Table"] and not tags["/TH"]:
         issue("table_missing_header", "StructTreeRoot")
+    field_facts = _pdf_controls(reader, issue)
     for index, page in enumerate(reader.pages, 1):
         location = f"pagina {index}"
         if not (page.extract_text() or "").strip():
@@ -165,7 +199,93 @@ def validate_pdf(path: Path) -> dict[str, Any]:
             if annot.get("/Subtype") == "/Link" and "/StructParent" not in annot:
                 issue("link_not_tagged", location)
     return _result("pdf", issues, {"title": str(title), "language": str(language), "pages": len(reader.pages),
-                                  "marked": bool(marked), "tags": dict(tags), "heading_levels": headings})
+                                  "marked": bool(marked), "tags": dict(tags), "heading_levels": headings, **field_facts})
+
+
+def _pdf_controls(reader: PdfReader, issue: Any) -> dict[str, Any]:
+    """Duas representacoes precisam concordar: Fields canonico, widgets e tags."""
+    root = reader.root_object
+    canonical: set[tuple[int, int]] = set()
+
+    def identifier(ref: Any) -> tuple[int, int]:
+        indirect = ref if hasattr(ref, 'idnum') else getattr(ref, 'indirect_reference', None)
+        return (indirect.idnum, indirect.generation) if indirect else (-1, -1)
+
+    def fields(ref: Any) -> None:
+        key = identifier(ref)
+        if key in canonical:
+            return
+        canonical.add(key)
+        node = ref.get_object()
+        for child in node.get('/Kids', []):
+            fields(child)
+    acro = root.get('/AcroForm', {})
+    acro = acro.get_object() if hasattr(acro, 'get_object') else acro
+    for ref in acro.get('/Fields', []):
+        fields(ref)
+
+    def inherited(node: Any, key: str) -> Any:
+        seen = set()
+        while isinstance(node, dict) and id(node) not in seen:
+            seen.add(id(node))
+            if key in node:
+                return node[key]
+            node = node.get('/Parent')
+            node = node.get_object() if node is not None else None
+        return None
+    parent_values: dict[int, Any] = {}
+
+    seen_parents: set[int] = set()
+
+    def parents(tree: Any) -> None:
+        tree = tree.get_object()
+        if id(tree) in seen_parents:
+            return
+        seen_parents.add(id(tree))
+        values = tree.get('/Nums', [])
+        parent_values.update({int(key): val for key, val in zip(values[::2], values[1::2])})
+        for child in tree.get('/Kids', []):
+            parents(child)
+    structure = root.get('/StructTreeRoot')
+    if structure is not None and '/ParentTree' in structure.get_object():
+        parents(structure.get_object()['/ParentTree'])
+    named = reader.named_destinations
+    facts = []
+    for page in reader.pages:
+        for ref in page.get('/Annots', []):
+            node = ref.get_object()
+            if node.get('/Subtype') == '/Link':
+                action = node.get('/A', {})
+                action = action.get_object() if hasattr(action,'get_object') else action
+                target = node.get('/Dest', action.get('/D') if action.get('/S') == '/GoTo' else None)
+                if isinstance(target, str) and target not in named:
+                    issue('broken_internal_link', target)
+            if node.get('/Subtype') != '/Widget':
+                continue
+            name, label, kind = (inherited(node, key) for key in ('/T','/TU','/FT'))
+            location = str(name or 'campo PDF')
+            if identifier(ref) not in canonical:
+                issue('orphan_form_widget', location)
+            if not str(label or '').strip():
+                issue('form_missing_label', location)
+            if not name:
+                issue('form_missing_name', location)
+            if kind not in ('/Tx','/Btn','/Ch','/Sig'):
+                issue('form_unknown_type', location)
+            parent = parent_values.get(node.get('/StructParent'))
+            parent = parent.get_object() if parent is not None else {}
+            kids = parent.get('/K', [])
+            kids = kids if isinstance(kids,list) else [kids]
+            bound = any(isinstance(child.get_object(),dict) and child.get_object().get('/Type') == '/OBJR' and identifier(child.get_object().get('/Obj')) == identifier(ref) for child in kids)
+            if parent.get('/S') != '/Form' or not bound:
+                issue('form_not_tagged', location)
+            if '/N' not in node.get('/AP', {}):
+                issue('form_missing_appearance', location)
+            if page.get('/Tabs') != '/S':
+                issue('form_tab_order_requires_review', location)
+            facts.append({'name': location, 'label': str(label or ''), 'type': str(kind or ''),
+                          'value': str(inherited(node,'/V') or ''), 'required': bool(int(inherited(node,'/Ff') or 0) & 2)})
+    return {'fields': facts, 'named_destinations': len(named)}
 
 
 async def verapdf(path: Path, profile: str = "ua1") -> dict[str, Any]:
@@ -218,8 +338,16 @@ async def validate(path: Path, external: bool = True) -> dict[str, Any]:
     suffix = path.suffix.lower()
     if suffix == ".docx":
         return validate_docx(path)
+    if suffix == ".xlsx":
+        from .report_artifacts import validate_xlsx
+
+        return validate_xlsx(path, report_schema=False)
+    if suffix == ".pptx":
+        from .report_artifacts import validate_pptx
+
+        return validate_pptx(path)
     if suffix != ".pdf":
-        raise ValueError("Formato aceito: DOCX ou PDF.")
+        raise ValueError("Formato aceito: DOCX, PDF, XLSX ou PPTX.")
     result = validate_pdf(path)
     result["pdf_ua"] = await verapdf(path) if external else {"status": "not_run", "reason": "Nao solicitado."}
     if result["pdf_ua"]["status"] in ("failed", "error"):

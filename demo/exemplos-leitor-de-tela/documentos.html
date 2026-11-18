@@ -22,7 +22,7 @@
 <li><details><summary>Componentes</summary><ul><li><a href="carrossel.html">Carrossel</a></li><li><a href="dica.html">Dica (tooltip)</a></li><li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li><li><a href="arvore.html">Árvore (tree view)</a></li><li><a href="tabela-ordenavel.html">Tabela ordenável</a></li><li><a href="web-components.html">Web Components (elemento personalizado)</a></li><li><a href="chat-ia.html">Resposta de IA em streaming</a></li></ul></details></li>
 <li><details><summary>Frameworks</summary><ul><li><a href="pilha-react.html">React</a></li><li><a href="pilha-vue.html">Vue</a></li><li><a href="pilha-svelte.html">Svelte</a></li><li><a href="pilha-angular.html">Angular</a></li></ul></details></li>
 <li><details><summary>Mobile (só código)</summary><ul><li><a href="android.html">Android (Jetpack Compose)</a></li><li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li></ul></details></li>
-<li><details open><summary>Documentos acessíveis</summary><ul><li><a href="documentos.html" aria-current="page">Word e PDF</a></li></ul></details></li>
+<li><details open><summary>Documentos acessíveis</summary><ul><li><a href="documentos.html" aria-current="page">Word, PDF e Excel</a></li></ul></details></li>
 </ul>
 </nav>
 </div>
@@ -31,9 +31,57 @@
 <div class="coluna">
 
 <h1>Documentos acessíveis</h1>
-<p>Compare arquivos Word DOCX e PDF bons e ruins quanto à propriedade demonstrada. Baixe os arquivos e abra no aplicativo de destino; a página HTML não simula a leitura do documento.</p>
-<p>Os defeitos dos arquivos ruins são intencionais. Bom não é certificação de acessibilidade. As medidas abaixo inspecionam os arquivos; a fala real do NVDA no Word ou leitor de PDF ainda não foi capturada.</p>
-<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2><ol><li><a href="#titulos">Títulos que permitem navegar</a></li><li><a href="#imagens">Imagens com significado em texto</a></li><li><a href="#tabelas">Tabelas com cabeçalhos</a></li><li><a href="#listas">Listas reconhecidas como listas</a></li><li><a href="#links">Links com destino compreensível</a></li><li><a href="#metadados">Título e idioma do arquivo</a></li><li><a href="#tags">PDF com estrutura preservada</a></li><li><a href="#ordem">Ordem de leitura com sentido</a></li><li><a href="#digitalizacao">PDF digitalizado com texto real</a></li></ol></nav>
+<p>Compare arquivos Word DOCX, PDF e Excel XLSX bons e ruins quanto à propriedade demonstrada. Baixe os arquivos e abra no aplicativo de destino; a página HTML não simula a leitura do documento.</p>
+<p>Os defeitos dos arquivos ruins são intencionais. Bom não é certificação de acessibilidade. As medidas abaixo inspecionam os arquivos; a fala real do NVDA no Word, Excel ou leitor de PDF ainda não foi capturada.</p>
+<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2><ol><li><a href="#formularios">Formulários realmente preenchíveis</a></li><li><a href="#sumario">Sumário automático e clicável</a></li><li><a href="#links-internos">Links internos com destino válido</a></li><li><a href="#titulos">Títulos que permitem navegar</a></li><li><a href="#imagens">Imagens com significado em texto</a></li><li><a href="#tabelas">Tabelas com cabeçalhos</a></li><li><a href="#listas">Listas reconhecidas como listas</a></li><li><a href="#links">Links com destino compreensível</a></li><li><a href="#metadados">Título e idioma do arquivo</a></li><li><a href="#tags">PDF com estrutura preservada</a></li><li><a href="#ordem">Ordem de leitura com sentido</a></li><li><a href="#digitalizacao">PDF digitalizado com texto real</a></li><li><a href="#planilhas-cabecalhos">Planilhas com cabeçalhos associados aos dados</a></li><li><a href="#planilhas-status">Situação da planilha disponível além da cor</a></li></ol></nav>
+<section aria-labelledby="formularios"><h2 id="formularios">Formulários realmente preenchíveis</h2>
+<h3>O que fazer</h3><p>Use controles preenchíveis com nome, rótulo, tipo, estado, instruções e sequência lógica. Indique campos obrigatórios em texto e nas propriedades que o formato oferece.</p><h3>O que evitar</h3><p>Não simule campos com linhas de sublinhado nem use somente cor ou asterisco sem explicação. Não confunda uma caixa desenhada com um controle de formulário.</p>
+<h3>O que mudou no exemplo ruim</h3><p>Os campos mantêm aparência e valores, mas perderam seus nomes acessíveis nas propriedades dos controles.</p>
+<h3>Arquivos para comparar</h3><ul>
+<li><a href="documentos/formularios-bom.docx" download>Bom: Formulários realmente preenchíveis (DOCX, 37 KB)</a></li>
+<li><a href="documentos/formularios-ruim.docx" download>Ruim de propósito: Formulários realmente preenchíveis (DOCX, 37 KB)</a></li>
+<li><a href="documentos/formularios-bom.pdf" download>Bom: Formulários realmente preenchíveis (PDF, 76 KB)</a></li>
+<li><a href="documentos/formularios-ruim.pdf" download>Ruim de propósito: Formulários realmente preenchíveis (PDF, 73 KB)</a></li>
+</ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
+<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Formulários realmente preenchíveis; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 3.</p>
+<p>Ruim DOCX: Defeitos estruturais encontrados: controle sem nome acessível nas propriedades; controle sem nome acessível nas propriedades; controle sem nome acessível nas propriedades. Título: Formulários realmente preenchíveis; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 3.</p>
+<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Formulários realmente preenchíveis; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 3.</p>
+<p>Ruim PDF: Defeitos estruturais encontrados: controle sem nome acessível nas propriedades; controle sem nome acessível nas propriedades; controle sem nome acessível nas propriedades. veraPDF não executado nesta cópia ruim. Título: Formulários realmente preenchíveis; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 3.</p>
+<h3>Comportamento esperado, sem fala capturada</h3><p>A pessoa deve reconhecer o campo, entender como preenchê-lo e consultar seu valor ou estado. No PDF, os widgets precisam estar na estrutura de formulário e ligados às tags. No Word, os controles têm título e instruções; isso ainda exige conferir a experiência no aplicativo.</p>
+<h3>Como conferir no aplicativo</h3><p>Percorra os campos pelo teclado no aplicativo, preencha texto, selecione uma opção e alterne a caixa de seleção. Salve, reabra e confira valores e anúncios. Obrigatório no Word é uma indicação textual; não há envio nem validação programada por macros.</p>
+<h3>Fontes oficiais</h3><ul><li><a href="https://support.microsoft.com/en-us/word/create-a-form-in-word-that-users-can-complete-or-print">Microsoft — Formulários preenchíveis no Word</a></li><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF12">W3C — PDF12 Nome papel valor dos campos</a></li><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF5">W3C — PDF5 Campos obrigatórios</a></li></ul></section>
+<section aria-labelledby="sumario"><h2 id="sumario">Sumário automático e clicável</h2>
+<h3>O que fazer</h3><p>Gere o sumário a partir dos títulos e use links que levem às seções corretas. No Word, atualize o campo depois de editar títulos ou páginas.</p><h3>O que evitar</h3><p>Não apresente apenas uma lista de títulos como se fosse navegação clicável. Não confunda o sumário no corpo com os marcadores laterais do PDF.</p>
+<h3>O que mudou no exemplo ruim</h3><p>As entradas continuam visíveis, mas foram convertidas em texto sem links; o campo automático do Word foi retirado.</p>
+<h3>Arquivos para comparar</h3><ul>
+<li><a href="documentos/sumario-bom.docx" download>Bom: Sumário automático e clicável (DOCX, 37 KB)</a></li>
+<li><a href="documentos/sumario-ruim.docx" download>Ruim de propósito: Sumário automático e clicável (DOCX, 37 KB)</a></li>
+<li><a href="documentos/sumario-bom.pdf" download>Bom: Sumário automático e clicável (PDF, 53 KB)</a></li>
+<li><a href="documentos/sumario-ruim.pdf" download>Ruim de propósito: Sumário automático e clicável (PDF, 51 KB)</a></li>
+</ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
+<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Sumário automático e clicável; idioma: pt-BR; níveis dos títulos: 1, 2, 2, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Título: Sumário automático e clicável; idioma: pt-BR; níveis dos títulos: 1, 2, 2, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Sumário automático e clicável; idioma: pt-BR; níveis dos títulos: 1, 2, 2, 2; itens de lista estruturados: 2; campos preenchíveis: 0.</p>
+<p>Ruim PDF: Nenhum defeito encontrado nas checagens estruturais executadas. veraPDF não executado nesta cópia ruim. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Título: Sumário automático e clicável; idioma: pt-BR; níveis dos títulos: 1, 2, 2, 2; itens de lista estruturados: 2; campos preenchíveis: 0.</p>
+<h3>Comportamento esperado, sem fala capturada</h3><p>As entradas devem permitir chegar à seção indicada. O DOCX tem campo de sumário com links iniciais; o PDF tem entradas clicáveis e marcadores. A atualização posterior do campo depende do editor.</p>
+<h3>Como conferir no aplicativo</h3><p>Ative cada entrada pelo teclado e confira o título de chegada. No Word, edite um título em uma cópia, atualize o sumário e confira novamente. No PDF, teste também os marcadores separadamente.</p>
+<h3>Fontes oficiais</h3><ul><li><a href="https://support.microsoft.com/en-us/word/training/insert-a-table-of-contents">Microsoft — Sumário automático no Word</a></li><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF2">W3C — PDF2 Marcadores</a></li><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF11">W3C — PDF11 Links e estrutura</a></li></ul></section>
+<section aria-labelledby="links-internos"><h2 id="links-internos">Links internos com destino válido</h2>
+<h3>O que fazer</h3><p>Vincule o texto descritivo a um marcador ou seção existente e confira a chegada no arquivo final.</p><h3>O que evitar</h3><p>Não deixe links apontando para marcadores removidos nem suponha que a navegação interna sobrevive a qualquer exportação.</p>
+<h3>O que mudou no exemplo ruim</h3><p>O link foi alterado para apontar a um destino que não existe no documento.</p>
+<h3>Arquivos para comparar</h3><ul>
+<li><a href="documentos/links-internos-bom.docx" download>Bom: Links internos com destino válido (DOCX, 37 KB)</a></li>
+<li><a href="documentos/links-internos-ruim.docx" download>Ruim de propósito: Links internos com destino válido (DOCX, 37 KB)</a></li>
+<li><a href="documentos/links-internos-bom.pdf" download>Bom: Links internos com destino válido (PDF, 48 KB)</a></li>
+<li><a href="documentos/links-internos-ruim.pdf" download>Ruim de propósito: Links internos com destino válido (PDF, 47 KB)</a></li>
+</ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
+<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Links internos com destino válido; idioma: pt-BR; níveis dos títulos: 1, 2, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim DOCX: Defeitos estruturais encontrados: link interno aponta a destino inexistente. Título: Links internos com destino válido; idioma: pt-BR; níveis dos títulos: 1, 2, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Links internos com destino válido; idioma: pt-BR; níveis dos títulos: 1, 2, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim PDF: Defeitos estruturais encontrados: link interno aponta a destino inexistente. veraPDF não executado nesta cópia ruim. Título: Links internos com destino válido; idioma: pt-BR; níveis dos títulos: 1, 2, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<h3>Comportamento esperado, sem fala capturada</h3><p>A ativação deve levar ao trecho indicado. A posição do cursor e o anúncio ao chegar variam com o leitor e o aplicativo; a existência do destino não prova o foco real.</p>
+<h3>Como conferir no aplicativo</h3><p>Percorra e ative os links pelo teclado, confira a seção de destino e continue a leitura a partir dela. Teste novamente depois de exportar.</p>
+<h3>Fontes oficiais</h3><ul><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF11">W3C — PDF11 Links e estrutura</a></li><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF2">W3C — PDF2 Marcadores</a></li></ul></section>
 <section aria-labelledby="titulos"><h2 id="titulos">Títulos que permitem navegar</h2>
 <h3>O que fazer</h3><p>Dê estrutura às seções com estilos de título no Word e tags de título no PDF. Organize os níveis pelo conteúdo.</p><h3>O que evitar</h3><p>Não transforme parágrafos em falsos títulos apenas aumentando a fonte e aplicando negrito.</p>
 <h3>O que mudou no exemplo ruim</h3><p>Os títulos visuais foram mantidos, mas sua estrutura foi trocada por parágrafos comuns.</p>
@@ -43,10 +91,10 @@
 <li><a href="documentos/titulos-bom.pdf" download>Bom: Títulos que permitem navegar (PDF, 46 KB)</a></li>
 <li><a href="documentos/titulos-ruim.pdf" download>Ruim de propósito: Títulos que permitem navegar (PDF, 45 KB)</a></li>
 </ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
-<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Títulos que permitem navegar; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Ruim DOCX: Defeitos estruturais encontrados: título principal sem estrutura de título. Título: Títulos que permitem navegar; idioma: pt-BR; níveis dos títulos: nenhum; itens de lista estruturados: 0.</p>
-<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Títulos que permitem navegar; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Ruim PDF: Defeitos estruturais encontrados: título principal sem estrutura de título. veraPDF não executado nesta cópia ruim. Título: Títulos que permitem navegar; idioma: pt-BR; níveis dos títulos: nenhum; itens de lista estruturados: 0.</p>
+<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Títulos que permitem navegar; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim DOCX: Defeitos estruturais encontrados: título principal sem estrutura de título. Título: Títulos que permitem navegar; idioma: pt-BR; níveis dos títulos: nenhum; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Títulos que permitem navegar; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim PDF: Defeitos estruturais encontrados: título principal sem estrutura de título. veraPDF não executado nesta cópia ruim. Título: Títulos que permitem navegar; idioma: pt-BR; níveis dos títulos: nenhum; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
 <h3>Comportamento esperado, sem fala capturada</h3><p>A estrutura deve expor os títulos e seus níveis para navegação. A frase anunciada depende do aplicativo e do leitor.</p>
 <h3>Como conferir no aplicativo</h3><p>Compare os títulos visuais com o painel de navegação do Word ou a lista de títulos do leitor no PDF. Percorra cada seção e registre o resultado.</p>
 <h3>Fontes oficiais</h3><ul><li><a href="https://support.microsoft.com/en-gb/accessibility/word/make-your-word-documents-accessible-to-people-with-disabilities">Microsoft — Acessibilidade no Word</a></li><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF9">W3C — PDF9 Títulos</a></li></ul></section>
@@ -59,10 +107,10 @@
 <li><a href="documentos/imagens-bom.pdf" download>Bom: Imagens com significado em texto (PDF, 47 KB)</a></li>
 <li><a href="documentos/imagens-ruim.pdf" download>Ruim de propósito: Imagens com significado em texto (PDF, 46 KB)</a></li>
 </ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
-<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Imagens com significado em texto; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Ruim DOCX: Defeitos estruturais encontrados: figura informativa sem alternativa de texto. Título: Imagens com significado em texto; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Imagens com significado em texto; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Ruim PDF: Defeitos estruturais encontrados: figura informativa sem alternativa de texto. veraPDF não executado nesta cópia ruim. Título: Imagens com significado em texto; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
+<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Imagens com significado em texto; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim DOCX: Defeitos estruturais encontrados: figura informativa sem alternativa de texto. Título: Imagens com significado em texto; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Imagens com significado em texto; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim PDF: Defeitos estruturais encontrados: figura informativa sem alternativa de texto. veraPDF não executado nesta cópia ruim. Título: Imagens com significado em texto; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
 <h3>Comportamento esperado, sem fala capturada</h3><p>O leitor deve ter acesso ao significado da figura; encontrar um campo de alternativa preenchido não prova que a descrição seja adequada.</p>
 <h3>Como conferir no aplicativo</h3><p>Chegue à imagem usando o leitor. Compare a descrição com a informação visual e confira se a informação continua compreensível sem enxergar a figura.</p>
 <h3>Fontes oficiais</h3><ul><li><a href="https://support.microsoft.com/en-gb/accessibility/word/make-your-word-documents-accessible-to-people-with-disabilities">Microsoft — Acessibilidade no Word</a></li><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF1">W3C — PDF1 Alternativas de imagens</a></li></ul></section>
@@ -75,10 +123,10 @@
 <li><a href="documentos/tabelas-bom.pdf" download>Bom: Tabelas com cabeçalhos (PDF, 49 KB)</a></li>
 <li><a href="documentos/tabelas-ruim.pdf" download>Ruim de propósito: Tabelas com cabeçalhos (PDF, 48 KB)</a></li>
 </ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
-<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Tabelas com cabeçalhos; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Ruim DOCX: Defeitos estruturais encontrados: tabela sem cabeçalho identificado. Título: Tabelas com cabeçalhos; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Tabelas com cabeçalhos; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Ruim PDF: Defeitos estruturais encontrados: tabela sem cabeçalho identificado. veraPDF não executado nesta cópia ruim. Título: Tabelas com cabeçalhos; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
+<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Tabelas com cabeçalhos; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim DOCX: Defeitos estruturais encontrados: tabela sem cabeçalho identificado. Título: Tabelas com cabeçalhos; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Tabelas com cabeçalhos; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim PDF: Defeitos estruturais encontrados: tabela sem cabeçalho identificado. veraPDF não executado nesta cópia ruim. Título: Tabelas com cabeçalhos; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
 <h3>Comportamento esperado, sem fala capturada</h3><p>Ao percorrer os dados, a associação com o cabeçalho deve continuar disponível. A repetição visual do cabeçalho no Word não prova sozinha a experiência no leitor.</p>
 <h3>Como conferir no aplicativo</h3><p>Entre na tabela e navegue por linhas e colunas com os comandos do leitor. Confira cabeçalhos, valores e transições de página no aplicativo escolhido.</p>
 <h3>Fontes oficiais</h3><ul><li><a href="https://support.microsoft.com/en-gb/accessibility/word/make-your-word-documents-accessible-to-people-with-disabilities">Microsoft — Acessibilidade no Word</a></li><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF6">W3C — PDF6 Tabelas</a></li></ul></section>
@@ -89,12 +137,12 @@
 <li><a href="documentos/listas-bom.docx" download>Bom: Listas reconhecidas como listas (DOCX, 37 KB)</a></li>
 <li><a href="documentos/listas-ruim.docx" download>Ruim de propósito: Listas reconhecidas como listas (DOCX, 37 KB)</a></li>
 <li><a href="documentos/listas-bom.pdf" download>Bom: Listas reconhecidas como listas (PDF, 44 KB)</a></li>
-<li><a href="documentos/listas-ruim.pdf" download>Ruim de propósito: Listas reconhecidas como listas (PDF, 43 KB)</a></li>
+<li><a href="documentos/listas-ruim.pdf" download>Ruim de propósito: Listas reconhecidas como listas (PDF, 44 KB)</a></li>
 </ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
-<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Listas reconhecidas como listas; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 2.</p>
-<p>Ruim DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Título: Listas reconhecidas como listas; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Listas reconhecidas como listas; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 2.</p>
-<p>Ruim PDF: Nenhum defeito encontrado nas checagens estruturais executadas. veraPDF não executado nesta cópia ruim. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Título: Listas reconhecidas como listas; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
+<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Listas reconhecidas como listas; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 2; campos preenchíveis: 0.</p>
+<p>Ruim DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Título: Listas reconhecidas como listas; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Listas reconhecidas como listas; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 2; campos preenchíveis: 0.</p>
+<p>Ruim PDF: Nenhum defeito encontrado nas checagens estruturais executadas. veraPDF não executado nesta cópia ruim. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Título: Listas reconhecidas como listas; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
 <h3>Comportamento esperado, sem fala capturada</h3><p>A relação entre os itens deve estar disponível à tecnologia assistiva. A lista de exemplo tem duas etapas em sequência.</p>
 <h3>Como conferir no aplicativo</h3><p>Use a navegação de listas e itens disponível no leitor e aplicativo. Confira sequência, quantidade e conteúdo sem depender do marcador visual.</p>
 <h3>Fontes oficiais</h3><ul><li><a href="https://support.microsoft.com/en-gb/accessibility/word/make-your-word-documents-accessible-to-people-with-disabilities">Microsoft — Acessibilidade no Word</a></li><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF21">W3C — PDF21 Listas</a></li></ul></section>
@@ -107,10 +155,10 @@
 <li><a href="documentos/links-bom.pdf" download>Bom: Links com destino compreensível (PDF, 45 KB)</a></li>
 <li><a href="documentos/links-ruim.pdf" download>Ruim de propósito: Links com destino compreensível (PDF, 43 KB)</a></li>
 </ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
-<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Links com destino compreensível; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Ruim DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Título: Links com destino compreensível; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Links com destino compreensível; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Ruim PDF: Nenhum defeito encontrado nas checagens estruturais executadas. veraPDF não executado nesta cópia ruim. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Título: Links com destino compreensível; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
+<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Links com destino compreensível; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Título: Links com destino compreensível; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Links com destino compreensível; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim PDF: Nenhum defeito encontrado nas checagens estruturais executadas. veraPDF não executado nesta cópia ruim. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Título: Links com destino compreensível; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
 <h3>Comportamento esperado, sem fala capturada</h3><p>A pessoa deve conseguir decidir se quer abrir o destino. Texto alternativo adicional para todo link PDF não é obrigatório por si só.</p>
 <h3>Como conferir no aplicativo</h3><p>Percorra os links pelo teclado e consulte a lista de links do leitor. Leia também o contexto antes de decidir se o propósito é compreensível.</p>
 <h3>Fontes oficiais</h3><ul><li><a href="https://support.microsoft.com/en-gb/accessibility/word/make-your-word-documents-accessible-to-people-with-disabilities">Microsoft — Acessibilidade no Word</a></li><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF13">W3C — PDF13 Propósito dos links</a></li></ul></section>
@@ -119,14 +167,14 @@
 <h3>O que mudou no exemplo ruim</h3><p>O título e o idioma padrão foram removidos dos metadados, mantendo o conteúdo visual.</p>
 <h3>Arquivos para comparar</h3><ul>
 <li><a href="documentos/metadados-bom.docx" download>Bom: Título e idioma do arquivo (DOCX, 37 KB)</a></li>
-<li><a href="documentos/metadados-ruim.docx" download>Ruim de propósito: Título e idioma do arquivo (DOCX, 36 KB)</a></li>
+<li><a href="documentos/metadados-ruim.docx" download>Ruim de propósito: Título e idioma do arquivo (DOCX, 37 KB)</a></li>
 <li><a href="documentos/metadados-bom.pdf" download>Bom: Título e idioma do arquivo (PDF, 45 KB)</a></li>
 <li><a href="documentos/metadados-ruim.pdf" download>Ruim de propósito: Título e idioma do arquivo (PDF, 44 KB)</a></li>
 </ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
-<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Título e idioma do arquivo; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Ruim DOCX: Defeitos estruturais encontrados: metadado de título ausente; idioma padrão ausente. Título: ausente; idioma: ausente; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Título e idioma do arquivo; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Ruim PDF: Defeitos estruturais encontrados: metadado de título ausente; idioma padrão ausente. veraPDF não executado nesta cópia ruim. Título: ausente; idioma: ausente; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
+<p>Bom DOCX: Nenhum defeito encontrado nas checagens estruturais executadas. Título: Título e idioma do arquivo; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim DOCX: Defeitos estruturais encontrados: metadado de título ausente; idioma padrão ausente. Título: ausente; idioma: ausente; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Título e idioma do arquivo; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim PDF: Defeitos estruturais encontrados: metadado de título ausente; idioma padrão ausente. veraPDF não executado nesta cópia ruim. Título: ausente; idioma: ausente; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
 <h3>Comportamento esperado, sem fala capturada</h3><p>O aplicativo e o leitor devem receber identificação e idioma coerentes com o conteúdo. A pronúncia também depende da voz e da configuração.</p>
 <h3>Como conferir no aplicativo</h3><p>Confira propriedades e idioma do texto no editor; no PDF, confira título, idioma e preferências de exibição. Ouça trechos em cada idioma usado.</p>
 <h3>Fontes oficiais</h3><ul><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF16">W3C — PDF16 Idioma</a></li><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF18">W3C — PDF18 Título do documento</a></li><li><a href="https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html">Adobe — Criar e verificar PDFs acessíveis</a></li></ul></section>
@@ -137,8 +185,8 @@
 <li><a href="documentos/tags-bom.pdf" download>Bom: PDF com estrutura preservada (PDF, 45 KB)</a></li>
 <li><a href="documentos/tags-ruim.pdf" download>Ruim de propósito: PDF com estrutura preservada (PDF, 44 KB)</a></li>
 </ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
-<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: PDF com estrutura preservada; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Ruim PDF: Defeitos estruturais encontrados: estrutura de tags ausente; título principal sem estrutura de título. veraPDF não executado nesta cópia ruim. Título: PDF com estrutura preservada; idioma: pt-BR; níveis dos títulos: nenhum; itens de lista estruturados: 0.</p>
+<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: PDF com estrutura preservada; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim PDF: Defeitos estruturais encontrados: estrutura de tags ausente; título principal sem estrutura de título. veraPDF não executado nesta cópia ruim. Título: PDF com estrutura preservada; idioma: pt-BR; níveis dos títulos: nenhum; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
 <h3>Comportamento esperado, sem fala capturada</h3><p>Tags devem representar o conteúdo e suas relações. Presença de tags ou aprovação automática não garante qualidade semântica.</p>
 <h3>Como conferir no aplicativo</h3><p>Inspecione a árvore de tags e percorra o PDF com teclado e leitor. Compare os elementos encontrados com o documento visível.</p>
 <h3>Fontes oficiais</h3><ul><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF9">W3C — PDF9 Títulos</a></li><li><a href="https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html">Adobe — Criar e verificar PDFs acessíveis</a></li></ul></section>
@@ -147,10 +195,10 @@
 <h3>O que mudou no exemplo ruim</h3><p>Os dois itens foram invertidos apenas na árvore de tags; a sequência visual não mudou.</p>
 <h3>Arquivos para comparar</h3><ul>
 <li><a href="documentos/ordem-bom.pdf" download>Bom: Ordem de leitura com sentido (PDF, 44 KB)</a></li>
-<li><a href="documentos/ordem-ruim.pdf" download>Ruim de propósito: Ordem de leitura com sentido (PDF, 43 KB)</a></li>
+<li><a href="documentos/ordem-ruim.pdf" download>Ruim de propósito: Ordem de leitura com sentido (PDF, 44 KB)</a></li>
 </ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
-<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Ordem de leitura com sentido; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 2.</p>
-<p>Ruim PDF: Nenhum defeito encontrado nas checagens estruturais executadas. veraPDF não executado nesta cópia ruim. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Título: Ordem de leitura com sentido; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 2.</p>
+<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: Ordem de leitura com sentido; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 2; campos preenchíveis: 0.</p>
+<p>Ruim PDF: Nenhum defeito encontrado nas checagens estruturais executadas. veraPDF não executado nesta cópia ruim. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Título: Ordem de leitura com sentido; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 2; campos preenchíveis: 0.</p>
 <h3>Comportamento esperado, sem fala capturada</h3><p>Na lista deste exemplo, a leitura deve apresentar Primeiro prepare o documento antes de Depois revise o documento.</p>
 <h3>Como conferir no aplicativo</h3><p>Leia continuamente e percorra os itens da lista com o leitor. Compare a sequência falada com o sentido das instruções. Registre aplicativo, versão e configuração.</p>
 <h3>Fontes oficiais</h3><ul><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF3">W3C — PDF3 Ordem de leitura</a></li></ul></section>
@@ -161,14 +209,38 @@
 <li><a href="documentos/digitalizacao-bom.pdf" download>Bom: PDF digitalizado com texto real (PDF, 45 KB)</a></li>
 <li><a href="documentos/digitalizacao-ruim.pdf" download>Ruim de propósito: PDF digitalizado com texto real (PDF, 47 KB)</a></li>
 </ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
-<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: PDF digitalizado com texto real; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0.</p>
-<p>Ruim PDF: Defeitos estruturais encontrados: idioma padrão ausente; estrutura de tags ausente; título principal sem estrutura de título; página sem texto extraível. veraPDF não executado nesta cópia ruim. Título: digitalizacao-ruim; idioma: ausente; níveis dos títulos: nenhum; itens de lista estruturados: 0.</p>
+<p>Bom PDF: Nenhum defeito encontrado nas checagens estruturais executadas. As verificações automáticas PDF/UA-1 do veraPDF passaram. Título: PDF digitalizado com texto real; idioma: pt-BR; níveis dos títulos: 1, 2; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
+<p>Ruim PDF: Defeitos estruturais encontrados: idioma padrão ausente; estrutura de tags ausente; título principal sem estrutura de título; página sem texto extraível. veraPDF não executado nesta cópia ruim. Título: digitalizacao-ruim; idioma: ausente; níveis dos títulos: nenhum; itens de lista estruturados: 0; campos preenchíveis: 0.</p>
 <h3>Comportamento esperado, sem fala capturada</h3><p>As palavras devem estar disponíveis como texto correto e estruturado. Recursos de OCR do leitor podem variar e não corrigem o arquivo de origem.</p>
 <h3>Como conferir no aplicativo</h3><p>Pesquise palavras, confira o texto reconhecido e leia o documento com tecnologia assistiva. Verifique números, acentos, ordem, títulos e tabelas.</p>
 <h3>Fontes oficiais</h3><ul><li><a href="https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF7">W3C — PDF7 Texto e OCR</a></li><li><a href="https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html">Adobe — Criar e verificar PDFs acessíveis</a></li></ul></section>
+<section aria-labelledby="planilhas-cabecalhos"><h2 id="planilhas-cabecalhos">Planilhas com cabeçalhos associados aos dados</h2>
+<h3>O que fazer</h3><p>Use estrutura tabular simples, nomes claros e cabeçalhos associados aos dados. Confira no Excel e no leitor escolhido como os cabeçalhos são identificados; podem ser necessários recursos e configurações específicos.</p><h3>O que evitar</h3><p>Não trate congelamento visual como definição semântica de cabeçalho, nem considere o uso de Tabela a única solução possível.</p>
+<h3>O que mudou no exemplo ruim</h3><p>O vínculo explícito da Tabela com sua linha de cabeçalhos foi retirado. A aparência e o congelamento permanecem; isso não comprova falha WCAG universal de todo intervalo que não seja uma Tabela.</p>
+<h3>Arquivos para comparar</h3><ul>
+<li><a href="documentos/planilhas-cabecalhos-bom.xlsx" download>Bom: Planilhas com cabeçalhos associados aos dados (XLSX, 6 KB)</a></li>
+<li><a href="documentos/planilhas-cabecalhos-ruim.xlsx" download>Ruim de propósito: Planilhas com cabeçalhos associados aos dados (XLSX, 6 KB)</a></li>
+</ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
+<p>Bom XLSX: Nenhum defeito encontrado nas checagens estruturais executadas. Tabelas definidas: 1; congelamento visual: A2; valores das células: [[&#x27;Mês&#x27;, &#x27;Participantes&#x27;, &#x27;Situação&#x27;], [&#x27;Setembro&#x27;, 12, &#x27;Revisar&#x27;], [&#x27;Outubro&#x27;, 18, &#x27;Concluído&#x27;]]. Congelar não define cabeçalhos para o leitor. A adequação das associações e do uso de cor exige conferência no Excel e com o leitor escolhido.</p>
+<p>Ruim XLSX: Nenhum defeito encontrado nas checagens estruturais executadas. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Tabelas definidas: 0; congelamento visual: A2; valores das células: [[&#x27;Mês&#x27;, &#x27;Participantes&#x27;, &#x27;Situação&#x27;], [&#x27;Setembro&#x27;, 12, &#x27;Revisar&#x27;], [&#x27;Outubro&#x27;, 18, &#x27;Concluído&#x27;]]. Congelar não define cabeçalhos para o leitor. A adequação das associações e do uso de cor exige conferência no Excel e com o leitor escolhido.</p>
+<h3>Comportamento esperado, sem fala capturada</h3><p>O exemplo bom define uma Tabela do Excel com linha de cabeçalhos. O ruim mantém os mesmos textos e o mesmo congelamento, mas remove a definição da Tabela. A fala real e as associações no leitor não foram executadas; intervalos nomeados ou outras soluções precisam ser avaliados em contexto.</p>
+<h3>Como conferir no aplicativo</h3><p>Abra cada arquivo no Excel, confira a existência da Tabela e da linha de cabeçalhos e navegue entre os dados. Com NVDA real, confira a configuração de anúncio de cabeçalhos; quando necessário, defina os cabeçalhos com os comandos documentados e registre a combinação usada.</p>
+<h3>Fontes oficiais</h3><ul><li><a href="https://support.microsoft.com/en-us/accessibility/excel/accessibility-best-practices-with-excel-spreadsheets">Microsoft — Boas práticas de acessibilidade no Excel</a></li><li><a href="https://download.nvaccess.org/documentation/en/userGuide.html#MicrosoftExcel">NV Access — Cabeçalhos no Microsoft Excel</a></li></ul></section>
+<section aria-labelledby="planilhas-status"><h2 id="planilhas-status">Situação da planilha disponível além da cor</h2>
+<h3>O que fazer</h3><p>Mantenha um valor textual que identifique a situação de cada registro, além das cores.</p><h3>O que evitar</h3><p>Não dependa exclusivamente de vermelho e verde para transmitir a situação.</p>
+<h3>O que mudou no exemplo ruim</h3><p>Os textos da coluna Situação foram retirados, mantendo os preenchimentos vermelho e verde. O significado da cor é o conteúdo declarado deste exemplo, não uma regra automática baseada em nomes de cor.</p>
+<h3>Arquivos para comparar</h3><ul>
+<li><a href="documentos/planilhas-status-bom.xlsx" download>Bom: Situação da planilha disponível além da cor (XLSX, 6 KB)</a></li>
+<li><a href="documentos/planilhas-status-ruim.xlsx" download>Ruim de propósito: Situação da planilha disponível além da cor (XLSX, 6 KB)</a></li>
+</ul><h3>Estrutura dos arquivos medida pelo MCP</h3>
+<p>Bom XLSX: Nenhum defeito encontrado nas checagens estruturais executadas. Tabelas definidas: 1; congelamento visual: A2; valores das células: [[&#x27;Mês&#x27;, &#x27;Participantes&#x27;, &#x27;Situação&#x27;], [&#x27;Setembro&#x27;, 12, &#x27;Revisar&#x27;], [&#x27;Outubro&#x27;, 18, &#x27;Concluído&#x27;]]. Congelar não define cabeçalhos para o leitor. A adequação das associações e do uso de cor exige conferência no Excel e com o leitor escolhido.</p>
+<p>Ruim XLSX: Nenhum defeito encontrado nas checagens estruturais executadas. Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo. Tabelas definidas: 1; congelamento visual: A2; valores das células: [[&#x27;Mês&#x27;, &#x27;Participantes&#x27;, &#x27;Situação&#x27;], [&#x27;Setembro&#x27;, 12, None], [&#x27;Outubro&#x27;, 18, None]]. Congelar não define cabeçalhos para o leitor. A adequação das associações e do uso de cor exige conferência no Excel e com o leitor escolhido.</p>
+<h3>Comportamento esperado, sem fala capturada</h3><p>Nos arquivos os registros de participação são iguais. O bom escreve Revisar e Concluído na coluna Situação, além das cores; no ruim esses valores foram removidos e só a cor permanece.</p>
+<h3>Como conferir no aplicativo</h3><p>Confira os valores da coluna Situação sem usar as cores. No Excel e com o leitor escolhido, navegue até cada célula e registre se a informação está disponível em texto.</p>
+<h3>Fontes oficiais</h3><ul><li><a href="https://support.microsoft.com/en-us/accessibility/excel/accessibility-best-practices-with-excel-spreadsheets">Microsoft — Boas práticas de acessibilidade no Excel</a></li></ul></section>
 <h2>Usar este conhecimento no MCP</h2><p>Peça a criação de um documento ou relatório acessível. O MCP gera os arquivos e devolve validações e limites; o modelo do cliente consulta o guia de comportamento de documentos para escolher a estrutura e explicar as verificações pendentes.</p>
-<h2>Outras verificações necessárias</h2><p>Confira também contraste, informação transmitida só por cor, ampliação e formulários. Esses aspectos não são comprovados por estes pares. OCR exige revisão do texto e da estrutura; PDF com tags ainda exige conferir o sentido e a ordem.</p>
-<p>Fontes consultadas em 2026-10-21. Arquivos medidos em 2026-10-21T03:03:35.888941+00:00. <a href="documentos/medicoes.json">Baixar o registro técnico das medições</a>.</p>
+<h2>Outras verificações necessárias</h2><p>Confira também contraste, informação transmitida só por cor, ampliação e formulários complexos. Os campos de exemplo não cobrem assinatura, envio ou toda combinação de aplicativo e leitor. OCR exige revisão do texto e da estrutura; PDF com tags ainda exige conferir o sentido e a ordem.</p>
+<p>Fontes consultadas em 2026-10-29. Arquivos medidos em 2026-10-29T21:46:46.785557+00:00. <a href="documentos/medicoes.json">Baixar o registro técnico das medições</a>.</p>
 <p><a href="index.html">Voltar ao início dos exemplos</a></p>
 </div>
 </main>

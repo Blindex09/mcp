@@ -41,7 +41,7 @@ async def _one(url: str | None, html: str | None, level: str, browser: str) -> d
         aria = str(await page.locator("body").aria_snapshot())
         await page.add_script_tag(content=script)
         raw = await page.evaluate("tags => axe.run(document, {runOnly: {type: 'tag', values: tags}})", tags)
-        stops = [{"step": s["step"], **s["element"]} for s in await audit.tab_stops(page, 60)]
+        stops = [{"step": s["step"], **s["element"]} for s in await audit.tab_stops(page, 0)]
         return {"aria": aria, "axe": audit.summarize_axe(raw), "tab_stops": stops}
 
     result: dict[str, Any] = await audit._with_page(url, html, fn, browser)

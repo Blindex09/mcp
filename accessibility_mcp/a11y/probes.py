@@ -6,7 +6,7 @@ teclado de uma pessoa faria e devolve FATOS: para os contratos, uma lista `esper
 
 Divisao de papeis (regra do projeto):
 - o MODELO decide qual padrao um componente e' naquele site (dialogo? menu? abas?) e escolhe a sonda;
-- o CODIGO executa as teclas e mede. O `esperado` vem do WAI-ARIA Authoring Practices (APG), definicao normativa de cada padrao, nao
+- o CODIGO executa as teclas e mede. O `esperado` vem das orientacoes informativas do WAI-ARIA Authoring Practices (APG), nao
   opiniao; se o componente DEVERIA seguir aquele padrao e se um desvio e' defeito continua sendo julgamento do modelo.
 Toda sonda usa so o teclado, entao vale para qualquer persona.
 """
@@ -124,8 +124,8 @@ async def tab_walk(s: Any, target: str | None = None, container: str | None = No
     return {
         "probe": "tab_walk", "stops_total": len(stops), "ended_because": end, "stuck_at": stuck,
         **({"links_sem_parada": links_sem_parada, "links_sem_parada_nota": f"{links_no_codigo - links_com_parada} link(s) com href e tabindex normal nao receberam parada de Tab neste navegador ({s.browser_name}); o Safari/WebKit nao para em links por padrao (preferencia do sistema)"} if links_sem_parada else {}),
-        "stops": stops[:60] + ([{"n": "...", "note": f"{len(stops) - 60} paradas omitidas"}] if len(stops) > 60 else []),
-        "obscured_stops": [x for x in stops if x.get("obscured")][:20], "offscreen_stops": [x["n"] for x in stops if x.get("offscreen")][:20],
+        "stops": stops,
+        "obscured_stops": [x for x in stops if x.get("obscured")], "offscreen_stops": [x["n"] for x in stops if x.get("offscreen")],
         "summary": f"{len(stops)} paradas; fim: {end}; presas: {len(stuck)}; focos cobertos: {sum(1 for x in stops if x.get('obscured'))}",
         "note": "fatos de Tab (WCAG 2.1.2 armadilha, 2.4.3 ordem, 2.4.7 visivel, 2.4.11 nao coberto); se a ordem faz sentido e' julgamento",
     }
@@ -144,7 +144,7 @@ async def focus_obscured(s: Any, target: str | None = None, container: str | Non
 # ------------------------------------------------------------------------------------------------ tamanho de alvo
 async def target_size(s: Any, target: str | None = None, container: str | None = None, max_stops: int = 0) -> dict[str, Any]:
     """WCAG 2.5.8: alvos menores que 24x24 px CSS e se escapam pela excecao de espacamento (circulo de 24 px sem tocar outro alvo)."""
-    dossier = await s.dossier("", 200)
+    dossier = await s.dossier("", 0)
     boxes = []
     for e in dossier["elements"]:
         r = e.get("rect") or {}
@@ -167,10 +167,10 @@ async def target_size(s: Any, target: str | None = None, container: str | None =
         near = [o["id"] for o in boxes if o["id"] != b["id"] and touches_box(c, o)]
         near += [o["id"] for o in small if o["id"] != b["id"] and o["id"] not in near and (circle(o)[0] - c[0]) ** 2 + (circle(o)[1] - c[1]) ** 2 < 24 ** 2]
         if near:
-            offenders.append({"id": b["id"], "tag": b["tag"], "name": b["name"], "size": f"{b['w']}x{b['h']}", "touches": near[:6]})
+            offenders.append({"id": b["id"], "tag": b["tag"], "name": b["name"], "size": f"{b['w']}x{b['h']}", "touches": near})
     return {
-        "probe": "target_size", "targets_measured": len(boxes), "smaller_than_24px": len(small), "fail_spacing_exception": offenders[:40],
-        "small_but_spaced": [f"{b['id']} {b['w']}x{b['h']}" for b in small if b["id"] not in {o["id"] for o in offenders}][:20],
+        "probe": "target_size", "targets_measured": len(boxes), "smaller_than_24px": len(small), "fail_spacing_exception": offenders,
+        "small_but_spaced": [f"{b['id']} {b['w']}x{b['h']}" for b in small if b["id"] not in {o["id"] for o in offenders}],
         "summary": f"{len(small)} de {len(boxes)} alvos medem menos de 24x24 px; {len(offenders)} deles tambem nao escapam pelo espacamento",
         "note": "fatos de geometria (WCAG 2.5.8). Excecoes que so o modelo decide: link dentro de texto corrido, controle nativo do navegador, equivalente de tamanho adequado na mesma pagina",
     }

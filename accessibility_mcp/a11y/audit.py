@@ -48,7 +48,7 @@ def _luminance(rgb: tuple[int, int, int]) -> float:
 def contrast_report(fg: str, bg: str, size_px: float = 16, bold: bool = False) -> dict[str, Any]:
     l1, l2 = _luminance(_parse_hex(fg)), _luminance(_parse_hex(bg))
     ratio = (max(l1, l2) + 0.05) / (min(l1, l2) + 0.05)
-    large = size_px >= 24 or (bold and size_px >= 18.66)
+    large = size_px >= 24 or (bold and size_px >= 14 * 96 / 72)
     return {
         "foreground": fg,
         "background": bg,
@@ -131,7 +131,7 @@ async def _with_page(
     return await patient(attempt, NAV_TIMEOUT_MS / 1000)
 
 
-def summarize_axe(raw: dict[str, Any], max_nodes: int = 5) -> dict[str, Any]:
+def summarize_axe(raw: dict[str, Any], max_nodes: int = 0) -> dict[str, Any]:
     def shape(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         out = []
         for v in items:
@@ -143,13 +143,14 @@ def summarize_axe(raw: dict[str, Any], max_nodes: int = 5) -> dict[str, Any]:
                     "wcag_tags": [t for t in v.get("tags", []) if t.startswith("wcag") or t == "best-practice"],
                     "help_url": v.get("helpUrl"),
                     "occurrences": len(v.get("nodes", [])),
+                    "omitted_occurrences": max(0, len(v.get("nodes", [])) - max_nodes) if max_nodes > 0 else 0,
                     "examples": [
                         {
                             "target": n.get("target"),
-                            "html": (n.get("html") or "")[:200],
+                            "html": n.get("html") or "",
                             "fix": n.get("failureSummary"),
                         }
-                        for n in v.get("nodes", [])[:max_nodes]
+                        for n in (v.get("nodes", [])[:max_nodes] if max_nodes > 0 else v.get("nodes", []))
                     ],
                 }
             )
@@ -295,8 +296,11 @@ async def _focused_stop(page: Any) -> tuple[tuple[int, int], dict[str, Any]] | N
     return (frame_index, node), info
 
 
-async def tab_stops(page: Any, steps: int) -> list[dict[str, Any]]:
-    """Aperta Tab ate o foco sair da pagina, dar a volta ou parar de mover; cada parada e um NO, nao uma descricao."""
+async def tab_stops(page: Any, steps: int, check_reverse: bool = False) -> list[dict[str, Any]]:
+    """Aperta Tab ate o foco sair da pagina, dar a volta ou parar de mover; cada parada e um NO, nao uma descricao.
+
+    check_reverse: em cada parada (da segunda em diante) aperta Shift+Tab e depois Tab, e registra em `shift_tab_back` se o foco
+    voltou ao no ANTERIOR e em `tab_after_shift_tab` se o Tab seguinte o devolveu a esta parada. So fatos: quem julga e o modelo."""
     seen: list[dict[str, Any]] = []
     first: tuple[int, int] | None = None
     previous: tuple[int, int] | None = None
@@ -310,18 +314,34 @@ async def tab_stops(page: Any, steps: int) -> list[dict[str, Any]]:
             first = ident
         elif ident in (first, previous):
             break  # deu a volta no ciclo, ou o foco parou de mover (Firefox no ultimo elemento)
+        before = previous
         previous = ident
         seen.append({"step": i + 1, "element": info})
+        if check_reverse and before is not None:
+            await page.keyboard.press("Shift+Tab")
+            back = await _focused_stop(page)
+            back_fact: dict[str, Any] = {"matches_previous_stop": back is not None and back[0] == before}
+            if back is None:
+                back_fact["landed_on"] = "fora da pagina"
+            elif back[0] != before:
+                back_fact["landed_on"] = back[1]
+            seen[-1]["shift_tab_back"] = back_fact
+            await page.keyboard.press("Tab")
+            again = await _focused_stop(page)
+            seen[-1]["tab_after_shift_tab"] = {"returns_to_this_stop": again is not None and again[0] == ident}
+            if again is None:
+                break
+            previous = again[0]
     return seen
 
 
 async def tab_order(
-    url: str | None = None, html: str | None = None, max_steps: int = 0, browser: str = "chromium"
+    url: str | None = None, html: str | None = None, max_steps: int = 0, browser: str = "chromium", check_reverse: bool = True
 ) -> list[dict[str, Any]]:
     steps = max(0, int(max_steps))  # 0 = ate o foco sair, dar a volta ou parar de mover
 
     async def fn(page: Any) -> list[dict[str, Any]]:
-        return await tab_stops(page, steps)
+        return await tab_stops(page, steps, check_reverse)
 
     result: list[dict[str, Any]] = await _with_page(url, html, fn, browser)
     return result

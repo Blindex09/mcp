@@ -1,5 +1,5 @@
 {
-  "data": "2026-10-21T03:13:04+00:00",
+  "data": "2026-11-06T21:55:27+00:00",
   "resultados": [
     {
       "conceito": "Regra 8: nenhum relogio fixo corta trabalho",
@@ -14,12 +14,12 @@
     {
       "conceito": "Carregamento progressivo (indice leve, guia sob demanda)",
       "estado": "COBERTO",
-      "evidencia": "72 guias, 72 descricoes no catalogo; o guia so e lido por nome"
+      "evidencia": "73 guias, 73 descricoes no catalogo; o guia so e lido por nome"
     },
     {
       "conceito": "Laco agentico com ferramentas tipadas",
       "estado": "COBERTO",
-      "evidencia": "47 de 47 ferramentas com esquema de entrada e descricao pelo protocolo MCP"
+      "evidencia": "59 de 59 ferramentas com esquema de entrada e descricao pelo protocolo MCP"
     },
     {
       "conceito": "Aprovacao antes de acao com efeito (guardrail na chamada de ferramenta)",
@@ -47,6 +47,11 @@
       "evidencia": "a11y_runs, a11y_export (EARL/SARIF) e a11y_diff"
     },
     {
+      "conceito": "Cliente MCP remoto e A2A por HTTP",
+      "estado": "COBERTO",
+      "evidencia": "nove ferramentas tipadas pelo protocolo real; rede privada recusada por padrao; tests/test_interop.py exercita Streamable HTTP MCP e JSON-RPC A2A reais"
+    },
+    {
       "conceito": "Observabilidade (spans OpenTelemetry de GenAI)",
       "estado": "COBERTO",
       "evidencia": "tests/test_telemetry.py: span execute_tool por ferramenta, sem argumentos nem resultados (liga com OTEL_EXPORTER_OTLP_ENDPOINT)"
@@ -59,12 +64,7 @@
     {
       "conceito": "Portao da regra 15 para os guias e fluxos (instrucoes ao modelo do cliente)",
       "estado": "PARCIAL",
-      "evidencia": "VPAT no Codex: 24/24, ablacao 18/24. Galeria de documentos: 48/48 em tres rodadas e 48/48 sem guia; sem ganho demonstrado. Geracao e leitura do guia pelo MCP real. Demais guias, fluxos e modelos sem avaliacao ampla; docs/modules/documentos_acessiveis.md e docs/modules/galeria_documentos.md"
-    },
-    {
-      "conceito": "Cliente MCP e A2A",
-      "estado": "LACUNA",
-      "evidencia": "o projeto e servidor; consumir outros servidores MCP ou delegar por A2A nao foi pedido nem implementado"
+      "evidencia": "VPAT no Codex: 24/24, ablacao 18/24. Galeria de documentos: 66/66 em tres rodadas e 66/66 sem guia; sem ganho demonstrado. Geracao e leitura do guia pelo MCP real. Demais guias, fluxos e modelos sem avaliacao ampla; docs/modules/documentos_acessiveis.md, docs/modules/galeria_documentos.md e docs/modules/formularios_sumario.md"
     },
     {
       "conceito": "Harness revisado a cada geracao de modelo",

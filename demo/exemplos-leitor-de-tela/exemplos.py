@@ -57,17 +57,17 @@ CENARIOS: list[dict[str, Any]] = [
                 "corrigir": "Nada a corrigir.",
             },
             {
-                "tipo": RUIM, "titulo": "Lista de cartões com um título dentro de cada item",
+                "tipo": OK, "titulo": "Lista de itens com títulos de seção",
                 "html": '<ul class="cartoes"><li><h3><a href="#sencha">Sencha</a></h3><p>Chá verde japonês.</p></li>'
                         '<li><h3><a href="#matcha">Matcha</a></h3><p>Chá verde em pó.</p></li></ul>',
-                "porque": "É HTML válido, mas a mesma informação aparece duas vezes: o leitor de tela anuncia \"lista com 2 itens\" e, em cada item, um título com o nível do h3. Quem navega por títulos passa a encontrar rótulos de cartão no lugar da estrutura da página. O guia aria-rules-dos-and-donts do MCP diz para usar título na estrutura do documento e não em título visual de cartão, e para expor cada informação uma só vez.",
-                "corrigir": "Troque por uma lista de links com descrição: ul, li e, dentro do item, o link com o nome do cartão e o parágrafo. A lista dá a contagem e os saltos; o link já é o nome. Se cada cartão for mesmo uma seção que merece estar no mapa da página, deixe os títulos e tire a lista, nunca os dois.",
+                "porque": "A lista representa a coleção; os títulos representam seções dentro dos itens. São relações diferentes e podem coexistir. Neste exemplo os títulos identificam o assunto de cada item e mantêm seu nível h3 na árvore. Essa combinação, isoladamente, não prova falha nem duplicação indevida.",
+                "corrigir": "Não remova uma lista ou um título válido apenas por estarem combinados. Confira se os títulos descrevem seções reais e formam uma hierarquia coerente. Se foram usados somente para mudar a fonte, corrija essa escolha de marcação mantendo o estilo por CSS.",
             },
             {
                 "tipo": BOM, "titulo": "Lista de cartões como lista de links com descrição",
                 "html": '<ul class="cartoes"><li><a href="#sencha">Sencha</a><p>Chá verde japonês.</p></li>'
                         '<li><a href="#matcha">Matcha</a><p>Chá verde em pó.</p></li></ul>',
-                "porque": "Uma só estrutura: o leitor de tela anuncia a lista com o total de itens e, em cada item, o link com o nome do cartão e a descrição. A lista de títulos da página continua só com os títulos de verdade.",
+                "porque": "Nesta variante, cada item reúne um link e sua descrição, sem formar uma subseção. A lista comunica a coleção e os links mantêm seus nomes na árvore de acessibilidade. A ausência de títulos é adequada a esta organização; não é uma regra para todos os cartões.",
                 "corrigir": "Nada a corrigir.",
             },
         ],

@@ -6,22 +6,22 @@ Servidor MCP somente de acessibilidade (web, mobile e interfaces de IA/agentes) 
 
 ## O que faz
 
--  Base de conhecimento embutida (`accessibility_mcp/a11y/content/`): 72 guias (WCAG 2.2, ARIA, NVDA/VoiceOver/TalkBack, o que o leitor de tela fala por elemento, tecla e evento, ordem de foco, títulos, listas e tabelas, checklist de auditoria, IA conversacional acessível, mobile, frameworks, XR, documentos, conformidade, e 28 playbooks de especialistas trazidos do Qaaccessibility), 44 exemplos de componentes acessíveis (modal, abas, combobox, treegrid, chat de IA…), os contratos da galeria de documentos e o template React (10 arquivos) de chat/agente acessível.
+-  Base de conhecimento embutida (`accessibility_mcp/a11y/content/`): 73 guias (WCAG 2.2, ARIA, NVDA/VoiceOver/TalkBack, o que o leitor de tela fala por elemento, tecla e evento, ordem de foco, títulos, listas e tabelas, checklist de auditoria, IA conversacional acessível, mobile, frameworks, XR, documentos, conformidade, e 28 playbooks de especialistas trazidos do Qaaccessibility), 44 exemplos de componentes acessíveis (modal, abas, combobox, treegrid, chat de IA…), os contratos da galeria de documentos e o template React (10 arquivos) de chat/agente acessível.
 -  Escolha pelo modelo do cliente: `a11y_list_content` devolve o catálogo (cada item com a descrição de quando usar) e o modelo escolhe pelo sentido. Nada de palavra-chave, regex ou ranking lexical, e nenhuma chamada de modelo dentro do servidor.
 -  Medição de fatos: contraste WCAG, auditoria axe-core num navegador real, árvore de acessibilidade e ordem de foco por teclado.
 
-## Ferramentas (47) e fluxos prontos
+## Ferramentas (56) e fluxos prontos
 
 ### Documentos e relatórios acessíveis
 
-A [galeria de documentos](demo/exemplos-leitor-de-tela/documentos.html) apresenta nove assuntos com 30 arquivos DOCX/PDF bons e ruins de propósito, medições e passos de revisão no aplicativo. O guia `document-behavior-matrix`, disponível pelo catálogo MCP, usa os mesmos contratos e fontes oficiais. Estrutura medida e comportamento esperado ficam separados da fala real do leitor de tela, ainda não capturada nesses documentos.
+A [galeria de documentos](demo/exemplos-leitor-de-tela/documentos.html) apresenta 12 assuntos com 42 arquivos DOCX/PDF bons e ruins de propósito, medições e passos de revisão no aplicativo. O guia `document-behavior-matrix`, disponível pelo catálogo MCP, usa os mesmos contratos e fontes oficiais. Inclui formulários preenchíveis, sumário e links internos, além de listas, imagens e tabelas. Estrutura medida e comportamento esperado ficam separados da fala real do leitor de tela, ainda não capturada nesses documentos.
 
 O MCP gera arquivos DOCX e PDF, além de orientar a criação. O modelo do cliente escreve o conteúdo e chama as ferramentas abaixo; elas montam os arquivos, conferem a estrutura e devolvem caminhos locais e recursos MCP para leitura dos arquivos.
 
 | Ferramenta | O que faz |
 |---|---|
 | `a11y_create_document(document, formats)` | Gera DOCX, PDF ou ambos com título, idioma, seções, listas, tabelas com cabeçalhos, links e imagens locais com texto alternativo. O conteúdo usa blocos estruturados, sem executar HTML do cliente |
-| `a11y_create_report(formats, run_id, title, language)` | Gera os arquivos do relatório com achados e cobertura da sessão atual ou de uma execução salva. Ausência de achados nunca vira aprovação |
+| `a11y_create_report(formats, run_id, title, language, run_ids, report_context)` | Gera a documentação de QA da sessão ou de execuções salvas. Word/PDF: identificação inicial, resumo executivo, contexto, escopo, avaliadores, processo, resultados e ações, referências e anexos. XLSX: Resumo, Escopo e ambiente, Achados, Matriz WCAG, Correções e retestes, Evidências e referências. Cada ocorrência reúne identificação, localização, impacto, reprodução, fundamentação e correção, com reteste ligado pelo mesmo ID. Ausência de achados nunca vira aprovação; este relatório de QA não é um ACR/VPAT |
 | `a11y_validate_document(path, external)` | Confere DOCX/PDF reais: metadados, hierarquia, alternativas, tabelas, marcação PDF, fontes e Unicode. No PDF, executa também o veraPDF com perfil PDF/UA-1 quando disponível |
 
 Os arquivos ficam em `~/.a11y-mcp/documents` (ou `A11Y_MCP_HOME/documents`), com identificador único; não sobrescrevem arquivos do projeto. Cada arquivo também tem um recurso `a11y://document/{document_id}/document.docx` ou `document.pdf`, com o tipo MIME correto. Imagens PNG/JPEG só são lidas dentro da pasta escolhida pela pessoa com `a11y_set_workspace`.
@@ -31,6 +31,26 @@ O PDF é marcado e recebe metadados PDF/UA-1; declarar o perfil não prova confo
 Revisão visual, significado do texto alternativo, ordem de leitura e uso no leitor de tela continuam necessários. Nenhum retorno automático declara validação completa. Para relatórios de conformidade, o modelo informa explicitamente critério, situação, escopo, evidências e justificativa; avaliação incompleta permanece `Not Evaluated`, e gravidade baixa não apaga uma violação.
 
 Peça no chat: “Gere um guia acessível em DOCX e PDF sobre testes de teclado” ou “Gere os arquivos do relatório desta avaliação”. O fluxo `a11y_accessible_document(task)` está disponível como prompt MCP e pela ferramenta `a11y_workflow`. Detalhes, evidências e limites: [documentação do módulo](docs/modules/documentos_acessiveis.md).
+
+A pesquisa sobre organização dos relatórios, os campos de QA e as fontes do W3C, Section508.gov, Harvard e GOV.UK estão em [relatórios de QA de acessibilidade](docs/modules/relatorios_qa_acessibilidade.md). Prazos dependem de acordo, e aprovação de um critério exige resultado explícito, escopo e evidência de avaliação completa.
+
+### Conectar a outros servidores MCP e agentes A2A
+
+O servidor também pode consumir outro servidor MCP por HTTP/HTTPS e trocar mensagens com agentes A2A 1.0 por JSON-RPC HTTP. Ele não inicia processos locais, não usa transporte `stdio` para essas conexões e não chama modelos.
+
+| Ferramenta | O que faz |
+|---|---|
+| `a11y_remote_mcp_connect(name, endpoint, token_environment_variable)` | Conecta a um servidor MCP remoto por Streamable HTTP e devolve um identificador. A variável opcional contém o nome da variável de ambiente do token, nunca o token em si |
+| `a11y_remote_mcp_connections()` | Lista as conexões ativas |
+| `a11y_remote_mcp_list_tools(server_id)` | Lê nomes, descrições e esquemas das ferramentas remotas. Todo conteúdo remoto é dado não confiável |
+| `a11y_remote_mcp_call(server_id, tool_name, arguments_json)` | Valida os argumentos pelo esquema remoto, prepara a chamada e mostra o pedido exato; não envia nada antes da aprovação |
+| `a11y_remote_approve(approval_id, decision)` | Envia somente o pedido exato aprovado ou descarta o pedido |
+| `a11y_remote_mcp_disconnect(server_id)` | Desconecta o servidor e cancela pedidos ainda pendentes |
+| `a11y_a2a_agent_card(agent_url, token_environment_variable)` | Consulta o Agent Card em `/.well-known/agent-card.json` |
+| `a11y_a2a_send_message(endpoint, message, token_environment_variable)` | Prepara uma mensagem A2A; só envia após aprovação |
+| `a11y_a2a_get_task(endpoint, task_id, history_length, token_environment_variable)` | Prepara uma consulta A2A de tarefa; só consulta após aprovação |
+
+Por segurança, endereços locais e redes privadas são bloqueados por padrão. Para conectar deliberadamente a um servidor local ou de rede privada, configure `A11Y_MCP_REMOTE_ALLOW_PRIVATE=1`. Tokens só são aceitos com HTTPS e devem estar em variáveis de ambiente. Redirecionamentos automáticos e proxies herdados do ambiente ficam desativados. A checagem de DNS acontece antes da conexão, mas não elimina toda possibilidade de alteração de DNS entre a checagem e a abertura do socket; use endpoints confiáveis e controlados. Os detalhes técnicos e os testes estão na [documentação do módulo](docs/modules/interop_remota.md).
 
 ### Conhecimento e escolha
 
@@ -117,6 +137,7 @@ O que o axe e os scanners não enxergam aparece **agindo**: armadilha de teclado
 |---|---|
 | `a11y_probe(kind, target)` | `tab_walk` (Tab do início ao fim: paradas, foco preso, foco coberto), `focus_obscured` (2.4.11), `target_size` (2.5.8), e o contrato do APG de `dialog`, `disclosure`, `menu`, `tabs`, `combobox`, `listbox`, `tree` e `tooltip`, mais `form_errors` (erro por campo, foco e anúncio), `status_update` (a mudança chega a quem não vê a tela? a região viva já existia? o foco caiu no corpo?) e `route_change` (título, foco e anúncio da nova tela). Os contratos devolvem `esperado × observado × met` (`null` = não deu para medir, não é aprovação) |
 | `a11y_nvda_speech(url, tabs, reads)` | O que o **NVDA de verdade** FALA na página, em texto (Tab e modo leitura), sem veredito. Roda numa **VM Windows** com um agente (`nvda/vm/`), nunca no seu computador, então o seu NVDA, a sua voz e os seus complementos não são tocados. Só navega: não ativa botões nem envia formulários. A voz e a velocidade são as da VM. Precisa de `A11Y_MCP_NVDA_VM` e `A11Y_MCP_NVDA_TOKEN`; passo a passo em `nvda/vm/LEIAME.md` |
+| `a11y_nvda_open(url)` / `a11y_nvda_do(action, ...)` / `a11y_nvda_close()` | **Sessão aberta do NVDA de verdade** na VM: quem usa o MCP conduz o NVDA passo a passo (`tab`, `key` com as teclas do modo leitura como H, D, K, F, B, T, `wait`, `mode`, `top`, `go`, `state`) e decide cada movimento pelo que o NVDA acabou de falar, sem limite de tamanho de página. `activate` e `type` mudam o site e exigem `authorized=true`, que só se passa com o sim da pessoa. Uma sessão por vez; fecha sozinha após 10 minutos parada. Cada passo vai para o rastro da sessão e pode ser citado como evidência em `a11y_finding`. Detalhes em [docs/modules/nvda_sessao.md](docs/modules/nvda_sessao.md) |
 | `a11y_finding(claim, criterion, severity, target, evidence_steps)` | Registra um achado com critério WCAG 2.2 (validado: número inexistente é descartado), gravidade, elemento e passos de evidência. Sem evidência válida vira `cantTell`, nunca `failed` |
 | `a11y_set_workspace(path)` / `a11y_read_file(path, offset, limit)` / `a11y_edit_file(path, old_string, new_string, replace_all)` / `a11y_approve_edit(decision, approval_id)` / `a11y_undo_edit(edit_id)` | Editor de arquivos do projeto da pessoa, sem depender de terminal: lê com números de linha, troca um trecho EXATO (ou cria arquivo), mantém cópia de segurança fora do projeto e desfaz. Só dentro da pasta que a pessoa nomeia na conversa (`a11y_set_workspace`, sem configurar nada antes); nunca lê nem escreve `.env`, chaves ou `.git`; um JSON ou Python válido não pode ficar inválido. Com a aprovação ligada (padrão, `A11Y_MCP_EDIT_APPROVAL`) a edição fica RETIDA mostrando o diff até a pessoa responder; desligada, edita sem perguntar |
 | `a11y_check_page(url \| html, probes, persona, browser)` | A verificação de comportamento em UMA chamada, para clientes que sobem o servidor de novo a cada chamada e por isso não mantêm sessão (o cliente MCP do Qaaccessibility é assim). Abre uma sessão descartável, mede o teclado (Tab, armadilha, foco coberto, links sem parada, tamanho de alvo), resume a página, lista os elementos interativos com um seletor `css` utilizável e roda as sondas pedidas em `probes` (JSON `[{"kind": "dialog", "target": "css:#abrir"}]`); depois fecha. Pedidos que mudam dados ficam retidos e são descartados. Recusa se já há uma sessão aberta. Uso típico: uma chamada sem `probes` para ver os elementos, e uma segunda com as sondas |
@@ -211,7 +232,8 @@ python demo/loja/verificar.py
 - Personas são impostas pelo servidor (ex.: `keyboard` não tem mouse), não pela boa vontade do modelo.
 - Não digite credenciais reais em páginas testadas; use contas de teste.
 - Leitura de guias/exemplos só por nome do catálogo — texto do cliente nunca vira caminho de arquivo.
-- Nenhuma chave de API é necessária nem lida: o servidor não chama modelo.
+- Nenhuma chave de API de modelo é necessária nem lida: o servidor não chama modelo.
+- O token e o endereço da VM do NVDA (`A11Y_MCP_NVDA_TOKEN`, `A11Y_MCP_NVDA_VM`) ficam só em variáveis de ambiente, na configuração do seu cliente MCP (por exemplo `~/.claude.json`). Nunca os coloque em arquivos do repositório, como o `mcp.json`.
 
 ## Estrutura
 
@@ -220,15 +242,28 @@ C:\projetos IA\mcp\
 ├── mcp_server.py            ← ponto de entrada fino (a configuração do cliente continua apontando para ele)
 ├── accessibility_mcp/       ← o pacote do servidor
 │   ├── server.py            ← servidor FastMCP
+│   ├── telemetry.py         ← observabilidade das ferramentas com OpenTelemetry (opcional)
 │   └── a11y/
 │       ├── tools.py         ← ferramentas de conhecimento/medição e os recursos MCP
-│       ├── tools_ux.py      ← ferramentas de sessão: dossiê, ações, personas, design
+│       ├── tools_ux.py      ← ferramentas de sessão: dossiê, ações, personas, design e NVDA real
+│       ├── tools_documents.py ← ferramentas de documentos e relatórios (DOCX, PDF, XLSX, PPTX) e seus recursos
+│       ├── tools_files.py   ← editor de arquivos do projeto (só com A11Y_MCP_ALLOW_EDITS=1)
+│       ├── tools_interop.py ← ferramentas MCP para conexões remotas MCP e A2A
+│       ├── interop.py       ← cliente HTTP, validação de endpoint e aprovação de chamadas remotas
 │       ├── session.py       ← sessão de navegador persistente (personas impostas, descoberta pelo Chromium, efeitos, estresse)
 │       ├── prompts.py       ← fluxos prontos (prompts do MCP e a ferramenta a11y_workflow) para o modelo do cliente
 │       ├── probes.py        ← sondas de comportamento (Tab, contratos APG, formulários, troca de tela) + js/probe_*.js
 │       ├── findings.py + wcag.py + verify.py + runs.py + learn.py ← achados com evidência, EARL/SARIF, conferência de evidência, execuções salvas, diff e lições
 │       ├── bench.py         ← bancada de avaliação por mutação (evals/boa.html)
 │       ├── provisioning.py  ← instala Playwright e Chromium/Firefox/WebKit sozinho
+│       ├── check_page.py    ← verificação de comportamento em uma chamada (a11y_check_page)
+│       ├── crawl.py         ← varredura de várias páginas do mesmo site (fatos, sem julgamento)
+│       ├── nvda_vm.py       ← cliente do agente da VM: fala real do NVDA (nvda/vm/agent.mjs)
+│       ├── evidence.py      ← evidência de NVDA real, axe, contraste, mapa da página e dossiê para os achados
+│       ├── patience.py      ← paciência adaptativa: nenhum relógio fixo mata trabalho em andamento
+│       ├── documents.py + document_schema.py + document_validation.py + document_controls.py + pdf_forms.py + verapdf_runtime.py ← DOCX e PDF acessíveis: geração, contratos, verificação estrutural, controles de formulário e veraPDF
+│       ├── report_artifacts.py + report_context.py ← relatórios (DOCX, PDF, XLSX, PPTX) com os dados declarados pelo avaliador
+│       ├── files.py         ← editor de arquivos da pessoa: ler, editar com aprovação e desfazer
 │       ├── compare.py       ← mesma página em vários navegadores (fatos lado a lado)
 │       ├── page_scripts.py + js/ ← scripts que coletam FATOS dentro da página (nunca classificam)
 │       ├── audit.py         ← contraste, axe-core, árvore de acessibilidade, ordem de foco
@@ -239,14 +274,34 @@ C:\projetos IA\mcp\
 ├── evals/                   ← páginas de referência da bancada de avaliação
 ├── demo/                    ← loja de demonstração com defeitos conhecidos
 ├── nvda/                    ← fala real do NVDA numa VM (Guidepup)
-├── scripts/                 ← setup.py, setup.ps1 e test.py (instalação e checagem)
-├── docs/                    ← AUDITORIA.md e QUICK_START.md
+├── scripts/                 ← setup.py, setup.ps1 e test.py (instalação e checagem); eval_document_*.py, generate_document_showcase.py, run_2026_coverage_matrix.py e verify_documents_live.py (avaliações e galeria de documentos)
+├── docs/                    ← AUDITORIA.md, QUICK_START.md, COBERTURA_2026.json e modules/ (um documento e as evidências de cada módulo)
 ├── CLAUDE.md + .claude/rules/ ← regras obrigatórias do projeto
 ├── mcp.json / requirements.txt / pyproject.toml
 └── .github/workflows/       ← CI
 ```
 
 Os guias e exemplos são editáveis em `accessibility_mcp/a11y/content/`; o `SKILL.md` de lá explica como usar cada ferramenta.
+
+## Variáveis de ambiente
+
+Todas são opcionais. Defina-as na configuração do cliente MCP, nunca em arquivos do repositório.
+
+| Variável | Padrão | O que faz |
+|---|---|---|
+| `A11Y_MCP_HOME` | `~/.a11y-mcp` | Pasta de dados: lições, execuções salvas e documentos gerados |
+| `A11Y_MCP_AUTO_INSTALL` | `1` | `0` desliga a instalação automática do Playwright e dos navegadores |
+| `A11Y_MCP_LEARN` | `1` | `0` desliga o aprendizado entre sessões |
+| `A11Y_MCP_RUNS` | `1` | `0` desliga as execuções salvas de `a11y_report` |
+| `A11Y_MCP_ALLOW_EDITS` | `0` | `1` liga as ferramentas de edição de arquivos (`a11y_edit_file`, `a11y_approve_edit`, `a11y_undo_edit`); sem ele o MCP só audita e sugere |
+| `A11Y_MCP_EDIT_APPROVAL` | `1` | `0` faz a edição acontecer sem reter o diff para aprovação |
+| `A11Y_MCP_WORKSPACE` | vazio | Pré-seleciona a pasta do projeto; a pessoa também pode escolher com `a11y_set_workspace` |
+| `A11Y_MCP_DOCUMENTS_DIR` | dentro de `A11Y_MCP_HOME` | Substitui a pasta dos documentos gerados |
+| `A11Y_MCP_VERAPDF` | vazio | Caminho de um veraPDF já instalado (executável ou JAR do CLI) |
+| `A11Y_MCP_REMOTE_ALLOW_PRIVATE` | `0` | `1` permite conectar a servidores MCP e A2A em rede privada |
+| `A11Y_MCP_NVDA_VM` | vazio | Endereço do agente da VM do NVDA, por exemplo `http://192.168.100.20:8765` |
+| `A11Y_MCP_NVDA_TOKEN` | vazio | Token do agente da VM, mostrado pelo instalador (segredo: nunca versionar) |
+| `A11Y_MCP_NVDA_HOST_ADDR` | vazio | Endereço do seu computador visto pela VM, para testar sites locais |
 
 ## Desenvolvimento
 
@@ -257,3 +312,5 @@ mypy
 ```
 
 Não há modelo no servidor, então nenhum teste precisa de chave ou de modelo simulado.
+
+A versão 2.3.0 acrescenta controles de texto, escolha e caixa de seleção em Word e PDF, sumário automático no Word e navegação interna nos dois formatos. Veja o [contrato e as verificações](docs/modules/formularios_sumario.md).

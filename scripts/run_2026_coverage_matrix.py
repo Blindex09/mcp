@@ -62,7 +62,13 @@ async def _live_checks() -> None:
     home = tempfile.mkdtemp(prefix="a11y-matrix-")
     work = Path(tempfile.mkdtemp(prefix="a11y-matrix-ws-"))
     (work / "p.html").write_text("<img src=a.png>\n", encoding="utf-8")
-    env = {**os.environ, "A11Y_MCP_HOME": home, "A11Y_MCP_EDIT_APPROVAL": "1", "PYTHONIOENCODING": "utf-8"}
+    env = {
+        **os.environ,
+        "A11Y_MCP_HOME": home,
+        "A11Y_MCP_EDIT_APPROVAL": "1",
+        "A11Y_MCP_REMOTE_ALLOW_PRIVATE": "0",
+        "PYTHONIOENCODING": "utf-8",
+    }
     params = StdioServerParameters(command=sys.executable, args=[str(ROOT / "mcp_server.py")], env=env)
     async with stdio_client(params) as (r, w), ClientSession(r, w) as s:
         await s.initialize()
@@ -70,8 +76,8 @@ async def _live_checks() -> None:
         typed = [t for t in tools if t.inputSchema.get("type") == "object" and t.description]
         record("Laco agentico com ferramentas tipadas", COVERED if len(typed) == len(tools) else PARTIAL, f"{len(typed)} de {len(tools)} ferramentas com esquema de entrada e descricao pelo protocolo MCP")
 
-        async def call(name: str, **args: object) -> dict:
-            return json.loads((await s.call_tool(name, args)).content[0].text)
+        async def call(tool_name: str, **args: object) -> dict:
+            return json.loads((await s.call_tool(tool_name, args)).content[0].text)
 
         await call("a11y_set_workspace", path=str(work))
         held = await call("a11y_edit_file", path="p.html", old_string="<img src=a.png>", new_string='<img src=a.png alt="x">')
@@ -81,19 +87,44 @@ async def _live_checks() -> None:
         escape = await call("a11y_read_file", path="../fora.txt")
         record("Menor privilegio: nada fora da pasta escolhida", COVERED if "fora da pasta" in escape.get("error", "") else GAP, escape.get("error", "")[:90])
         status = await call("a11y_status")
-        leaked = "chave" in json.dumps(status).lower() and "A11Y_MCP_API_KEY" in json.dumps(status)
-        record("Nenhum segredo no resultado de diagnostico", COVERED if not leaked else GAP, "a11y_status nunca mostra chaves")
+        secrets = [v for v in (os.environ.get("A11Y_MCP_NVDA_TOKEN", ""),) if v]
+        leaked = any(secret in json.dumps(status) for secret in secrets)
+        record("Nenhum segredo no resultado de diagnostico", COVERED if not leaked else GAP, "a11y_status nunca mostra o token da VM do NVDA")
         learnings = await call("a11y_learnings")
         record("Memoria persistente visivel e editavel pela pessoa", COVERED if "entries" in learnings else PARTIAL, "a11y_learnings lista e a11y_forget apaga; fica fora do projeto")
         runs = await call("a11y_runs")
         record("Tarefa longa e retomavel: execucoes salvas, exportaveis e comparaveis", COVERED if "runs" in runs else PARTIAL, "a11y_runs, a11y_export (EARL/SARIF) e a11y_diff")
+        interop_names = {
+            "a11y_remote_mcp_connect",
+            "a11y_remote_mcp_connections",
+            "a11y_remote_mcp_list_tools",
+            "a11y_remote_mcp_call",
+            "a11y_remote_approve",
+            "a11y_remote_mcp_disconnect",
+            "a11y_a2a_agent_card",
+            "a11y_a2a_send_message",
+            "a11y_a2a_get_task",
+        }
+        interop_registered = interop_names <= {tool.name for tool in tools}
+        connections = await call("a11y_remote_mcp_connections")
+        blocked_private = await call(
+            "a11y_remote_mcp_connect",
+            name="matrix-private-check",
+            endpoint="http://127.0.0.1:8080/mcp",
+        )
+        safe_default = "rede local ou reservada" in blocked_private.get("error", "")
+        record(
+            "Cliente MCP remoto e A2A por HTTP",
+            COVERED if interop_registered and connections.get("connections") == [] and safe_default else GAP,
+            "nove ferramentas tipadas pelo protocolo real; rede privada recusada por padrao; "
+            "tests/test_interop.py exercita Streamable HTTP MCP e JSON-RPC A2A reais",
+        )
 
 
 def _declared_gaps() -> None:
     record("Observabilidade (spans OpenTelemetry de GenAI)", COVERED, "tests/test_telemetry.py: span execute_tool por ferramenta, sem argumentos nem resultados (liga com OTEL_EXPORTER_OTLP_ENDPOINT)")
     record("Evals como portao (bancada por mutacao)", COVERED, "python -m accessibility_mcp.a11y.bench facts roda sem modelo e esta nos testes (o servidor nao chama modelo)")
-    record("Portao da regra 15 para os guias e fluxos (instrucoes ao modelo do cliente)", PARTIAL, "VPAT no Codex: 24/24, ablacao 18/24. Galeria de documentos: 48/48 em tres rodadas e 48/48 sem guia; sem ganho demonstrado. Geracao e leitura do guia pelo MCP real. Demais guias, fluxos e modelos sem avaliacao ampla; docs/modules/documentos_acessiveis.md e docs/modules/galeria_documentos.md")
-    record("Cliente MCP e A2A", GAP, "o projeto e servidor; consumir outros servidores MCP ou delegar por A2A nao foi pedido nem implementado")
+    record("Portao da regra 15 para os guias e fluxos (instrucoes ao modelo do cliente)", PARTIAL, "VPAT no Codex: 24/24, ablacao 18/24. Galeria de documentos: 66/66 em tres rodadas e 66/66 sem guia; sem ganho demonstrado. Geracao e leitura do guia pelo MCP real. Demais guias, fluxos e modelos sem avaliacao ampla; docs/modules/documentos_acessiveis.md, docs/modules/galeria_documentos.md e docs/modules/formularios_sumario.md")
     record("Harness revisado a cada geracao de modelo", GAP, "o servidor nao escolhe modelo; falta a rodada dos guias e fluxos sem o andaime em um modelo novo do cliente")
 
 

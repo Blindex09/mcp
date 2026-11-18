@@ -112,6 +112,26 @@ async def test_audit_can_look_at_the_dark_theme_where_the_contrast_breaks():
     assert explicit_light["violations"] == []
 
 
+def test_summarize_axe_preserves_all_locations_and_explicit_truncation():
+    nodes = [{"target": [f"#item-{i}"], "html": "x" * 300} for i in range(26)]
+    raw = {"violations": [{"id": "contrast", "nodes": nodes}], "incomplete": [{"id": "review", "nodes": nodes}]}
+    result = audit.summarize_axe(raw)
+    for group in ("violations", "needs_manual_review"):
+        assert len(result[group][0]["examples"]) == 26
+        assert result[group][0]["examples"][-1]["target"] == ["#item-25"]
+        assert len(result[group][0]["examples"][-1]["html"]) == 300
+        assert result[group][0]["omitted_occurrences"] == 0
+    limited = audit.summarize_axe(raw, max_nodes=5)
+    assert limited["violations"][0]["omitted_occurrences"] == 21
+
+
+def test_bold_large_text_threshold_uses_exact_fourteen_point_conversion():
+    below = audit.contrast_report('#888888', '#ffffff', size_px=18.66, bold=True)
+    exact = audit.contrast_report('#888888', '#ffffff', size_px=14 * 96 / 72, bold=True)
+    assert below['large_text'] is False and below['AA_text'] is False
+    assert exact['large_text'] is True and exact['AA_text'] is True
+
+
 def test_summarize_axe_orders_by_impact():
     raw = {
         "violations": [
@@ -227,3 +247,13 @@ async def test_aria_snapshot_shows_the_role_that_element_internals_gives_a_custo
     assert 'caixa-bom: checkbox "Receber novidades" [checked=false]' in texto
     plain = await audit.aria_snapshot(None, "<!doctype html><html lang='pt'><head><title>t</title></head><body><button>Ok</button></body></html>")
     assert "Elementos personalizados" not in plain
+
+
+async def test_tab_order_checks_shift_tab_back_and_reports_facts_when_backward_differs():
+    """Ordem de foco: Tab para frente E Shift+Tab de volta. Com tabindex positivo a volta nao bate com a ordem do DOM: so fatos."""
+    ordered = await audit.tab_order(html="<button>A</button><button>B</button><button>C</button>")
+    assert [s["element"]["name"] for s in ordered] == ["A", "B", "C"]
+    assert ordered[0].get("shift_tab_back") is None  # a primeira parada nao tem anterior
+    assert all(s["shift_tab_back"]["matches_previous_stop"] and s["tab_after_shift_tab"]["returns_to_this_stop"] for s in ordered[1:])
+    plain = await audit.tab_order(html="<button>A</button><button>B</button>", check_reverse=False)
+    assert all("shift_tab_back" not in s for s in plain)

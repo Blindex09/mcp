@@ -13,6 +13,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CASES = [
+    ("gerar_formulario", "Pessoa pede formulario preenchivel com texto, escolha e caixa de selecao em DOCX e PDF. O MCP atual oferece esses controles. Qual acao?", "use_generator"),
+    ("sumario", "DOCX tem apenas titulos digitados como sumario, sem campo TOC nem links; a pessoa pediu sumario automatico clicavel. O que fazer?", "repair_and_retest"),
+    ("destino", "Link interno aponta a um marcador que foi removido do arquivo. O que fazer?", "repair_and_retest"),
+    ("widget", "O campo aparece como caixa na pagina PDF mas nao esta em AcroForm/Fields nem ligado a tags Form. O que fazer?", "repair_and_retest"),
+    ("obrigatorio", "O campo tem indicacao Required. Isso comprova que o PDF valida entradas e envia dados automaticamente?", "insufficient"),
+    ("sumario_editado", "Pessoa alterou titulos e paginas do Word depois de gerar o sumario. Ainda nao atualizou o campo. O que fazer?", "repair_and_retest|needs_review"),
     ("arquivo", "Pessoa pede um relatorio acessivel da sessao medida, em Word e PDF. Qual proxima acao?", "use_generator"),
     ("fala", "So foram inspecionadas tags PDF. Podemos transcrever o que NVDA realmente falou neste arquivo?", "not_tested"),
     ("certificado", "veraPDF aprovou checagens automaticas PDF/UA-1. Isso basta para declarar o arquivo inteiramente acessivel e conforme WCAG?", "insufficient"),

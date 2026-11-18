@@ -1,0 +1,428 @@
+{
+  "date": "2026-10-29",
+  "scope": "Calibração de guias Excel, listas, navegação e estrutura de documentos; cliente Codex padrão. Não foi executado leitor de tela real.",
+  "trials": {
+    "cases": [
+      {
+        "id": "lista_com_titulo",
+        "question": "O item de lista contém uma seção com título descritivo e hierarquia coerente. A combinação lista+título, por si só, é uma falha?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "titulo_so_estilo",
+        "question": "Foi confirmado que um parágrafo comum foi marcado heading exclusivamente para aumentar a fonte e comunica uma seção inexistente. Há defeito na estrutura?",
+        "expected": "failure"
+      },
+      {
+        "id": "lista_sem_estrutura",
+        "question": "Uma coleção comunicada visualmente como lista foi feita só de linhas com marcadores digitados, sem relação equivalente disponível em texto ou programa. Há defeito confirmado?",
+        "expected": "failure"
+      },
+      {
+        "id": "tab_sem_titulos",
+        "question": "Tab alcança controles; os títulos não são focáveis, mas aparecem corretamente na navegação por títulos. Apenas essa diferença comprova defeito?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "titulo_invisivel",
+        "question": "Título visual de seção não aparece em nenhuma estrutura programática nem possui alternativa textual que expresse a relação. Há defeito confirmado?",
+        "expected": "failure"
+      },
+      {
+        "id": "setas_vs_tab",
+        "question": "Setas leem parágrafos estáticos; Tab não para neles. Isso isoladamente é defeito?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "sem_freeze",
+        "question": "Planilha não congela painéis, mas cabeçalhos e associações foram confirmados na navegação da combinação testada. A ausência de congelamento prova falha?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "freeze_sem_fatos",
+        "question": "Planilha congela a primeira linha. Ainda não foram examinadas as relações de cabeçalho ou a navegação. É possível concluir que as associações estão corretas?",
+        "expected": "review"
+      },
+      {
+        "id": "nome_definido",
+        "question": "Planilha sem objeto Tabela usa intervalos nomeados compatíveis e cabeçalhos foram confirmados no leitor. A ausência de objeto Tabela sozinha prova falha?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "cabecalho_perdido",
+        "question": "Nos dados tabulares a relação com cabeçalhos comunicada visualmente está ausente de toda alternativa textual ou programática e isso foi conferido no contexto. Há defeito confirmado?",
+        "expected": "failure"
+      },
+      {
+        "id": "fala_excel",
+        "question": "Foram inspecionadas tabelas e nomes no XLSX, mas nenhum leitor foi executado. A fala literal do NVDA foi testada?",
+        "expected": "not_tested"
+      },
+      {
+        "id": "linhas_numeradas",
+        "question": "Passos foram digitados como 1., 2., 3. em um único parágrafo, sem estrutura de lista. Podemos afirmar que há uma lista nativa estruturada?",
+        "expected": "failure"
+      },
+      {
+        "id": "lista_nativa",
+        "question": "Itens ordenados têm estrutura nativa no Word e tags L/LI no PDF, conferidas para essa propriedade. A estrutura específica da lista está correta?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "pdf_certificado",
+        "question": "O veraPDF passou, mas a alternativa textual de um gráfico não foi comparada ao conteúdo. Podemos concluir adequação semântica do gráfico?",
+        "expected": "review"
+      },
+      {
+        "id": "documentos_exemplos",
+        "question": "Arquivo chamado bom demonstra só associação de cabeçalhos. Não foram avaliadas outras propriedades. Sua conformidade integral está comprovada?",
+        "expected": "review"
+      },
+      {
+        "id": "cor_unica",
+        "question": "Situação é transmitida exclusivamente por cor, sem texto, padrão, símbolo ou alternativa correspondente. Há defeito confirmado?",
+        "expected": "failure"
+      },
+      {
+        "id": "cor_texto",
+        "question": "Situação está em texto compreensível e também em cor; sem outros problemas observados nessa propriedade. Cor redundante sozinha é defeito?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "popup_nativo",
+        "question": "Popup nativo não é exposto pelo método usado e a experiência não foi verificada por outro meio. O comportamento está concluído como aprovado?",
+        "expected": "review"
+      },
+      {
+        "id": "teclado_inoperante",
+        "question": "Botão exige clique, não opera por teclado e não há equivalente; fatos conferidos. Há defeito confirmado?",
+        "expected": "failure"
+      },
+      {
+        "id": "celula_mesclada",
+        "question": "Há célula mesclada em uma faixa decorativa de título; os dados, relações e navegação não foram examinados. Esse único fato prova falha WCAG?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "sumario",
+        "question": "Links internos foram testados e chegam às seções certas, mas não houve execução de VoiceOver. A fala literal de VoiceOver foi testada?",
+        "expected": "not_tested"
+      },
+      {
+        "id": "somente_html_valido",
+        "question": "HTML passou em validação de sintaxe; teclado e estrutura não foram testados. Acessibilidade integral está comprovada?",
+        "expected": "review"
+      },
+      {
+        "id": "salto_h1",
+        "question": "Há mais de um h1, com estrutura real ainda não examinada. A contagem isolada prova falha?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "excecao_alvo",
+        "question": "Alvo inline em frase tem exceção aplicável confirmada. O tamanho abaixo de 24 pixels sozinho prova falha 2.5.8?",
+        "expected": "not_failure"
+      }
+    ],
+    "trials": [
+      {
+        "variant": "guide",
+        "repetition": 1,
+        "passed": 24,
+        "total": 24,
+        "failed": []
+      },
+      {
+        "variant": "guide",
+        "repetition": 2,
+        "passed": 24,
+        "total": 24,
+        "failed": []
+      },
+      {
+        "variant": "guide",
+        "repetition": 3,
+        "passed": 24,
+        "total": 24,
+        "failed": []
+      },
+      {
+        "variant": "ablation",
+        "repetition": 1,
+        "passed": 24,
+        "total": 24,
+        "failed": []
+      },
+      {
+        "variant": "ablation",
+        "repetition": 2,
+        "passed": 24,
+        "total": 24,
+        "failed": []
+      },
+      {
+        "variant": "ablation",
+        "repetition": 3,
+        "passed": 24,
+        "total": 24,
+        "failed": []
+      }
+    ]
+  },
+  "original_trial_summary": {
+    "cases": [
+      {
+        "id": "lista_com_titulo",
+        "question": "O item de lista contém uma seção com título descritivo e hierarquia coerente. A combinação lista+título, por si só, é uma falha?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "titulo_so_estilo",
+        "question": "Foi confirmado que um parágrafo comum foi marcado heading exclusivamente para aumentar a fonte e comunica uma seção inexistente. Há defeito na estrutura?",
+        "expected": "failure"
+      },
+      {
+        "id": "lista_sem_estrutura",
+        "question": "Uma coleção comunicada visualmente como lista foi feita só de linhas com marcadores digitados, sem relação equivalente disponível em texto ou programa. Há defeito confirmado?",
+        "expected": "failure"
+      },
+      {
+        "id": "tab_sem_titulos",
+        "question": "Tab alcança controles; os títulos não são focáveis, mas aparecem corretamente na navegação por títulos. Apenas essa diferença comprova defeito?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "titulo_invisivel",
+        "question": "Título visual de seção não aparece em nenhuma estrutura programática nem possui alternativa textual que expresse a relação. Há defeito confirmado?",
+        "expected": "failure"
+      },
+      {
+        "id": "setas_vs_tab",
+        "question": "Setas leem parágrafos estáticos; Tab não para neles. Isso isoladamente é defeito?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "sem_freeze",
+        "question": "Planilha não congela painéis, mas cabeçalhos e associações foram confirmados na navegação da combinação testada. A ausência de congelamento prova falha?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "freeze_sem_fatos",
+        "question": "Planilha congela a primeira linha. Ainda não foram examinadas as relações de cabeçalho ou a navegação. É possível concluir que as associações estão corretas?",
+        "expected": "review"
+      },
+      {
+        "id": "nome_definido",
+        "question": "Planilha sem objeto Tabela usa intervalos nomeados compatíveis e cabeçalhos foram confirmados no leitor. A ausência de objeto Tabela sozinha prova falha?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "cabecalho_perdido",
+        "question": "Nos dados tabulares a relação com cabeçalhos comunicada visualmente está ausente de toda alternativa textual ou programática e isso foi conferido no contexto. Há defeito confirmado?",
+        "expected": "failure"
+      },
+      {
+        "id": "fala_excel",
+        "question": "Foram inspecionadas tabelas e nomes no XLSX, mas nenhum leitor foi executado. A fala literal do NVDA foi testada?",
+        "expected": "not_tested"
+      },
+      {
+        "id": "linhas_numeradas",
+        "question": "Passos foram digitados como 1., 2., 3. em um único parágrafo, sem estrutura de lista. Podemos afirmar que há uma lista nativa estruturada?",
+        "expected": "failure"
+      },
+      {
+        "id": "lista_nativa",
+        "question": "Itens ordenados têm estrutura nativa no Word e tags L/LI no PDF, conferidas para essa propriedade. A estrutura específica da lista está correta?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "pdf_certificado",
+        "question": "O veraPDF passou, mas a alternativa textual de um gráfico não foi comparada ao conteúdo. Podemos concluir adequação semântica do gráfico?",
+        "expected": "review"
+      },
+      {
+        "id": "documentos_exemplos",
+        "question": "Arquivo chamado bom demonstra só associação de cabeçalhos. Não foram avaliadas outras propriedades. Sua conformidade integral está comprovada?",
+        "expected": "review"
+      },
+      {
+        "id": "cor_unica",
+        "question": "Situação é transmitida exclusivamente por cor, sem texto, padrão, símbolo ou alternativa correspondente. Há defeito confirmado?",
+        "expected": "failure"
+      },
+      {
+        "id": "cor_texto",
+        "question": "Situação está em texto compreensível e também em cor; sem outros problemas observados nessa propriedade. Cor redundante sozinha é defeito?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "popup_nativo",
+        "question": "Popup nativo não é exposto pelo método usado e a experiência não foi verificada por outro meio. O comportamento está concluído como aprovado?",
+        "expected": "review"
+      },
+      {
+        "id": "teclado_inoperante",
+        "question": "Botão exige clique, não opera por teclado e não há equivalente; fatos conferidos. Há defeito confirmado?",
+        "expected": "failure"
+      },
+      {
+        "id": "celula_mesclada",
+        "question": "Há célula mesclada em uma faixa decorativa de título; os dados, relações e navegação não foram examinados. Esse único fato prova falha WCAG?",
+        "expected": "review"
+      },
+      {
+        "id": "sumario",
+        "question": "Links internos foram testados e chegam às seções certas. Isso, sozinho, prova a fala literal de VoiceOver?",
+        "expected": "not_tested"
+      },
+      {
+        "id": "somente_html_valido",
+        "question": "HTML passou em validação de sintaxe; teclado e estrutura não foram testados. Acessibilidade integral está comprovada?",
+        "expected": "review"
+      },
+      {
+        "id": "salto_h1",
+        "question": "Há mais de um h1, com estrutura real ainda não examinada. A contagem isolada prova falha?",
+        "expected": "not_failure"
+      },
+      {
+        "id": "excecao_alvo",
+        "question": "Alvo inline em frase tem exceção aplicável confirmada. O tamanho abaixo de 24 pixels sozinho prova falha 2.5.8?",
+        "expected": "not_failure"
+      }
+    ],
+    "trials": [
+      {
+        "variant": "guide",
+        "repetition": 1,
+        "passed": 23,
+        "total": 24,
+        "failed": [
+          "celula_mesclada"
+        ]
+      },
+      {
+        "variant": "guide",
+        "repetition": 2,
+        "passed": 23,
+        "total": 24,
+        "failed": [
+          "celula_mesclada"
+        ]
+      },
+      {
+        "variant": "guide",
+        "repetition": 3,
+        "passed": 22,
+        "total": 24,
+        "failed": [
+          "celula_mesclada",
+          "sumario"
+        ]
+      },
+      {
+        "variant": "ablation",
+        "repetition": 1,
+        "passed": 23,
+        "total": 24,
+        "failed": [
+          "celula_mesclada"
+        ]
+      },
+      {
+        "variant": "ablation",
+        "repetition": 2,
+        "passed": 23,
+        "total": 24,
+        "failed": [
+          "celula_mesclada"
+        ]
+      },
+      {
+        "variant": "ablation",
+        "repetition": 3,
+        "passed": 23,
+        "total": 24,
+        "failed": [
+          "celula_mesclada"
+        ]
+      }
+    ]
+  },
+  "evaluation_correction": "Preservados os resultados da primeira avaliação. O gabarito de célula mesclada foi corrigido de review para not_failure porque a pergunta tratava apenas do fato isolado; a pergunta sobre fala VoiceOver foi esclarecida para declarar explicitamente que não houve execução. Guias não foram alterados para satisfazer rótulos errados. A segunda avaliação completa usou as perguntas esclarecidas, três rodadas e três ablações.",
+  "improvement_demonstrated": false,
+  "candidate_hashes": {
+    "C:\\projetos IA\\mcp\\accessibility_mcp\\a11y\\content\\references\\specialist-excel-accessibility.md": "b5f0b607ddcaa77233ba7ae421d7aa3c6816fc3bf8b1eebe76a5330b5fc5305f",
+    "C:\\projetos IA\\qaaccessibility\\backend\\src\\agents\\excel_accessibility\\excel_accessibility.py": "099eb3f2679c4e8d6b3c2683e6f81ce0db0688ff65b7bfcbb2760f5f957c7c5b",
+    "C:\\projetos IA\\mcp\\accessibility_mcp\\a11y\\content\\references\\screen-reader-structure-focus-navigation.md": "1ac4085e978d44a9c4ef57270d4768a2b53b4f737d31d6a892031275a71a0493",
+    "C:\\projetos IA\\qaaccessibility\\backend\\src\\resources\\leitor_de_tela_estrutura_foco_e_navegacao.md": "8e54e52288a52a57ecff601e2889e03e5920d8d405c409b115672f3fb03db030",
+    "C:\\projetos IA\\mcp\\accessibility_mcp\\a11y\\content\\references\\page-structure-review.md": "b64f3eebcf72ff71d34b06a0de663277934cfe35efc41ca54d23f424f434438f",
+    "C:\\projetos IA\\mcp\\accessibility_mcp\\a11y\\content\\references\\aria-rules-dos-and-donts.md": "3b19e85cd1e02414d47d91dfbefe399da2a2328126d1e4cd982635c7ebd699fc",
+    "C:\\projetos IA\\mcp\\accessibility_mcp\\a11y\\content\\references\\component-behavior-matrix.md": "d8348e18b338c6a09d03d55bec0794813ebcd237edead4f2f325add30318f7c2"
+  },
+  "evidence_folder": "C:\\Users\\olive\\AppData\\Local\\Temp\\a11y-coherence-jkynfshd",
+  "candidate_hashes_encoding": "SHA-256 do texto UTF-8 com quebras de linha normalizadas para LF; arquivos Windows podem estar em CRLF sem mudar o conteúdo avaliado.",
+  "installed_file_hashes": {
+    "C:\\projetos IA\\mcp\\accessibility_mcp\\a11y\\content\\references\\specialist-excel-accessibility.md": "9d9384a6b7858e7d6f1233338d0532949757277602d661df9891aee8cc7fe914",
+    "C:\\projetos IA\\qaaccessibility\\backend\\src\\agents\\excel_accessibility\\excel_accessibility.py": "bd09f6e1346ac0f102f02251766fb715af9eced52852b7a00808b0ee9089bafe",
+    "C:\\projetos IA\\mcp\\accessibility_mcp\\a11y\\content\\references\\screen-reader-structure-focus-navigation.md": "c6a420cfaf6ff1904fb2a8a86ebbd50eb095420fd3379d61170c629afc58b680",
+    "C:\\projetos IA\\qaaccessibility\\backend\\src\\resources\\leitor_de_tela_estrutura_foco_e_navegacao.md": "fdb1dd65550b06cce5d7b5b762df7b1dc9445b1464035c6264358f24888239ce",
+    "C:\\projetos IA\\mcp\\accessibility_mcp\\a11y\\content\\references\\page-structure-review.md": "7d51eabb1d1ba4aaaba0bae984634af015f95533d6ada74d3cf75363431065aa",
+    "C:\\projetos IA\\mcp\\accessibility_mcp\\a11y\\content\\references\\aria-rules-dos-and-donts.md": "13bdf450d4d53489b0a94769f1b9b335b503274982ae779d1de8a3927312c2fa",
+    "C:\\projetos IA\\mcp\\accessibility_mcp\\a11y\\content\\references\\component-behavior-matrix.md": "7f5357e4c2ba9056701a0cbda270376a7904e81ec27ab5ef97da50c5e10819b8"
+  },
+  "streaming_regression": {
+    "initial_failure": "O teste tentava converter o texto 12.\\n1. em inteiro ao extrair o contador do resumo; a pontuação e a quebra de linha passaram a fazer parte do valor.",
+    "isolated_observations": [
+      {
+        "bad_live_updates": 12,
+        "good_live_updates": 1
+      },
+      {
+        "bad_live_updates": 12,
+        "good_live_updates": 1
+      },
+      {
+        "bad_live_updates": 12,
+        "good_live_updates": 1
+      }
+    ],
+    "corrected_target_test": "1 passed in 7.78s",
+    "limitation": "São atualizações do observador de regiões vivas, não contagem de fala real. A explicação da galeria e o comentário do observador foram corrigidos; a página foi medida novamente."
+  },
+  "verification": {
+    "ruff": "passed",
+    "mypy": "38 source files, passed",
+    "qaaccessibility_unit_tests": 10,
+    "gallery_after_navigation_change": {
+      "passed": 18
+    },
+    "full_suite": {
+      "passed": 418,
+      "failed": 1,
+      "skipped": 1,
+      "seconds": 1272.65,
+      "failed_test": "old streaming test parser; ValueError converting 12.\\n1.",
+      "note": "A suíte já estava em execução com o teste anterior quando a correção foi instalada. O restante terminou sem outra falha."
+    },
+    "corrected_streaming_test_runs": [
+      {
+        "passed": 1,
+        "seconds": 7.78
+      },
+      {
+        "passed": 1,
+        "seconds": 4.5,
+        "requested_retry": true
+      }
+    ],
+    "coverage_matrix": {
+      "covered": 12,
+      "partial": 1,
+      "gap": 1,
+      "exit_code": 1
+    },
+    "actual_screen_reader_speech_captured": false
+  }
+}

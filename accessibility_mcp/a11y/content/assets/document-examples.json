@@ -1,91 +1,335 @@
 {
-  "reviewed": "2026-10-21",
+  "reviewed": "2026-10-29",
   "sources": {
-    "word": {"title": "Microsoft — Acessibilidade no Word", "url": "https://support.microsoft.com/en-gb/accessibility/word/make-your-word-documents-accessible-to-people-with-disabilities"},
-    "headings": {"title": "W3C — PDF9 Títulos", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF9"},
-    "images": {"title": "W3C — PDF1 Alternativas de imagens", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF1"},
-    "tables": {"title": "W3C — PDF6 Tabelas", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF6"},
-    "lists": {"title": "W3C — PDF21 Listas", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF21"},
-    "links": {"title": "W3C — PDF13 Propósito dos links", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF13"},
-    "language": {"title": "W3C — PDF16 Idioma", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF16"},
-    "title": {"title": "W3C — PDF18 Título do documento", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF18"},
-    "order": {"title": "W3C — PDF3 Ordem de leitura", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF3"},
-    "ocr": {"title": "W3C — PDF7 Texto e OCR", "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF7"},
-    "acrobat": {"title": "Adobe — Criar e verificar PDFs acessíveis", "url": "https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html"},
-    "exercise": {"title": "Governo de Illinois — Exercício Word e PDF", "url": "https://doit.illinois.gov/initiatives/accessibility/guides/word/word-accessibility-exercise.html"}
+    "forms_word": {
+      "title": "Microsoft — Formulários preenchíveis no Word",
+      "url": "https://support.microsoft.com/en-us/word/create-a-form-in-word-that-users-can-complete-or-print"
+    },
+    "toc_word": {
+      "title": "Microsoft — Sumário automático no Word",
+      "url": "https://support.microsoft.com/en-us/word/training/insert-a-table-of-contents"
+    },
+    "forms_pdf": {
+      "title": "W3C — PDF12 Nome papel valor dos campos",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF12"
+    },
+    "required_pdf": {
+      "title": "W3C — PDF5 Campos obrigatórios",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF5"
+    },
+    "internal_pdf": {
+      "title": "W3C — PDF11 Links e estrutura",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF11"
+    },
+    "bookmarks_pdf": {
+      "title": "W3C — PDF2 Marcadores",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF2"
+    },
+    "word": {
+      "title": "Microsoft — Acessibilidade no Word",
+      "url": "https://support.microsoft.com/en-gb/accessibility/word/make-your-word-documents-accessible-to-people-with-disabilities"
+    },
+    "headings": {
+      "title": "W3C — PDF9 Títulos",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF9"
+    },
+    "images": {
+      "title": "W3C — PDF1 Alternativas de imagens",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF1"
+    },
+    "tables": {
+      "title": "W3C — PDF6 Tabelas",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF6"
+    },
+    "lists": {
+      "title": "W3C — PDF21 Listas",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF21"
+    },
+    "links": {
+      "title": "W3C — PDF13 Propósito dos links",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF13"
+    },
+    "language": {
+      "title": "W3C — PDF16 Idioma",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF16"
+    },
+    "title": {
+      "title": "W3C — PDF18 Título do documento",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF18"
+    },
+    "order": {
+      "title": "W3C — PDF3 Ordem de leitura",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF3"
+    },
+    "ocr": {
+      "title": "W3C — PDF7 Texto e OCR",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF7"
+    },
+    "acrobat": {
+      "title": "Adobe — Criar e verificar PDFs acessíveis",
+      "url": "https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html"
+    },
+    "exercise": {
+      "title": "Governo de Illinois — Exercício Word e PDF",
+      "url": "https://doit.illinois.gov/initiatives/accessibility/guides/word/word-accessibility-exercise.html"
+    },
+    "excel": {
+      "title": "Microsoft — Boas práticas de acessibilidade no Excel",
+      "url": "https://support.microsoft.com/en-us/accessibility/excel/accessibility-best-practices-with-excel-spreadsheets"
+    },
+    "nvda_excel": {
+      "title": "NV Access — Cabeçalhos no Microsoft Excel",
+      "url": "https://download.nvaccess.org/documentation/en/userGuide.html#MicrosoftExcel"
+    }
   },
   "scenarios": [
     {
-      "id": "titulos", "title": "Títulos que permitem navegar", "formats": ["docx", "pdf"], "sources": ["word", "headings"],
+      "id": "formularios",
+      "title": "Formulários realmente preenchíveis",
+      "formats": [
+        "docx",
+        "pdf"
+      ],
+      "sources": [
+        "forms_word",
+        "forms_pdf",
+        "required_pdf"
+      ],
+      "do": "Use controles preenchíveis com nome, rótulo, tipo, estado, instruções e sequência lógica. Indique campos obrigatórios em texto e nas propriedades que o formato oferece.",
+      "dont": "Não simule campos com linhas de sublinhado nem use somente cor ou asterisco sem explicação. Não confunda uma caixa desenhada com um controle de formulário.",
+      "expected": "A pessoa deve reconhecer o campo, entender como preenchê-lo e consultar seu valor ou estado. No PDF, os widgets precisam estar na estrutura de formulário e ligados às tags. No Word, os controles têm título e instruções; isso ainda exige conferir a experiência no aplicativo.",
+      "manual": "Percorra os campos pelo teclado no aplicativo, preencha texto, selecione uma opção e alterne a caixa de seleção. Salve, reabra e confira valores e anúncios. Obrigatório no Word é uma indicação textual; não há envio nem validação programada por macros.",
+      "defect": "Os campos mantêm aparência e valores, mas perderam seus nomes acessíveis nas propriedades dos controles.",
+      "detected": "form_missing_label"
+    },
+    {
+      "id": "sumario",
+      "title": "Sumário automático e clicável",
+      "formats": [
+        "docx",
+        "pdf"
+      ],
+      "sources": [
+        "toc_word",
+        "bookmarks_pdf",
+        "internal_pdf"
+      ],
+      "do": "Gere o sumário a partir dos títulos e use links que levem às seções corretas. No Word, atualize o campo depois de editar títulos ou páginas.",
+      "dont": "Não apresente apenas uma lista de títulos como se fosse navegação clicável. Não confunda o sumário no corpo com os marcadores laterais do PDF.",
+      "expected": "As entradas devem permitir chegar à seção indicada. O DOCX tem campo de sumário com links iniciais; o PDF tem entradas clicáveis e marcadores. A atualização posterior do campo depende do editor.",
+      "manual": "Ative cada entrada pelo teclado e confira o título de chegada. No Word, edite um título em uma cópia, atualize o sumário e confira novamente. No PDF, teste também os marcadores separadamente.",
+      "defect": "As entradas continuam visíveis, mas foram convertidas em texto sem links; o campo automático do Word foi retirado.",
+      "detected": null
+    },
+    {
+      "id": "links-internos",
+      "title": "Links internos com destino válido",
+      "formats": [
+        "docx",
+        "pdf"
+      ],
+      "sources": [
+        "internal_pdf",
+        "bookmarks_pdf"
+      ],
+      "do": "Vincule o texto descritivo a um marcador ou seção existente e confira a chegada no arquivo final.",
+      "dont": "Não deixe links apontando para marcadores removidos nem suponha que a navegação interna sobrevive a qualquer exportação.",
+      "expected": "A ativação deve levar ao trecho indicado. A posição do cursor e o anúncio ao chegar variam com o leitor e o aplicativo; a existência do destino não prova o foco real.",
+      "manual": "Percorra e ative os links pelo teclado, confira a seção de destino e continue a leitura a partir dela. Teste novamente depois de exportar.",
+      "defect": "O link foi alterado para apontar a um destino que não existe no documento.",
+      "detected": "broken_internal_link"
+    },
+    {
+      "id": "titulos",
+      "title": "Títulos que permitem navegar",
+      "formats": [
+        "docx",
+        "pdf"
+      ],
+      "sources": [
+        "word",
+        "headings"
+      ],
       "do": "Dê estrutura às seções com estilos de título no Word e tags de título no PDF. Organize os níveis pelo conteúdo.",
       "dont": "Não transforme parágrafos em falsos títulos apenas aumentando a fonte e aplicando negrito.",
       "expected": "A estrutura deve expor os títulos e seus níveis para navegação. A frase anunciada depende do aplicativo e do leitor.",
       "manual": "Compare os títulos visuais com o painel de navegação do Word ou a lista de títulos do leitor no PDF. Percorra cada seção e registre o resultado.",
-      "defect": "Os títulos visuais foram mantidos, mas sua estrutura foi trocada por parágrafos comuns.", "detected": "missing_heading_one"
+      "defect": "Os títulos visuais foram mantidos, mas sua estrutura foi trocada por parágrafos comuns.",
+      "detected": "missing_heading_one"
     },
     {
-      "id": "imagens", "title": "Imagens com significado em texto", "formats": ["docx", "pdf"], "sources": ["word", "images"],
+      "id": "imagens",
+      "title": "Imagens com significado em texto",
+      "formats": [
+        "docx",
+        "pdf"
+      ],
+      "sources": [
+        "word",
+        "images"
+      ],
       "do": "Descreva a informação relevante das imagens. Para gráficos complexos, ofereça também dados e explicação no corpo do documento.",
       "dont": "Não deixe uma imagem informativa sem alternativa nem use o nome do arquivo como descrição. Conteúdo decorativo deve ser marcado como tal no aplicativo de autoria.",
       "expected": "O leitor deve ter acesso ao significado da figura; encontrar um campo de alternativa preenchido não prova que a descrição seja adequada.",
       "manual": "Chegue à imagem usando o leitor. Compare a descrição com a informação visual e confira se a informação continua compreensível sem enxergar a figura.",
-      "defect": "A alternativa da imagem informativa foi removida; a figura continua visível.", "detected": "image_missing_alt"
+      "defect": "A alternativa da imagem informativa foi removida; a figura continua visível.",
+      "detected": "image_missing_alt"
     },
     {
-      "id": "tabelas", "title": "Tabelas com cabeçalhos", "formats": ["docx", "pdf"], "sources": ["word", "tables"],
+      "id": "tabelas",
+      "title": "Tabelas com cabeçalhos",
+      "formats": [
+        "docx",
+        "pdf"
+      ],
+      "sources": [
+        "word",
+        "tables"
+      ],
       "do": "Use tabelas para dados, identifique os cabeçalhos e preserve suas relações com as células. Prefira estrutura simples; confira tabelas que atravessam páginas.",
       "dont": "Não simule uma tabela com espaços nem confie só no negrito da primeira linha. Células mescladas ou estruturas complexas exigem revisão específica.",
       "expected": "Ao percorrer os dados, a associação com o cabeçalho deve continuar disponível. A repetição visual do cabeçalho no Word não prova sozinha a experiência no leitor.",
       "manual": "Entre na tabela e navegue por linhas e colunas com os comandos do leitor. Confira cabeçalhos, valores e transições de página no aplicativo escolhido.",
-      "defect": "O cabeçalho continua visualmente destacado, mas sua marcação foi removida.", "detected": "table_missing_header"
+      "defect": "O cabeçalho continua visualmente destacado, mas sua marcação foi removida.",
+      "detected": "table_missing_header"
     },
     {
-      "id": "listas", "title": "Listas reconhecidas como listas", "formats": ["docx", "pdf"], "sources": ["word", "lists"],
+      "id": "listas",
+      "title": "Listas reconhecidas como listas",
+      "formats": [
+        "docx",
+        "pdf"
+      ],
+      "sources": [
+        "word",
+        "lists"
+      ],
       "do": "Crie listas com o recurso de listas do editor e mantenha a estrutura de lista e itens ao exportar.",
       "dont": "Não substitua a lista por parágrafos com números ou marcadores digitados à mão.",
       "expected": "A relação entre os itens deve estar disponível à tecnologia assistiva. A lista de exemplo tem duas etapas em sequência.",
       "manual": "Use a navegação de listas e itens disponível no leitor e aplicativo. Confira sequência, quantidade e conteúdo sem depender do marcador visual.",
-      "defect": "A numeração visual permanece, mas os itens foram convertidos em parágrafos comuns.", "detected": null
+      "defect": "A numeração visual permanece, mas os itens foram convertidos em parágrafos comuns.",
+      "detected": null
     },
     {
-      "id": "links", "title": "Links com destino compreensível", "formats": ["docx", "pdf"], "sources": ["word", "links"],
+      "id": "links",
+      "title": "Links com destino compreensível",
+      "formats": [
+        "docx",
+        "pdf"
+      ],
+      "sources": [
+        "word",
+        "links"
+      ],
       "do": "Escreva um nome que explique a finalidade do link, considerando o contexto. Mantenha o link utilizável pelo teclado.",
       "dont": "Não use um link isolado chamado apenas Clique aqui sem contexto que explique o destino. Uma URL ou um texto preenchido não prova clareza.",
       "expected": "A pessoa deve conseguir decidir se quer abrir o destino. Texto alternativo adicional para todo link PDF não é obrigatório por si só.",
       "manual": "Percorra os links pelo teclado e consulte a lista de links do leitor. Leia também o contexto antes de decidir se o propósito é compreensível.",
-      "defect": "O link isolado perdeu seu nome descritivo e passou a se chamar Clique aqui.", "detected": null
+      "defect": "O link isolado perdeu seu nome descritivo e passou a se chamar Clique aqui.",
+      "detected": null
     },
     {
-      "id": "metadados", "title": "Título e idioma do arquivo", "formats": ["docx", "pdf"], "sources": ["language", "title", "acrobat"],
+      "id": "metadados",
+      "title": "Título e idioma do arquivo",
+      "formats": [
+        "docx",
+        "pdf"
+      ],
+      "sources": [
+        "language",
+        "title",
+        "acrobat"
+      ],
       "do": "Informe um título descritivo e o idioma principal correto. Marque mudanças de idioma quando necessário.",
       "dont": "Não confunda o nome do arquivo com o título nos metadados nem marque texto em português como se fosse inglês.",
       "expected": "O aplicativo e o leitor devem receber identificação e idioma coerentes com o conteúdo. A pronúncia também depende da voz e da configuração.",
       "manual": "Confira propriedades e idioma do texto no editor; no PDF, confira título, idioma e preferências de exibição. Ouça trechos em cada idioma usado.",
-      "defect": "O título e o idioma padrão foram removidos dos metadados, mantendo o conteúdo visual.", "detected": "missing_language"
+      "defect": "O título e o idioma padrão foram removidos dos metadados, mantendo o conteúdo visual.",
+      "detected": "missing_language"
     },
     {
-      "id": "tags", "title": "PDF com estrutura preservada", "formats": ["pdf"], "sources": ["headings", "acrobat"],
+      "id": "tags",
+      "title": "PDF com estrutura preservada",
+      "formats": [
+        "pdf"
+      ],
+      "sources": [
+        "headings",
+        "acrobat"
+      ],
       "do": "Exporte PDF com tags e confira a estrutura resultante, além da aparência. Corrija o arquivo fonte sempre que possível.",
       "dont": "Não suponha que um PDF seja acessível por ser selecionável, abrir no navegador ou ter sido produzido por uma impressora PDF.",
       "expected": "Tags devem representar o conteúdo e suas relações. Presença de tags ou aprovação automática não garante qualidade semântica.",
       "manual": "Inspecione a árvore de tags e percorra o PDF com teclado e leitor. Compare os elementos encontrados com o documento visível.",
-      "defect": "A árvore de tags foi retirada, sem alterar o texto que aparece na página.", "detected": "missing_tags"
+      "defect": "A árvore de tags foi retirada, sem alterar o texto que aparece na página.",
+      "detected": "missing_tags"
     },
     {
-      "id": "ordem", "title": "Ordem de leitura com sentido", "formats": ["pdf"], "sources": ["order"],
+      "id": "ordem",
+      "title": "Ordem de leitura com sentido",
+      "formats": [
+        "pdf"
+      ],
+      "sources": [
+        "order"
+      ],
       "do": "Mantenha uma sequência lógica na estrutura do PDF e confira também a ordem de foco dos elementos interativos.",
       "dont": "Não confie apenas na posição visual ou em copiar e colar o texto: a ordem das tags pode ser diferente da ordem de pintura.",
       "expected": "Na lista deste exemplo, a leitura deve apresentar Primeiro prepare o documento antes de Depois revise o documento.",
       "manual": "Leia continuamente e percorra os itens da lista com o leitor. Compare a sequência falada com o sentido das instruções. Registre aplicativo, versão e configuração.",
-      "defect": "Os dois itens foram invertidos apenas na árvore de tags; a sequência visual não mudou.", "detected": null
+      "defect": "Os dois itens foram invertidos apenas na árvore de tags; a sequência visual não mudou.",
+      "detected": null
     },
     {
-      "id": "digitalizacao", "title": "PDF digitalizado com texto real", "formats": ["pdf"], "sources": ["ocr", "acrobat"],
+      "id": "digitalizacao",
+      "title": "PDF digitalizado com texto real",
+      "formats": [
+        "pdf"
+      ],
+      "sources": [
+        "ocr",
+        "acrobat"
+      ],
       "do": "Prefira o documento fonte com texto. Se só houver digitalização, aplique OCR, revise o reconhecimento e organize as tags e a ordem de leitura.",
       "dont": "Não entregue uma fotografia de texto como único conteúdo nem considere que executar OCR resolve toda a acessibilidade.",
       "expected": "As palavras devem estar disponíveis como texto correto e estruturado. Recursos de OCR do leitor podem variar e não corrigem o arquivo de origem.",
       "manual": "Pesquise palavras, confira o texto reconhecido e leia o documento com tecnologia assistiva. Verifique números, acentos, ordem, títulos e tabelas.",
-      "defect": "O conteúdo foi rasterizado: o PDF contém somente a imagem da página, sem texto extraível nem estrutura.", "detected": "page_without_extractable_text"
+      "defect": "O conteúdo foi rasterizado: o PDF contém somente a imagem da página, sem texto extraível nem estrutura.",
+      "detected": "page_without_extractable_text"
+    },
+    {
+      "id": "planilhas-cabecalhos",
+      "title": "Planilhas com cabeçalhos associados aos dados",
+      "formats": [
+        "xlsx"
+      ],
+      "sources": [
+        "excel",
+        "nvda_excel"
+      ],
+      "do": "Use estrutura tabular simples, nomes claros e cabeçalhos associados aos dados. Confira no Excel e no leitor escolhido como os cabeçalhos são identificados; podem ser necessários recursos e configurações específicos.",
+      "dont": "Não trate congelamento visual como definição semântica de cabeçalho, nem considere o uso de Tabela a única solução possível.",
+      "expected": "O exemplo bom define uma Tabela do Excel com linha de cabeçalhos. O ruim mantém os mesmos textos e o mesmo congelamento, mas remove a definição da Tabela. A fala real e as associações no leitor não foram executadas; intervalos nomeados ou outras soluções precisam ser avaliados em contexto.",
+      "manual": "Abra cada arquivo no Excel, confira a existência da Tabela e da linha de cabeçalhos e navegue entre os dados. Com NVDA real, confira a configuração de anúncio de cabeçalhos; quando necessário, defina os cabeçalhos com os comandos documentados e registre a combinação usada.",
+      "defect": "O vínculo explícito da Tabela com sua linha de cabeçalhos foi retirado. A aparência e o congelamento permanecem; isso não comprova falha WCAG universal de todo intervalo que não seja uma Tabela.",
+      "detected": null
+    },
+    {
+      "id": "planilhas-status",
+      "title": "Situação da planilha disponível além da cor",
+      "formats": [
+        "xlsx"
+      ],
+      "sources": [
+        "excel"
+      ],
+      "do": "Mantenha um valor textual que identifique a situação de cada registro, além das cores.",
+      "dont": "Não dependa exclusivamente de vermelho e verde para transmitir a situação.",
+      "expected": "Nos arquivos os registros de participação são iguais. O bom escreve Revisar e Concluído na coluna Situação, além das cores; no ruim esses valores foram removidos e só a cor permanece.",
+      "manual": "Confira os valores da coluna Situação sem usar as cores. No Excel e com o leitor escolhido, navegue até cada célula e registre se a informação está disponível em texto.",
+      "defect": "Os textos da coluna Situação foram retirados, mantendo os preenchimentos vermelho e verde. O significado da cor é o conteúdo declarado deste exemplo, não uma regra automática baseada em nomes de cor.",
+      "detected": null
     }
   ]
 }

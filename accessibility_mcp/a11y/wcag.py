@@ -99,6 +99,89 @@ CRITERIA: dict[str, tuple[str, str]] = {
     "4.1.3": ("Status Messages", "AA"),
 }
 
+# Nomes em portugues dos criterios de nivel A e AA, para o relatorio nao falar
+# "Language of Page" com quem nao le ingles. Sem traducao, cai no nome oficial.
+NAMES_PT = {
+    "1.1.1": "Conteúdo não textual",
+    "1.2.1": "Somente áudio e somente vídeo (gravados)",
+    "1.2.2": "Legendas (gravadas)",
+    "1.2.3": "Audiodescrição ou alternativa em mídia (gravados)",
+    "1.2.4": "Legendas (ao vivo)",
+    "1.2.5": "Audiodescrição (gravada)",
+    "1.3.1": "Informação e relações",
+    "1.3.2": "Sequência significativa",
+    "1.3.3": "Características sensoriais",
+    "1.3.4": "Orientação",
+    "1.3.5": "Identificar a finalidade de entrada",
+    "1.4.1": "Uso de cor",
+    "1.4.2": "Controle de áudio",
+    "1.4.3": "Contraste (mínimo)",
+    "1.4.4": "Redimensionar texto",
+    "1.4.5": "Imagens de texto",
+    "1.4.10": "Reorganização",
+    "1.4.11": "Contraste de não texto",
+    "1.4.12": "Espaçamento de texto",
+    "1.4.13": "Conteúdo em foco ou sobreposição",
+    "2.1.1": "Teclado",
+    "2.1.2": "Sem armadilha de teclado",
+    "2.1.4": "Atalhos de tecla de caractere",
+    "2.2.1": "Tempo ajustável",
+    "2.2.2": "Pausar, parar, ocultar",
+    "2.3.1": "Três flashes ou abaixo do limite",
+    "2.4.1": "Ignorar blocos",
+    "2.4.2": "Página titulada",
+    "2.4.3": "Ordem do foco",
+    "2.4.4": "Finalidade do link (no contexto)",
+    "2.4.5": "Várias maneiras",
+    "2.4.6": "Títulos e rótulos",
+    "2.4.7": "Foco visível",
+    "2.4.11": "Foco não obscurecido (mínimo)",
+    "2.5.1": "Gestos de ponteiro",
+    "2.5.2": "Cancelamento de ponteiro",
+    "2.5.3": "Rótulo no nome",
+    "2.5.4": "Atuação por movimento",
+    "2.5.7": "Movimentos de arrastar",
+    "2.5.8": "Tamanho do alvo (mínimo)",
+    "3.1.1": "Idioma da página",
+    "3.1.2": "Idioma das partes",
+    "3.2.1": "Em foco",
+    "3.2.2": "Na entrada",
+    "3.2.3": "Navegação consistente",
+    "3.2.4": "Identificação consistente",
+    "3.2.6": "Ajuda consistente",
+    "3.3.1": "Identificação de erro",
+    "3.3.2": "Rótulos ou instruções",
+    "3.3.3": "Sugestão de erro",
+    "3.3.4": "Prevenção de erro (legal, financeiro, dados)",
+    "3.3.7": "Entrada redundante",
+    "3.3.8": "Autenticação acessível (mínimo)",
+    "4.1.2": "Nome, função, valor",
+    "4.1.3": "Mensagens de status",
+}
+
+PRINCIPLES = {
+    "1": "Perceptível",
+    "2": "Operável",
+    "3": "Compreensível",
+    "4": "Robusto",
+}
+
+GUIDELINES = {
+    "1.1": "Alternativas em texto",
+    "1.2": "Mídia baseada em tempo",
+    "1.3": "Adaptável",
+    "1.4": "Distinguível",
+    "2.1": "Acessível por teclado",
+    "2.2": "Tempo suficiente",
+    "2.3": "Convulsões e reações físicas",
+    "2.4": "Navegável",
+    "2.5": "Modalidades de entrada",
+    "3.1": "Legível",
+    "3.2": "Previsível",
+    "3.3": "Assistência de entrada",
+    "4.1": "Compatível",
+}
+
 _NUMBER = re.compile(r"(?<![\d.])([1-4])\.(\d{1,2})\.(\d{1,2})(?![\d.])")
 
 
@@ -124,8 +207,22 @@ def name_of(number: str) -> str:
     return CRITERIA[number][0] if number in CRITERIA else ""
 
 
+def name_pt_of(number: str) -> str:
+    """Nome do criterio em portugues; sem traducao registrada, devolve o nome oficial em ingles."""
+    return NAMES_PT.get(number) or name_of(number)
+
+
 def level_of(number: str) -> str:
     return CRITERIA[number][1] if number in CRITERIA else ""
+
+
+def principle_of(number: str) -> str:
+    return PRINCIPLES.get(number.split(".", 1)[0], "") if number in CRITERIA else ""
+
+
+def guideline_of(number: str) -> tuple[str, str]:
+    prefix = ".".join(number.split(".")[:2])
+    return (prefix, GUIDELINES[prefix]) if number in CRITERIA else ("", "")
 
 
 def slug_of(number: str) -> str:

@@ -15,6 +15,8 @@ from . import wcag
 
 SEVERITIES = ("blocker", "serious", "moderate", "minor")
 OUTCOMES = ("failed", "cantTell", "passed", "unsupported")  # unsupported: o verificador refutou; sai do relatorio, fica registrado
+PRIORITIES = ("P0", "P1", "P2", "P3", "unrated")
+_SEVERITY_PRIORITY = {"blocker": "P0", "serious": "P1", "moderate": "P2", "minor": "P3"}
 _TARGET = re.compile(r"e\d+|css:.{1,300}")
 ASSERTOR = {"name": "a11y-mcp", "about": "servidor MCP de teste de acessibilidade como usuario (fatos medidos; quem julga e o modelo do cliente)"}
 
@@ -42,8 +44,15 @@ def build(raw: Any, *, step: int, steps_seen: set[int], elements_seen: dict[str,
     severity = _clean(raw.get("severity"), 20).lower()
     if severity not in SEVERITIES:
         severity = "unrated"
+    priority = _clean(raw.get("priority"), 20).upper()
+    if not priority:
+        priority = _SEVERITY_PRIORITY.get(severity, "unrated")
+    elif priority not in PRIORITIES[:-1]:
+        problems.append(f"prioridade '{priority}' invalida: sem prioridade informada")
+        priority = "unrated"
     target = _clean(raw.get("target"), 300) or None
     element = None
+    location = None
     if target:
         if not _TARGET.fullmatch(target):
             problems.append(f"alvo '{target[:40]}' invalido: descartado")
@@ -52,7 +61,11 @@ def build(raw: Any, *, step: int, steps_seen: set[int], elements_seen: dict[str,
             problems.append(f"alvo '{target}' nunca apareceu no dossie: descartado")
             target = None
         elif target in elements_seen:
-            element = elements_seen[target].get("descriptor")
+            seen = elements_seen[target]
+            element = seen.get("descriptor")
+            brief = seen.get("brief") or {}
+            location = {key: brief[key] for key in ("css", "where", "attrs") if brief.get(key)}
+    guideline, guideline_name = wcag.guideline_of(criterion) if criterion else ("", "")
     cited = raw.get("evidence_steps")
     cited = cited if isinstance(cited, list) else []
     evidence = sorted({int(s) for s in cited if isinstance(s, (int, float, str)) and str(s).isdigit() and int(s) in steps_seen and int(s) <= step})
@@ -63,7 +76,11 @@ def build(raw: Any, *, step: int, steps_seen: set[int], elements_seen: dict[str,
     finding = {
         "criterion": criterion, "criterion_name": wcag.name_of(criterion) if criterion else None,
         "level": wcag.level_of(criterion) if criterion else None,
-        "severity": severity, "claim": claim, "target": target, "element": element, "persona": persona,
+        "principle": wcag.principle_of(criterion) if criterion else None,
+        "guideline": guideline or None, "guideline_name": guideline_name or None,
+        "severity": severity, "priority": priority, "claim": claim, "impact": _clean(raw.get("impact"), 500) or None,
+        "recommendation": _clean(raw.get("recommendation"), 1000) or None,
+        "target": target, "element": element, "location": location, "page_url": _clean(raw.get("page_url"), 2000) or None, "persona": persona,
         "step": step, "evidence_steps": evidence, "source": source, "outcome": "failed", "notes": problems,
         "verification": None,
     }
@@ -81,6 +98,7 @@ def element_brief(e: dict[str, Any]) -> dict[str, Any]:
         "tag": e["tag"], "type": e.get("type"), "role_attr": e.get("role_attr"), "role": comp.get("role"), "name": comp.get("name") or e.get("text"),
         "focusable": e.get("focusable"), "clickable": e.get("clickable"), "states": present(e.get("states")), "relations": present(e.get("relations")),
         "attrs": present(e.get("attrs")), "tabindex": e.get("tabindex"), "rect": e.get("rect"),
+        "css": e.get("css"), "where": present(e.get("where")),
     }
 
 
@@ -188,11 +206,3 @@ def to_sarif(findings: list[dict[str, Any]], url: str) -> dict[str, Any]:
     }
 
 
-def digest(findings: list[dict[str, Any]], limit: int = 12) -> str:
-    """Uma linha por achado (criterio, gravidade, desfecho, afirmacao) para o relatorio, o aprendizado e o resumo."""
-    lines = []
-    for f in findings[:limit]:
-        crit = f"WCAG {f['criterion']} " if f.get("criterion") else ""
-        why = f" [{f['verification']['reason']}]" if f.get("verification") and f["verification"].get("reason") else ""
-        lines.append(f"{f['id']} {crit}{f['severity']} {f['outcome']}: {f['claim']}{why}")
-    return "\n".join(lines)

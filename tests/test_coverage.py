@@ -5,6 +5,52 @@ import pytest
 
 from accessibility_mcp.a11y.session import SESSION
 
+
+async def test_page_map_keeps_content_after_previous_inventory_caps():
+    html = '<!doctype html><html lang="pt"><title>Grande</title><body>'
+    html += ''.join(f'<h2>Titulo {i}</h2><a href="#{i}">Link {i}</a><img alt="Imagem {i}">' for i in range(85))
+    html += ''.join(f'<form aria-label="Formulario {i}"><input aria-label="Campo {i}"></form>' for i in range(15))
+    await SESSION.open(None, html + '</body></html>')
+    try:
+        result = (await SESSION.page_map())["main"]
+        assert len(result["headings"]["outline"]) == 85
+        assert len(result["links"]["items"]) == 85
+        assert len(result["images"]["items"]) == 85
+        assert len(result["forms"]["forms"]) == 15
+    finally:
+        await SESSION.close()
+
+
+async def test_reading_order_and_reflow_do_not_drop_late_content():
+    html = '<!doctype html><html lang="pt"><title>Grande</title><body>'
+    html += ''.join(f'<p>Linha {i}</p>' for i in range(410))
+    html += ''.join(f'<div style="width:800px">Largo {i}</div>' for i in range(20))
+    await SESSION.open(None, html + '</body></html>')
+    try:
+        page_map = (await SESSION.page_map())["main"]
+        assert page_map['reading_order']['items_compared'] == 430
+        stress = await SESSION.stress('reflow_320')
+        assert stress['overflowing_total'] >= 20
+        assert len(stress['overflowing_elements']) == stress['overflowing_total']
+        assert any(e['text'] == 'Largo 19' for e in stress['overflowing_elements'])
+    finally:
+        await SESSION.close()
+
+
+@pytest.mark.parametrize("browser", ["chromium", "firefox"])
+async def test_full_dossier_does_not_stop_discovery_at_six_hundred(browser):
+    html = '<!doctype html><html lang="pt"><title>Grande</title><body>'
+    html += ''.join(f'<button>Botao {i}</button>' for i in range(605))
+    await SESSION.open(None, html + '</body></html>', browser=browser)
+    try:
+        result = await SESSION.dossier()
+        assert len(result["elements"]) == result["discovered_total"] == 605
+        assert result["discovery_truncated"] is False
+        assert result["not_listed_over_limit"] == 0
+        assert result["elements"][-1]["text"] == "Botao 604"
+    finally:
+        await SESSION.close()
+
 IFRAME_DOC = (
     "<html><body><h1>Dentro</h1><button id='ib'>Botao do iframe</button><div id='idiv'>div do iframe</div>"
     "<script>document.getElementById('idiv').addEventListener('click',()=>{document.title='clicou'})</script></body></html>"

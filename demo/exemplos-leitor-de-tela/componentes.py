@@ -220,7 +220,7 @@ COMPONENTES: list[dict[str, Any]] = [
     {
         "slug": "chat-ia",
         "nome": "Resposta de IA em streaming",
-        "resumo": "Uma resposta que chega aos poucos não pode ser uma região viva atualizada a cada palavra: o leitor de tela fica falando por cima de si mesmo. O padrão do MCP é escrever a resposta numa área que não anuncia e avisar uma vez, no fim, numa região de status. O número de anúncios abaixo é medido, sem veredito.",
+        "resumo": "Uma região assertiva atualizada a cada palavra pode provocar interrupções repetidas. Os exemplos comparam essa estrutura com a resposta fora da região viva e um status ao final. A contagem abaixo mede atualizações observadas na região, não anúncios ouvidos; leitores podem agrupar ou suprimir atualizações.",
         "exemplos": [
             {
                 "tipo": "ruim", "titulo": "Cada palavra numa região assertiva",
@@ -228,7 +228,7 @@ COMPONENTES: list[dict[str, Any]] = [
                 "html": '<button type="button" id="chat-ruim-btn">Perguntar</button><div id="chat-ruim-resp" aria-live="assertive"></div>'
                         "<script>document.getElementById('chat-ruim-btn').addEventListener('click',function(){var r=document.getElementById('chat-ruim-resp');r.textContent='';"
                         "'O chá verde deve ser preparado com água abaixo de oitenta graus'.split(' ').forEach(function(p,i){setTimeout(function(){r.textContent+=p+' ';},i*40);});});</script>",
-                "porque": "Cada palavra que entra é uma mudança numa região assertiva: o leitor de tela interrompe e repete, e quem usa se perde antes de a resposta acabar.",
+                "porque": "Cada palavra acrescenta uma mudança à região assertiva. Essa estrutura pode causar interrupções repetidas; a contagem de mutações não comprova quantas mensagens um leitor efetivamente fala. A fala precisa ser verificada na combinação de leitor e navegador usada.",
                 "corrigir": "Escreva a resposta num elemento sem aria-live, mantenha o foco no campo e avise uma vez, no fim, numa região de status (Resposta pronta).",
             },
             {
@@ -238,7 +238,7 @@ COMPONENTES: list[dict[str, Any]] = [
                         "<script>document.getElementById('chat-bom-btn').addEventListener('click',function(){var r=document.getElementById('chat-bom-resp'),a=document.getElementById('chat-bom-aviso');r.textContent='';r.setAttribute('aria-busy','true');"
                         "var t='O chá verde deve ser preparado com água abaixo de oitenta graus'.split(' ');t.forEach(function(p,i){setTimeout(function(){r.textContent+=p+' ';"
                         "if(i===t.length-1){r.setAttribute('aria-busy','false');a.textContent='Resposta pronta';}},i*40);});});</script>",
-                "porque": "A resposta aparece sem interromper ninguém. Um único aviso, Resposta pronta, chega no fim, e a pessoa lê o texto quando quiser.",
+                "porque": "A resposta é escrita fora da região viva. Ao final, um único status Resposta pronta é exposto, e o texto permanece disponível para leitura. O comportamento de fala depende do leitor e não foi capturado nesta medição.",
                 "corrigir": "Nada a corrigir.",
             },
         ],

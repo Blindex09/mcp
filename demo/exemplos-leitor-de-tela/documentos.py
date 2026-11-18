@@ -17,9 +17,12 @@ from typing import Any
 
 from docx import Document
 from docx.oxml.ns import qn
+from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Font, PatternFill
+from openpyxl.worksheet.table import Table, TableStyleInfo
 from PIL import Image, ImageDraw, ImageFont
 from pypdf import PdfReader, PdfWriter
-from pypdf.generic import NameObject
+from pypdf.generic import ArrayObject, NameObject, TextStringObject
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
@@ -40,11 +43,13 @@ ISSUES = {
     "missing_language": "idioma padrão ausente",
     "missing_tags": "estrutura de tags ausente",
     "page_without_extractable_text": "página sem texto extraível",
+    "form_missing_label": "controle sem nome acessível nas propriedades",
+    "broken_internal_link": "link interno aponta a destino inexistente",
 }
 
 
 def guide_text() -> str:
-    lines = ["# Document behavior matrix: Word DOCX and PDF examples", "",
+    lines = ["# Document behavior matrix: Word DOCX, PDF and Excel XLSX examples", "",
              "Origem: este MCP. Contratos dos exemplos de documentos e uso das ferramentas deste servidor.",
              f"Fontes oficiais consultadas em {DATA['reviewed']}. Textos sintetizados; arquivos de terceiros não foram incorporados.", "",
              "## Como usar e o que pode afirmar", "",
@@ -52,7 +57,7 @@ def guide_text() -> str:
              "Para produzir arquivos, escreva o conteúdo e use a11y_create_document; para relatório dos achados, a11y_create_report. Valide o arquivo efetivo com a11y_validate_document.",
              "O MCP mede estrutura; o modelo do cliente julga significado, qualidade e cobertura. Não escolha casos por palavras-chave nem converta ausência de erros em conformidade.",
              "As técnicas W3C são formas de atender critérios, não uma lista de implementações obrigatórias. A galeria ensina casos delimitados; Bom significa que a propriedade exemplificada foi preservada, não certificação do arquivo.",
-             "A inspeção DOCX verifica metadados, títulos, alternativas, cabeçalhos de tabela e links sem texto. PDF acrescenta tags, fontes, Unicode e texto extraível. Listas simuladas, propósito de links, sentido da alternativa e ordem lógica exigem julgamento e revisão no aplicativo.",
+             "A inspeção XLSX genérica mede tabelas, cabeçalhos declarados, congelamento, células mescladas e nomes definidos sem exigir as abas de um relatório de auditoria; o significado dos valores e as associações efetivas no leitor exigem revisão. A inspeção DOCX verifica metadados, títulos, alternativas, cabeçalhos de tabela e links sem texto. PDF acrescenta tags, fontes, Unicode e texto extraível. Listas simuladas, propósito de links, sentido da alternativa e ordem lógica exigem julgamento e revisão no aplicativo.",
              "Uma imagem decorativa corretamente marcada não exige a mesma descrição de uma figura informativa. O validador DOCX atual não distingue decoração e pode pedir revisão; o gerador exige alt para as imagens que aceita.",
              "PDF/UA-1 e PDF/UA-2 são perfis distintos. O gerador atual é verificado automaticamente com veraPDF PDF/UA-1; não declare PDF/UA-2. Aprovação automática não comprova todos os requisitos nem WCAG.",
              "A sonda a11y_nvda_speech é para páginas na VM configurada, não abre Word ou leitor de PDF. Não invente fala literal nem declare teste real de documentos sem capturar o leitor no aplicativo. Registre versões, comandos, resultado e limitações. OCR do leitor não torna o arquivo acessível.", ""]
@@ -63,7 +68,9 @@ def guide_text() -> str:
                       f"Medição automática: {item['detected'] or 'o validador estrutural pode não detectar este defeito; revisar o conteúdo e a estrutura específica' }.",
                       "Fontes: " + "; ".join(f"[{DATA['sources'][key]['title']}]({DATA['sources'][key]['url']})" for key in item["sources"]), ""])
     lines.extend(["## Limites complementares", "",
-                  "Confira contraste e uso de cor sem depender apenas da cor; texto pequeno ou layout que não reflui podem impedir o uso com ampliação. Formulários precisam de nomes, instruções, estados e ordem de foco; o gerador atual não cria formulários interativos. Valide essas propriedades separadamente, sem afirmar que foram cobertas pelos pares desta galeria.",
+                  "O gerador oferece campos text, checkbox e choice em blocos field, com field_name, text como rótulo, help_text, required, value ou checked e options nas escolhas. DOCX usa controles nativos de conteúdo; PDF usa AcroForm e widgets ligados às tags. Não há macros, envio automático, campos de assinatura ou grupos de rádio. A indicação de obrigatório no Word não é validação automática; no PDF há sinalizador Required, mas envio e avisos dependem do aplicativo e não foram programados aqui.",
+                  "toc=true gera campo TOC com resultado inicial clicável no Word e sumário clicável no PDF; atualize o campo no Word após editar. Títulos aceitam id, e links aceitam url=#id. O destino deve existir. Sumário e marcadores PDF são recursos distintos. Aparências iniciais dos campos PDF usam fonte incorporada Windows-1252; o corpo do documento aceita Unicode. Não afirme suporte a todos os alfabetos e aplicativos sem verificar.",
+                  "Confira também contraste, uso de cor, ampliação, instruções de erros e comportamento real ao preencher. Os pares são exemplos delimitados; não comprovam toda experiência de formulário com tecnologia assistiva.",
                   "Não envie documentos privados a serviços externos sem autorização. Trabalhe no arquivo dentro da pasta escolhida pela pessoa e prefira corrigir a fonte, reexportar e conferir o resultado. Um DOCX correto não garante que qualquer exportação PDF preserve a estrutura.", ""])
     return "\n".join(lines)
 
@@ -72,7 +79,17 @@ def spec_for(slug: str) -> DocumentSpec:
     item = next(s for s in DATA["scenarios"] if s["id"] == slug)
     blocks = [Block(kind="paragraph", text="Exemplo didático para comparar a estrutura dos arquivos. Consulte a página da galeria antes de avaliar."),
               Block(kind="heading", text="Preparação do documento")]
-    if slug == "imagens":
+    if slug == "formularios":
+        blocks.extend([
+            Block(kind="field", text="Nome completo", field_name="nome", help_text="Informe seu nome para esta demonstração.", required=True),
+            Block(kind="field", text="Área de interesse", field_name="area", field_type="choice", options=["Web", "Documentos"], value="Documentos", help_text="Escolha uma das áreas disponíveis."),
+            Block(kind="field", text="Quero participar", field_name="participar", field_type="checkbox", help_text="Marque para registrar seu interesse.")])
+    elif slug in ("sumario", "links-internos"):
+        blocks[-1].id = "preparacao"
+        blocks.extend([Block(kind="paragraph", text="Primeiro prepare o documento."), Block(kind="heading", text="Revisão do documento", id="revisao"), Block(kind="paragraph",text="Depois revise o documento.")])
+        if slug == "links-internos":
+            blocks.append(Block(kind="link",text="Voltar à preparação do documento",url="#preparacao"))
+    elif slug == "imagens":
         blocks.append(Block(kind="image", source="grafico.png", alt="Participação nos testes: 12 pessoas em setembro e 18 em outubro."))
     elif slug == "tabelas":
         blocks.append(Block(kind="table", text="Participação nos testes", headers=["Mês", "Participantes"], rows=[["Setembro", "12"], ["Outubro", "18"]]))
@@ -82,7 +99,7 @@ def spec_for(slug: str) -> DocumentSpec:
         blocks.append(Block(kind="link", text="Guia de acessibilidade do Word da Microsoft", url=DATA["sources"]["word"]["url"]))
     else:
         blocks.append(Block(kind="paragraph", text="Primeiro prepare o documento. Depois revise o documento. Confira a estrutura e leia o conteúdo no aplicativo de destino."))
-    return DocumentSpec(title=item["title"], language="pt-BR", author="Projeto MCP de acessibilidade", blocks=blocks)
+    return DocumentSpec(title=item["title"], language="pt-BR", author="Projeto MCP de acessibilidade", blocks=blocks, toc=slug == "sumario")
 
 
 def image_bytes() -> bytes:
@@ -131,6 +148,20 @@ def bad_docx(source: Path, target: Path, slug: str) -> None:
         doc.core_properties.title = doc.core_properties.language = ""
         for lang in doc.styles.element.xpath(".//w:lang"):
             lang.attrib.pop(qn("w:val"), None)
+    elif slug == "formularios":
+        for alias in doc.element.xpath(".//w:sdtPr/w:alias"):
+            alias.set(qn("w:val"), "")
+    elif slug == "sumario":
+        for node in list(doc.element.xpath(".//w:fldChar | .//w:instrText")):
+            node.getparent().remove(node)
+        for link in list(doc.element.xpath(".//w:hyperlink")):
+            parent = link.getparent()
+            for child in list(link):
+                parent.insert(parent.index(link), child)
+            parent.remove(link)
+    elif slug == "links-internos":
+        for link in doc.element.xpath(".//w:hyperlink[@w:anchor]"):
+            link.set(qn("w:anchor"), "destino_inexistente")
     doc.save(target)
 
 
@@ -182,10 +213,68 @@ def bad_pdf(source: Path, target: Path, slug: str) -> None:
         lists = [node for node in tree if node.get("/S") == "/L"]
         assert len(lists) == 1 and len(lists[0]["/K"]) == 2
         lists[0]["/K"].reverse()
-    writer.write(target)
+    elif slug == "formularios":
+        for ref in writer.root_object['/AcroForm']['/Fields']:
+            ref.get_object().pop(NameObject('/TU'), None)
+        for node in tree:
+            if node.get('/S') == '/Form':
+                node.pop(NameObject('/Alt'), None)
+                node.pop(NameObject('/A'), None)
+    elif slug == "sumario":
+        for page in writer.pages:
+            page[NameObject('/Annots')] = ArrayObject([ref for ref in page.get('/Annots',[]) if ref.get_object().get('/Subtype') != '/Link'])
+        for node in tree:
+            if node.get('/S') == '/Link':
+                node[NameObject('/S')] = NameObject('/P')
+                children = node.get('/K', [])
+                if isinstance(children,list):
+                    node[NameObject('/K')] = ArrayObject([ref for ref in children if not isinstance(ref.get_object(),dict) or ref.get_object().get('/Type') != '/OBJR'])
+    elif slug == "links-internos":
+        for page in writer.pages:
+            for ref in page.get('/Annots',[]):
+                if ref.get_object().get('/Subtype') == '/Link':
+                    ref.get_object()[NameObject('/Dest')] = TextStringObject('destino_inexistente')
+    buffer = io.BytesIO()
+    writer.write(buffer)
+    target.write_bytes(buffer.getvalue())
+
+
+def build_xlsx_example(path: Path, slug: str, good: bool) -> None:
+    """Pares didáticos com diferença declarada; não julga conformidade por conteúdo."""
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Participação"
+    wb.properties.title = "Participação nos testes"
+    wb.properties.language = "pt-BR"
+    ws.append(["Mês", "Participantes", "Situação"])
+    ws.append(["Setembro", 12, "Revisar" if good or slug == "planilhas-cabecalhos" else None])
+    ws.append(["Outubro", 18, "Concluído" if good or slug == "planilhas-cabecalhos" else None])
+    ws.freeze_panes = "A2"  # igual nos dois: congelar não cria associação de cabeçalho
+    for cell in ws[1]:
+        cell.fill = PatternFill("solid", fgColor="17365D")
+        cell.font = Font(color="FFFFFF", bold=True)
+    for name in ("A", "B", "C"):
+        ws.column_dimensions[name].width = 26
+    ws['C2'].fill = PatternFill("solid", fgColor="FFCCCC")
+    ws['C3'].fill = PatternFill("solid", fgColor="D9EAD3")
+    if good or slug != "planilhas-cabecalhos":
+        table = Table(displayName="ParticipacaoNosTestes", ref="A1:C3")
+        table.tableStyleInfo = TableStyleInfo(name="TableStyleLight1", showRowStripes=True)
+        ws.add_table(table)
+    wb.save(path)
+    wb.close()
 
 
 def structural_facts(path: Path) -> dict[str, Any]:
+    if path.suffix == ".xlsx":
+        wb = load_workbook(path)
+        try:
+            ws = wb.active
+            return {"list_items": 0, "tables": len(ws.tables), "freeze_panes": ws.freeze_panes,
+                    "values": list(ws.values),
+                    "status_fills": [ws.cell(row, 3).fill.fgColor.rgb for row in (2, 3)]}
+        finally:
+            wb.close()
     if path.suffix == ".docx":
         doc = Document(path)
         return {"list_items": len(doc.element.xpath(".//w:pPr/w:numPr")),
@@ -209,7 +298,7 @@ def structural_facts(path: Path) -> dict[str, Any]:
 
 async def build_files(directory: Path) -> dict[str, Any]:
     directory.mkdir(parents=True, exist_ok=True)
-    evidence: dict[str, Any] = {"measured_at": datetime.now(timezone.utc).isoformat(), "nvda": "Não executado no Word ou leitor de PDF", "cases": {}}
+    evidence: dict[str, Any] = {"measured_at": datetime.now(timezone.utc).isoformat(), "nvda": "Não executado no Word, Excel ou leitor de PDF", "cases": {}}
     images = {"grafico.png": image_bytes()}
     for item in DATA["scenarios"]:
         slug = item["id"]
@@ -218,7 +307,10 @@ async def build_files(directory: Path) -> dict[str, Any]:
         for fmt in item["formats"]:
             good = directory / f"{slug}-bom.{fmt}"
             bad = directory / f"{slug}-ruim.{fmt}"
-            if fmt == "docx":
+            if fmt == "xlsx":
+                build_xlsx_example(good, slug, True)
+                build_xlsx_example(bad, slug, False)
+            elif fmt == "docx":
                 documents.build_docx(spec, images, good)
                 bad_docx(good, bad, slug)
             else:
@@ -255,8 +347,8 @@ async def build_files(directory: Path) -> dict[str, Any]:
 def render_page(evidence: dict[str, Any], header: str, footer: str) -> str:
     esc = escape
     parts = [header, '<h1>Documentos acessíveis</h1>',
-             '<p>Compare arquivos Word DOCX e PDF bons e ruins quanto à propriedade demonstrada. Baixe os arquivos e abra no aplicativo de destino; a página HTML não simula a leitura do documento.</p>',
-             '<p>Os defeitos dos arquivos ruins são intencionais. Bom não é certificação de acessibilidade. As medidas abaixo inspecionam os arquivos; a fala real do NVDA no Word ou leitor de PDF ainda não foi capturada.</p>',
+             '<p>Compare arquivos Word DOCX, PDF e Excel XLSX bons e ruins quanto à propriedade demonstrada. Baixe os arquivos e abra no aplicativo de destino; a página HTML não simula a leitura do documento.</p>',
+             '<p>Os defeitos dos arquivos ruins são intencionais. Bom não é certificação de acessibilidade. As medidas abaixo inspecionam os arquivos; a fala real do NVDA no Word, Excel ou leitor de PDF ainda não foi capturada.</p>',
              '<nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2><ol>' + ''.join(f'<li><a href="#{s["id"]}">{esc(s["title"])}</a></li>' for s in DATA["scenarios"]) + '</ol></nav>']
     for item in DATA["scenarios"]:
         slug = item["id"]
@@ -281,13 +373,16 @@ def render_page(evidence: dict[str, Any], header: str, footer: str) -> str:
                 result += ' Este resultado não detecta nem aprova o defeito demonstrado; confira a estrutura específica e o sentido do conteúdo.'
             facts = check["facts"]
             levels = ', '.join(str(level) for level in facts.get("heading_levels", [])) or 'nenhum'
-            summary = f'Título: {facts.get("title") or "ausente"}; idioma: {facts.get("language") or "ausente"}; níveis dos títulos: {levels}; itens de lista estruturados: {output["structure"]["list_items"]}.'
+            summary = f'Título: {facts.get("title") or "ausente"}; idioma: {facts.get("language") or "ausente"}; níveis dos títulos: {levels}; itens de lista estruturados: {output["structure"]["list_items"]}; campos preenchíveis: {len(facts.get("fields", []))}.'
+            if output["format"] == "xlsx":
+                structure = output["structure"]
+                summary = f'Tabelas definidas: {structure["tables"]}; congelamento visual: {structure["freeze_panes"]}; valores das células: {structure["values"]}. Congelar não define cabeçalhos para o leitor. A adequação das associações e do uso de cor exige conferência no Excel e com o leitor escolhido.'
             parts.append(f'<p>{esc(output["kind"].capitalize())} {output["format"].upper()}: {esc(result)} {esc(summary)}</p>')
         parts.extend([f'<h3>Comportamento esperado, sem fala capturada</h3><p>{esc(item["expected"])}</p>',
                       f'<h3>Como conferir no aplicativo</h3><p>{esc(item["manual"])}</p>',
                       '<h3>Fontes oficiais</h3><ul>' + ''.join(f'<li><a href="{esc(DATA["sources"][key]["url"])}">{esc(DATA["sources"][key]["title"])}</a></li>' for key in item["sources"]) + '</ul></section>'])
     parts.extend(['<h2>Usar este conhecimento no MCP</h2><p>Peça a criação de um documento ou relatório acessível. O MCP gera os arquivos e devolve validações e limites; o modelo do cliente consulta o guia de comportamento de documentos para escolher a estrutura e explicar as verificações pendentes.</p>',
-                  '<h2>Outras verificações necessárias</h2><p>Confira também contraste, informação transmitida só por cor, ampliação e formulários. Esses aspectos não são comprovados por estes pares. OCR exige revisão do texto e da estrutura; PDF com tags ainda exige conferir o sentido e a ordem.</p>',
+                  '<h2>Outras verificações necessárias</h2><p>Confira também contraste, informação transmitida só por cor, ampliação e formulários complexos. Os campos de exemplo não cobrem assinatura, envio ou toda combinação de aplicativo e leitor. OCR exige revisão do texto e da estrutura; PDF com tags ainda exige conferir o sentido e a ordem.</p>',
                   f'<p>Fontes consultadas em {esc(DATA["reviewed"])}. Arquivos medidos em {esc(evidence["measured_at"])}. <a href="documentos/medicoes.json">Baixar o registro técnico das medições</a>.</p>',
                   '<p><a href="index.html">Voltar ao início dos exemplos</a></p>', footer])
     return '\n'.join(parts)

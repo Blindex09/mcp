@@ -13,7 +13,7 @@ measures the behavior) and the stack notes. A probe result of `met: null` is "co
 
 ## 1. Headings
 
-- MUST: real `h1`-`h6` for anything that works as a title; one `h1` per page or view; levels follow the outline without skipping;
+- MUST: real `h1`-`h6` for anything that works as a title; heading levels reflect the actual structure. A single main h1 and avoiding skipped levels are recommended practices, not standalone WCAG failure rules;
   visual size comes from CSS, never from the level number.
 - MUST NOT: a `div`/`span` styled big as a title (the tree has no heading); a heading chosen for its size; headings used as the
   title of every card inside a list when the list items are links (prefer the link; see lists).
@@ -186,3 +186,18 @@ measures the behavior) and the stack notes. A probe result of `met: null` is "co
 | iOS (SwiftUI/UIKit) | custom views without `accessibilityLabel`/traits; decorative images not hidden; `UIAccessibility.post(notification:)` for announcements and layout/screen changes | developer.apple.com; VoiceOver on a real device; no iOS runner here (declare as not verified) |
 
 Always finish a stack review by saying what was NOT verified: real screen reader speech, real devices, untested flows.
+
+## Calibration against official W3C sources, checked 2026-10-28
+
+The MUST/MUST NOT lists above describe recommended implementation patterns. WCAG success criteria are normative; APG, tutorials and Understanding documents explain approaches and do not add universal WCAG requirements. Judge the observed effect against the applicable criterion and exceptions.
+
+- Multiple h1 headings, a skipped level or missing main/nav landmarks alone do not establish WCAG failure. Check actual structure and relationships (1.3.1), bypass mechanism (2.4.1) and descriptive headings (2.4.6). Section headings is AAA (2.4.10).
+- An error must identify the affected item and describe the error in text (3.3.1); applicable suggestions are addressed by 3.3.3. aria-invalid, a particular description attribute, an alert or moving focus to the first invalid field are implementation methods, not a universal requirement to use every method together. Evaluate identification, relationships and whether a status message is exposed (4.1.3) in context.
+- Visible keyboard focus (2.4.7) is not restricted to an outline. For author-provided indicators assess non-text contrast under 1.4.11; size and shape requirements from 2.4.13 belong to AAA.
+- 2.4.11 AA concerns an entirely obscured component. Partial overlap is not automatically that failure; 2.4.12 AAA addresses any part hidden. Sampling five points does not prove total occlusion.
+- A small target is not automatically a 2.5.8 failure: check spacing, equivalent controls, inline, user-agent and essential exceptions. Measure CSS pixels without rounding 23.75 to 24.
+- WCAG-EM 2.0 covers scope, support baseline, functionality, states, representative samples and complete processes. A URL or initial DOM alone does not identify every state. Report measured scope and actual methods.
+- ACT Rules Format 1.1 distinguishes passed, failed, inapplicable, cantTell and untested. When measurement is blocked, investigate the cause and retry using an appropriate supported method; never replace unknown with a fabricated definitive result.
+- The accessibility tree and emulated preferences do not prove actual NVDA/JAWS/VoiceOver speech or real mobile-device behavior.
+
+Sources: https://www.w3.org/TR/wcag22/ ; https://www.w3.org/WAI/ARIA/apg/about/introduction/ ; https://www.w3.org/TR/act-rules-format/ ; https://www.w3.org/TR/2026/NOTE-wcag-em-2-20260723/ ; https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html ; https://www.w3.org/WAI/WCAG22/Understanding/error-identification.html ; https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html ; https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html ; https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum

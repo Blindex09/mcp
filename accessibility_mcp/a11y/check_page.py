@@ -13,8 +13,6 @@ from typing import Any
 from .probes import run_probe
 from .session import Session, SessionError
 
-PROBE_KINDS_WITHOUT_TARGET = ("tab_walk", "focus_obscured", "target_size")
-
 
 def parse_probes(raw: str) -> list[dict[str, str]]:
     """Le a lista de sondas pedida: JSON `[{"kind": "dialog", "target": "css:#abrir"}, ...]`. Texto vazio = nenhuma."""
@@ -68,7 +66,7 @@ async def check_page(
     try:
         walk = await run_probe(session, "tab_walk")
         sizes = await run_probe(session, "target_size")
-        dossier = await session.dossier(max_elements=200)
+        dossier = await session.dossier(max_elements=0)
         page_map = await session.page_map()
         results: list[dict[str, Any]] = []
         for spec in requested:

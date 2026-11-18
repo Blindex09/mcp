@@ -7,6 +7,7 @@ Papeis que nunca se invertem: o MODELO decide o que mudar e por que. O HARNESS (
 - a edicao e uma troca EXATA de um trecho que existe uma unica vez (ou todas, se pedido), nunca uma reescrita as cegas;
 - integridade: um arquivo JSON ou Python que era valido nao pode passar a ser invalido;
 - copia de seguranca antes de cada escrita (fora do projeto) e escrita atomica; `undo` devolve o arquivo;
+- desligado por padrao: ler e permitido, mas as ferramentas de edicao so existem com `A11Y_MCP_ALLOW_EDITS=1` (o MCP audita e sugere, nao muda o projeto);
 - aprovacao: ligada (padrao) a edicao fica RETIDA mostrando o que muda e so acontece quando a pessoa responde; desligada
   (`A11Y_MCP_EDIT_APPROVAL=0`) o agente edita sem perguntar. Nunca uma recusa seca.
 Sem prazo nem teto de tamanho imposto pelo codigo: a pessoa escolhe o recorte de leitura com `offset` e `limit`.
@@ -35,6 +36,11 @@ class FileError(ValueError):
 
 
 # ------------------------------------------------------------------------------------------------ pasta de trabalho
+def edits_allowed() -> bool:
+    """O MCP so audita e sugere: editar arquivos do projeto fica DESLIGADO, a menos que a pessoa ligue (A11Y_MCP_ALLOW_EDITS=1)."""
+    return os.environ.get("A11Y_MCP_ALLOW_EDITS", "0").strip().lower() in ("1", "true", "yes", "on")
+
+
 def approval_enabled() -> bool:
     return os.environ.get("A11Y_MCP_EDIT_APPROVAL", "1").strip().lower() not in ("0", "false", "no", "off")
 

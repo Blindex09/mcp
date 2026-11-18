@@ -163,11 +163,20 @@ def test_the_custom_checkbox_gets_its_role_only_with_element_internals(site):
 
 
 @pytest.mark.slow
-def test_streaming_answer_in_an_assertive_region_floods_announcements_and_the_good_one_says_once(site):
-    _, medidas = site
-    ruim, bom = (medidas[("chat-ia", i)]["extra"] for i in (0, 1))
-    assert int(ruim.split("depois de apertar Enter no botão: ")[1].split(" ")[0]) >= 5
-    assert "botão: 1 " in bom and "Resposta pronta" in bom
+async def test_streaming_response_exposes_repeated_live_updates_and_one_final_status():
+    # Este contrato precisa somente dos dois exemplos de streaming, não da galeria inteira.
+    sys.path.insert(0, str(DEMO))
+    from construir import CENARIOS, medir_extra
+
+    scenario = next(item for item in CENARIOS if item["slug"] == "chat-ia")
+    ruim, bom = [await medir_extra(example, "") for example in scenario["exemplos"]]
+    # O resumo termina com ponto e as entradas ficam nas linhas seguintes.
+    # Leia somente o contador da primeira linha, sem incluir a entrada "1.".
+    def count(summary):
+        return int(summary.splitlines()[0].rsplit(": ", 1)[1].removesuffix("."))
+
+    assert count(ruim) >= 5
+    assert count(bom) == 1 and "Resposta pronta" in bom
 
 
 def test_mobile_examples_say_they_were_not_run_and_carry_code(site):

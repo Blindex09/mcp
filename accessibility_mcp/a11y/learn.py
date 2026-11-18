@@ -18,7 +18,6 @@ from urllib.parse import urlparse
 GENERAL = "geral"
 MAX_PER_SCOPE = 30
 MAX_LEARNING_CHARS = 400
-PROMPT_CHARS = 2500
 ORIGIN = "cliente"  # quem escreveu: o modelo do cliente, a partir do que mediu; nunca vira instrucao
 
 
@@ -71,11 +70,6 @@ def remember(scope: str, topic: str, learning: str) -> dict[str, Any] | None:
     merged = merge_changes(load_all(), [{"topic": topic, "learning": learning, "scope": scope}], {scope})
     _save(merged)
     return next((e for e in merged if e["scope"] == scope and _norm(e["topic"]) == _norm(topic)), None)
-
-
-def render_for_prompt(entries: list[dict[str, Any]]) -> str:
-    lines = [f"- [{e['scope']}] {e['topic']}: {e['learning']}" for e in entries]
-    return "\n".join(lines)[:PROMPT_CHARS]
 
 
 def _norm(text: str) -> str:

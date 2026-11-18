@@ -10,7 +10,7 @@ Fontes e conhecimento compartilhado
 
 As páginas oficiais de Microsoft, W3C e Adobe foram consultadas em 21/10/2026. As URLs e a data estão em accessibility_mcp/a11y/content/assets/document-examples.json. O exercício do governo de Illinois também é uma referência listada. Nenhum arquivo de terceiros foi copiado para a galeria.
 
-O gerador documentos.py usa essa fonte para montar a página e o guia document-behavior-matrix, que fica acessível no catálogo MCP. O conjunto de contratos também pode ser lido como template assets/document-examples.json. É conhecimento próprio de condução dos exemplos e ferramentas deste MCP, não alteração dos guias espelhados do Qaaccessibility. A base passa a conter 72 guias; ferramentas e prompts permanecem 47 e sete.
+O gerador documentos.py usa essa fonte para montar a página e o guia document-behavior-matrix, que fica acessível no catálogo MCP. O conjunto de contratos também pode ser lido como template assets/document-examples.json. É conhecimento próprio de condução dos exemplos e ferramentas deste MCP, não alteração dos guias espelhados do Qaaccessibility. A base passa a conter 72 guias; o servidor expõe 56 ferramentas e sete prompts.
 
 O guia orienta a criar arquivos reais com as ferramentas existentes, avaliar o arquivo efetivo e separar estrutura, julgamento semântico e fala capturada. Inclui os limites de OCR, diferença entre PDF/UA-1 e PDF/UA-2, imagens decorativas, contexto dos links e exportação do Word para PDF. Técnicas W3C são formas de atender critérios, não implementações obrigatórias isoladas.
 
@@ -47,3 +47,14 @@ Verificação final
 Ruff check . e mypy passaram; o mypy verificou 32 arquivos do servidor. A regressão conjunta terminou com 345 testes aprovados e um ignorado em 1115,69 segundos. A rodada específica final teve 79 aprovados em 96,38 segundos, incluindo o caso de título PDF vazio acrescentado depois da coleta da regressão conjunta. Os testes existentes de Firefox passaram no ambiente da suíte, distinto da tentativa adicional de inicialização pelo MCP registrada acima.
 
 A matriz de cobertura foi executada: 11 conceitos cobertos, um parcial e duas lacunas; retornou código 1 pelas pendências declaradas. O pacote wheel foi construído e inspecionado: contém tanto o guia novo quanto os contratos compartilhados. A navegação da galeria e o protocolo MCP real passaram; isso não estabelece a fala real de leitores de tela nem valida todos os clientes de IDE.
+
+
+Revisão de coerência em 29/10/2026
+
+A galeria atual tem 14 assuntos e 46 arquivos: 18 DOCX, 24 PDF e quatro XLSX. Os novos pares Excel demonstram cabeçalhos de tabela e status textual em complemento às cores. Ambos os pares conservam a mesma configuração de painel congelado: congelamento é apoio visual e não prova associação de cabeçalhos. A ausência de tabela nativa, isoladamente, não determina falha; o contexto, as alternativas de associação e o leitor usado precisam ser verificados.
+
+O validador de XLSX genérico passou a medir planilhas, tabelas, cabeçalhos declarados, nomes definidos e congelamento sem exigir as abas internas do relatório de auditoria. A geração desses relatórios continua verificando seu contrato próprio. Os exemplos inadequados de Excel não são aprovados semanticamente por uma checagem estrutural verde. A página explica os limites da automação.
+
+Os guias deixaram de tratar títulos significativos dentro de itens de lista como erro automático. Também explicam que Tab, leitura linear e navegação por títulos percorrem conjuntos diferentes de elementos. O exemplo web correspondente foi corrigido e medido novamente. Os guias de origem do Qaaccessibility e o índice de conhecimento foram sincronizados.
+
+O relatório Word e PDF agora usa listas numeradas estruturadas para os passos de reprodução, com sequência reiniciada por modalidade. O XLSX conserva texto organizado nas células. A regressão verifica os blocos, a numeração real no DOCX e as tags de lista no PDF efetivo. O registro desta revisão e os limites das avaliações estão em coerencia_documentos.md e coerencia_documentos_evidencias.json.

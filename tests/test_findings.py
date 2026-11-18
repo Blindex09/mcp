@@ -25,6 +25,11 @@ def test_build_validates_only_objective_facts():
     f, notes = build({"claim": "Botao sem nome", "criterion": "WCAG 4.1.2", "severity": "SERIOUS", "target": "e1", "evidence_steps": [1, 2]})
     assert f["criterion"] == "4.1.2" and f["criterion_name"] == "Name, Role, Value" and f["level"] == "A"
     assert f["severity"] == "serious" and f["element"]["name"] == "Comprar" and f["evidence_steps"] == [1, 2] and notes == []
+    assert f["priority"] == "P1" and f["principle"] == "Robusto"
+
+    f, notes = build({"claim": "Foco fora de ordem", "criterion": "2.4.3", "severity": "moderate", "target": "e1"})
+    assert f["priority"] == "P2" and f["principle"] == "Operável"
+    assert f["guideline"] == "2.4" and f["guideline_name"] == "Navegável" and notes == []
 
     f, notes = build({"claim": "x", "criterion": "7.7.7", "severity": "enorme", "target": "e99", "evidence_steps": [2, 9]})
     assert f["criterion"] is None and f["severity"] == "unrated"  # criterio inexistente e gravidade fora da escala: nada inventado
@@ -90,11 +95,17 @@ async def test_manual_tools_probe_finding_trace_and_report_formats():
         probe = json.loads(await call("a11y_probe", kind="dialog", target=opener["id"]))
         assert "foco_vai_para_dentro" in probe["unmet"] and "escape_fecha" in probe["unmet"]
         trace = json.loads(await call("a11y_trace"))
-        assert trace["total"] == 1 and trace["steps"][0]["kind"] == "probe:dialog"
+        assert trace["total"] == 2 and [t["kind"] for t in trace["steps"]] == ["dossier", "probe:dialog"]  # o dossie tambem vira passo citavel
 
-        ok = json.loads(await call("a11y_finding", claim="o foco nao entra no dialogo ao abrir", criterion="2.4.3", severity="serious", target=opener["id"], evidence_steps="1"))
+        ok = json.loads(await call("a11y_finding", claim="o foco nao entra no dialogo ao abrir", criterion="2.4.3", severity="serious", target=opener["id"], evidence_steps="2",
+                                   problem_location="Página de exemplo > conteúdo principal > botão Abrir",
+                                   reproduction_steps_keyboard=["Abra a página de exemplo.", "Use Tab até Abrir e pressione Enter."],
+                                   reproduction_steps_screen_reader_proposed=["NVDA em modo de navegação: B até Abrir; orientação ainda não executada."]))
+        assert ok["recorded"]["report_details"]["problem_location"] == "Página de exemplo > conteúdo principal > botão Abrir"
+        assert ok["recorded"]["report_details"]["reproduction_steps_keyboard"] == ["Abra a página de exemplo.", "Use Tab até Abrir e pressione Enter."]
         assert ok["recorded"]["outcome"] == "failed" and ok["recorded"]["verification"]["verdict"] == "recorded" and ok["recorded"]["element"]["name"] == "Abrir"
-        weak = json.loads(await call("a11y_finding", claim="algo parece estranho", criterion="9.9.9"))
+        assert ok["recorded"]["report_details"]["reproduction_steps_screen_reader_proposed"] == ["NVDA em modo de navegação: B até Abrir; orientação ainda não executada."]
+        weak = json.loads(await call("a11y_finding", claim="algo parece estranho", criterion="9.9.9", reproduction_steps_screen_reader_proposed=["Orientação proposta, sem execução."]))
         assert weak["recorded"]["outcome"] == "cantTell" and weak["recorded"]["criterion"] is None
         assert "sem afirmacao" in json.loads(await call("a11y_finding", claim=""))["error"]
 
@@ -104,6 +115,7 @@ async def test_manual_tools_probe_finding_trace_and_report_formats():
         assert sarif["runs"][0]["results"][0]["ruleId"] == "WCAG-2.4.3"
         js = json.loads(await call("a11y_report", format="json"))
         assert js["counts"]["failed"] == 1 and js["counts"]["cantTell"] == 1
+        assert js["findings"][0]["report_details"]["problem_location"] == ok["recorded"]["report_details"]["problem_location"]
         assert "format" in json.loads(await call("a11y_report", format="xml"))["error"]
         assert "invalida" in json.loads(await call("a11y_probe", kind="zzz"))["error"]
     finally:

@@ -26,6 +26,15 @@ Passo "2/6 Pacotes do agente e NVDA portatil do Guidepup (uns 400 MB)"
 Push-Location $pastaNvda
 npm install --no-fund --no-audit
 npx @guidepup/setup install nvda
+$vozInstalada = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Speech_OneCore\Voices\Tokens" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty PSChildName -First 1
+$inisGuidepup = Get-ChildItem "$env:LOCALAPPDATA\guidepup" -Recurse -Filter "nvda.ini" -ErrorAction SilentlyContinue
+foreach ($ini in $inisGuidepup) {
+  $conteudoIni = (Get-Content $ini.FullName -Raw).Replace("showSpeechViewerAtStartup = True", "showSpeechViewerAtStartup = False")
+  if ($vozInstalada) {
+    $conteudoIni = $conteudoIni.Replace("MSTTS_V110_enGB_GeorgeM", $vozInstalada)
+  }
+  Set-Content -Path $ini.FullName -Value $conteudoIni -Encoding UTF8
+}
 Pop-Location
 
 Passo "3/6 A VM nao pode dormir nem apagar a tela durante o teste"
@@ -59,7 +68,7 @@ node vm\agent.mjs
 "@ | Set-Content -Path $iniciar -Encoding ASCII
 $acao = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c `"$iniciar`""
 $gatilho = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
-Register-ScheduledTask -TaskName "A11Y NVDA agente" -Action $acao -Trigger $gatilho -RunLevel Limited -Force | Out-Null
+Register-ScheduledTask -TaskName "A11Y NVDA agente" -Action $acao -Trigger $gatilho -RunLevel Highest -Force | Out-Null
 Start-ScheduledTask -TaskName "A11Y NVDA agente"
 
 Passo "6/6 Pronto. Configure no cliente MCP (no seu computador, nao aqui):"

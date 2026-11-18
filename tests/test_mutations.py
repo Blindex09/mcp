@@ -262,6 +262,26 @@ async def test_denied_form_submission_is_never_sent_and_the_page_stays(api):
         await SESSION.close()
 
 
+async def test_held_submission_does_not_run_site_handler_before_replay(api):
+    html = real_form(api).replace('</body>', '''<script>
+      window.submitCalls = 0;
+      document.querySelector('form').addEventListener('submit', event => {
+        window.submitCalls++;
+        event.submitter.disabled = true;
+      });
+    </script></body>''')
+    await SESSION.open(None, html, allow_mutations="ask", persona="keyboard")
+    try:
+        await SESSION.act("press", "", "Tab")
+        await SESSION.act("press", "", "Tab")
+        result = await SESSION.act("press", "", "Enter")
+        assert await SESSION.page.evaluate('window.submitCalls') == 0
+        await SESSION.decide("allow", [result["approvals_pending"][0]["id"]])
+        assert Recorder.seen.count("POST") == 1
+    finally:
+        await SESSION.close()
+
+
 async def test_keyboard_submission_is_also_held_and_replayed(api):
     await SESSION.open(None, real_form(api), allow_mutations="ask", persona="keyboard")
     try:
@@ -270,6 +290,26 @@ async def test_keyboard_submission_is_also_held_and_replayed(api):
         r = await SESSION.act("press", "", "Enter")
         assert len(r["approvals_pending"]) == 1 and "POST" not in Recorder.seen
         await SESSION.decide("allow")
+        assert Recorder.seen.count("POST") == 1
+    finally:
+        await SESSION.close()
+
+
+async def test_programmatic_form_submit_is_held_and_replayed_once_after_approval(api):
+    html = f"""<!doctype html><html lang="pt"><title>f</title><body>
+    <form id="f" method="post" action="{api}/form"><input name="email" value="a@b.com"></form>
+    <button id="enviar" type="button" onclick="document.getElementById('f').submit()">Enviar</button>
+    </body></html>"""
+    await SESSION.open(None, html, allow_mutations="ask")
+    try:
+        send = {e["text"]: e["id"] for e in (await SESSION.dossier())["elements"] if e["text"]}["Enviar"]
+        result = await SESSION.act("click", send)
+        assert len(result["approvals_pending"]) == 1
+        item = result["approvals_pending"][0]
+        assert item["method"] == "POST" and item["fields"] == ["email (7 caracteres)"]
+        assert "a@b.com" not in str(item) and "POST" not in Recorder.seen
+
+        await SESSION.decide("allow", [item["id"]])
         assert Recorder.seen.count("POST") == 1
     finally:
         await SESSION.close()

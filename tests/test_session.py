@@ -57,6 +57,36 @@ async def _by(session, **match):
     raise AssertionError(f"elemento nao achado: {match}")
 
 
+async def test_reach_css_target_without_prior_dossier(site):
+    result = await site.reach('css:#q')
+    assert result['reached'] is True
+    assert result['tab_presses'] == 3
+
+
+def test_tree_diff_preserves_more_than_forty_changes():
+    lines = [f'- text "Linha {i}"' for i in range(55)]
+    assert tree_diff([], lines)['added'] == lines
+    assert tree_diff(lines, [])['removed'] == lines
+
+
+async def test_observation_preserves_long_tree_and_all_live_updates():
+    html = '<!doctype html><html lang="pt"><title>Grande</title><body>'
+    html += ''.join(f'<p>Linha {i}</p>' for i in range(450))
+    html += ''.join(f'<div role="status" id="s{i}"></div>' for i in range(25))
+    await SESSION.open(None, html + '</body></html>')
+    try:
+        await SESSION.page.evaluate('''() => {
+          for (let i=0; i<25; i++) document.getElementById('s'+i).textContent = 'x'.repeat(250) + i;
+        }''')
+        result = await SESSION.observe()
+        assert any('Linha 449' in line for line in result['accessibility_tree'])
+        assert len(result['recent_announcements']) == 25
+        assert result['recent_announcements'][-1]['text'] == 'x' * 250 + '24'
+        assert (await SESSION.observe())['recent_announcements'] == []
+    finally:
+        await SESSION.close()
+
+
 async def test_dossier_gives_facts_not_classification(site):
     d = await site.dossier()
     assert d["title"] == "Loja" and len(d["elements"]) >= 8

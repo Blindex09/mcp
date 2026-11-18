@@ -12,7 +12,8 @@ from . import wcag
 
 class Block(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    kind: Literal["paragraph", "heading", "list", "table", "image", "link"]
+    kind: Literal["paragraph", "heading", "list", "table", "image", "link", "field"]
+    id: str = Field(default="", pattern=r"^(?:[A-Za-z][A-Za-z0-9_]{0,39})?$")
     text: str = ""
     level: int = Field(default=2, ge=2, le=6)
     items: list[str] = Field(default_factory=list)
@@ -22,6 +23,14 @@ class Block(BaseModel):
     source: str = ""
     alt: str = ""
     url: str = ""
+    field_name: str = Field(default="", pattern=r"^(?:[A-Za-z][A-Za-z0-9_]{0,39})?$")
+    field_type: Literal["text", "checkbox", "choice"] = "text"
+    value: str = ""
+    checked: bool = False
+    required: bool = False
+    help_text: str = ""
+    options: list[str] = Field(default_factory=list)
+    multiline: bool = False
 
     @model_validator(mode="after")
     def check_content(self) -> Block:
@@ -40,8 +49,25 @@ class Block(BaseModel):
             parsed = urlsplit(self.url)
             valid = parsed.scheme in ("http", "https") and bool(parsed.netloc)
             valid = valid or (parsed.scheme == "mailto" and bool(parsed.path))
+            valid = valid or (self.url.startswith("#") and bool(self.url[1:]))
             if not valid:
-                raise ValueError("Link deve usar http, https ou mailto.")
+                raise ValueError("Link deve usar http, https, mailto ou um destino interno #id.")
+        if self.id and self.kind != "heading":
+            raise ValueError("id identifica somente titulos de destino.")
+        if self.kind == "field":
+            if not self.field_name or not self.text.strip() or not self.help_text.strip():
+                raise ValueError("Campo exige field_name, text como rotulo e help_text como instrucao.")
+            if self.field_type == "choice":
+                if not self.options or any(not option.strip() for option in self.options) or len(set(self.options)) != len(self.options):
+                    raise ValueError("Escolha exige opcoes distintas e nao vazias.")
+                if self.value and self.value not in self.options:
+                    raise ValueError("O valor deve pertencer as opcoes da escolha.")
+            elif self.options:
+                raise ValueError("options pertence somente a campos choice.")
+            if self.multiline and self.field_type != "text":
+                raise ValueError("multiline pertence somente a campos text.")
+            if self.field_type == "checkbox" and self.value:
+                raise ValueError("Use checked para o estado de uma caixa de selecao.")
         return self
 
 
@@ -72,6 +98,7 @@ class DocumentSpec(BaseModel):
     language: str = Field(default="pt-BR", pattern=r"^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$")
     author: str = ""
     subject: str = ""
+    toc: bool = False
     blocks: list[Block] = Field(min_length=1)
     assessments: list[Assessment] = Field(default_factory=list)
 
@@ -88,4 +115,17 @@ class DocumentSpec(BaseModel):
         ids = [a.criterion for a in self.assessments]
         if len(ids) != len(set(ids)):
             raise ValueError("Um criterio nao pode ter duas conclusoes no mesmo documento.")
+        headings = [block.id or f"sec_{index}" for index, block in enumerate(self.blocks, 1) if block.kind == "heading"]
+        if len(set(headings)) != len(headings) or "document_title" in headings:
+            raise ValueError("Destinos de titulos devem ser unicos; document_title e reservado.")
+        for block in self.blocks:
+            if block.kind == "link" and block.url.startswith("#") and block.url[1:] not in {"document_title", *headings}:
+                raise ValueError("O destino interno do link nao existe neste documento.")
+        names = [block.field_name for block in self.blocks if block.kind == "field"]
+        if len(set(names)) != len(names):
+            raise ValueError("Nomes de campos devem ser unicos.")
+        if set(names) & {"document_title", *headings}:
+            raise ValueError("Campos e destinos internos devem ter identificadores distintos.")
+        if self.toc and not headings:
+            raise ValueError("O sumario precisa de pelo menos um titulo de secao.")
         return self

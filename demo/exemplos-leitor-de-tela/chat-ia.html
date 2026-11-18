@@ -22,7 +22,7 @@
 <li><details open><summary>Componentes</summary><ul><li><a href="carrossel.html">Carrossel</a></li><li><a href="dica.html">Dica (tooltip)</a></li><li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li><li><a href="arvore.html">Árvore (tree view)</a></li><li><a href="tabela-ordenavel.html">Tabela ordenável</a></li><li><a href="web-components.html">Web Components (elemento personalizado)</a></li><li><a href="chat-ia.html" aria-current="page">Resposta de IA em streaming</a></li></ul></details></li>
 <li><details><summary>Frameworks</summary><ul><li><a href="pilha-react.html">React</a></li><li><a href="pilha-vue.html">Vue</a></li><li><a href="pilha-svelte.html">Svelte</a></li><li><a href="pilha-angular.html">Angular</a></li></ul></details></li>
 <li><details><summary>Mobile (só código)</summary><ul><li><a href="android.html">Android (Jetpack Compose)</a></li><li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li></ul></details></li>
-<li><details><summary>Documentos acessíveis</summary><ul><li><a href="documentos.html">Word e PDF</a></li></ul></details></li>
+<li><details><summary>Documentos acessíveis</summary><ul><li><a href="documentos.html">Word, PDF e Excel</a></li></ul></details></li>
 </ul>
 </nav>
 </div>
@@ -30,7 +30,7 @@
 <main id="conteudo" tabindex="-1">
 <div class="coluna">
 <h1>Resposta de IA em streaming</h1>
-<p>Uma resposta que chega aos poucos não pode ser uma região viva atualizada a cada palavra: o leitor de tela fica falando por cima de si mesmo. O padrão do MCP é escrever a resposta numa área que não anuncia e avisar uma vez, no fim, numa região de status. O número de anúncios abaixo é medido, sem veredito.</p>
+<p>Uma região assertiva atualizada a cada palavra pode provocar interrupções repetidas. Os exemplos comparam essa estrutura com a resposta fora da região viva e um status ao final. A contagem abaixo mede atualizações observadas na região, não anúncios ouvidos; leitores podem agrupar ou suprimir atualizações.</p>
 <nav class="neste-texto" aria-labelledby="neste-texto"><h2 id="neste-texto">Nesta página</h2>
 <ol>
 <li><a href="#ex-1">Exemplo ruim: Cada palavra numa região assertiva</a></li>
@@ -40,7 +40,7 @@
 <h2 id="ex-1"><span class="etiqueta t-ruim">Exemplo ruim:</span> Cada palavra numa região assertiva</h2>
 <div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Cada palavra numa região assertiva"><button type="button" id="chat-ruim-btn">Perguntar</button><div id="chat-ruim-resp" aria-live="assertive"></div><script>document.getElementById('chat-ruim-btn').addEventListener('click',function(){var r=document.getElementById('chat-ruim-resp');r.textContent='';'O chá verde deve ser preparado com água abaixo de oitenta graus'.split(' ').forEach(function(p,i){setTimeout(function(){r.textContent+=p+' ';},i*40);});});</script></div>
 <h3>Por quê</h3>
-<p>Cada palavra que entra é uma mudança numa região assertiva: o leitor de tela interrompe e repete, e quem usa se perde antes de a resposta acabar.</p>
+<p>Cada palavra acrescenta uma mudança à região assertiva. Essa estrutura pode causar interrupções repetidas; a contagem de mutações não comprova quantas mensagens um leitor efetivamente fala. A fala precisa ser verificada na combinação de leitor e navegador usada.</p>
 <h3>O que corrigir</h3>
 <p>Escreva a resposta num elemento sem aria-live, mantenha o foco no campo e avise uma vez, no fim, numa região de status (Resposta pronta).</p>
 <h3>O que o navegador entrega ao leitor de tela (medido)</h3>
@@ -48,7 +48,7 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
 <h3>Medida a mais (feita pelo MCP)</h3>
-<pre>Anúncios que o leitor de tela receberia depois de apertar Enter no botão: 12 (o MCP guarda no máximo 20 por ação).
+<pre>Atualizações observadas em regiões vivas após Enter no botão: 12.
 1. [aria-live=assertive] O
 2. [aria-live=assertive] O chá
 3. [aria-live=assertive] O chá verde
@@ -67,7 +67,7 @@
 <h2 id="ex-2"><span class="etiqueta t-bom">Exemplo bom:</span> Resposta sem região viva e um aviso no fim</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Resposta sem região viva e um aviso no fim"><button type="button" id="chat-bom-btn">Perguntar</button><div id="chat-bom-resp" aria-busy="false"></div><div role="status" id="chat-bom-aviso"></div><script>document.getElementById('chat-bom-btn').addEventListener('click',function(){var r=document.getElementById('chat-bom-resp'),a=document.getElementById('chat-bom-aviso');r.textContent='';r.setAttribute('aria-busy','true');var t='O chá verde deve ser preparado com água abaixo de oitenta graus'.split(' ');t.forEach(function(p,i){setTimeout(function(){r.textContent+=p+' ';if(i===t.length-1){r.setAttribute('aria-busy','false');a.textContent='Resposta pronta';}},i*40);});});</script></div>
 <h3>Por quê</h3>
-<p>A resposta aparece sem interromper ninguém. Um único aviso, Resposta pronta, chega no fim, e a pessoa lê o texto quando quiser.</p>
+<p>A resposta é escrita fora da região viva. Ao final, um único status Resposta pronta é exposto, e o texto permanece disponível para leitura. O comportamento de fala depende do leitor e não foi capturado nesta medição.</p>
 <h3>O que corrigir</h3>
 <p>Nada a corrigir.</p>
 <h3>O que o navegador entrega ao leitor de tela (medido)</h3>
@@ -76,7 +76,7 @@
 <h3>O que o axe acha (medido)</h3>
 <p>O axe não achou nenhuma violação (nível AA).</p>
 <h3>Medida a mais (feita pelo MCP)</h3>
-<pre>Anúncios que o leitor de tela receberia depois de apertar Enter no botão: 1 (o MCP guarda no máximo 20 por ação).
+<pre>Atualizações observadas em regiões vivas após Enter no botão: 1.
 1. [status] Resposta pronta</pre>
 <h3>Código</h3>
 <p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: Resposta sem região viva e um aviso no fim">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>

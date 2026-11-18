@@ -63,7 +63,7 @@ Test by navigating headings, landmarks, controls, and reading order with the tar
 
 ## 5. Headings, landmarks, and regions
 
-- Use headings for document outline, not font size, tool status, thought text, or visual card titles.
+- Use headings for meaningful document sections, including sections inside list items or cards when appropriate. Do not choose a heading solely for font size, tool status or thought text. A list with meaningful headings is not automatically duplicate semantics.
 - Use landmarks for meaningful page areas. A `<section>` becomes a region only when it has an accessible name.
 - Label repeated landmarks uniquely. Do not include the role word in the label (for example, label a `nav` “Principal”, not “Navegação principal”).
 - Avoid landmark proliferation. Routine AI tool calls, transient progress, and each chat message do not need individual region landmarks.

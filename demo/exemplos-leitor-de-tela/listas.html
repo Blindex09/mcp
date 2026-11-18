@@ -22,7 +22,7 @@
 <li><details><summary>Componentes</summary><ul><li><a href="carrossel.html">Carrossel</a></li><li><a href="dica.html">Dica (tooltip)</a></li><li><a href="lista-de-opcoes.html">Lista de opções (listbox)</a></li><li><a href="arvore.html">Árvore (tree view)</a></li><li><a href="tabela-ordenavel.html">Tabela ordenável</a></li><li><a href="web-components.html">Web Components (elemento personalizado)</a></li><li><a href="chat-ia.html">Resposta de IA em streaming</a></li></ul></details></li>
 <li><details><summary>Frameworks</summary><ul><li><a href="pilha-react.html">React</a></li><li><a href="pilha-vue.html">Vue</a></li><li><a href="pilha-svelte.html">Svelte</a></li><li><a href="pilha-angular.html">Angular</a></li></ul></details></li>
 <li><details><summary>Mobile (só código)</summary><ul><li><a href="android.html">Android (Jetpack Compose)</a></li><li><a href="ios.html">iOS (SwiftUI e UIKit)</a></li></ul></details></li>
-<li><details><summary>Documentos acessíveis</summary><ul><li><a href="documentos.html">Word e PDF</a></li></ul></details></li>
+<li><details><summary>Documentos acessíveis</summary><ul><li><a href="documentos.html">Word, PDF e Excel</a></li></ul></details></li>
 </ul>
 </nav>
 </div>
@@ -35,7 +35,7 @@
 <ol>
 <li><a href="#ex-1">Exemplo ruim: Lista falsa feita de divs com bolinha no texto</a></li>
 <li><a href="#ex-2">Exemplo bom: Lista de verdade</a></li>
-<li><a href="#ex-3">Exemplo ruim: Lista de cartões com um título dentro de cada item</a></li>
+<li><a href="#ex-3">Não precisa corrigir: Lista de itens com títulos de seção</a></li>
 <li><a href="#ex-4">Exemplo bom: Lista de cartões como lista de links com descrição</a></li>
 </ol>
 </nav>
@@ -68,12 +68,12 @@
 <h3>Código</h3>
 <p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-2" aria-label="Copiar código para a área de transferência: Lista de verdade">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
 <pre id="codigo-2"><code>&lt;ul&gt;&lt;li&gt;Sencha&lt;/li&gt;&lt;li&gt;Matcha&lt;/li&gt;&lt;li&gt;Gyokuro&lt;/li&gt;&lt;/ul&gt;</code></pre>
-<h2 id="ex-3"><span class="etiqueta t-ruim">Exemplo ruim:</span> Lista de cartões com um título dentro de cada item</h2>
-<div class="exemplo exemplo-ruim" role="group" aria-label="Exemplo ao vivo, exemplo ruim: Lista de cartões com um título dentro de cada item"><ul class="cartoes"><li><h3><a href="#sencha">Sencha</a></h3><p>Chá verde japonês.</p></li><li><h3><a href="#matcha">Matcha</a></h3><p>Chá verde em pó.</p></li></ul></div>
+<h2 id="ex-3"><span class="etiqueta t-ok">Não precisa corrigir:</span> Lista de itens com títulos de seção</h2>
+<div class="exemplo exemplo-ok" role="group" aria-label="Exemplo ao vivo, não precisa corrigir: Lista de itens com títulos de seção"><ul class="cartoes"><li><h3><a href="#sencha">Sencha</a></h3><p>Chá verde japonês.</p></li><li><h3><a href="#matcha">Matcha</a></h3><p>Chá verde em pó.</p></li></ul></div>
 <h3>Por quê</h3>
-<p>É HTML válido, mas a mesma informação aparece duas vezes: o leitor de tela anuncia &quot;lista com 2 itens&quot; e, em cada item, um título com o nível do h3. Quem navega por títulos passa a encontrar rótulos de cartão no lugar da estrutura da página. O guia aria-rules-dos-and-donts do MCP diz para usar título na estrutura do documento e não em título visual de cartão, e para expor cada informação uma só vez.</p>
+<p>A lista representa a coleção; os títulos representam seções dentro dos itens. São relações diferentes e podem coexistir. Neste exemplo os títulos identificam o assunto de cada item e mantêm seu nível h3 na árvore. Essa combinação, isoladamente, não prova falha nem duplicação indevida.</p>
 <h3>O que corrigir</h3>
-<p>Troque por uma lista de links com descrição: ul, li e, dentro do item, o link com o nome do cartão e o parágrafo. A lista dá a contagem e os saltos; o link já é o nome. Se cada cartão for mesmo uma seção que merece estar no mapa da página, deixe os títulos e tire a lista, nunca os dois.</p>
+<p>Não remova uma lista ou um título válido apenas por estarem combinados. Confira se os títulos descrevem seções reais e formam uma hierarquia coerente. Se foram usados somente para mudar a fonte, corrija essa escolha de marcação mantendo o estilo por CSS.</p>
 <h3>O que o navegador entrega ao leitor de tela (medido)</h3>
 <pre>- list:
   - listitem:
@@ -87,14 +87,14 @@
         - /url: &quot;#matcha&quot;
     - paragraph: Chá verde em pó.</pre>
 <h3>O que o axe acha (medido)</h3>
-<p>O axe não achou nada neste exemplo. É um problema que só aparece olhando a árvore de acessibilidade ou ouvindo com o leitor de tela.</p>
+<p>O axe não achou nenhuma violação (nível AA).</p>
 <h3>Código</h3>
-<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-3" aria-label="Copiar código para a área de transferência: Lista de cartões com um título dentro de cada item">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
+<p class="copiar-linha"><button type="button" class="botao" data-copiar="codigo-3" aria-label="Copiar código para a área de transferência: Lista de itens com títulos de seção">Copiar código para a área de transferência</button><span class="selo" aria-hidden="true" hidden>Código copiado</span></p>
 <pre id="codigo-3"><code>&lt;ul class=&quot;cartoes&quot;&gt;&lt;li&gt;&lt;h3&gt;&lt;a href=&quot;#sencha&quot;&gt;Sencha&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Chá verde japonês.&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;h3&gt;&lt;a href=&quot;#matcha&quot;&gt;Matcha&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Chá verde em pó.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;</code></pre>
 <h2 id="ex-4"><span class="etiqueta t-bom">Exemplo bom:</span> Lista de cartões como lista de links com descrição</h2>
 <div class="exemplo exemplo-bom" role="group" aria-label="Exemplo ao vivo, exemplo bom: Lista de cartões como lista de links com descrição"><ul class="cartoes"><li><a href="#sencha">Sencha</a><p>Chá verde japonês.</p></li><li><a href="#matcha">Matcha</a><p>Chá verde em pó.</p></li></ul></div>
 <h3>Por quê</h3>
-<p>Uma só estrutura: o leitor de tela anuncia a lista com o total de itens e, em cada item, o link com o nome do cartão e a descrição. A lista de títulos da página continua só com os títulos de verdade.</p>
+<p>Nesta variante, cada item reúne um link e sua descrição, sem formar uma subseção. A lista comunica a coleção e os links mantêm seus nomes na árvore de acessibilidade. A ausência de títulos é adequada a esta organização; não é uma regra para todos os cartões.</p>
 <h3>O que corrigir</h3>
 <p>Nada a corrigir.</p>
 <h3>O que o navegador entrega ao leitor de tela (medido)</h3>

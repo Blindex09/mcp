@@ -1,4 +1,4 @@
-"""Integration and startup smoke-tests for mcp_server."""
+﻿"""Integration and startup smoke-tests for mcp_server."""
 import importlib.util
 import json
 import subprocess
@@ -43,6 +43,7 @@ def test_server_identity_and_instructions() -> None:
     assert mod.mcp.name == "accessibility"
     assert callable(mod.main)
     assert "never calls a model" in mod.mcp.instructions and "a11y_list_content" in mod.mcp.instructions
+    assert "a11y_remote_mcp_connect" in mod.mcp.instructions and "credentials require HTTPS" in mod.mcp.instructions
 
 
 async def test_server_exposes_only_accessibility_tools() -> None:
@@ -57,12 +58,16 @@ async def test_server_exposes_only_accessibility_tools() -> None:
         "a11y_open", "a11y_close", "a11y_dossier", "a11y_observe", "a11y_act", "a11y_reach",
         "a11y_announce", "a11y_screenshot", "a11y_design_tokens", "a11y_preview_css", "a11y_stress", "a11y_focus_style",
         # diagnostico, cobertura, aprovacao e aprendizado (o modelo e o do cliente; o servidor nao chama modelo)
-        "a11y_nvda_speech", "a11y_status", "a11y_compare_browsers", "a11y_page_map", "a11y_coverage", "a11y_crawl", "a11y_approve", "a11y_learnings", "a11y_learn", "a11y_forget",
+        "a11y_nvda_speech", "a11y_nvda_open", "a11y_nvda_do", "a11y_nvda_close", "a11y_status", "a11y_compare_browsers", "a11y_page_map", "a11y_coverage", "a11y_crawl", "a11y_approve", "a11y_learnings", "a11y_learn", "a11y_forget",
         # editor de arquivos do projeto da pessoa
         "a11y_set_workspace", "a11y_read_file", "a11y_edit_file", "a11y_approve_edit", "a11y_undo_edit",
         # sondas de comportamento, achados com evidencia, execucoes salvas
         "a11y_probe", "a11y_check_page", "a11y_finding", "a11y_trace", "a11y_report", "a11y_runs", "a11y_export", "a11y_diff",
         "a11y_create_document", "a11y_validate_document", "a11y_create_report",
+        # interoperaÃ§Ã£o remota MCP/A2A, com aprovaÃ§Ã£o para chamadas externas
+        "a11y_remote_mcp_connect", "a11y_remote_mcp_connections", "a11y_remote_mcp_list_tools",
+        "a11y_remote_mcp_call", "a11y_remote_approve", "a11y_remote_mcp_disconnect",
+        "a11y_a2a_agent_card", "a11y_a2a_send_message", "a11y_a2a_get_task",
     }
     assert not any("skill" in n for n in names)
     # nenhuma ferramenta depende de modelo: as de antes (busca por modelo, usuario autonomo, revisao autonoma) nao existem mais

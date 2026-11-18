@@ -75,9 +75,50 @@ Verificação: 15 testes Node passaram, incluindo contrato de inicialização co
 viewport livre, maximização da janela correta, dimensões e desconexão na falha.
 Ruff, mypy e os oito testes Python da integração também passaram. A matriz foi
 executada novamente: 12 conceitos cobertos, um parcial e uma lacuna já descritos.
-A execução real continua pendente pelo bloqueio de segurança anterior; não foi
-tentada uma rota alternativa. Esses testes não comprovam a maximização na tela
-do usuário nem a correção do foco ao vivo.
+
+## Execução ao vivo na VM e alinhamento com o Guidepup, 05/11/2026
+
+A execução real numa máquina virtual Windows com NVDA controlado pelo Guidepup
+revelou cinco causas na costura entre `nvda/focus.mjs`, `nvda/walk.mjs` e a
+implementação interna do `@guidepup/guidepup` (`NVDAClient.ts`,
+`navigateToWebContent.ts` e `overrides/userConfig/nvda.ini`):
+
+1. O NVDA insere espaços nas transições entre letras maiúsculas, minúsculas e
+   dígitos ao anunciar o título da janela (`A11yNvda...` é falado como
+   `A 11y Nvda ...`). A conferência foi ajustada para normalizar o texto falado
+   e o marcador em minúsculas e sem espaços ou pontuação, seguindo o padrão de
+   `cleanString.ts` do Guidepup.
+2. No `NVDAClient.ts` do Guidepup, o modo padrão `capture: "initial"` encerra a
+   escuta do evento `speak` na primeira mensagem recebida. Quando o NVDA emite
+   um pacote `speak` inicial sem texto antes da frase falada, a frase real é
+   descartada. O `nvda.start` passou a usar `capture: true`, enquanto comandos
+   auxiliares de preparação e troca de janela (`exitFocusMode`,
+   `toggleBetweenBrowseAndFocusMode`, `Alt+Escape`) usam `{ capture: false }`
+   como em `navigateToWebContent.ts`.
+3. Na reativação após `page.reload()`, chamar `windowsActivate` novamente sobre
+   uma janela já ativa e maximizada executava `ShowWindow(hWnd, 9)`
+   (`SW_RESTORE`), desmaximizando a janela e transferindo o foco para a janela
+   de fundo. Agora, quando a janela já foi ativada na sessão, o controle
+   atualiza o título, garante a maximização e confere o título no NVDA antes de
+   recorrer a uma nova ativação externa.
+4. Após confirmar o foco da janela, o controle foca e clica no `body` e alterna
+   `toggleBetweenBrowseAndFocusMode` duas vezes seguido de `exitFocusMode`,
+   sincronizando o cursor virtual do NVDA com o documento web antes da
+   navegação por Tab e seta.
+5. O `nvda.ini` distribuído pelo `@guidepup/nvda` traz `MSTTS_V110_enGB_GeorgeM`
+   fixo e `showSpeechViewerAtStartup = True`. Em sistemas Windows em português
+   (onde só existem as vozes `MSTTS_V110_ptBR_DanielM` e `MariaM`), o script
+   `instalar-na-vm.ps1` agora ajusta a voz para a voz OneCore instalada e
+   desativa a abertura automática da janela do Speech Viewer.
+
+Verificação: 17 testes Node em `nvda/focus.test.mjs`, `nvda/vm/agent.test.mjs`
+e `nvda/window.test.mjs` passaram; 8 testes Python em `tests/test_nvda_vm.py`
+passaram; e a execução ao vivo na VM (o endereço do agente em `A11Y_MCP_NVDA_VM`) contra
+`https://example.com` concluiu com `erro: null`, 12 confirmações seguidas de
+foco (`confirmado: true`), janela maximizada (`1358x636`) e captura real da
+fala do NVDA tanto em `tab` (`Learn more, link`) quanto em `leitura`
+(`This domain is for use in documentation examples without needing permission.`,
+`Avoid use in operations.`, `link, Learn more`).
 
 Referências consultadas: [ativação no Guidepup](https://www.guidepup.dev/docs/api/class-windows-activate),
 [testes com NVDA](https://www.guidepup.dev/docs/screen-reader-testing/testing-nvda)

@@ -27,6 +27,14 @@ async def _call(**kw):
     return json.loads(await mcp_server.mcp._tool_manager.get_tool("a11y_check_page").fn(**kw))
 
 
+async def test_single_call_returns_all_controls_on_large_page():
+    html = HEAD + ''.join(f'<button>Botao {i}</button>' for i in range(205)) + '</main></body></html>'
+    result = await _call(html=html)
+    assert len(result['elements']) == 205
+    assert result['elements_not_listed'] == 0
+    assert len(result['tab_walk']['stops']) == 205
+
+
 def test_parse_probes_accepts_a_json_list_and_rejects_the_rest():
     assert cp.parse_probes("") == [] and cp.parse_probes("   ") == []
     assert cp.parse_probes('[{"kind": "dialog", "target": "css:#a"}]') == [{"kind": "dialog", "target": "css:#a", "container": ""}]

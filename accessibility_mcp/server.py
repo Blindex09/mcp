@@ -22,6 +22,7 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
+from accessibility_mcp.a11y.lazy_tools import install as install_lazy_tools
 from accessibility_mcp.a11y.prompts import register_prompts
 from accessibility_mcp.a11y.provisioning import PROVISIONER
 from accessibility_mcp.a11y.session import SESSION
@@ -54,10 +55,11 @@ mcp = FastMCP(
         "SCOPE: this server audits and suggests on sites that already exist. It never redesigns: every suggested fix must keep the existing layout, structure and visual identity; prefer invisible fixes (accessible names, ARIA, focus order, alt text, keyboard support), and when a fix needs a visible change (e.g. contrast) keep it inside the site's own palette and scale and record it in a11y_finding design_impact. It does not edit the person's files unless the person turns the edit tools on (A11Y_MCP_ALLOW_EDITS=1). "
         "A green automated audit does NOT mean accessible: test like a user. "
         "This server never calls a model: YOU (the client model) judge; the tools measure facts. "
+        "TOOLS LOAD ON DEMAND: only a few tools are listed at start (a11y_find_tools, a11y_call, a11y_open, a11y_close, a11y_status). When the task needs another one, call a11y_find_tools(query) with what you want to do: it returns the tool, its schema, and adds it to the list (or use a11y_call(name, arguments)). Every tool named below exists even if it is not listed yet. "
         "1) KNOWLEDGE: a11y_list_content gives the catalog (read the descriptions and choose by meaning); a11y_get_reference / a11y_get_example / "
         "a11y_get_template read the items. Start with the guides testing-playbook-for-ai, component-behavior-matrix, component-identity-guide, "
         "ux-persona-testing and design-language-review. Ready-made workflows are available as MCP prompts (a11y_review, a11y_walkthrough, a11y_component, "
-        "a11y_site_scan, a11y_compare_runs, a11y_write_accessible_code, a11y_accessible_document). "
+        "a11y_site_scan, a11y_compare_runs, a11y_write_accessible_code, a11y_accessible_document, a11y_deliver_audit). "
         "2) TEST LIKE A USER: a11y_open(url|html, persona) starts a persistent session (personas are enforced: "
         "keyboard and screen_reader have no mouse); a11y_dossier gives FACTS about every interactive element so YOU "
         "decide what each really is in that site's context; a11y_act / a11y_reach / a11y_announce probe behavior and "
@@ -83,6 +85,7 @@ mcp = FastMCP(
 instrument(mcp)  # cada ferramenta registrada daqui em diante vira um span (sem args nem resultados)
 register_a11y(mcp)
 register_prompts(mcp)
+install_lazy_tools(mcp)  # por ultimo: a lista do protocolo mostra so o nucleo + o que a conversa ativar
 
 
 def _load_dotenv() -> None:

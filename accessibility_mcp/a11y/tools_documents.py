@@ -9,7 +9,7 @@ from typing import Any, Literal
 
 from mcp.types import ToolAnnotations
 
-from . import documents, report_artifacts, runs
+from . import documents, report_artifacts, report_lint, runs
 from .document_schema import DocumentSpec
 from .document_validation import validate
 from .documents import Formats
@@ -57,6 +57,7 @@ def register_documents(mcp: Any) -> None:
         language: Literal["pt", "pt-BR", "pt-PT"] = "pt-BR",
         run_ids: list[str] | None = None,
         report_context: ReportContext | None = None,
+        allow_incomplete: bool = False,
     ) -> str:
         """Create a plain-language accessibility report as DOCX, tagged PDF, structured XLSX or structured PPTX.
         The narrative is written in simple Portuguese for the person who will fix the code and for the person affected by the problem.
@@ -133,7 +134,12 @@ def register_documents(mcp: Any) -> None:
         reproduction steps (com visão, sem visão), observed code, suggested corrected code, and design impact.
         Group IDs preserve recurring issues without mixing page-specific facts.
         Word and PDF repeat identification and triage as a two-column "Ficha do achado" table for each occurrence before its narrative.
-        Prazos dependem de acordo; prioridade nao cria automaticamente um SLA."""
+        Prazos dependem de acordo; prioridade nao cria automaticamente um SLA.
+
+        HOUSE RULE (enforced, for xlsx, docx, pdf and pptx): nothing goes out unconfirmed and nothing goes out missing. The report is NOT generated while a11y_lint_report would list errors (in Word and PDF every sentence or cell that would say "Não registrado", "Não informado" or "A definir" is an error too): a finding still
+        "cantTell", any column that would stay "Não registrado", observed code not found exactly in the served file or shortened with "…", a fix not tested with a11y_try_patch,
+        design impact not stated, a screen without a name or content, screen-reader steps not executed with the real NVDA (or not declared "Não se aplica" with the reason).
+        The error returns the list; fix it and call again. allow_incomplete=true exists only for when the PERSON explicitly asks for an incomplete draft."""
         try:
             selected_formats = {
                 "docx": ("docx",), "pdf": ("pdf",), "both": ("docx", "pdf"),
@@ -179,6 +185,21 @@ def register_documents(mcp: Any) -> None:
                     page = SESSION._need()
                     record = {"url": page.url, "persona": SESSION.persona, "findings": list(SESSION.findings), "coverage": SESSION.coverage_report()}
             record = apply_context(record, report_context)
+            quality = report_lint.lint(record, selected_formats, title, language)
+            if not quality["ok"] and not allow_incomplete:
+                # REGRA DA CASA: nada vai sem confirmacao e nada vai faltando. O relatorio nao e' gerado; a lista diz o que corrigir.
+                return json.dumps({
+                    "error": "relatorio NAO gerado: " + quality["summary"] + ". Corrija cada item de `lint.issues` (a11y_verify_code, a11y_try_patch, a11y_nvda_do, a11y_finding) e gere de novo. "
+                             "So use allow_incomplete=true se a PESSOA pedir, explicitamente, um rascunho incompleto.",
+                    "lint": quality,
+                }, ensure_ascii=False)
+            fingerprint = documents.report_fingerprint(record, title, selected_formats, language)
+            previous = documents.existing_report(fingerprint)
+            if previous is not None:
+                # REGRA DA CASA: o mesmo relatorio nao e' gerado duas vezes, nem com outro nome nem "acrescentado": devolve o que ja existe.
+                return json.dumps({**previous, "reused": True, "lint": quality,
+                                   "notice": "Relatorio identico ao ja gerado: NAO criei outro arquivo. Use os arquivos de `files`. Se o conteudo mudou, corrija os achados e gere de novo: so entao sai um arquivo novo; "
+                                             "e ao entregar a versao nova, apague a anterior em vez de manter as duas."}, ensure_ascii=False)
             output: dict[str, Any] = {"files": []}
             document_formats = tuple(kind for kind in selected_formats if kind in ("docx", "pdf"))
             artifact_formats = tuple(kind for kind in selected_formats if kind in ("xlsx", "pptx"))
@@ -205,7 +226,33 @@ def register_documents(mcp: Any) -> None:
                 (artifact_folder / "validation.json").write_text(json.dumps(files, ensure_ascii=False, indent=2), encoding="utf-8")
                 output.setdefault("document_id", artifact_id)
                 output["files"].extend(files)
+            output["lint"] = quality
+            documents.remember_report(fingerprint, output)
             return json.dumps(output, ensure_ascii=False)
+        except Exception as e:  # noqa: BLE001 - fronteira MCP com erro explicito
+            return json.dumps({"error": f"{type(e).__name__}: {e}"}, ensure_ascii=False)
+
+    @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False))
+    async def a11y_lint_report(run_id: str = "", run_ids: list[str] | None = None, formats: Literal["docx", "pdf", "both", "xlsx", "pptx", "all"] = "all") -> str:
+        """CHECK A REPORT BEFORE DELIVERING IT. Reads the findings of the current session (or of saved runs) and lists what a reviewer would point out: observed code
+        missing, shortened with "…" or not found exactly in the real file, fix not tested in the browser, design impact not stated, screen without a name, screen-reader
+        steps without an executed NVDA step cited. Each item has finding, rule, severity (erro | aviso | info) and message. Nothing is changed or blocked: fix the
+        findings (a11y_verify_code, a11y_try_patch, a11y_finding) and call again. a11y_create_report also returns this list as `lint`."""
+        try:
+            wanted = list(dict.fromkeys(([run_id] if run_id else []) + (run_ids or [])))
+            findings: list[dict[str, Any]] = []
+            if wanted:
+                for name in wanted:
+                    saved = runs.load(name)
+                    if saved is None:
+                        raise ValueError(f"Execução '{name}' não encontrada; consulte a11y_runs.")
+                    findings.extend(saved.get("findings", []))
+            else:
+                async with SESSION.lock:
+                    SESSION._need()
+                    findings = list(SESSION.findings)
+            kinds = {"docx": ("docx",), "pdf": ("pdf",), "both": ("docx", "pdf"), "xlsx": ("xlsx",), "pptx": ("pptx",), "all": ("docx", "pdf", "xlsx", "pptx")}[formats]
+            return json.dumps(report_lint.lint({"findings": findings}, kinds), ensure_ascii=False)
         except Exception as e:  # noqa: BLE001 - fronteira MCP com erro explicito
             return json.dumps({"error": f"{type(e).__name__}: {e}"}, ensure_ascii=False)
 

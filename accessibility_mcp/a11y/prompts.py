@@ -119,7 +119,26 @@ def texto_a11y_accessible_document(task: str) -> str:
 {REGRAS}"""
 
 
-FLUXOS = ("a11y_review", "a11y_walkthrough", "a11y_component", "a11y_site_scan", "a11y_compare_runs", "a11y_write_accessible_code", "a11y_accessible_document")
+def texto_a11y_deliver_audit(url: str, flow: str) -> str:
+    """Auditoria de ponta a ponta de um site que ja existe, ate o relatorio entregavel (voce conduz as ferramentas)."""
+    return f"""Audit {url} end to end and deliver a report a developer can act on without asking you anything. Flow under test: {flow}.
+
+{GUIAS}
+
+SCOPE: this server audits and suggests on a site that already exists. Every fix must keep the existing layout, structure and visual identity; prefer invisible fixes (accessible names, ARIA, focus order, alt text, keyboard support). When a fix needs a visible change (for example contrast) keep it inside the site's own palette and say so in design_impact. Never edit the person's files.
+
+1. Open the flow with a11y_open(url, persona="keyboard"). List the screens of the flow in order; each screen becomes ONE sheet of the report (use the same name in `screen`).
+2. Walk the WHOLE flow once with a11y_journey (click/press/type steps by css selector). It measures every step: focus dropped on the body, focus left behind the new content, change not announced, focus jumping while typing. Add a11y_page_map, a11y_audit and the matching a11y_probe kinds for the components you meet (dialog, combobox, form_errors, status_update, route_change). Several states can differ between loads (images, random text): never rely on one load.
+3. For each problem, GET the real code from the site, never from memory: a11y_source_of(element) returns its rendered HTML, the exact JS call that creates it (file, position, component) and the CSS rules that apply. If it finds nothing, say so; do not invent code. Prove any other snippet with a11y_verify_code. Do not paraphrase, shorten with "…" or "[...]", or cite a file from another build. If the site was redeployed during the work, verify again.
+4. Write the fix as the SAME code edited minimally, then TEST it before recommending it: a11y_try_patch(asset, old, new) applies it only in this session and reloads; measure again with a11y_journey, a11y_probe or a11y_dossier. Then a11y_finding(from_patches=true) copies observed_code (the exact `old`) and fixed_code (the exact `new`) from the tested patches: nothing typed by hand. a11y_try_patch(clear=true) when done.
+5. Reproduction steps are two separate groups: with sight (low vision or accessibility QA) and without sight (a person who really uses a screen reader). Only write keys and speech that were really executed with a11y_nvda_open / a11y_nvda_do; what was not run goes in the proposed steps. The NVDA of the VM may not record speech that arrives seconds after the last key: say so instead of claiming silence.
+6. Record each confirmed problem with a11y_finding: claim, criterion, severity, screen, observed_code, fixed_code, design_impact, reproduction steps for both groups, evidence_steps. Read the notes it returns: they say when the code does not match or the fix was not tested.
+7. Before delivering run a11y_lint_report and fix every error and warning, then a11y_create_report(formats="xlsx") (one sheet per screen). Deliver the file path and what was NOT verified.
+
+{REGRAS}"""
+
+
+FLUXOS = ("a11y_review", "a11y_walkthrough", "a11y_component", "a11y_site_scan", "a11y_compare_runs", "a11y_write_accessible_code", "a11y_accessible_document", "a11y_deliver_audit")
 
 
 def workflow_text(name: str, url: str = "", task: str = "", persona: str = "keyboard", focus: str = "", selector: str = "", stack: str = "html",
@@ -128,13 +147,15 @@ def workflow_text(name: str, url: str = "", task: str = "", persona: str = "keyb
     faltam = {
         "a11y_review": [("url", url)], "a11y_walkthrough": [("url", url), ("task", task)], "a11y_component": [("url", url), ("selector", selector)],
         "a11y_site_scan": [("url", url)], "a11y_compare_runs": [("base_run_id", base_run_id), ("head_run_id", head_run_id)], "a11y_write_accessible_code": [("task", task)],
-        "a11y_accessible_document": [("task", task)],
+        "a11y_accessible_document": [("task", task)], "a11y_deliver_audit": [("url", url), ("task", task)],
     }
     if name not in faltam:
         raise ValueError(f"fluxo invalido: {name}. Opcoes: {', '.join(FLUXOS)}")
     ausentes = [k for k, v in faltam[name] if not v]
     if ausentes:
         raise ValueError(f"o fluxo {name} precisa de: {', '.join(ausentes)}")
+    if name == "a11y_deliver_audit":
+        return texto_a11y_deliver_audit(url, task)
     if name == "a11y_review":
         return texto_a11y_review(url, focus or "components, keyboard and screen reader, and design")
     if name == "a11y_walkthrough":
@@ -182,6 +203,11 @@ def register_prompts(mcp: Any) -> None:
     def a11y_write_accessible_code(task: str, stack: str = "html") -> str:
         """Write or fix code so it is accessible from the start, then prove it with the probes."""
         return texto_a11y_write_accessible_code(task, stack)
+
+    @mcp.prompt()
+    def a11y_deliver_audit(url: str, task: str) -> str:
+        """Audit an existing site end to end (journey, real code, tested fixes, NVDA) and deliver a report a developer can act on without asking questions."""
+        return texto_a11y_deliver_audit(url, task)
 
     @mcp.prompt()
     def a11y_accessible_document(task: str) -> str:

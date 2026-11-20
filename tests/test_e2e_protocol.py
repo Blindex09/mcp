@@ -90,7 +90,8 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
     base = f"http://127.0.0.1:{site.server_address[1]}"
     SiteHandler.posts = []
     env = {
-        **os.environ, "PYTHONIOENCODING": "utf-8", "A11Y_MCP_HOME": str(tmp_path / "home"),
+        **os.environ, "PYTHONIOENCODING": "utf-8", "A11Y_MCP_HOME": str(tmp_path / "home"), "A11Y_MCP_DOCUMENTS_DIR": str(tmp_path / "documentos"),
+        "A11Y_MCP_LAZY_TOOLS": "0",
     }
     for chave in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "OLLAMA_API_KEY"):
         env.pop(chave, None)  # prova: nada de provedor de modelo no ambiente, e o servidor funciona do mesmo jeito
@@ -129,7 +130,7 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         assert any(c["name"] == "page-structure-review" for c in cat) and all(c["quando_usar"] for c in cat)
         assert "a11y_find" not in registered and "a11y_walkthrough" not in registered and "a11y_review" not in registered  # nada depende de modelo
         prompts = {p.name for p in (await s.list_prompts()).prompts}
-        assert prompts == {"a11y_review", "a11y_walkthrough", "a11y_component", "a11y_site_scan", "a11y_compare_runs", "a11y_write_accessible_code", "a11y_accessible_document"}
+        assert prompts == {"a11y_review", "a11y_walkthrough", "a11y_component", "a11y_site_scan", "a11y_compare_runs", "a11y_write_accessible_code", "a11y_accessible_document", "a11y_deliver_audit"}
         guided = (await s.get_prompt("a11y_review", {"url": f"{base}/index.html"})).messages[0].content.text
         assert "testing-playbook-for-ai" in guided and "NOT verified" in guided and "a11y_probe" in guided
         assert (await call("a11y_workflow", name="a11y_review", url=f"{base}/index.html")).content[0].text == guided  # a mesma coisa por ferramenta (clientes sem prompts)
@@ -213,6 +214,19 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
                             reproduction_steps_screen_reader_proposed=["NVDA, modo de navegação: B até Comprar; orientação não executada."]))
         assert rec["recorded"]["outcome"] == "failed" and rec["recorded"]["element"]["name"] == "Comprar"
         assert rec["recorded"]["report_details"]["reproduction_steps_screen_reader_proposed"] == ["NVDA, modo de navegação: B até Comprar; orientação não executada."]
+        # ---------- codigo real, correcao testada, percurso e conferencia do relatorio
+        fonte = js(await call("a11y_source_of", target=by_text["Comprar"]["id"]))
+        assert "error" not in fonte and "Comprar" in json.dumps(fonte, ensure_ascii=False)
+        assert js(await call("a11y_verify_code", snippets=["isto nao existe em nenhum arquivo da pagina 9f3a"]))["all_found"] is False
+        assert js(await call("a11y_try_patch", clear=True)).get("error") is None
+        jornada = js(await call("a11y_journey", steps=[{"action": "focus", "target": by_text["Comprar"]["id"], "label": "foco no botao"}]))
+        assert "error" not in jornada
+        lint = js(await call("a11y_lint_report"))
+        assert lint["ok"] is False and lint["issues"]  # o achado acima nao tem codigo verificado nem correcao testada
+        # ferramentas sob demanda (neste teste a lista vem completa; o modo enxuto tem teste proprio em test_lazy_tools.py)
+        achadas = js(await call("a11y_find_tools", query="verify code"))
+        assert "a11y_verify_code" in achadas["ativadas"]
+        assert "error" not in js(await call("a11y_call", name="a11y_status"))
         earl = js(await call("a11y_report", format="earl", save=False))
         assert earl["@graph"][0]["earl:result"]["earl:outcome"] == {"@id": "earl:failed"} and "run_id" not in earl
         assert js(await call("a11y_report", format="sarif", save=False))["runs"][0]["results"][0]["ruleId"] == "WCAG-2.1.1"
@@ -226,7 +240,7 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         assert js(await call("a11y_validate_document", path=output["path"], external=False))["status"] == "automated_checks_passed"
         resource = await s.read_resource(output["uri"])
         assert resource.contents[0].mimeType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        report_file = js(await call("a11y_create_report", formats="docx", run_id=first_run))
+        report_file = js(await call("a11y_create_report", formats="docx", run_id=first_run, allow_incomplete=True))
         assert report_file["files"][0]["validation"]["status"] == "automated_checks_passed"
 
         # ---------- persona imposta pelo servidor (sem mouse)
@@ -360,6 +374,7 @@ async def test_accessibility_reports_are_generated_and_downloaded_over_mcp(tmp_p
         "A11Y_MCP_HOME": str(home),
         "A11Y_MCP_AUTO_INSTALL": "0",
         "PYTHONIOENCODING": "utf-8",
+        "A11Y_MCP_DOCUMENTS_DIR": str(tmp_path / "documentos"),
     }
     params = StdioServerParameters(command=sys.executable, args=[str(ROOT / "mcp_server.py")], env=env)
 
@@ -368,6 +383,7 @@ async def test_accessibility_reports_are_generated_and_downloaded_over_mcp(tmp_p
         for kind in ("xlsx", "pptx", "docx", "pdf"):
             result = js(await session.call_tool("a11y_create_report", {
                 "formats": kind,
+                "allow_incomplete": True,
                 "run_id": run_id,
                 "title": "Exemplo didático de relatório de QA de acessibilidade",
                 "report_context": {

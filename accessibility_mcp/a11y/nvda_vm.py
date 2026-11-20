@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
+import subprocess
 import time
 from typing import Any
 from urllib.parse import urlsplit, urlunsplit
@@ -33,9 +35,59 @@ class NvdaVmError(Exception):
     """Falha ao obter a fala da VM (mensagem ja pronta para a pessoa)."""
 
 
+_found_base: str | None = None  # endereco achado depois que o configurado deixou de responder (a VM costuma trocar de IP)
+
+
 def configured() -> tuple[str, str] | None:
     base, token = os.environ.get(ENV_URL, "").strip(), os.environ.get(ENV_TOKEN, "").strip()
+    if base and token and _found_base:
+        return _found_base, token
     return (base.rstrip("/"), token) if base and token else None
+
+
+def _neighbors() -> list[str]:
+    """Enderecos que a propria maquina ja conhece na rede (tabela ARP): nada e' varrido nem escaneado."""
+    try:
+        out = subprocess.run(["arp", "-a"], capture_output=True, text=True, timeout=5, check=False).stdout
+    except (OSError, subprocess.SubprocessError):
+        return []
+    return re.findall(r"\b(\d{1,3}(?:\.\d{1,3}){3})\b", out)
+
+
+def candidate_bases(base: str) -> list[str]:
+    """Outros enderecos na MESMA sub-rede e porta do agente configurado, vindos dos vizinhos conhecidos."""
+    parts = urlsplit(base)
+    host = parts.hostname or ""
+    prefix = host.rsplit(".", 1)[0] + "." if host.count(".") == 3 else ""
+    if not prefix:
+        return []
+    port = f":{parts.port}" if parts.port else ""
+    seen: list[str] = []
+    for ip in _neighbors():
+        if ip.startswith(prefix) and ip != host and not ip.endswith((".255", ".254", ".1", ".0")) and ip not in seen:
+            seen.append(ip)
+    return [f"{parts.scheme}://{ip}{port}" for ip in seen]
+
+
+async def _post_found(client: httpx.AsyncClient, base: str, path: str, body: dict[str, Any]) -> tuple[httpx.Response, str]:
+    """POST ao agente; se a conexao falhar, tenta os vizinhos da sub-rede (a VM pode ter trocado de IP) e lembra o que respondeu."""
+    global _found_base
+    try:
+        return await client.post(f"{base}{path}", json=body), base
+    except (httpx.ConnectError, httpx.ConnectTimeout) as first:
+        for other in candidate_bases(base):
+            try:
+                resp = await client.post(f"{other}{path}", json=body, timeout=httpx.Timeout(30, connect=2))
+            except httpx.HTTPError:
+                continue
+            _found_base = other
+            return resp, other
+        raise NvdaVmError(
+            f"nao consegui falar com a VM em {base} ({type(first).__name__}) nem em outros enderecos da mesma rede. Ela esta ligada, com o agente rodando e o firewall liberado? "
+            "Se ela mudou de endereco (DHCP), atualize A11Y_MCP_NVDA_VM ou fixe o IP da VM."
+        ) from first
+    except httpx.HTTPError as e:
+        raise NvdaVmError(f"nao consegui falar com a VM em {base} ({type(e).__name__}). Ela esta ligada, com o agente rodando e o firewall liberado?") from e
 
 
 def translate_url(url: str) -> str:
@@ -74,10 +126,7 @@ async def run(
         body["silencio"] = silence
     headers = {"authorization": f"Bearer {token}"}
     async with httpx.AsyncClient(headers=headers, timeout=30) as client:
-        try:
-            resp = await client.post(f"{base}/percorrer", json=body)
-        except httpx.HTTPError as e:
-            raise NvdaVmError(f"nao consegui falar com a VM em {base} ({type(e).__name__}). Ela esta ligada, com o agente rodando e o firewall liberado?") from e
+        resp, base = await _post_found(client, base, "/percorrer", body)
         if resp.status_code == 401:
             raise NvdaVmError("a VM recusou o token (A11Y_MCP_NVDA_TOKEN).")
         if resp.status_code == 409:
@@ -151,10 +200,7 @@ async def _post_job(path: str, body: dict[str, Any], poll: float = 1.0) -> dict[
     base, token = cfg
     headers = {"authorization": f"Bearer {token}"}
     async with httpx.AsyncClient(headers=headers, timeout=30) as client:
-        try:
-            resp = await client.post(f"{base}{path}", json=body)
-        except httpx.HTTPError as e:
-            raise NvdaVmError(f"nao consegui falar com a VM em {base} ({type(e).__name__}). Ela esta ligada, com o agente rodando e o firewall liberado?") from e
+        resp, base = await _post_found(client, base, path, body)
         if resp.status_code == 401:
             raise NvdaVmError("a VM recusou o token (A11Y_MCP_NVDA_TOKEN).")
         if resp.status_code in (400, 409):

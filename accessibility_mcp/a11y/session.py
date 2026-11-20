@@ -237,6 +237,7 @@ class Session:
         self._live_seen = 0
         self._console_seen = 0
         self._watchdog: asyncio.Task[None] | None = None
+        self.patches: list[dict[str, Any]] = []  # correcoes de arquivo (JS/CSS) aplicadas SO nesta sessao, para testar uma sugestao antes de recomenda-la
 
     @property
     def allow_mutations(self) -> bool:
@@ -389,6 +390,8 @@ class Session:
         if not req.url.lower().startswith(_ALLOWED_SCHEMES):
             await route.abort()
             return
+        if self.patches and req.method.upper() == "GET" and await self._serve_patched(route):
+            return
         key = (req.method.upper(), req.url)
         if key in self._allow_once:  # aprovado pela pessoa: passa uma vez
             self._allow_once.discard(key)
@@ -426,6 +429,49 @@ class Session:
             await route.abort("blockedbyclient")
         else:
             await route.abort()
+
+    async def _serve_patched(self, route: Any) -> bool:
+        """Entrega o arquivo com as trocas pedidas (so nesta sessao; o site nao e' alterado)."""
+        url = route.request.url
+        todo = [p for p in self.patches if p["asset"] in url]
+        if not todo:
+            return False
+        try:
+            response = await route.fetch()
+            text = await response.text()
+        except Exception:  # noqa: BLE001 - nao deu para buscar o arquivo: segue sem troca
+            return False
+        for patch in todo:
+            hits = text.count(patch["old"])
+            patch["hits"] = hits
+            if hits:
+                text = text.replace(patch["old"], patch["new"])
+        await route.fulfill(response=response, body=text)
+        return True
+
+    async def try_patch(self, asset: str, old: str, new: str, reload: bool = True) -> dict[str, Any]:
+        """Troca `old` por `new` no arquivo cujo endereco contem `asset`, SO nesta sessao, e recarrega a pagina. Serve para medir uma correcao
+        (foco, nome acessivel, regioes vivas) antes de recomenda-la. Nao escreve em nenhum arquivo do site."""
+        page = self._need()
+        if not asset.strip() or not old:
+            raise SessionError("informe asset (parte do endereco do arquivo) e o trecho exato a trocar (old)")
+        self.patches.append({"asset": asset.strip(), "old": old, "new": new, "hits": None})
+        if reload:
+            await page.reload(wait_until="load")
+            await self._settle()
+        hits = self.patches[-1]["hits"]
+        out: dict[str, Any] = {"asset": asset, "hits": hits, "active_patches": len(self.patches), "reloaded": reload}
+        if hits == 0:
+            self.patches.pop()
+            out["problem"] = "o trecho old nao existe nesse arquivo (confira com a11y_verify_code); a troca nao foi mantida"
+        elif hits is None:
+            out["problem"] = "nenhum arquivo com esse endereco foi pedido pela pagina depois da troca"
+        return out
+
+    def clear_patches(self) -> int:
+        count = len(self.patches)
+        self.patches.clear()
+        return count
 
     async def _hold_form_submit(self, _source: Any, details: dict[str, Any]) -> None:
         """Retem o submit antes da navegacao, sem levar valores dos campos ao processo MCP."""

@@ -50,6 +50,8 @@ async def test_server_exposes_only_accessibility_tools() -> None:
     mod = _load_module()
     names = {t.name for t in await mod.mcp.list_tools()}
     assert names == {
+        # ferramentas sob demanda
+        "a11y_find_tools", "a11y_call",
         # conhecimento e escolha
         "a11y_list_content", "a11y_workflow", "a11y_get_reference", "a11y_get_example", "a11y_get_template",
         # medicao de fatos (sem sessao)
@@ -62,7 +64,7 @@ async def test_server_exposes_only_accessibility_tools() -> None:
         # editor de arquivos do projeto da pessoa
         "a11y_set_workspace", "a11y_read_file", "a11y_edit_file", "a11y_approve_edit", "a11y_undo_edit",
         # sondas de comportamento, achados com evidencia, execucoes salvas
-        "a11y_probe", "a11y_check_page", "a11y_finding", "a11y_trace", "a11y_report", "a11y_runs", "a11y_export", "a11y_diff",
+        "a11y_probe", "a11y_journey", "a11y_verify_code", "a11y_source_of", "a11y_try_patch", "a11y_lint_report", "a11y_check_page", "a11y_finding", "a11y_trace", "a11y_report", "a11y_runs", "a11y_export", "a11y_diff",
         "a11y_create_document", "a11y_validate_document", "a11y_create_report",
         # interoperaÃ§Ã£o remota MCP/A2A, com aprovaÃ§Ã£o para chamadas externas
         "a11y_remote_mcp_connect", "a11y_remote_mcp_connections", "a11y_remote_mcp_list_tools",
@@ -77,7 +79,7 @@ async def test_server_exposes_only_accessibility_tools() -> None:
 async def test_the_workflows_are_mcp_prompts_for_the_clients_own_model() -> None:
     mod = _load_module()
     nomes = {p.name for p in await mod.mcp.list_prompts()}
-    assert nomes == {"a11y_review", "a11y_walkthrough", "a11y_component", "a11y_site_scan", "a11y_compare_runs", "a11y_write_accessible_code", "a11y_accessible_document"}
+    assert nomes == {"a11y_review", "a11y_walkthrough", "a11y_component", "a11y_site_scan", "a11y_compare_runs", "a11y_write_accessible_code", "a11y_accessible_document", "a11y_deliver_audit"}
     texto = (await mod.mcp.get_prompt("a11y_walkthrough", {"url": "http://exemplo.test", "task": "comprar um item", "persona": "screen_reader"})).messages[0].content.text
     assert "comprar um item" in texto and "screen_reader" in texto and "testing-playbook-for-ai" in texto
     assert "NOT verified" in texto and "Never answer a11y_approve" in texto  # as regras do que pode e nao pode acompanham todo fluxo
@@ -120,7 +122,7 @@ async def test_the_same_workflows_are_also_a_tool_for_clients_without_mcp_prompt
     argumentos = {
         "a11y_review": {"url": "http://x.test"}, "a11y_walkthrough": {"url": "http://x.test", "task": "t"}, "a11y_component": {"url": "http://x.test", "selector": "#a"},
         "a11y_site_scan": {"url": "http://x.test"}, "a11y_compare_runs": {"base_run_id": "b", "head_run_id": "h"}, "a11y_write_accessible_code": {"task": "t"},
-        "a11y_accessible_document": {"task": "relatorio em PDF"},
+        "a11y_accessible_document": {"task": "relatorio em PDF"}, "a11y_deliver_audit": {"url": "http://x.test", "task": "cotacao"},
     }
     for nome, args in argumentos.items():
         pronto = (await mod.mcp.get_prompt(nome, args)).messages[0].content.text

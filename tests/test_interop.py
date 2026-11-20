@@ -223,6 +223,7 @@ async def test_interop_tools_are_registered_and_callable_over_the_mcp_protocol(t
         "A11Y_MCP_AUTO_INSTALL": "0",
         "A11Y_MCP_REMOTE_ALLOW_PRIVATE": "0",
         "PYTHONIOENCODING": "utf-8",
+        "A11Y_MCP_LAZY_TOOLS": "0",
     }
     params = StdioServerParameters(command=sys.executable, args=[str(ROOT / "mcp_server.py")], env=env)
     expected = {

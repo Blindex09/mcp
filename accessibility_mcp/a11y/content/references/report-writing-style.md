@@ -133,3 +133,22 @@ O mesmo modelo vale para os três formatos. O que o relatório mostra vem só do
 - **Teclas e falas conferidas.** Antes de escrever um passo, rode as teclas no leitor e copie a fala. A mesma tecla pode falar diferente em outro modo (por exemplo, Tab fala "botão de alternância, não pressionado" e a letra B fala "botão, não marcado").
 - **Código em duas células.** `code_snippet` é o código real do problema (HTML, JS ou CSS), copiado da página ou do arquivo observado com a origem (URL do arquivo e posição aproximada). `fixed_code` é o código corrigido sugerido, escrito a partir dele; é sugestão, não aplicada nem testada no site.
 - **Elemento e seletor descritos em palavras** que o desenvolvedor encontra na página; não use seletores que só a ferramenta entende (como `:has-text`).
+
+## Entrega sem retrabalho: o que o MCP confere sozinho
+
+Estas regras vieram de auditorias reais em que o relatório precisou ser revisado depois. Cumpra-as ANTES de gerar o arquivo:
+
+0. **O código vem do site, não da sua cabeça.** `a11y_source_of(elemento)` devolve o HTML, a chamada JS exata que cria o elemento (arquivo, posição, componente) e as regras de CSS. O
+   achado usa `from_patches=true` para copiar `observed_code` e `fixed_code` dos patches testados. Se o MCP não achar o código, diga isso: nunca invente.
+1. **Código observado é cópia literal.** Nada de "…", "[...]", `<svg…/>`, trecho reescrito ou de outra versão do arquivo. Prove cada trecho com `a11y_verify_code`
+   (devolve arquivo, posição e impressão digital). Se o site foi recompilado (o nome do arquivo mudou), confira de novo.
+2. **Código corrigido é o MESMO código editado o mínimo** e foi testado: `a11y_try_patch` aplica só na sessão, e `a11y_journey`, `a11y_probe` ou `a11y_dossier` medem o
+   efeito. Repita no `fixed_code` o texto exato que foi testado.
+3. **Um percurso inteiro vale mais que uma sonda por tela.** `a11y_journey` mede em cada passo o foco, o que mudou e o que foi anunciado; assim as trocas de etapa
+   que perdem o foco aparecem sem ninguém listá-las.
+4. **Fala do leitor de tela só se foi executada.** O NVDA da VM pode não registrar falas que chegam segundos depois da última tecla (resultados de busca, por
+   exemplo). Escreva "não foi possível observar", nunca "não falou nada".
+5. **Impacto no design em todo achado:** "Nenhum" ou "Visual mínimo: o que muda", dentro do layout e da paleta do site.
+6. **Antes de entregar:** `a11y_lint_report` e corrija erros e avisos; o `a11y_create_report` também devolve essa lista em `lint`.
+7. **Nunca gere o mesmo relatório duas vezes** (nem com outro nome, nem "acrescentando" algo). `a11y_create_report` reconhece o conteúdo idêntico e devolve os arquivos
+   que já existem (`reused: true`). Se o conteúdo mudou, o arquivo novo substitui o anterior na entrega: apague a versão velha em vez de manter as duas na pasta.

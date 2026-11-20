@@ -73,7 +73,7 @@ def register(mcp: Any) -> None:
     ) -> str:
         """Ready-made workflow for YOU to follow with this server's tools (the same text as the MCP prompts, for clients that do not show prompts, such as some
         Codex versions). name: a11y_review (url, focus) | a11y_walkthrough (url, task, persona) | a11y_component (url, selector) | a11y_site_scan (url, max_pages) |
-        a11y_compare_runs (base_run_id, head_run_id) | a11y_write_accessible_code (task, stack) | a11y_accessible_document (task). Returns instructions: which guides to read, which tools and probes to use,
+        a11y_compare_runs (base_run_id, head_run_id) | a11y_write_accessible_code (task, stack) | a11y_accessible_document (task) | a11y_deliver_audit (url, task = the flow under test). Returns instructions: which guides to read, which tools and probes to use,
         what you may and may not claim, and how to report. The server does not run the workflow and calls no model: you do."""
         try:
             return workflow_text(name, url=url, task=task, persona=persona, focus=focus, selector=selector, stack=stack, max_pages=max_pages,

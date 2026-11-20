@@ -296,7 +296,7 @@ async def test_report_run_ids_generate_xlsx_and_resource_download(tmp_path, monk
     monkeypatch.setattr(documents, "folder", lambda: tmp_path)
     monkeypatch.setattr(runs, "load", records.get)
     tool = mcp._tool_manager.get_tool("a11y_create_report")
-    result = json.loads(await tool.fn(formats="xlsx", run_ids=["first", "second"]))
+    result = json.loads(await tool.fn(formats="xlsx", run_ids=["first", "second"], allow_incomplete=True))
     assert "error" not in result
     downloaded = await mcp.read_resource(f"a11y://document/{result['document_id']}/report.xlsx")
     assert next(iter(downloaded)).content[:2] == b"PK"
@@ -316,7 +316,7 @@ async def test_report_from_saved_run_keeps_evidence_and_coverage():
 
     run_id = runs.save("exemplo.test", {"url": "https://exemplo.test", "findings": [{"criterion": "2.1.1", "claim": "Controle sem teclado", "outcome": "failed", "evidence_steps": [3]}], "coverage": {"gaps": ["NVDA não executado"], "probes_run": ["keyboard_contract"], "actions_taken": 9}})
     tool = mcp._tool_manager.get_tool("a11y_create_report")
-    result = json.loads(await tool.fn(formats="docx", run_id=run_id))
+    result = json.loads(await tool.fn(formats="docx", run_id=run_id, allow_incomplete=True))
     assert "error" not in result
     path = Path(result["files"][0]["path"])
     document = Document(str(path))
@@ -406,3 +406,21 @@ async def test_verapdf_exit_and_report_are_both_checked(monkeypatch, tmp_path, x
     monkeypatch.setenv("A11Y_MCP_VERAPDF", sys.executable)
     monkeypatch.setattr(document_validation.asyncio, "create_subprocess_exec", launch)
     assert (await document_validation.verapdf(tmp_path / "arquivo.pdf"))["status"] == expected
+
+
+async def test_same_report_is_never_generated_twice(tmp_path, monkeypatch):
+    from accessibility_mcp.a11y import runs
+    from accessibility_mcp.server import mcp
+
+    record = {"url": "https://exemplo.test", "findings": [{"criterion": "2.1.1", "claim": "Controle sem teclado", "outcome": "failed"}]}
+    monkeypatch.setattr(documents, "folder", lambda: tmp_path)
+    monkeypatch.setattr(runs, "load", {"a": record}.get)
+    tool = mcp._tool_manager.get_tool("a11y_create_report")
+    first = json.loads(await tool.fn(formats="xlsx", run_id="a", allow_incomplete=True))
+    second = json.loads(await tool.fn(formats="xlsx", run_id="a", allow_incomplete=True))
+    assert "error" not in first and second.get("reused") is True
+    assert second["files"][0]["path"] == first["files"][0]["path"]
+    assert len([p for p in tmp_path.iterdir() if p.is_dir()]) == 1
+    record["findings"][0]["claim"] = "Controle sem teclado e sem foco"
+    third = json.loads(await tool.fn(formats="xlsx", run_id="a", allow_incomplete=True))
+    assert not third.get("reused") and third["files"][0]["path"] != first["files"][0]["path"]

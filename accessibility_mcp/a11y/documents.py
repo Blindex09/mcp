@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import hashlib
 import io
 import json
 import os
@@ -51,6 +52,37 @@ def folder() -> Path:
     if override:
         return Path(override).expanduser().resolve()
     return learn.store_path().resolve() / "documents"
+
+
+def report_fingerprint(record: dict[str, Any], title: str, formats: tuple[str, ...], language: str) -> str:
+    """Impressao digital do CONTEUDO de um relatorio (achados, titulo, formatos, idioma). Duas geracoes com a mesma impressao sao o mesmo relatorio."""
+    raw = json.dumps({"record": record, "title": title, "formats": sorted(formats), "language": language}, ensure_ascii=False, sort_keys=True, default=str)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _report_index() -> Path:
+    return folder() / "relatorios-gerados.json"
+
+
+def existing_report(fingerprint: str) -> dict[str, Any] | None:
+    """O relatorio identico ja gerado antes, se todos os arquivos dele ainda existirem; senao None."""
+    try:
+        entry = json.loads(_report_index().read_text(encoding="utf-8")).get(fingerprint)
+    except (OSError, ValueError):
+        return None
+    if not entry or not entry.get("files"):
+        return None
+    return entry if all(Path(f.get("path", "")).is_file() for f in entry["files"]) else None
+
+
+def remember_report(fingerprint: str, output: dict[str, Any]) -> None:
+    try:
+        index = json.loads(_report_index().read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        index = {}
+    index[fingerprint] = {key: output[key] for key in ("files", "document_id", "document_ids") if key in output}
+    folder().mkdir(parents=True, exist_ok=True)
+    _report_index().write_text(json.dumps(index, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
 def artifact_path(document_id: str, filename: str) -> Path:

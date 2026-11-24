@@ -222,6 +222,11 @@ async def inspect_element(session: Any, target: str, properties: list[str] | Non
     finally:
         cdp.remove_listener("CSS.styleSheetAdded", guarda)
 
+    if target not in session.elements_seen:
+        # o elemento inspecionado fica identificado para o achado, mesmo que uma correcao testada depois o troque (h3 por h2, por exemplo)
+        entry = await session.describe_element(target)
+        if entry is not None:
+            session.elements_seen[target] = entry
     inline = casadas.get("inlineStyle")
     return {
         "target": target, "url": page.url,

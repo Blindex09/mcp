@@ -72,6 +72,16 @@ async def test_a_finding_on_any_element_gets_its_tag_role_and_name_from_the_brow
     assert titulo["element"]["tag"] == "h3" and titulo["element"]["role"] == "heading" and titulo["element"]["name"] == "Produtos"
 
 
+async def test_an_inspected_element_stays_identified_after_a_tested_fix_replaces_it(page):
+    from accessibility_mcp.server import mcp
+
+    await mcp._tool_manager.get_tool("a11y_inspect").fn(target="css:#salto", states=False)
+    async with SESSION.lock:
+        await SESSION.page.evaluate("document.getElementById('salto').outerHTML = '<h2 id=\"salto2\">Produtos</h2>'")  # o que a troca de h3 por h2 faz na pagina
+    rec = json.loads(await mcp._tool_manager.get_tool("a11y_finding").fn(claim="Salto de nivel", criterion="1.3.1", target="css:#salto"))["recorded"]
+    assert rec["element"] == {"tag": "h3", "role": "heading", "name": "Produtos"}
+
+
 async def test_a_finding_whose_target_matches_nothing_is_refused_instead_of_saved_without_element(page):
     from accessibility_mcp.server import mcp
 

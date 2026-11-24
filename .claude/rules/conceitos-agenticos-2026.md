@@ -72,10 +72,10 @@ Presente: servidor MCP (`mcp_server.py`); skill no formato aberto SKILL.md com c
 aplicadas pelo harness; conferência objetiva da evidência dos achados (`a11y/verify.py`); sondas de comportamento (`a11y/probes.py`); bancada de avaliação sem modelo (`a11y/bench.py`,
 `evals/`); espera adaptativa (`a11y/patience.py`); provisionamento autônomo do navegador (`a11y/provisioning.py`).
 
+Não se aplicam a este projeto, por decisão do dono de 24/11/2026: o portão de avaliação de instruções ao modelo (regra 15) e a revisão do andaime a cada geração de modelo. O projeto não tem modelo: quem opera o MCP é o Claude, pelo cliente, e os guias e fluxos são lidos por ele.
+
 Lacunas registradas (nunca "fora de escopo" em silêncio):
-- Não há cliente MCP para consumir ferramentas externas, nem A2A: o projeto é servidor. A decisão de oferecer isso é do dono.
-- Os guias e os textos dos fluxos são instruções para o modelo do cliente, e o portão da regra 15 (conjunto amplo de avaliações, tentativas repetidas, ablação) não foi rodado: exige um modelo, que o servidor não tem. Pendente, medido só do lado do cliente.
-- Não há rodada registrada do harness sem o andaime para uma geração nova de modelo (o servidor não escolhe modelo; o andaime que resta são os guias e os fluxos).
+- Cliente MCP remoto e A2A por HTTP existem (`a11y_remote_mcp_*` e `a11y_a2a_*`), com aprovação para cada chamada externa e rede privada recusada por padrão; a matriz os cobre e `tests/test_interop.py` os exercita com HTTP real.
 - Sandbox: o navegador roda descartável por chamada, mas comandos do host (instalações) usam o ambiente do processo.
 - Prompts do MCP: o Claude Code e o VS Code os mostram como comandos; o suporte do Codex não foi confirmado nas páginas oficiais, por isso o mesmo conteúdo também sai pela ferramenta `a11y_workflow`.
 

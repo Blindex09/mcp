@@ -44,7 +44,7 @@ O conteúdo de `accessibility_mcp/a11y/content/` vem de fontes oficiais, com a d
 frameworks, mobile, documentos e conformidade vieram do Qaaccessibility (mesma pesquisa), e os playbooks dos especialistas também: lá é a fonte, e uma mudança de lá
 vem para cá na mesma entrega. O que é próprio do MCP (guias de como conduzir as ferramentas, sondas, fluxos, exemplos do site) nasce aqui e não é espelhado no Qaaccessibility
 (decisão do dono de 19/out/2026, depois de comparar os dois projetos: o Qaaccessibility analisa o código com IA e entrega relatórios, correções e tickets; o MCP prova o comportamento no navegador). Mudança de
-um guia, de um playbook ou do texto de um fluxo (`prompts.py`) é mudança de instrução ao modelo do cliente e segue o portão da regra 15; sem crédito de modelo para a avaliação ampla, ela é registrada como pendência.
+um guia, de um playbook ou do texto de um fluxo (`prompts.py`) é texto lido pelo Claude, que opera o MCP pelo cliente. O projeto não tem modelo, então o portão de avaliação da regra 15 não se aplica a ele (decisão do dono de 24/11/2026); o que vale é a prova por testes e pela bancada sem modelo.
 
 ### Edição de arquivos
 

@@ -65,6 +65,7 @@ async def _live_checks() -> None:
     env = {
         **os.environ,
         "A11Y_MCP_HOME": home,
+        "A11Y_MCP_LAZY_TOOLS": "0",  # a matriz confere as ferramentas registradas: no modo sob demanda a lista traz so o nucleo
         "A11Y_MCP_ALLOW_EDITS": "1",  # sem isto as ferramentas de edicao nem existem; a matriz prova o portao de aprovacao delas
         "A11Y_MCP_EDIT_APPROVAL": "1",
         "A11Y_MCP_REMOTE_ALLOW_PRIVATE": "0",
@@ -125,8 +126,6 @@ async def _live_checks() -> None:
 def _declared_gaps() -> None:
     record("Observabilidade (spans OpenTelemetry de GenAI)", COVERED, "tests/test_telemetry.py: span execute_tool por ferramenta, sem argumentos nem resultados (liga com OTEL_EXPORTER_OTLP_ENDPOINT)")
     record("Evals como portao (bancada por mutacao)", COVERED, "python -m accessibility_mcp.a11y.bench facts roda sem modelo e esta nos testes (o servidor nao chama modelo)")
-    record("Portao da regra 15 para os guias e fluxos (instrucoes ao modelo do cliente)", PARTIAL, "VPAT no Codex: 24/24, ablacao 18/24. Galeria de documentos: 66/66 em tres rodadas e 66/66 sem guia; sem ganho demonstrado. Geracao e leitura do guia pelo MCP real. Demais guias, fluxos e modelos sem avaliacao ampla; docs/modules/documentos_acessiveis.md, docs/modules/galeria_documentos.md e docs/modules/formularios_sumario.md")
-    record("Harness revisado a cada geracao de modelo", GAP, "o servidor nao escolhe modelo; falta a rodada dos guias e fluxos sem o andaime em um modelo novo do cliente")
 
 
 def main() -> int:

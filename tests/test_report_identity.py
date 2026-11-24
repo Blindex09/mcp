@@ -7,7 +7,8 @@ from accessibility_mcp.a11y import documents, report_lint, runs
 from accessibility_mcp.a11y.session import SESSION
 
 PAGE = ('<!doctype html><html lang="pt"><title>t</title><body><main><h1>Titulo</h1><p id="aviso">Texto legal do rodape</p>'
-        '<h3 id="salto">Produtos</h3></main></body></html>')
+        '<h3 id="salto">Produtos</h3><p id="longo">WeCover é operada pela 118LABS LLC, agência de seguros licenciada pelo Departamento de Serviços Financeiros '
+        'da Flórida (FL DFS), licença nº G319999.</p></main></body></html>')
 
 
 def _record(claim: str) -> dict:
@@ -70,6 +71,25 @@ async def test_a_finding_on_any_element_gets_its_tag_role_and_name_from_the_brow
     assert texto["element"] == {"tag": "p", "role": "paragraph", "name": "Texto legal do rodape"} and texto["location"]["css"] == "#aviso"
     titulo = json.loads(await tool.fn(claim="Salto de nivel", criterion="1.3.1", target="css:#salto"))["recorded"]
     assert titulo["element"]["tag"] == "h3" and titulo["element"]["role"] == "heading" and titulo["element"]["name"] == "Produtos"
+
+
+def test_a_long_label_is_cut_at_a_whole_word_with_an_ellipsis_and_short_ones_stay_whole():
+    from accessibility_mcp.a11y.session import shorten_label
+
+    curto = "Texto legal do rodape"
+    assert shorten_label(curto) == curto and shorten_label("  muitos   espacos\n aqui ") == "muitos espacos aqui"
+    longo = "WeCover é operada pela 118LABS LLC, agência de seguros licenciada pelo Departamento de Serviços Financeiros da Flórida (FL DFS), licença nº G319999."
+    rotulo = shorten_label(longo)
+    assert rotulo == "WeCover é operada pela 118LABS LLC, agência de seguros licenciada pelo Departamento de Serviços…"
+    assert len(rotulo) <= 101 and longo.startswith(rotulo[:-1])
+    assert shorten_label("x" * 150) == "x" * 100 + "…"  # sem espaco nenhum, corta no limite
+
+
+async def test_a_finding_on_a_long_paragraph_gets_a_label_that_does_not_end_mid_word(page):
+    from accessibility_mcp.server import mcp
+
+    rec = json.loads(await mcp._tool_manager.get_tool("a11y_finding").fn(claim="Contraste baixo", criterion="1.4.3", target="css:#longo"))["recorded"]
+    assert rec["element"]["tag"] == "p" and rec["element"]["name"].endswith("Departamento de Serviços…") and "Flórida" not in rec["element"]["name"]
 
 
 async def test_an_inspected_element_stays_identified_after_a_tested_fix_replaces_it(page):

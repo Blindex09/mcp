@@ -149,6 +149,20 @@ class Coverage:
     delegated: list[dict[str, Any]] = field(default_factory=list)  # acoes que a pagina trata em ancestrais (alvo real desconhecido)
 
 
+LABEL_LIMIT = 100
+
+
+def shorten_label(text: str, limit: int = LABEL_LIMIT) -> str:
+    """Rotulo curto de um elemento sem nome proprio (paragrafo, por exemplo): texto ate o limite, cortado na ultima palavra inteira e marcado com reticencias."""
+    text = " ".join(text.split())
+    if len(text) <= limit:
+        return text
+    cut = text[:limit]
+    if not text[limit].isspace():
+        cut = cut.rsplit(" ", 1)[0] if " " in cut else cut
+    return cut.rstrip(" ,;:(-") + "…"
+
+
 def is_local_dev(url: str | None) -> bool:
     """Site de desenvolvimento local (localhost, 127.0.0.1, ::1, *.localhost, *.test) ou HTML passado direto."""
     if not url:
@@ -1218,7 +1232,7 @@ class Session:
         first = loc.first
         info = await first.evaluate(
             """el => { const r = el.getBoundingClientRect(); const keep = ['id', 'class', 'href', 'src', 'type', 'aria-label', 'data-testid'];
-                return {tag: el.tagName.toLowerCase(), role_attr: el.getAttribute('role'), text: (el.innerText || el.textContent || '').trim().slice(0, 120),
+                return {tag: el.tagName.toLowerCase(), role_attr: el.getAttribute('role'), text: (el.innerText || el.textContent || '').trim().slice(0, 400),
                     attrs: Object.fromEntries(keep.filter(a => el.hasAttribute(a)).map(a => [a, el.getAttribute(a)])),
                     rect: {x: r.x, y: r.y, w: r.width, h: r.height}}; }"""
         )
@@ -1231,7 +1245,7 @@ class Session:
                 role, name = ax.get("role", {}).get("value"), ax.get("name", {}).get("value")
         t = target.strip()
         return findings.seen_entry({
-            "tag": info["tag"], "role_attr": info["role_attr"], "text": info["text"], "attrs": info["attrs"], "rect": info["rect"],
+            "tag": info["tag"], "role_attr": info["role_attr"], "text": shorten_label(info["text"]), "attrs": info["attrs"], "rect": info["rect"],
             "css": t[4:] if t.startswith("css:") else None, "computed": {"role": role, "name": name},
         })
 

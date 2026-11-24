@@ -31,4 +31,4 @@ Em 24/11/2026, em https://wecover.travel/contato, com o cartão do WhatsApp e o 
 - Marca de biblioteca é vestígio: ausência de marca não prova que a biblioteca não é usada. Marca de React é lida nos primeiros 400 elementos do corpo.
 - A lista de regras herdadas inclui as regras padrão do navegador e fica longa. Pendência de apresentação.
 - Só Chromium. Em Firefox e WebKit a ferramenta diz que a inspeção usa o CDP.
-- Os guias e prompts que ensinam o modelo (`testing-playbook-for-ai`, `a11y_review`) ainda não citam `a11y_inspect`. É mudança de instrução ao modelo e tem o portão da regra 15, que exige um modelo e não foi rodado nesta entrega.
+- Os textos que ensinam o modelo citam `a11y_inspect`: `testing-playbook-for-ai`, `report-writing-style`, o fluxo `a11y_deliver_audit` e as instruções do servidor, inclusive o limite do estado forçado e a regra de que todo achado leva um alvo que exista na página. Por ser mudança de instrução ao modelo, o portão da regra 15 (conjunto amplo, tentativas repetidas e ablação) exige um modelo e não foi rodado; fica como pendência declarada.

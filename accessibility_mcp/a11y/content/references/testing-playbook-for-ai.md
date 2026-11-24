@@ -29,12 +29,18 @@ The component contracts (what each widget must and must not do, and what the scr
 4. Decide what each interactive thing really is (`component-identity-guide`), then probe it AS that thing with `a11y_probe`:
    `tab_walk`, `focus_obscured`, `target_size`, `dialog`, `disclosure`, `menu`, `tabs`, `combobox`, `form_errors`, `route_change`.
 5. Do what a person does: `a11y_act`, `a11y_reach` (how many Tab presses to reach it), `a11y_announce` (what a screen reader
-   would receive). Read the effect: focus, tree diff, announcements.
+   would receive). Read the effect: focus, tree diff, announcements. To see why an element looks or behaves as it does, `a11y_inspect`
+   (Chromium) reads it the way the browser's DevTools does: full HTML with `style` attributes, the CSS rules that apply (file, line, original
+   text), the computed style, what changes under forced `:hover`, `:focus`, `:focus-visible` and `:active`, its listeners, its accessibility
+   entry and the page's technologies (React, Vue, Angular, source maps). It never runs the page's own `onFocus` or `onMouseEnter` code: a focus
+   style set by JavaScript shows no change there, so confirm it with a real Tab and `a11y_screenshot` before calling the focus indicator missing.
 6. Stress and variants: `a11y_stress` (reflow at 320 px, text spacing), personas `low_vision`, `mobile_touch`, `forced_colors`,
    `reduced_motion`, dark mode, other browsers. `a11y_compare_browsers` shows the same page side by side.
 7. Cover the site: `a11y_crawl` (facts only, robots.txt respected, GET only) for several pages.
 8. Report: `a11y_finding` with criterion, severity, element and evidence (cite the trace numbers), then `a11y_report` and
-   `a11y_export`. Always include `a11y_coverage` and what was NOT verified.
+   `a11y_export`. Always give the finding a `target` (`css:<selector>` or a dossier id) that exists on the page: the element is read from the
+   browser, interactive or not, and a report is refused while any cell would say "Elemento não identificado". Generating the same report title
+   again replaces the previous file, so never keep two files for one report. Always include `a11y_coverage` and what was NOT verified.
 
 ### 2b. If your client cannot keep a session open between calls
 
@@ -86,6 +92,8 @@ You MAY NOT claim from this server alone:
 
 | What went wrong | Why | Defense |
 |---|---|---|
+| `a11y_focus_style` measured 0 changed pixels on a React card with `outline:none`, and a failure was nearly recorded | the card sets its focus look in `onFocus` (a state change in JavaScript); a forced `:focus` runs no page event | measure with a real Tab and `a11y_screenshot` before recording a missing focus indicator; `a11y_inspect` states the limit in its own `limits` |
+| A report went out with "Elemento não identificado" in every row | `a11y_finding` resolved the element only for dossier targets (interactive); a `css:` target on a paragraph or heading stayed empty | the element is now read from the browser for any `css:` target, a target that matches nothing is refused, and the report lint blocks the gap |
 | A probe said "focus stays on the button" when focus was on the page body | `None == None` counted as a match; the trigger was a div that never takes focus | every focus comparison requires a real element first; new check `gatilho_recebe_foco` |
 | `disclosure` failed a native `<details>` | it only knew `aria-expanded`; native state lives in `details.open` | the probe reads the native state of a `summary`; native elements are passes, not defects |
 | Two buttons with the same name on one page | good and bad examples sat side by side | live examples are wrapped in a named `group`; check names across the whole page, not per fragment |

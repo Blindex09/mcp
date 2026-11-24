@@ -140,6 +140,8 @@ Estas regras vieram de auditorias reais em que o relatório precisou ser revisad
 
 0. **O código vem do site, não da sua cabeça.** `a11y_source_of(elemento)` devolve o HTML, a chamada JS exata que cria o elemento (arquivo, posição, componente) e as regras de CSS. O
    achado usa `from_patches=true` para copiar `observed_code` e `fixed_code` dos patches testados. Se o MCP não achar o código, diga isso: nunca invente.
+   Para ver como o navegador enxerga o elemento (HTML completo com `style`, regras de CSS aplicadas com arquivo e linha, estilo calculado, estados forçados, ouvintes e
+   tecnologias da página), use `a11y_inspect(elemento)`. Todo achado leva um `target` (`css:<seletor>` ou id do dossiê) que exista na página: o relatório não sai com "Elemento não identificado".
 1. **Código observado é cópia literal.** Nada de "…", "[...]", `<svg…/>`, trecho reescrito ou de outra versão do arquivo. Prove cada trecho com `a11y_verify_code`
    (devolve arquivo, posição e impressão digital). Se o site foi recompilado (o nome do arquivo mudou), confira de novo.
 2. **Código corrigido é o MESMO código editado o mínimo** e foi testado: `a11y_try_patch` aplica só na sessão, e `a11y_journey`, `a11y_probe` ou `a11y_dossier` medem o

@@ -7,57 +7,69 @@ timeout agregado e roda um navegador headless descartavel por chamada.
 from __future__ import annotations
 
 import itertools
-import re
+import json
 from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from . import color_science
+from .aria_compression import compress_aria_snapshot
 from .patience import patient
 from .provisioning import provisioner_for
 
 AXE_PATH = Path(__file__).parent / "vendor" / "axe.min.js"
+AXE_LOCALES: dict[str, Path] = {
+    "pt-br": Path(__file__).parent / "vendor" / "axe_pt_BR.json",
+}
 NAV_TIMEOUT_MS = 30_000  # so a 1a espera; a MESMA navegacao e' tentada de novo com mais tempo (3x, 9x...), nao so o pedido inteiro
 _LEVEL_TAGS = {
-    "A": ["wcag2a", "wcag21a"],
-    "AA": ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"],
-    "AAA": ["wcag2a", "wcag2aa", "wcag2aaa", "wcag21a", "wcag21aa", "wcag22aa"],
+    "A": ["wcag2a", "wcag21a", "wcag22a"],
+    "AA": ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22a", "wcag22aa"],
+    "AAA": ["wcag2a", "wcag2aa", "wcag2aaa", "wcag21a", "wcag21aa", "wcag21aaa", "wcag22a", "wcag22aa", "wcag22aaa"],
 }
 
 
 # ---------------------------------------------------------------- contraste
 
+
 def _parse_hex(value: str) -> tuple[int, int, int]:
-    v = value.strip().lstrip("#")
-    if re.fullmatch(r"[0-9a-fA-F]{3}", v):
-        v = "".join(c * 2 for c in v)
-    if not re.fullmatch(r"[0-9a-fA-F]{6}", v):
-        raise ValueError(f"cor invalida: {value!r} (use #rgb ou #rrggbb)")
-    return int(v[0:2], 16), int(v[2:4], 16), int(v[4:6], 16)
+    return color_science.parse_color(value)
 
 
 def _luminance(rgb: tuple[int, int, int]) -> float:
-    def ch(c: int) -> float:
-        s = c / 255
-        return s / 12.92 if s <= 0.03928 else ((s + 0.055) / 1.055) ** 2.4
-
-    r, g, b = (ch(c) for c in rgb)
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+    return color_science.relative_luminance(rgb)
 
 
-def contrast_report(fg: str, bg: str, size_px: float = 16, bold: bool = False) -> dict[str, Any]:
-    l1, l2 = _luminance(_parse_hex(fg)), _luminance(_parse_hex(bg))
-    ratio = (max(l1, l2) + 0.05) / (min(l1, l2) + 0.05)
+def contrast_report(
+    fg: str, bg: str, size_px: float = 16, bold: bool = False, include_cvd: bool = False
+) -> dict[str, Any]:
+    fg_rgb = color_science.parse_color(fg)
+    bg_rgb = color_science.parse_color(bg)
+    ratio = color_science.wcag_contrast_ratio(fg_rgb, bg_rgb)
     large = size_px >= 24 or (bold and size_px >= 14 * 96 / 72)
-    return {
+    aa_threshold = 3.0 if large else 4.5
+    aaa_threshold = 4.5 if large else 7.0
+    lc = color_science.apca_contrast(fg_rgb, bg_rgb)
+    out: dict[str, Any] = {
         "foreground": fg,
         "background": bg,
+        "foreground_hex": color_science.rgb_to_hex(fg_rgb),
+        "background_hex": color_science.rgb_to_hex(bg_rgb),
         "ratio": round(ratio, 2),
         "large_text": large,
-        "AA_text": ratio >= (3.0 if large else 4.5),
-        "AAA_text": ratio >= (4.5 if large else 7.0),
+        "AA_text": ratio >= aa_threshold,
+        "AAA_text": ratio >= aaa_threshold,
         "AA_ui_components": ratio >= 3.0,
+        "apca_lc": round(lc, 1),
+        "apca_abs_lc": round(abs(lc), 1),
+        "apca_note": color_science.apca_note(lc),
+        "suggested_aa_fix": color_science.suggest_contrast_fix(fg_rgb, bg_rgb, aa_threshold),
+        "suggested_aaa_fix": color_science.suggest_contrast_fix(fg_rgb, bg_rgb, aaa_threshold),
     }
+    if include_cvd:
+        out["cvd_simulation"] = color_science.cvd_contrast_report(fg_rgb, bg_rgb)
+    return out
 
 
 # --------------------------------------------------------------- navegador
@@ -87,6 +99,16 @@ async def _launch(pw: Any, browser: str = "chromium") -> Any:
 
 
 COLOR_SCHEMES = ("light", "dark")
+
+
+def check_locale(value: str | None) -> str | None:
+    """'' / 'en' = padrao do axe-core (ingles); 'pt-BR' = pacote oficial em portugues."""
+    raw = (value or "").strip().lower().replace("_", "-")
+    if not raw or raw in ("en", "en-us"):
+        return None
+    if raw in ("pt", "pt-br"):
+        return "pt-br"
+    raise ValueError("locale invalido: use '' (en) ou 'pt-BR'")
 
 
 def check_color_scheme(value: str | None) -> str | None:
@@ -159,7 +181,7 @@ def summarize_axe(raw: dict[str, Any], max_nodes: int = 0) -> dict[str, Any]:
     violations = shape(raw.get("violations", []))
     order = {"critical": 0, "serious": 1, "moderate": 2, "minor": 3}
     violations.sort(key=lambda v: order.get(v["impact"] or "minor", 4))
-    return {
+    out: dict[str, Any] = {
         "violations": violations,
         "needs_manual_review": shape(raw.get("incomplete", [])),
         "passes": len(raw.get("passes", [])),
@@ -168,18 +190,31 @@ def summarize_axe(raw: dict[str, Any], max_nodes: int = 0) -> dict[str, Any]:
             "(ver referencia nvda-testing-guide)."
         ),
     }
+    version = (raw.get("testEngine") or {}).get("version")
+    if version:
+        out["axe_version"] = str(version)
+    return out
 
 
 async def run_axe(
-    url: str | None = None, html: str | None = None, level: str = "AA", browser: str = "chromium", color_scheme: str | None = None
+    url: str | None = None,
+    html: str | None = None,
+    level: str = "AA",
+    browser: str = "chromium",
+    color_scheme: str | None = None,
+    locale: str | None = None,
 ) -> dict[str, Any]:
     tags = _LEVEL_TAGS.get(level.upper())
     if tags is None:
         raise ValueError("level deve ser A, AA ou AAA")
+    loc = check_locale(locale)
+    locale_cfg = json.loads(AXE_LOCALES[loc].read_text(encoding="utf-8")) if loc else None
     script = AXE_PATH.read_text(encoding="utf-8")
 
     async def fn(page: Any) -> dict[str, Any]:
         await page.add_script_tag(content=script)
+        if locale_cfg is not None:
+            await page.evaluate("cfg => axe.configure({locale: cfg})", locale_cfg)
         raw = await page.evaluate(
             "tags => axe.run(document, {runOnly: {type: 'tag', values: tags}})", tags
         )
@@ -235,11 +270,16 @@ async def snapshot_com_papeis_do_navegador(page: Any, locator: Any) -> str:
     return "\n".join([texto, "", cabecalho, *extra])
 
 
-async def aria_snapshot(url: str | None = None, html: str | None = None, browser: str = "chromium") -> str:
+async def aria_snapshot(
+    url: str | None = None, html: str | None = None, browser: str = "chromium", compress: bool = False
+) -> str:
     async def fn(page: Any) -> str:
         return await snapshot_com_papeis_do_navegador(page, page.locator("body"))
 
     result: str = await _with_page(url, html, fn, browser)
+    if compress:
+        compressed, _ = compress_aria_snapshot(result)
+        return compressed
     return result
 
 

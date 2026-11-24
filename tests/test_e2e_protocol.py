@@ -217,6 +217,9 @@ async def test_every_tool_over_the_real_protocol(tmp_path):
         # ---------- codigo real, correcao testada, percurso e conferencia do relatorio
         fonte = js(await call("a11y_source_of", target=by_text["Comprar"]["id"]))
         assert "error" not in fonte and "Comprar" in json.dumps(fonte, ensure_ascii=False)
+        inspecao = js(await call("a11y_inspect", target=by_text["Comprar"]["id"], states=False))
+        assert "error" not in inspecao and "Comprar" in inspecao["html"]["code"] and inspecao["trace_step"]
+        assert not any(k.startswith("data-a11y-") for k in inspecao["attributes"])  # marcas da propria ferramenta nao sao atributos da pagina
         assert js(await call("a11y_verify_code", snippets=["isto nao existe em nenhum arquivo da pagina 9f3a"]))["all_found"] is False
         assert js(await call("a11y_try_patch", clear=True)).get("error") is None
         jornada = js(await call("a11y_journey", steps=[{"action": "focus", "target": by_text["Comprar"]["id"], "label": "foco no botao"}]))

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import uuid
 from typing import Any, Literal
 
 from mcp.types import ToolAnnotations
@@ -198,8 +197,8 @@ def register_documents(mcp: Any) -> None:
             if previous is not None:
                 # REGRA DA CASA: o mesmo relatorio nao e' gerado duas vezes, nem com outro nome nem "acrescentado": devolve o que ja existe.
                 return json.dumps({**previous, "reused": True, "lint": quality,
-                                   "notice": "Relatorio identico ao ja gerado: NAO criei outro arquivo. Use os arquivos de `files`. Se o conteudo mudou, corrija os achados e gere de novo: so entao sai um arquivo novo; "
-                                             "e ao entregar a versao nova, apague a anterior em vez de manter as duas."}, ensure_ascii=False)
+                                   "notice": "Relatorio identico ao ja gerado: NAO criei outro arquivo. Use os arquivos de `files`. Se o conteudo mudar, o mesmo titulo gera de novo o mesmo arquivo, "
+                                             "substituindo o anterior: o mais recente prevalece e nunca ficam dois com o mesmo nome."}, ensure_ascii=False)
             output: dict[str, Any] = {"files": []}
             document_formats = tuple(kind for kind in selected_formats if kind in ("docx", "pdf"))
             artifact_formats = tuple(kind for kind in selected_formats if kind in ("xlsx", "pptx"))
@@ -211,14 +210,13 @@ def register_documents(mcp: Any) -> None:
                     ("docx", "pdf"): "both",
                 }
                 document_format = document_format_by_formats[document_formats]
-                generated = await documents.create(content, document_format)
+                generated = await documents.create(content, document_format, documents.report_id("document:" + document_format, title, language))
                 output["document_id"] = generated["document_id"]
                 output.setdefault("document_ids", {}).update({kind: generated["document_id"] for kind in document_formats})
                 output["files"].extend(generated["files"])
             if artifact_formats:
-                artifact_id = uuid.uuid4().hex
-                artifact_folder = documents.folder() / artifact_id
-                artifact_folder.mkdir(parents=True, exist_ok=False)
+                artifact_id = documents.report_id("artifact:" + ",".join(sorted(artifact_formats)), title, language)
+                artifact_folder = documents.fresh_folder(artifact_id)
                 files = await asyncio.to_thread(report_artifacts.create, record, title, artifact_formats, artifact_folder, language)
                 for entry in files:
                     entry["uri"] = f"a11y://document/{artifact_id}/{entry['filename']}"

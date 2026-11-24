@@ -2,6 +2,16 @@
 
 Pesquisa e implementação local: 27/10/2026.
 
+## Nome estável do relatório e elemento sempre identificado em 24/11/2026
+
+Pedido do dono depois de dois defeitos vistos na planilha da página /contato da WeCover: o MCP deixou duas planilhas do mesmo relatório (cada geração com conteúdo novo criava uma pasta nova) e as três linhas saíram com "Elemento não identificado".
+
+Nome estável. O identificador de cada relatório passou a ser derivado do título (sem diferença de maiúsculas e espaços), do idioma e do grupo de formato (`documents.report_id`). O mesmo relatório cai sempre na mesma pasta, e gerar de novo substitui o anterior: `documents.fresh_folder` apaga a versão antiga antes de gravar a nova, e `remember_report` retira do índice a impressão digital antiga que apontava para aquela pasta. O mais recente prevalece e nunca ficam dois arquivos com o mesmo nome. Relatório de conteúdo idêntico continua devolvendo o arquivo existente. Títulos, idiomas ou grupos de formato diferentes nunca se sobrescrevem. Prova: `test_the_same_report_name_always_lands_on_the_same_file_and_the_newest_replaces_it` e `test_different_names_or_format_groups_never_overwrite_each_other`.
+
+Elemento sempre identificado. A causa estava em `a11y_finding`: só o alvo vindo do dossiê (elementos interativos) trazia o elemento, e um alvo `css:` ficava sem ele, então a planilha escrevia "Elemento não identificado". Agora o elemento de qualquer alvo `css:` é lido do navegador (`Session.describe_element`: etiqueta, papel e nome calculados pelo CDP, texto, atributos de identidade e caixa), seja ele um parágrafo, um título ou um botão. Alvo que não existe na página é recusado, e o achado não é gravado sem o elemento. Provas: `test_a_finding_on_any_element_gets_its_tag_role_and_name_from_the_browser` e `test_a_finding_whose_target_matches_nothing_is_refused_instead_of_saved_without_element`. Como defesa contra a recorrência, a conferência do relatório (`report_lint`) trata como lacuna que impede a entrega qualquer célula igual a "Elemento não identificado", "Seletor não registrado" ou "Página não registrada" (antes só "Não registrado" valia), com a dica de dar um alvo `css:` existente. Prova: `test_the_report_lint_blocks_a_finding_with_no_identified_element`.
+
+Limite registrado: achado sem alvo nenhum continua podendo ser gravado, mas o relatório recusa gerar. Problema da página inteira usa `css:html` ou o marco.
+
 ## Retirada de Título da página em 29/10/2026
 
 O campo Título da página foi retirado do contrato de apresentação dos relatórios: cabeçalhos e valores da planilha e seções compartilhadas de documento/apresentação. A planilha passa de 32 para 31 colunas, preservando Site em A1, Sistema operacional em B1, Navegadores em C1, URL e Roteiro detalhado. page_title antigo continua aceito internamente por compatibilidade, sem ser solicitado ou exibido como campo. Isso não desativa o teste do título de documento para WCAG 2.4.2 nem filtra menções necessárias ao título em um achado real.

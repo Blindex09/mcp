@@ -65,6 +65,7 @@ async def _live_checks() -> None:
     env = {
         **os.environ,
         "A11Y_MCP_HOME": home,
+        "A11Y_MCP_ALLOW_EDITS": "1",  # sem isto as ferramentas de edicao nem existem; a matriz prova o portao de aprovacao delas
         "A11Y_MCP_EDIT_APPROVAL": "1",
         "A11Y_MCP_REMOTE_ALLOW_PRIVATE": "0",
         "PYTHONIOENCODING": "utf-8",

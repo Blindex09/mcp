@@ -43,6 +43,40 @@ function (scope) {
     return (doc.__a11yHoverRules = out);
   };
   const g = (a) => el.getAttribute(a);
+  let ariaHiddenAncestor = false;
+  for (let n = el; n; n = n.parentElement || (n.getRootNode && n.getRootNode().host)) {
+    if (n.getAttribute && n.getAttribute('aria-hidden') === 'true') { ariaHiddenAncestor = true; break; }
+  }
+  const accnameTrace = [];
+  const rawLabelledby = g('aria-labelledby');
+  if (rawLabelledby !== null) {
+    const ids = rawLabelledby.split(/\s+/).filter(Boolean);
+    const resolved = [];
+    const missing = [];
+    for (const id of ids) {
+      const target = root.getElementById ? root.getElementById(id) : doc.getElementById(id);
+      if (target) resolved.push(target);
+      else missing.push(id);
+    }
+    accnameTrace.push({
+      source: 'aria-labelledby',
+      ids,
+      missing_ids: missing,
+      text: textOf(resolved) || null,
+    });
+  }
+  const rawAriaLabel = g('aria-label');
+  if (rawAriaLabel !== null) accnameTrace.push({source: 'aria-label', text: clean(rawAriaLabel).slice(0, 120) || null});
+  if (el.labels && el.labels.length) accnameTrace.push({source: 'label', text: textOf(Array.from(el.labels)) || null});
+  const rawAlt = g('alt');
+  if (rawAlt !== null) accnameTrace.push({source: 'alt', text: clean(rawAlt).slice(0, 120)});
+  const rawText = clean(el.innerText).slice(0, 120);
+  if (rawText) accnameTrace.push({source: 'innerText', text: rawText});
+  const rawPlaceholder = g('placeholder');
+  if (rawPlaceholder !== null) accnameTrace.push({source: 'placeholder', text: clean(rawPlaceholder).slice(0, 120) || null});
+  const rawTitle = g('title');
+  if (rawTitle !== null) accnameTrace.push({source: 'title', text: clean(rawTitle).slice(0, 120) || null});
+
   const controlled = byIds(g('aria-controls') || g('aria-owns'));
   const pop = controlled[0];
   const popItems = pop ? Array.from(pop.querySelectorAll('[role],a,button,li,option')) : [];
@@ -69,6 +103,9 @@ function (scope) {
     where: {frame_url: (doc.URL || '').slice(0, 80), in_shadow: root instanceof ShadowRoot, shadow_host: root instanceof ShadowRoot ? root.host.tagName.toLowerCase() : null},
     attrs: {aria_label: g('aria-label'), labelledby: textOf(byIds(g('aria-labelledby'))) || null,
       label: el.labels && el.labels.length ? textOf(Array.from(el.labels)) : null, placeholder: g('placeholder'), title: g('title'), alt: g('alt')},
+    accname_trace: accnameTrace,
+    aria_hidden_focusable: ariaHiddenAncestor,
+    dom_focusable: el.tabIndex >= 0,
     text: clean(el.innerText).slice(0, 80) || null,
     icon_only: !clean(el.innerText) && !!el.querySelector('svg,img,i'),
     value_length: (el.value !== undefined && !isPw) ? String(el.value).length : null,

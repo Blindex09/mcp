@@ -118,37 +118,52 @@ def register(mcp: Any) -> None:
         return _clip(text)
 
     @mcp.tool()
-    async def a11y_contrast(foreground: str, background: str, size_px: float = 16, bold: bool = False) -> str:
-        """Check WCAG 2.2 color contrast between two hex colors (#rgb or #rrggbb).
-        Returns the ratio and AA/AAA pass/fail for text (size-aware) and UI components."""
+    async def a11y_contrast(
+        foreground: str, background: str, size_px: float = 16, bold: bool = False, include_cvd: bool = False
+    ) -> str:
+        """Check WCAG 2.2 color contrast and APCA perceptual contrast (Lc) between two opaque colors
+        (#rgb, #rrggbb, rgb()/rgba(..., 1), hsl(), or oklch()).
+        Returns WCAG ratio, AA/AAA text and UI pass/fail, APCA Lc, and minimal OKLCH lightness fix suggestions.
+        include_cvd: true also returns simulated foreground/background ratios across all 8 color-vision deficiency types."""
         try:
-            report = audit.contrast_report(foreground, background, size_px, bold)
+            report = audit.contrast_report(foreground, background, size_px, bold, include_cvd)
             return _json(evidence.with_step(report, evidence.contrast(report)))
         except ValueError as e:
             return _error(e)
 
     @mcp.tool()
-    async def a11y_audit(url: str = "", html: str = "", level: str = "AA", browser: str = "chromium", color_scheme: str = "") -> str:
+    async def a11y_audit(
+        url: str = "",
+        html: str = "",
+        level: str = "AA",
+        browser: str = "chromium",
+        color_scheme: str = "",
+        locale: str = "",
+    ) -> str:
         """Run an automated axe-core WCAG audit in headless Chromium. Provide EITHER url
         (http/https only) OR html (a full HTML string). level: A | AA | AAA. browser: chromium | firefox | webkit (installed automatically on first use).
         color_scheme: light | dark (optional; emulates prefers-color-scheme, so contrast in the dark theme is audited too).
+        locale: '' (default English) | 'pt-BR' (axe-core messages translated to Portuguese).
         Returns violations sorted by impact, items needing manual review, and pass count. It also writes one step to the session trace
         (returned as `trace_step`): cite it in a11y_finding evidence_steps to confirm an axe-measured failure (for example a contrast ratio).
         Automated checks catch only part of WCAG - always follow up with keyboard and
         screen-reader testing (see a11y_get_reference "audit-checklist")."""
         try:
-            result = await audit.run_axe(url or None, html or None, level, browser, color_scheme or None)
+            result = await audit.run_axe(url or None, html or None, level, browser, color_scheme or None, locale or None)
             return _json(evidence.with_step(result, evidence.axe(result, url or "(html)", level)))
         except Exception as e:  # noqa: BLE001 - fronteira da ferramenta: devolve erro ao cliente
             return _error(e)
 
     @mcp.tool()
-    async def a11y_aria_snapshot(url: str = "", html: str = "", browser: str = "chromium") -> str:
+    async def a11y_aria_snapshot(
+        url: str = "", html: str = "", browser: str = "chromium", compress: bool = False
+    ) -> str:
         """Return the page's accessibility tree (roles, accessible names, states) as YAML,
         i.e. what a screen reader is given. Provide EITHER url (http/https) OR html.
+        compress: true folds large repetitive non-interactive groups (>100 identical siblings) while preserving interactive controls.
         Use to compare visible content with computed names and spot duplicated or missing semantics."""
         try:
-            return _clip(await audit.aria_snapshot(url or None, html or None, browser))
+            return _clip(await audit.aria_snapshot(url or None, html or None, browser, compress))
         except Exception as e:  # noqa: BLE001 - fronteira da ferramenta: devolve erro ao cliente
             return _error(e)
 

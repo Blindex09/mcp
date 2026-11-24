@@ -428,6 +428,9 @@ def finding_facts(finding: dict[str, Any]) -> list[list[str]]:
     return rows
 
 
+# Textos que o gerador escreve numa celula quando falta o dado: uma celula (ou linha de celula) igual a um deles e' lacuna, e a planilha nao sai com ela.
+GAP_CELLS = frozenset({"Não registrado", "Elemento não identificado", "Seletor não registrado", "Página não registrada"})
+
 _NARRATIVE_SENTINELS = {
     "", "Não registrado", "Não registrada", "Não informado", "Não informada", "A definir",
     "Não definida", "Elemento não identificado", "Seletor não registrado", "Página não registrada",

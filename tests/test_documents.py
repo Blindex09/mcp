@@ -423,4 +423,168 @@ async def test_same_report_is_never_generated_twice(tmp_path, monkeypatch):
     assert len([p for p in tmp_path.iterdir() if p.is_dir()]) == 1
     record["findings"][0]["claim"] = "Controle sem teclado e sem foco"
     third = json.loads(await tool.fn(formats="xlsx", run_id="a", allow_incomplete=True))
-    assert not third.get("reused") and third["files"][0]["path"] != first["files"][0]["path"]
+    # conteudo novo, mesmo relatorio: o mais recente SUBSTITUI o anterior no mesmo caminho, e continua so uma pasta
+    assert not third.get("reused") and third["files"][0]["path"] == first["files"][0]["path"]
+    assert len([p for p in tmp_path.iterdir() if p.is_dir()]) == 1
+
+
+def _build_synthetic_tagged_pdf(
+    path: Path,
+    *,
+    display_doc_title: bool = True,
+    suspects: bool = False,
+    role_map: dict[str, str] | None = None,
+    custom_role: str | None = None,
+    shared_mcid: bool = False,
+    tabs_s: bool = True,
+    link_contents: str = "Ir",
+    untagged_text: bool = False,
+    nested_artifact: bool = False,
+    irregular_table: bool = False,
+    cid_missing_gidmap: bool = False,
+    tounicode_bad: bool = False,
+    reverse_order: bool = False,
+) -> Path:
+    """Constroi um PDF sintetico estruturado minimo para testar cada regra isolada de validate_pdf."""
+    from pypdf.generic import (
+        ArrayObject,
+        BooleanObject,
+        DecodedStreamObject,
+        DictionaryObject,
+        NameObject,
+        NumberObject,
+        TextStringObject,
+    )
+
+    writer = PdfWriter()
+    page = writer.add_blank_page(width=400, height=400)
+    page_ref = page.indirect_reference
+    assert page_ref is not None
+
+    font_desc = writer._add_object(
+        DictionaryObject({
+            NameObject("/Type"): NameObject("/FontDescriptor"),
+            NameObject("/FontName"): NameObject("/TestFont"),
+            NameObject("/FontFile2"): writer._add_object(DecodedStreamObject()),
+        })
+    )
+    cid_font_dict = DictionaryObject({
+        NameObject("/Type"): NameObject("/Font"),
+        NameObject("/Subtype"): NameObject("/CIDFontType2"),
+        NameObject("/BaseFont"): NameObject("/TestFont"),
+        NameObject("/FontDescriptor"): font_desc,
+    })
+    if not cid_missing_gidmap:
+        cid_font_dict[NameObject("/CIDToGIDMap")] = NameObject("/Identity")
+    cid_ref = writer._add_object(cid_font_dict)
+
+    tu_data = (
+        "/CIDInit /ProcSet findresource begin 12 dict begin begincmap\n"
+        "1 beginbfchar\n<0001> <0000>\nendbfchar\nendcmap\n"
+        if tounicode_bad
+        else "/CIDInit /ProcSet findresource begin 12 dict begin begincmap\n1 beginbfchar\n<0041> <0041>\nendbfchar\nendcmap\n"
+    )
+    tu_stream = DecodedStreamObject()
+    tu_stream.set_data(tu_data.encode("latin-1"))
+    type0 = writer._add_object(
+        DictionaryObject({
+            NameObject("/Type"): NameObject("/Font"),
+            NameObject("/Subtype"): NameObject("/Type0"),
+            NameObject("/BaseFont"): NameObject("/TestFont"),
+            NameObject("/Encoding"): NameObject("/Identity-H"),
+            NameObject("/DescendantFonts"): ArrayObject([cid_ref]),
+            NameObject("/ToUnicode"): writer._add_object(tu_stream),
+        })
+    )
+    page[NameObject("/Resources")] = DictionaryObject({NameObject("/Font"): DictionaryObject({NameObject("/F1"): type0})})
+
+    parts: list[str] = []
+    for idx in range(5):
+        if idx == 1 and nested_artifact:
+            parts.append(f"/P <</MCID {idx}>> BDC /Artifact BMC BT /F1 12 Tf 20 300 Td <0041> Tj ET EMC EMC")
+        else:
+            tag = "/H1" if idx == 0 else "/P"
+            parts.append(f"{tag} <</MCID {idx}>> BDC BT /F1 12 Tf 20 {350 - idx * 20} Td <0041> Tj ET EMC")
+    if untagged_text:
+        parts.append("BT /F1 12 Tf 20 380 Td <0041> Tj ET")
+    cs = DecodedStreamObject()
+    cs.set_data("\n".join(parts).encode("latin-1"))
+    page[NameObject("/Contents")] = writer._add_object(cs)
+
+    mcid_seq = [0, 4, 3, 2, 1] if reverse_order else [0, 1, 2, 3, 4]
+    elems = []
+    for i, m in enumerate(mcid_seq):
+        role = NameObject(f"/{custom_role}") if (custom_role and i == 1) else (NameObject("/H1") if i == 0 else NameObject("/P"))
+        elems.append(writer._add_object(DictionaryObject({NameObject("/S"): role, NameObject("/Pg"): page_ref, NameObject("/K"): NumberObject(m)})))
+    if shared_mcid:
+        elems.append(writer._add_object(DictionaryObject({NameObject("/S"): NameObject("/P"), NameObject("/Pg"): page_ref, NameObject("/K"): NumberObject(1)})))
+
+    if irregular_table:
+        c1 = writer._add_object(DictionaryObject({NameObject("/S"): NameObject("/TH"), NameObject("/Pg"): page_ref, NameObject("/K"): NumberObject(1)}))
+        c2 = writer._add_object(DictionaryObject({NameObject("/S"): NameObject("/TH"), NameObject("/Pg"): page_ref, NameObject("/K"): NumberObject(2)}))
+        r1 = writer._add_object(DictionaryObject({NameObject("/S"): NameObject("/TR"), NameObject("/K"): ArrayObject([c1, c2])}))
+        d1 = writer._add_object(DictionaryObject({NameObject("/S"): NameObject("/TD"), NameObject("/Pg"): page_ref, NameObject("/K"): NumberObject(3)}))
+        r2 = writer._add_object(DictionaryObject({NameObject("/S"): NameObject("/TR"), NameObject("/K"): ArrayObject([d1])}))
+        elems.append(writer._add_object(DictionaryObject({NameObject("/S"): NameObject("/Table"), NameObject("/K"): ArrayObject([r1, r2])})))
+
+    link_struct = writer._add_object(DictionaryObject({NameObject("/S"): NameObject("/Link"), NameObject("/Pg"): page_ref}))
+    elems.append(link_struct)
+    doc_elem = writer._add_object(DictionaryObject({NameObject("/S"): NameObject("/Document"), NameObject("/K"): ArrayObject(elems)}))
+    st_dict = DictionaryObject({NameObject("/Type"): NameObject("/StructTreeRoot"), NameObject("/K"): ArrayObject([doc_elem])})
+    if role_map:
+        st_dict[NameObject("/RoleMap")] = DictionaryObject({NameObject(f"/{k}"): NameObject(f"/{v}") for k, v in role_map.items()})
+    writer.root_object[NameObject("/StructTreeRoot")] = writer._add_object(st_dict)
+
+    annot = DictionaryObject({
+        NameObject("/Type"): NameObject("/Annot"),
+        NameObject("/Subtype"): NameObject("/Link"),
+        NameObject("/Rect"): ArrayObject([NumberObject(10), NumberObject(10), NumberObject(80), NumberObject(30)]),
+        NameObject("/StructParent"): NumberObject(0),
+        NameObject("/A"): DictionaryObject({NameObject("/S"): NameObject("/URI"), NameObject("/URI"): TextStringObject("https://example.test")}),
+    })
+    if link_contents:
+        annot[NameObject("/Contents")] = TextStringObject(link_contents)
+    page[NameObject("/Annots")] = ArrayObject([writer._add_object(annot)])
+    if tabs_s:
+        page[NameObject("/Tabs")] = NameObject("/S")
+
+    mi = DictionaryObject({NameObject("/Marked"): BooleanObject(True)})
+    if suspects:
+        mi[NameObject("/Suspects")] = BooleanObject(True)
+    writer.root_object[NameObject("/MarkInfo")] = mi
+    writer.root_object[NameObject("/Lang")] = TextStringObject("pt-BR")
+    writer.root_object[NameObject("/ViewerPreferences")] = DictionaryObject({NameObject("/DisplayDocTitle"): BooleanObject(display_doc_title)})
+    writer.add_metadata({"/Title": "Documento Sintetico"})
+    writer.write(path)
+    return path
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "expected_code"),
+    [
+        ({}, None),
+        ({"suspects": True}, "structure_marked_suspect"),
+        ({"display_doc_title": False}, "display_doc_title_missing"),
+        ({"role_map": {"A": "B", "B": "A"}}, "role_map_circular"),
+        ({"role_map": {"P": "Div"}}, "role_map_remaps_standard"),
+        ({"custom_role": "CustomWidget"}, "role_map_unmapped_custom"),
+        ({"shared_mcid": True}, "duplicate_mcid_reference"),
+        ({"reverse_order": True}, "reading_order_mismatch"),
+        ({"nested_artifact": True}, "nested_artifact_tagged"),
+        ({"untagged_text": True}, "untagged_page_content"),
+        ({"tabs_s": False}, "page_tabs_not_structure"),
+        ({"link_contents": ""}, "link_missing_contents"),
+        ({"cid_missing_gidmap": True}, "font_missing_cid_to_gid_map"),
+        ({"tounicode_bad": True}, "font_tounicode_noncharacter"),
+        ({"irregular_table": True}, "table_irregular_grid"),
+    ],
+)
+def test_validate_pdf_deep_structural_checks(tmp_path, kwargs, expected_code):
+    pdf_path = _build_synthetic_tagged_pdf(tmp_path / "case.pdf", **kwargs)
+    res = validate_pdf(pdf_path)
+    codes = {i["code"] for i in res["issues"]}
+    if expected_code is None:
+        assert codes == set()
+    else:
+        assert expected_code in codes, (expected_code, res["issues"])
+

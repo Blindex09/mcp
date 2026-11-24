@@ -148,5 +148,5 @@
   try { for (const sheet of Array.from(document.styleSheets)) { try { scan(sheet.cssRules); } catch (e) {} } } catch (e) {}
   const hoverRules = {total: hover.length, items: hover, note: 'regras CSS :hover que mudam exibicao/visibilidade; o gatilho pode nao ser focavel nem ter listener'};
 
-  return {url: location.href, document: doc, headings, landmarks, images, links: linkInfo, forms: formInfo, tables, lists, media, iframes, live_regions: live, reading_order: reading, hover_reveals: hoverRules};
+  return {url: location.href, document: doc, headings, landmarks, images, links: linkInfo, forms: formInfo, tables, lists, media, media_activity: window.__a11yMediaActivity || {plays: [], audio_contexts: 0}, iframes, live_regions: live, reading_order: reading, hover_reveals: hoverRules};
 }

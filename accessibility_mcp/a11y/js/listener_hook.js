@@ -30,4 +30,33 @@
     } catch (e) {}
     return orig.call(this, type, fn, opts);
   };
+
+  window.__a11yMediaActivity = {plays: [], audio_contexts: 0};
+  if (typeof HTMLMediaElement !== 'undefined' && typeof HTMLMediaElement.prototype.play === 'function') {
+    const origPlay = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () {
+      try {
+        if (window.__a11yMediaActivity.plays.length < 30) {
+          window.__a11yMediaActivity.plays.push({
+            tag: (this.tagName || '').toLowerCase(),
+            src: String(this.currentSrc || this.getAttribute('src') || '').slice(0, 100),
+            muted: Boolean(this.muted),
+            controls: Boolean(this.controls),
+          });
+        }
+      } catch (e) {}
+      return origPlay.apply(this, arguments);
+    };
+  }
+  for (const key of ['AudioContext', 'webkitAudioContext']) {
+    const NativeCtx = window[key];
+    if (typeof NativeCtx === 'function') {
+      window[key] = new Proxy(NativeCtx, {
+        construct(target, args, newTarget) {
+          try { window.__a11yMediaActivity.audio_contexts += 1; } catch (e) {}
+          return Reflect.construct(target, args, newTarget);
+        },
+      });
+    }
+  }
 })();

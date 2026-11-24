@@ -23,9 +23,12 @@ FOCUS_JS = _load("focus")
 DOSSIER_ITEM_JS = _load("dossier")  # function(scope){...} com this = o elemento (via CDP callFunctionOn ou Playwright)
 # Linguagem de design real do site (contagens do que ele usa).
 DESIGN_JS = _load("design")
-# Estresse: reflow em 320 px (WCAG 1.4.10) e texto cortado com espacamento do usuario (WCAG 1.4.12).
+# Estresse: reflow em 320 px (WCAG 1.4.10), texto cortado e texto sobreposto com espacamento do usuario (WCAG 1.4.12).
 REFLOW_JS = _load("reflow")
 CLIPPED_JS = _load("clipped")
+TEXT_OVERLAP_JS = _load("text_overlap")
+# Captura anotada temporaria (somente para visualizacao humana/modelo; removida logo apos a captura).
+ANNOTATE_JS = _load("annotate")
 
 # Espera adaptativa: a pagina "assentou" quando o DOM fica quieto (sem tempo fixo; so ha um teto).
 SETTLE_JS = _load("settle")

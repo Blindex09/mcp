@@ -64,7 +64,7 @@ async def test_server_exposes_only_accessibility_tools() -> None:
         # editor de arquivos do projeto da pessoa
         "a11y_set_workspace", "a11y_read_file", "a11y_edit_file", "a11y_approve_edit", "a11y_undo_edit",
         # sondas de comportamento, achados com evidencia, execucoes salvas
-        "a11y_probe", "a11y_journey", "a11y_verify_code", "a11y_source_of", "a11y_try_patch", "a11y_lint_report", "a11y_check_page", "a11y_finding", "a11y_trace", "a11y_report", "a11y_runs", "a11y_export", "a11y_diff",
+        "a11y_probe", "a11y_journey", "a11y_verify_code", "a11y_source_of", "a11y_inspect", "a11y_try_patch", "a11y_lint_report", "a11y_check_page", "a11y_finding", "a11y_trace", "a11y_report", "a11y_runs", "a11y_export", "a11y_diff",
         "a11y_create_document", "a11y_validate_document", "a11y_create_report",
         # interoperaÃ§Ã£o remota MCP/A2A, com aprovaÃ§Ã£o para chamadas externas
         "a11y_remote_mcp_connect", "a11y_remote_mcp_connections", "a11y_remote_mcp_list_tools",

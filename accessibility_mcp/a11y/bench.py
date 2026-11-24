@@ -112,6 +112,24 @@ async def _d_silent_status(s: Session) -> bool:
     return not r["announcements"] and any("Adicionado" in x for x in r["tree_added"])
 
 
+async def _d_hidden_focusable(s: Session) -> bool:
+    return any(
+        e.get("aria_hidden_focusable") and (e.get("focusable") or e.get("dom_focusable"))
+        for e in (await s.dossier("", 200))["elements"]
+    )
+
+
+async def _d_invisible_focus(s: Session) -> bool:
+    got = await s.focus_style("css:#comprar", check_pixels=True)
+    diff = got.get("pixel_diff") or {}
+    return bool(diff.get("measured") and diff.get("changed_pixels") == 0)
+
+
+async def _d_spacing_overlap(s: Session) -> bool:
+    res = await s.stress("text_spacing")
+    return bool(res.get("newly_overlapping_with_user_spacing"))
+
+
 @dataclass(frozen=True)
 class Mutation:
     name: str
@@ -141,6 +159,22 @@ MUTATIONS: tuple[Mutation, ...] = (
     ), _d_no_state, "botao que abre/fecha sem expor o estado"),
     Mutation("sem_titulo", frozenset({"2.4.2"}), ("titulo da pagina", "title"), _swap(("<title>Casa do Cha - Inicio</title>", "")), _d_title, "pagina sem titulo"),
     Mutation("status_mudo", frozenset({"4.1.3"}), ("status", "anunc", "carrinho", "adicionado"), _swap(('<p id="status" role="status"></p>', '<p id="status"></p>')), _d_silent_status, "mensagem de status que nao e anunciada"),
+    Mutation("rotulo_fora_do_nome", frozenset({"2.5.3"}), ("comprar", "nome acessivel", "aria-label"), _swap((
+        '<button id="comprar" type="button">Comprar cha verde</button>',
+        '<button id="comprar" type="button" aria-label="Finalizar pedido">Comprar cha verde</button>',
+    )), None, "rotulo visivel ausente do nome acessivel (label in name)"),
+    Mutation("aria_hidden_focavel", frozenset({"4.1.2"}), ("aria-hidden", "foco", "comprar"), _swap((
+        '<button id="comprar" type="button">Comprar cha verde</button>',
+        '<span aria-hidden="true"><button id="comprar" type="button">Comprar cha verde</button></span>',
+    )), _d_hidden_focusable, "elemento focavel dentro de aria-hidden=true"),
+    Mutation("foco_invisivel_pixel", frozenset({"2.4.7"}), ("foco", "contorno", "outline"), _swap((
+        ":focus-visible { outline: 3px solid #0b57d0; outline-offset: 2px; }",
+        ":focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }",
+    )), _d_invisible_focus, "indicador de foco da mesma cor do fundo (0 pixels alterados)"),
+    Mutation("texto_sobreposto_espacamento", frozenset({"1.4.12"}), ("espacamento", "sobrepo", "linha"), _swap((
+        '<p class="muted">Escolha um cha e adicione ao carrinho.</p>',
+        '<div style="height:28px;width:320px"><p class="muted" style="margin:0;line-height:1.2">Escolha um cha e adicione ao carrinho.</p></div><p style="margin:0">Entrega rapida em todo o pais.</p>',
+    )), _d_spacing_overlap, "texto que passa a sobrepor outro com espacamento 1.4.12"),
 )
 
 

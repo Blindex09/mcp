@@ -20,4 +20,27 @@
       if (t) window.__a11yLive.push({role: r.getAttribute('role') || ('aria-live=' + r.getAttribute('aria-live')), text: t, fresh: fresh.has(r)});
     });
   }).observe(document, {subtree: true, childList: true, characterData: true});
+
+  const wrapAriaNotify = (proto) => {
+    if (!proto || typeof proto.ariaNotify !== 'function' || proto.ariaNotify.__a11yWrapped) return;
+    const orig = proto.ariaNotify;
+    const wrapped = function ariaNotify(message, options) {
+      try {
+        const text = String(message == null ? '' : message).trim();
+        if (text) {
+          window.__a11yLive.push({
+            role: 'ariaNotify',
+            priority: (options && options.priority) || 'normal',
+            text,
+            fresh: false,
+          });
+        }
+      } catch (e) {}
+      return orig.apply(this, arguments);
+    };
+    wrapped.__a11yWrapped = true;
+    proto.ariaNotify = wrapped;
+  };
+  wrapAriaNotify(typeof Element !== 'undefined' && Element.prototype);
+  wrapAriaNotify(typeof Document !== 'undefined' && Document.prototype);
 })()

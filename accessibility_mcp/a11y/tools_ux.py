@@ -159,12 +159,13 @@ def register_ux(mcp: Any) -> None:
         return await _run(SESSION.reach(target, max_tabs))
 
     @mcp.tool()
-    async def a11y_focus_style(target: str) -> str:
+    async def a11y_focus_style(target: str, check_pixels: bool = True) -> str:
         """FACTS about what :focus changes on an element (measured by Chromium by forcing the focus state, no
-        events fired): every computed property that differs (outline, box-shadow, border, background, color...).
-        Whether that is a visible, sufficient focus indicator is your judgment (compare with a11y_screenshot).
+        events fired): every computed property that differs (outline, box-shadow, border, background, color...)
+        and, when check_pixels=true (default), pixel-level visual delta (changed pixels, WCAG 2.4.13 perimeter*2px
+        comparison, max pixel contrast delta). Whether that is a visible, sufficient focus indicator is your judgment.
         Refused for the screen_reader persona."""
-        return await _run(SESSION.focus_style(target))
+        return await _run(SESSION.focus_style(target, check_pixels))
 
     @mcp.tool()
     async def a11y_announce(target: str) -> str:
@@ -173,12 +174,14 @@ def register_ux(mcp: Any) -> None:
         return await _run(SESSION.announce(target))
 
     @mcp.tool()
-    async def a11y_screenshot(target: str = "", full_page: bool = False) -> Any:
+    async def a11y_screenshot(target: str = "", full_page: bool = False, annotate: bool = False) -> Any:
         """Screenshot (JPEG) of the page or one element (id from a11y_dossier, or css:<selector>), to judge
-        layout, typography and spacing visually. Refused for the screen_reader persona (it cannot see)."""
+        layout, typography and spacing visually.
+        annotate: true temporarily draws numbered bounding boxes for axe-core WCAG AA violations and removes them
+        immediately after capture (records a step in session trace). Refused for the screen_reader persona."""
         try:
             async with SESSION.lock:
-                return Image(data=await SESSION.screenshot(target, full_page), format="jpeg")
+                return Image(data=await SESSION.screenshot(target, full_page, annotate), format="jpeg")
         except SessionError as e:
             return _json({"error": str(e)})
         except Exception as e:  # noqa: BLE001
@@ -257,6 +260,23 @@ def register_ux(mcp: Any) -> None:
             return _json(evidence.with_step(result, evidence.record("source_of", {"target": target, "js_sources": found_js, "css_rules": len(css_rules)})))
         except SessionError as e:
             return _json({"error": str(e)})
+
+    @mcp.tool()
+    async def a11y_inspect(target: str, properties: list[str] | None = None, states: bool = True) -> str:
+        """INSPECT ONE ELEMENT LIKE THE BROWSER'S DEVTOOLS (Chromium only), as FACTS. target: dossier id or 'css:<selector>'. Returns: the full outerHTML (style attributes and
+        whole svg included), every attribute, the inline style, the CSS rules that match it with style sheet, line, column and the original rule text, the rules it
+        inherits, the computed style (properties: list of CSS property names; default is the set that matters for reading, focus, target size and visibility),
+        what changes under forced :hover, :focus, :focus-visible and :active (states=false skips it), its event listeners, its box (content, padding, border, margin),
+        the accessibility entry (role, name, name sources, properties) and the technologies of the page: library markers (React, Vue, Angular, Svelte, Next,
+        jQuery, web components) and which served files declare a source map. Use it after a11y_source_of to see WHY an element looks or behaves as it does.
+        It judges nothing; it records one step in the trace (cite trace_step in a11y_finding)."""
+        from . import inspect_dom
+
+        def log(data: dict[str, Any]) -> int | None:
+            return evidence.record("inspect", {"target": target, "rules": len(data["matched_rules"]), "listeners": len(data["event_listeners"]),
+                                                "markers": sorted(data["technologies"]["markers"])})
+
+        return await _run_logged(inspect_dom.inspect_element(SESSION, target, properties, states), log)
 
     @mcp.tool()
     async def a11y_verify_code(snippets: list[str]) -> str:
@@ -367,7 +387,9 @@ def register_ux(mcp: Any) -> None:
         a separate measurement (a reader does not announce contrast or visible focus). Do not invent landmarks or roles,
         apply NVDA shortcuts to every reader, or turn proposed routes into test evidence or observed speech.
         criterion: real WCAG 2.2 number. severity: blocker | serious | moderate | minor. priority: P0 | P1 | P2 | P3; when omitted it follows severity.
-        target: dossier id or css:<selector>; the current page URL and observed element details are attached automatically. evidence_steps are
+        target: dossier id or css:<selector> (ALWAYS give one: a report is refused while a finding has no identified element; for a whole-page problem use css:html or
+        the landmark). The element is read from the page, interactive or not: tag, role and accessible name come from the browser. A css: target that matches nothing is
+        refused. The current page URL and observed element details are attached automatically. evidence_steps are
         comma-separated a11y_trace step numbers. Besides probes and actions, the trace also receives the real NVDA speech (a11y_nvda_*), axe audits, contrast
         measurements, page maps and dossiers, each returning a `trace_step` to cite here. Without valid evidence the result is cantTell, never a confirmed failure."""
         from . import findings as fnd
@@ -384,6 +406,12 @@ def register_ux(mcp: Any) -> None:
                     observed_code = "\n\n".join(f"JS/CSS, {p['asset']}:\n{p['old']}" for p in SESSION.patches)
                     fixed_code = "\n\n".join(f"JS/CSS, {p['asset']}:\n{p['new']}" for p in SESSION.patches)
                 page = SESSION._need()
+                if target and target.startswith("css:") and target not in SESSION.elements_seen:
+                    # o relatorio nunca sai com "elemento nao identificado": o elemento do alvo e' lido da pagina (qualquer elemento, nao so os do dossie)
+                    entry = await SESSION.describe_element(target)
+                    if entry is None:
+                        return _json({"error": f"o alvo {target[:80]} nao existe na pagina: o achado nao e registrado sem o elemento. Confira o seletor com a11y_inspect ou a11y_dossier"})
+                    SESSION.elements_seen[target] = entry
                 raw = {
                     "claim": claim, "criterion": criterion, "severity": severity, "target": target or None,
                     "evidence_steps": cited, "priority": priority, "impact": impact,

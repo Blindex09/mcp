@@ -13,6 +13,7 @@ inatividade, nenhum JavaScript arbitrario exposto ao cliente.
 from __future__ import annotations
 
 import asyncio
+import io
 import itertools
 import json
 import re
@@ -22,7 +23,9 @@ from dataclasses import dataclass, field
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
-from . import findings
+from PIL import Image
+
+from . import audit, color_science, findings
 from . import page_scripts as js
 from .audit import _launch, validate_url
 from .patience import PATIENCE_FACTOR, patient
@@ -238,6 +241,7 @@ class Session:
         self._console_seen = 0
         self._watchdog: asyncio.Task[None] | None = None
         self.patches: list[dict[str, Any]] = []  # correcoes de arquivo (JS/CSS) aplicadas SO nesta sessao, para testar uma sugestao antes de recomenda-la
+        self.last_annotation: dict[str, Any] | None = None
 
     @property
     def allow_mutations(self) -> bool:
@@ -339,6 +343,7 @@ class Session:
         self.dialogs, self.popups, self.console_errors = [], [], []
         self.trace, self.findings, self.elements_seen = [], [], {}
         self._live_seen = self._console_seen = 0
+        self.last_annotation = None
         self.last_used = time.monotonic()
         self._watchdog = asyncio.create_task(self._idle_watchdog())
         return {
@@ -371,6 +376,7 @@ class Session:
         self._frame_of = {}
         self._inflight = set()
         self._req_t0 = {}
+        self.last_annotation = None
         return was_open
 
     def idle_limit_s(self) -> float:
@@ -1116,69 +1122,205 @@ class Session:
                 return {"reached": True, "tab_presses": i, "path": path[-15:]}
         return {"reached": False, "tab_presses": max_tabs, "reason": "limite de Tab atingido", "path": path[-15:]}
 
-    async def focus_style(self, target: str) -> dict[str, Any]:
+    @staticmethod
+    def _pixel_diff_stats(before_png: bytes, after_png: bytes, box: dict[str, Any]) -> dict[str, Any]:
+        """Compara pixels RGB antes e depois do foco sem julgar: contagem de pixels, area relativa 2.4.13 e maior contraste."""
+        with Image.open(io.BytesIO(before_png)) as im1, Image.open(io.BytesIO(after_png)) as im2:
+            rgb1_img = im1.convert("RGB")
+            rgb2_img = im2.convert("RGB")
+            w = min(rgb1_img.width, rgb2_img.width)
+            h = min(rgb1_img.height, rgb2_img.height)
+            if w <= 0 or h <= 0:
+                return {"measured": False, "reason": "captura vazia para comparacao"}
+            if (rgb1_img.width, rgb1_img.height) != (w, h):
+                rgb1_img = rgb1_img.crop((0, 0, w, h))
+            if (rgb2_img.width, rgb2_img.height) != (w, h):
+                rgb2_img = rgb2_img.crop((0, 0, w, h))
+            raw1 = rgb1_img.tobytes()
+            raw2 = rgb2_img.tobytes()
+        changed: list[tuple[tuple[int, int, int], tuple[int, int, int]]] = [
+            ((raw1[i], raw1[i + 1], raw1[i + 2]), (raw2[i], raw2[i + 1], raw2[i + 2]))
+            for i in range(0, min(len(raw1), len(raw2)), 3)
+            if max(abs(raw1[i] - raw2[i]), abs(raw1[i + 1] - raw2[i + 1]), abs(raw1[i + 2] - raw2[i + 2])) > 8
+        ]
+        n_changed = len(changed)
+        max_ratio = 1.0
+        ge3_count = 0
+        if n_changed > 0:
+            step = max(1, n_changed // 4000)
+            sampled = changed[::step][:4000]
+            ratios = [color_science.wcag_contrast_ratio(c1, c2) for c1, c2 in sampled]
+            max_ratio = round(max(ratios), 2)
+            ge3_sample = sum(1 for r in ratios if r >= 3.0)
+            ge3_count = round(ge3_sample * (n_changed / len(ratios))) if len(ratios) < n_changed else ge3_sample
+        perimeter = round(2.0 * (float(box["width"]) + float(box["height"])), 1)
+        min_2413 = round(2.0 * perimeter, 1)
+        return {
+            "measured": True,
+            "changed_pixels": n_changed,
+            "clip_pixels": w * h,
+            "perimeter_px": perimeter,
+            "wcag_2413_min_area_px": min_2413,
+            "area_vs_2413_min": round(n_changed / min_2413, 2) if min_2413 > 0 else 0.0,
+            "max_pixel_contrast_ratio": max_ratio,
+            "pixels_with_contrast_ge_3": ge3_count,
+        }
+
+    async def _focus_clip(self, loc: Any) -> tuple[dict[str, float] | None, dict[str, Any] | None]:
+        """Calcula o retangulo de captura ao redor do elemento (margem de 12 px limitada ao viewport)."""
+        try:
+            await loc.evaluate("el => el.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'})")
+            box = await loc.bounding_box()
+        except Exception:  # noqa: BLE001
+            return None, None
+        if not box or box["width"] <= 0 or box["height"] <= 0:
+            return None, box
+        page = self._need()
+        vp = page.viewport_size
+        if vp is None:
+            vp = await page.evaluate("() => ({width: window.innerWidth, height: window.innerHeight})")
+        pad = 12.0
+        x = max(0.0, float(box["x"]) - pad)
+        y = max(0.0, float(box["y"]) - pad)
+        right = min(float(vp["width"]), float(box["x"]) + float(box["width"]) + pad)
+        bottom = min(float(vp["height"]), float(box["y"]) + float(box["height"]) + pad)
+        if right - x < 1.0 or bottom - y < 1.0:
+            return None, box
+        return {"x": x, "y": y, "width": right - x, "height": bottom - y}, box
+
+    async def cdp_node(self, loc: Any) -> int:
+        """nodeId do CDP do elemento do localizador, ou 0 quando so da para achar pelo navegador (Shadow DOM sem id do dossie).
+
+        Elemento ja numerado pelo dossie: resolvido pelo id interno do navegador, o que atravessa iframes e Shadow DOM. Alvo "css:" ainda sem
+        numero: o elemento recebe uma marca so durante a busca."""
+        cdp = self.cdp
+        eid = await loc.get_attribute("data-a11y-id")
+        backend = next((b for b, i in self._ids.items() if i == eid), None)
+        if backend is not None:
+            await cdp.send("DOM.getDocument", {"depth": 0})
+            return int((await cdp.send("DOM.pushNodesByBackendIdsToFrontend", {"backendNodeIds": [backend]}))["nodeIds"][0])
+        marked = eid is None
+        if marked:
+            eid = "cdp-node-probe"
+            await loc.evaluate("(el, v) => el.setAttribute('data-a11y-id', v)", eid)
+        root = (await cdp.send("DOM.getDocument", {"depth": 0}))["root"]["nodeId"]
+        node = (await cdp.send("DOM.querySelector", {"nodeId": root, "selector": f'[data-a11y-id="{eid}"]'}))["nodeId"]
+        if marked:
+            await loc.evaluate("(el) => el.removeAttribute('data-a11y-id')")
+        return int(node)
+
+    async def describe_element(self, target: str) -> dict[str, Any] | None:
+        """Quem e o elemento do alvo, para qualquer elemento da pagina (o dossie so lista os interativos): etiqueta, papel e nome que o
+        navegador calcula (CDP no Chromium), texto, atributos de identidade e caixa. None quando o alvo nao existe na pagina."""
+        loc = self._locator(target)
+        if await loc.count() == 0:
+            return None
+        first = loc.first
+        info = await first.evaluate(
+            """el => { const r = el.getBoundingClientRect(); const keep = ['id', 'class', 'href', 'src', 'type', 'aria-label', 'data-testid'];
+                return {tag: el.tagName.toLowerCase(), role_attr: el.getAttribute('role'), text: (el.innerText || el.textContent || '').trim().slice(0, 120),
+                    attrs: Object.fromEntries(keep.filter(a => el.hasAttribute(a)).map(a => [a, el.getAttribute(a)])),
+                    rect: {x: r.x, y: r.y, w: r.width, h: r.height}}; }"""
+        )
+        role = name = None
+        if self.cdp is not None:
+            node = await self.cdp_node(first)
+            if node:
+                got = await self.cdp.send("Accessibility.getPartialAXTree", {"nodeId": node, "fetchRelatives": False})
+                ax = got["nodes"][0] if got.get("nodes") else {}
+                role, name = ax.get("role", {}).get("value"), ax.get("name", {}).get("value")
+        t = target.strip()
+        return findings.seen_entry({
+            "tag": info["tag"], "role_attr": info["role_attr"], "text": info["text"], "attrs": info["attrs"], "rect": info["rect"],
+            "css": t[4:] if t.startswith("css:") else None, "computed": {"role": role, "name": name},
+        })
+
+    async def focus_style(self, target: str, check_pixels: bool = True) -> dict[str, Any]:
         """Mudanca de estilo que o :focus provoca no elemento, medida pelo Chromium (pseudo-estado forcado, sem
         disparar eventos de foco/blur). Sao FATOS: se aquilo e um indicador de foco visivel e suficiente e do modelo."""
         if PERSONAS[self.persona].get("no_visual"):
             raise SessionError("persona 'screen_reader' nao ve a tela: estilo de foco indisponivel.")
+        page = self._need()
         loc = self._locator(target)
         if await loc.count() == 0:
             raise SessionError("elemento nao encontrado (rode a11y_dossier de novo depois de navegar)")
         if self.cdp is None:
-            return await self._focus_style_by_focusing(target, loc)
-        eid = await loc.get_attribute("data-a11y-id")
+            return await self._focus_style_by_focusing(target, loc, check_pixels)
+        node = await self.cdp_node(loc)
+        if not node:  # elemento dentro de Shadow DOM: sem como achar pelo seletor, mede focando de verdade
+            return await self._focus_style_by_focusing(target, loc, check_pixels)
         cdp = self.cdp
-        backend = next((b for b, i in self._ids.items() if i == eid), None)
-        marked = False
-        if backend is not None:  # pelo id interno do navegador: atravessa iframes e Shadow DOM
-            await cdp.send("DOM.getDocument", {"depth": 0})
-            node = (await cdp.send("DOM.pushNodesByBackendIdsToFrontend", {"backendNodeIds": [backend]}))["nodeIds"][0]
-        else:
-            if eid is None:  # alvo "css:" que o dossie ainda nao numerou: marca o elemento so durante a medida
-                eid = "focus-style-probe"
-                await loc.evaluate("(el, v) => el.setAttribute('data-a11y-id', v)", eid)
-                marked = True
-            root = (await cdp.send("DOM.getDocument", {"depth": 0}))["root"]["nodeId"]
-            node = (await cdp.send("DOM.querySelector", {"nodeId": root, "selector": f'[data-a11y-id="{eid}"]'}))["nodeId"]
-            if marked:
-                await loc.evaluate("(el) => el.removeAttribute('data-a11y-id')")
-            if not node:  # elemento dentro de Shadow DOM: sem como achar pelo seletor, mede focando de verdade
-                return await self._focus_style_by_focusing(target, loc)
         await cdp.send("CSS.enable")
 
         async def computed() -> dict[str, str]:
             got = await cdp.send("CSS.getComputedStyleForNode", {"nodeId": node})
             return {p["name"]: p["value"] for p in got["computedStyle"]}
 
+        clip: dict[str, float] | None = None
+        box: dict[str, Any] | None = None
+        before_png: bytes | None = None
+        after_png: bytes | None = None
+        if check_pixels:
+            clip, box = await self._focus_clip(loc)
+            if clip is not None:
+                before_png = await page.screenshot(type="png", clip=clip)
+
         before = await computed()
         try:
             await cdp.send("CSS.forcePseudoState", {"nodeId": node, "forcedPseudoClasses": ["focus", "focus-visible"]})
             after = await computed()
+            if check_pixels and clip is not None:
+                after_png = await page.screenshot(type="png", clip=clip)
         finally:
             await cdp.send("CSS.forcePseudoState", {"nodeId": node, "forcedPseudoClasses": []})
         changed = {k: [before.get(k), v] for k, v in after.items() if before.get(k) != v}
-        return {
+        out: dict[str, Any] = {
             "target": target, "changed_on_focus": dict(list(changed.items())[:25]), "properties_changed": len(changed),
             "outline_when_focused": " ".join(after.get(k, "") for k in ("outline-style", "outline-width", "outline-color", "outline-offset")),
             "box_shadow_when_focused": after.get("box-shadow"),
             "note": "fatos do :focus; se e visivel e com contraste suficiente para a pessoa e julgamento (veja screenshot)",
         }
+        if check_pixels:
+            if before_png is not None and after_png is not None and box is not None:
+                out["pixel_diff"] = self._pixel_diff_stats(before_png, after_png, box)
+            else:
+                out["pixel_diff"] = {"measured": False, "reason": "elemento sem caixa visivel na viewport"}
+        return out
 
-    async def _focus_style_by_focusing(self, target: str, loc: Any) -> dict[str, Any]:
+    async def _focus_style_by_focusing(self, target: str, loc: Any, check_pixels: bool = True) -> dict[str, Any]:
         """Sem CDP nao ha pseudo-estado forcado: foca DE VERDADE (dispara focus/blur), mede e desfoca."""
-        got: dict[str, Any] = await loc.evaluate(
-            """el => { const snap = () => { const cs = getComputedStyle(el); const o = {}; for (const p of cs) o[p] = cs.getPropertyValue(p); return o; };
-              const before = snap(); el.focus({preventScroll: true}); const after = snap(); el.blur(); return {before, after}; }"""
-        )
-        before, after = got["before"], got["after"]
+        page = self._need()
+        clip: dict[str, float] | None = None
+        box: dict[str, Any] | None = None
+        before_png: bytes | None = None
+        after_png: bytes | None = None
+        if check_pixels:
+            clip, box = await self._focus_clip(loc)
+            if clip is not None:
+                before_png = await page.screenshot(type="png", clip=clip)
+        snap_js = """el => { const cs = getComputedStyle(el); const o = {}; for (const p of cs) o[p] = cs.getPropertyValue(p); return o; }"""
+        before: dict[str, str] = await loc.evaluate(snap_js)
+        try:
+            await loc.evaluate("el => el.focus({preventScroll: true})")
+            after: dict[str, str] = await loc.evaluate(snap_js)
+            if check_pixels and clip is not None:
+                after_png = await page.screenshot(type="png", clip=clip)
+        finally:
+            await loc.evaluate("el => el.blur()")
         changed = {k: [before.get(k), v] for k, v in after.items() if before.get(k) != v}
-        return {
+        out: dict[str, Any] = {
             "target": target, "changed_on_focus": dict(list(changed.items())[:25]), "properties_changed": len(changed),
             "outline_when_focused": " ".join(after.get(k, "") for k in ("outline-style", "outline-width", "outline-color", "outline-offset")),
             "box_shadow_when_focused": after.get("box-shadow"),
             "method": f"{self.browser_name}: foco real (dispara eventos de foco/blur; :focus-visible pode diferir de foco por teclado)",
             "note": "fatos do :focus; se e visivel e com contraste suficiente para a pessoa e julgamento (veja screenshot)",
         }
+        if check_pixels:
+            if before_png is not None and after_png is not None and box is not None:
+                out["pixel_diff"] = self._pixel_diff_stats(before_png, after_png, box)
+            else:
+                out["pixel_diff"] = {"measured": False, "reason": "elemento sem caixa visivel na viewport"}
+        return out
 
     async def announce(self, target: str) -> dict[str, Any]:
         """O que um leitor de tela receberia para o elemento (arvore de acessibilidade dele)."""
@@ -1187,18 +1329,57 @@ class Session:
             raise SessionError("elemento nao encontrado (rode a11y_dossier de novo depois de navegar)")
         return {"target": target, "accessibility_tree": str(await loc.aria_snapshot())}
 
-    async def screenshot(self, target: str = "", full_page: bool = False) -> bytes:
+    async def screenshot(self, target: str = "", full_page: bool = False, annotate: bool = False) -> bytes:
         if PERSONAS[self.persona].get("no_visual"):
             raise SessionError(
                 "persona 'screen_reader' nao ve a tela: captura indisponivel. "
                 "Abra outra sessao com persona 'default' para avaliar o visual."
             )
         page = self._need()
-        if target:
-            data: bytes = await self._locator(target).screenshot(type="jpeg", quality=70)
-        else:
-            data = await page.screenshot(type="jpeg", quality=70, full_page=full_page)
-        return data
+        if not annotate:
+            if target:
+                return bytes(await self._locator(target).screenshot(type="jpeg", quality=70))
+            return bytes(await page.screenshot(type="jpeg", quality=70, full_page=full_page))
+
+        if not await page.evaluate("() => typeof window.axe === 'object'"):
+            await page.add_script_tag(content=audit.AXE_PATH.read_text(encoding="utf-8"))
+        raw = await page.evaluate(
+            "tags => axe.run(document, {runOnly: {type: 'tag', values: tags}})",
+            audit._LEVEL_TAGS["AA"],
+        )
+        items: list[dict[str, Any]] = []
+        skipped_complex = 0
+        total_nodes = 0
+        for v in raw.get("violations", []):
+            for node in v.get("nodes", []):
+                total_nodes += 1
+                node_target = node.get("target") or []
+                if len(node_target) == 1 and isinstance(node_target[0], (str, list)):
+                    items.append({
+                        "index": len(items) + 1,
+                        "id": v.get("id") or "axe",
+                        "impact": v.get("impact") or "minor",
+                        "selector": node_target[0],
+                    })
+                else:
+                    skipped_complex += 1
+        overlay_stats: dict[str, Any] = {"marked": [], "skipped": 0}
+        try:
+            overlay_stats = dict(await page.evaluate(js.ANNOTATE_JS, {"items": items, "fullPage": full_page}))
+            if target:
+                data: bytes = await self._locator(target).screenshot(type="jpeg", quality=70)
+            else:
+                data = await page.screenshot(type="jpeg", quality=70, full_page=full_page)
+        finally:
+            await page.evaluate("() => { const o = document.getElementById('__a11y_annotate_overlay__'); if (o) o.remove(); }")
+        self.last_annotation = {
+            "violations": len(raw.get("violations", [])),
+            "nodes_total": total_nodes,
+            "marked": overlay_stats.get("marked", []),
+            "skipped": int(overlay_stats.get("skipped", 0)) + skipped_complex,
+        }
+        self.log_trace("screenshot:annotated", target or None, None, self.last_annotation)
+        return bytes(data)
 
     # ---------------------------------------------------------------- estresse
     async def stress(self, kind: str) -> dict[str, Any]:
@@ -1213,6 +1394,7 @@ class Session:
                 await page.set_viewport_size(orig)
         if kind == "text_spacing":
             before = await page.evaluate(js.CLIPPED_JS)
+            ov_before = await page.evaluate(js.TEXT_OVERLAP_JS)
             css = (
                 "* { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important; }"
                 " p { margin-bottom: 2em !important; }"
@@ -1220,12 +1402,20 @@ class Session:
             handle = await page.add_style_tag(content=css)
             try:
                 after = await page.evaluate(js.CLIPPED_JS)
+                ov_after = await page.evaluate(js.TEXT_OVERLAP_JS)
             finally:
                 await page.evaluate("(el) => el.remove()", handle)
             seen = {(c["tag"], c["text"]) for c in before}
+            ov_seen = {(o["first_tag"], o["first_text"], o["second_tag"], o["second_text"]) for o in ov_before}
+            new_overlaps = [
+                o for o in ov_after
+                if (o["first_tag"], o["first_text"], o["second_tag"], o["second_text"]) not in ov_seen
+            ]
             return {
                 "kind": kind, "clipped_before": len(before),
                 "newly_clipped_with_user_spacing": [c for c in after if (c["tag"], c["text"]) not in seen][:15],
+                "overlaps_before": len(ov_before),
+                "newly_overlapping_with_user_spacing": new_overlaps[:15],
             }
         raise SessionError("kind deve ser reflow_320 ou text_spacing")
 

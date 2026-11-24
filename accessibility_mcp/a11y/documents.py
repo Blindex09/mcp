@@ -9,6 +9,7 @@ import io
 import json
 import os
 import re
+import shutil
 import uuid
 from datetime import datetime, timezone
 from html import escape
@@ -80,6 +81,9 @@ def remember_report(fingerprint: str, output: dict[str, Any]) -> None:
         index = json.loads(_report_index().read_text(encoding="utf-8"))
     except (OSError, ValueError):
         index = {}
+    replaced = {output.get("document_id"), *(output.get("document_ids") or {}).values()}
+    # a versao anterior do mesmo relatorio foi substituida: sua impressao digital nao pode mais apontar para a pasta nova
+    index = {fp: entry for fp, entry in index.items() if not replaced & {entry.get("document_id"), *(entry.get("document_ids") or {}).values()}}
     index[fingerprint] = {key: output[key] for key in ("files", "document_id", "document_ids") if key in output}
     folder().mkdir(parents=True, exist_ok=True)
     _report_index().write_text(json.dumps(index, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -381,13 +385,29 @@ def _finish_pdf(spec: DocumentSpec, path: Path, links: dict[str, str]) -> None:
     path.write_bytes(buffer.getvalue())
 
 
-async def create(spec: DocumentSpec, formats: Formats = "both") -> dict[str, Any]:
+def report_id(group: str, title: str, language: str) -> str:
+    """Identificador estavel de um relatorio: o mesmo titulo, idioma e grupo de formato dao sempre a mesma pasta, entao gerar de novo SUBSTITUI o anterior
+    (o mais recente prevalece) em vez de deixar dois arquivos com o mesmo nome."""
+    return hashlib.sha256(f"{group}|{language}|{' '.join(title.split()).casefold()}".encode()).hexdigest()[:32]
+
+
+def fresh_folder(document_id: str) -> Path:
+    """A pasta do relatorio, vazia: se ja existia (versao anterior do mesmo relatorio), a anterior e' apagada antes de gravar a nova."""
+    target = (folder() / document_id).resolve()
+    if not target.is_relative_to(folder()) or not re.fullmatch(r"[a-f0-9]{32}", document_id):
+        raise ValueError("Identificador de relatorio invalido.")
+    if target.exists():
+        shutil.rmtree(target)
+    target.mkdir(parents=True)
+    return target
+
+
+async def create(spec: DocumentSpec, formats: Formats = "both", document_id: str | None = None) -> dict[str, Any]:
     if formats not in ("docx", "pdf", "both"):
         raise ValueError("Formato deve ser docx, pdf ou both.")
     images = _images(spec)
-    document_id = uuid.uuid4().hex
-    target = folder() / document_id
-    target.mkdir(parents=True, exist_ok=False)
+    document_id = document_id or uuid.uuid4().hex
+    target = fresh_folder(document_id)
     outputs: list[dict[str, Any]] = []
     for kind in ("docx", "pdf") if formats == "both" else (formats,):
         path = artifact_path(document_id, f"document.{kind}")

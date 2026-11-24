@@ -1,5 +1,5 @@
 {
-  "data": "2026-11-06T21:55:27+00:00",
+  "data": "2026-11-24T17:36:30+00:00",
   "resultados": [
     {
       "conceito": "Regra 8: nenhum relogio fixo corta trabalho",
@@ -19,7 +19,7 @@
     {
       "conceito": "Laco agentico com ferramentas tipadas",
       "estado": "COBERTO",
-      "evidencia": "59 de 59 ferramentas com esquema de entrada e descricao pelo protocolo MCP"
+      "evidencia": "5 de 5 ferramentas com esquema de entrada e descricao pelo protocolo MCP"
     },
     {
       "conceito": "Aprovacao antes de acao com efeito (guardrail na chamada de ferramenta)",
@@ -34,7 +34,7 @@
     {
       "conceito": "Nenhum segredo no resultado de diagnostico",
       "estado": "COBERTO",
-      "evidencia": "a11y_status nunca mostra chaves"
+      "evidencia": "a11y_status nunca mostra o token da VM do NVDA"
     },
     {
       "conceito": "Memoria persistente visivel e editavel pela pessoa",
@@ -48,7 +48,7 @@
     },
     {
       "conceito": "Cliente MCP remoto e A2A por HTTP",
-      "estado": "COBERTO",
+      "estado": "LACUNA",
       "evidencia": "nove ferramentas tipadas pelo protocolo real; rede privada recusada por padrao; tests/test_interop.py exercita Streamable HTTP MCP e JSON-RPC A2A reais"
     },
     {

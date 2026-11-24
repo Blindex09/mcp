@@ -257,3 +257,30 @@ async def test_tab_order_checks_shift_tab_back_and_reports_facts_when_backward_d
     assert all(s["shift_tab_back"]["matches_previous_stop"] and s["tab_after_shift_tab"]["returns_to_this_stop"] for s in ordered[1:])
     plain = await audit.tab_order(html="<button>A</button><button>B</button>", check_reverse=False)
     assert all("shift_tab_back" not in s for s in plain)
+
+
+def test_axe_level_tags_include_wcag22_and_aaa_and_reject_bad_locale():
+    assert "wcag22a" in audit._LEVEL_TAGS["A"]
+    assert "wcag22a" in audit._LEVEL_TAGS["AA"] and "wcag22aa" in audit._LEVEL_TAGS["AA"]
+    assert "wcag21aaa" in audit._LEVEL_TAGS["AAA"] and "wcag22aaa" in audit._LEVEL_TAGS["AAA"]
+    assert audit.check_locale("pt_BR") == "pt-br"
+    assert audit.check_locale("") is None
+    with pytest.raises(ValueError, match="locale"):
+        audit.check_locale("fr-FR")
+
+
+@pytest.mark.slow
+async def test_axe_414_pt_br_and_compressed_aria_snapshot():
+    res = await audit.run_axe(html=BAD_HTML, locale="pt-BR")
+    assert res["axe_version"].startswith("4.14")
+    helps = " ".join(v["help"] for v in res["violations"])
+    assert "alternativo" in helps.lower() or "botões" in helps.lower() or "botoes" in helps.lower()
+
+    big_html = (
+        "<!doctype html><html lang='pt'><head><title>L</title></head><body><main>"
+        + "<ul>" + "".join(f"<li>Registro {i}</li>" for i in range(125)) + "</ul>"
+        + "<button>Salvar</button></main></body></html>"
+    )
+    full = await audit.aria_snapshot(html=big_html, compress=False)
+    comp = await audit.aria_snapshot(html=big_html, compress=True)
+    assert len(comp) < len(full) and 'button "Salvar"' in comp and "Registro 120" not in comp

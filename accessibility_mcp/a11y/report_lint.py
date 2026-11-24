@@ -65,8 +65,10 @@ def lint(record: dict[str, Any], formats: tuple[str, ...] = ("xlsx",), title: st
         row = dict(zip(report_artifacts._XLSX_HEADERS, report_artifacts._xlsx_row(occurrence), strict=False))
         for header, value in row.items():
             text = str(value or "").strip()
-            if not text or text == "Não registrado":
-                add(occurrence, "campo_vazio", "erro", f"a coluna \"{header}\" ficaria sem informacao (Não registrado)")
+            gap = next((line.strip() for line in text.splitlines() if line.strip() in report_artifacts.GAP_CELLS), None)
+            if not text or gap:
+                hint = " (dê ao achado um target css:<seletor> que exista na página: o elemento é lido do navegador)" if gap == "Elemento não identificado" else ""
+                add(occurrence, "campo_vazio", "erro", f"a coluna \"{header}\" ficaria sem informacao ({gap or 'Não registrado'}){hint}")
         screen_reader = row.get(report_artifacts.SCREEN_READER_STEPS_HEADER, "")
         if (report_context.SCREEN_READER_NOT_RUN in screen_reader or report_context.SCREEN_READER_PROPOSED_NOTE in screen_reader):
             add(occurrence, "leitor_nao_executado", "erro", "os passos sem visao nao foram executados com leitor de tela real (execute com a11y_nvda_do ou declare Não se aplica com o motivo)")
